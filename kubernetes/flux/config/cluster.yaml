@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 30m
-  url: "ssh://git@github.com:zebernst/homelab.git"
+  url: "https://github.com/zebernst/homelab.git"
   secretRef:
     name: github-deploy-key
   ref:
