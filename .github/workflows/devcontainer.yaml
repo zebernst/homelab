@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   devcontainer:
-    if: ${{ github.repository == 'onedr0p/cluster-template' }}
+    if: ${{ github.repository == 'zebernst/homelab' }}
     name: publish
     runs-on: ubuntu-latest
     permissions:
@@ -35,7 +35,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
-          platforms: linux/amd64 #,linux/arm64
+          platforms: linux/amd64,linux/arm64
 
       - if: ${{ github.event_name != 'pull_request' }}
         name: Login to GitHub Container Registry
