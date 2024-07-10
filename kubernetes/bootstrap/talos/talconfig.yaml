@@ -1,0 +1,163 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
+---
+# renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+talosVersion: v1.7.5
+# renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+kubernetesVersion: v1.30.2
+
+clusterName: "jupiter"
+endpoint: https://10.2.3.1:6443
+clusterPodNets:
+  - "10.69.0.0/16"
+clusterSvcNets:
+  - "10.96.0.0/16"
+additionalApiServerCertSans: &sans
+  - "10.2.3.1"
+  - 127.0.0.1 # KubePrism
+  - "kube.zebernst.dev"
+  - "jupiter.zebernst.dev"
+additionalMachineCertSans: *sans
+
+# Disable built-in Flannel to use Cilium
+cniConfig:
+  name: none
+
+nodes:
+  - hostname: "controlplane1"
+    ipAddress: "10.2.2.100"
+    installDiskSelector:
+      type: ssd
+    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "d8:cb:8a:5f:0d:b1"
+        dhcp: false
+        addresses:
+          - "10.2.2.100/16"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "10.2.0.1"
+        mtu: 1500
+        vip:
+          ip: "10.2.3.1"
+  - hostname: "controlplane2"
+    ipAddress: "10.2.2.101"
+    installDiskSelector:
+      type: ssd
+    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "d8:cb:8a:60:1c:b1"
+        dhcp: false
+        addresses:
+          - "10.2.2.101/16"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "10.2.0.1"
+        mtu: 1500
+        vip:
+          ip: "10.2.3.1"
+  - hostname: "controlplane3"
+    ipAddress: "10.2.2.102"
+    installDiskSelector:
+      type: ssd
+    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "44:8a:5b:dc:f8:6c"
+        dhcp: false
+        addresses:
+          - "10.2.2.102/16"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "10.2.0.1"
+        mtu: 1500
+        vip:
+          ip: "10.2.3.1"
+  - hostname: "io"
+    ipAddress: "10.2.2.103"
+    installDiskSelector:
+      type: ssd
+    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "d8:cb:8a:5f:16:30"
+        dhcp: false
+        addresses:
+          - "10.2.2.103/16"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "10.2.0.1"
+        mtu: 1500
+  - hostname: "europa"
+    ipAddress: "10.2.2.104"
+    installDiskSelector:
+      type: ssd
+    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "d8:cb:8a:60:5e:17"
+        dhcp: false
+        addresses:
+          - "10.2.2.104/16"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "10.2.0.1"
+        mtu: 1500
+  - hostname: "ganymede"
+    ipAddress: "10.2.2.105"
+    installDiskSelector:
+      type: ssd
+    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "00:23:24:99:21:ae"
+        dhcp: false
+        addresses:
+          - "10.2.2.105/16"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "10.2.0.1"
+        mtu: 1500
+  - hostname: "callisto"
+    ipAddress: "10.2.2.106"
+    installDiskSelector:
+      type: ssd
+    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
+    controlPlane: false
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "00:23:24:99:20:a8"
+        dhcp: false
+        addresses:
+          - "10.2.2.106/16"
+        routes:
+          - network: 0.0.0.0/0
+            gateway: "10.2.0.1"
+        mtu: 1500
+
+# Global patches
+patches:
+  - "@./patches/global/cluster-discovery.yaml"
+  - "@./patches/global/containerd.yaml"
+  - "@./patches/global/disable-search-domain.yaml"
+  - "@./patches/global/hostdns.yaml"
+  - "@./patches/global/kubelet.yaml"
+  - "@./patches/global/nut-client.yaml"
+  - "@./patches/global/openebs-local.yaml"
+  - "@./patches/global/sysctl.yaml"
+
+# Controller patches
+controlPlane:
+  patches:
+    - "@./patches/controller/api-access.yaml"
+    - "@./patches/controller/cluster.yaml"
+    - "@./patches/controller/disable-admission-controller.yaml"
+    - "@./patches/controller/etcd.yaml"
+

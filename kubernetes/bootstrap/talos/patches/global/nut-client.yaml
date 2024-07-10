@@ -1,0 +1,11 @@
+---
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: nut-client
+configFiles:
+  - content: |-
+      # MONITOR ${upsmonHost} 1 ${upsmonUser} ${upsmonPass} secondary
+      SHUTDOWNCMD "/sbin/poweroff"
+    mountPath: /usr/local/etc/nut/upsmon.conf
+environment:
+  - NUT_UPS=upsname

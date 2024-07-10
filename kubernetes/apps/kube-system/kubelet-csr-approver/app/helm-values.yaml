@@ -1,0 +1,3 @@
+---
+providerRegex: ^(controlplane1|controlplane2|controlplane3|io|europa|ganymede|callisto)$
+bypassDnsResolution: true
