@@ -7,11 +7,13 @@ resources:
   - ./coredns.yaml
   - ./jetstack.yaml
   - ./metrics-server.yaml
+  - ./grafana.yaml
   - ./openebs.yaml
   - ./postfinance.yaml
   - ./prometheus-community.yaml
   - ./spegel.yaml
   - ./stakater.yaml
   - ./external-dns.yaml
+  - ./external-secrets.yaml
   - ./ingress-nginx.yaml
   - ./k8s-gateway.yaml
