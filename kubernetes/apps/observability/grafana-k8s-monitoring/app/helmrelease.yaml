@@ -28,14 +28,17 @@ spec:
         secret:
           create: false
           name: grafanacloud-prometheus-secret
+          namespace: observability
       loki:
         secret:
           create: false
           name: grafanacloud-loki-secret
+          namespace: observability
       tempo:
         secret:
           create: false
           name: grafanacloud-loki-secret
+          namespace: observability
     metrics:
       enabled: true
       cost:
