@@ -25,122 +25,29 @@ cniConfig:
 nodes:
   - hostname: "controlplane1"
     ipAddress: "10.2.2.100"
-    installDiskSelector:
-      type: ssd
-    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
     controlPlane: true
-    networkInterfaces:
-      - deviceSelector:
-          hardwareAddr: "d8:cb:8a:5f:0d:b1"
-        dhcp: false
-        addresses:
-          - "10.2.2.100/16"
-        routes:
-          - network: 0.0.0.0/0
-            gateway: "10.2.0.1"
-        mtu: 1500
-        vip:
-          ip: "10.2.3.1"
+    installDiskSelector: &disk
+      type: ssd
   - hostname: "controlplane2"
     ipAddress: "10.2.2.101"
-    installDiskSelector:
-      type: ssd
-    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
     controlPlane: true
-    networkInterfaces:
-      - deviceSelector:
-          hardwareAddr: "d8:cb:8a:60:1c:b1"
-        dhcp: false
-        addresses:
-          - "10.2.2.101/16"
-        routes:
-          - network: 0.0.0.0/0
-            gateway: "10.2.0.1"
-        mtu: 1500
-        vip:
-          ip: "10.2.3.1"
+    installDiskSelector: *disk
   - hostname: "controlplane3"
     ipAddress: "10.2.2.102"
-    installDiskSelector:
-      type: ssd
-    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
     controlPlane: true
-    networkInterfaces:
-      - deviceSelector:
-          hardwareAddr: "44:8a:5b:dc:f8:6c"
-        dhcp: false
-        addresses:
-          - "10.2.2.102/16"
-        routes:
-          - network: 0.0.0.0/0
-            gateway: "10.2.0.1"
-        mtu: 1500
-        vip:
-          ip: "10.2.3.1"
+    installDiskSelector: *disk
   - hostname: "io"
     ipAddress: "10.2.2.103"
-    installDiskSelector:
-      type: ssd
-    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
-    controlPlane: false
-    networkInterfaces:
-      - deviceSelector:
-          hardwareAddr: "d8:cb:8a:5f:16:30"
-        dhcp: false
-        addresses:
-          - "10.2.2.103/16"
-        routes:
-          - network: 0.0.0.0/0
-            gateway: "10.2.0.1"
-        mtu: 1500
+    installDiskSelector: *disk
   - hostname: "europa"
     ipAddress: "10.2.2.104"
-    installDiskSelector:
-      type: ssd
-    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
-    controlPlane: false
-    networkInterfaces:
-      - deviceSelector:
-          hardwareAddr: "d8:cb:8a:60:5e:17"
-        dhcp: false
-        addresses:
-          - "10.2.2.104/16"
-        routes:
-          - network: 0.0.0.0/0
-            gateway: "10.2.0.1"
-        mtu: 1500
+    installDiskSelector: *disk
   - hostname: "ganymede"
     ipAddress: "10.2.2.105"
-    installDiskSelector:
-      type: ssd
-    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
-    controlPlane: false
-    networkInterfaces:
-      - deviceSelector:
-          hardwareAddr: "00:23:24:99:21:ae"
-        dhcp: false
-        addresses:
-          - "10.2.2.105/16"
-        routes:
-          - network: 0.0.0.0/0
-            gateway: "10.2.0.1"
-        mtu: 1500
+    installDiskSelector: *disk
   - hostname: "callisto"
     ipAddress: "10.2.2.106"
-    installDiskSelector:
-      type: ssd
-    talosImageURL: factory.talos.dev/installer/b2eca6971a7595935b5b790ebba98b8328d14911c08769c644a7d7e1429df517
-    controlPlane: false
-    networkInterfaces:
-      - deviceSelector:
-          hardwareAddr: "00:23:24:99:20:a8"
-        dhcp: false
-        addresses:
-          - "10.2.2.106/16"
-        routes:
-          - network: 0.0.0.0/0
-            gateway: "10.2.0.1"
-        mtu: 1500
+    installDiskSelector: *disk
 
 # Global patches
 patches:
@@ -149,15 +56,56 @@ patches:
   - "@./patches/global/disable-search-domain.yaml"
   - "@./patches/global/hostdns.yaml"
   - "@./patches/global/kubelet.yaml"
-  - "@./patches/global/nut-client.yaml"
   - "@./patches/global/openebs-local.yaml"
   - "@./patches/global/sysctl.yaml"
 
-# Controller patches
+# Control plane configuration
 controlPlane:
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/intel-ucode
+          - siderolabs/nut-client
+          # - siderolabs/stargz-snapshotter -- temporarily disabled, see https://github.com/siderolabs/extensions/issues/245
+
+  networkInterfaces:
+    - interface: eno1
+      dhcp: true
+      vip:
+        ip: 10.2.3.1
+
   patches:
     - "@./patches/controller/api-access.yaml"
     - "@./patches/controller/cluster.yaml"
     - "@./patches/controller/disable-admission-controller.yaml"
     - "@./patches/controller/etcd.yaml"
+
+  extensionServices:
+    - &nut-config
+      name: nut-client
+      configFiles:
+        - content: |-
+            MONITOR ${upsmonHost} 1 ${upsmonUser} ${upsmonPass} secondary
+            SHUTDOWNCMD "/sbin/poweroff"
+          mountPath: /usr/local/etc/nut/upsmon.conf
+
+# Worker configuration
+worker:
+  schematic:
+    customization:
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/intel-ucode
+          - siderolabs/i915-ucode
+          - siderolabs/iscsi-tools
+          - siderolabs/nut-client
+          # - siderolabs/stargz-snapshotter -- temporarily disabled, see https://github.com/siderolabs/extensions/issues/245
+
+  networkInterfaces:
+    - interface: eno1
+      dhcp: true
+
+  extensionServices:
+    - *nut-config
 
