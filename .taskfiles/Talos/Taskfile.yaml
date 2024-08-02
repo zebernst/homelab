@@ -14,6 +14,43 @@ env:
 
 tasks:
 
+  configure:
+    desc: Generate Talos MachineConfig files
+    dir: "{{.KUBERNETES_DIR}}/bootstrap/talos"
+    cmds:
+      - |
+        if [ ! -f "{{.TALHELPER_SECRET_FILE}}" ]; then
+            talhelper gensecret > {{.TALHELPER_SECRET_FILE}}
+            sops --encrypt --in-place {{.TALHELPER_SECRET_FILE}}
+        fi
+      - cmd: >-
+          talhelper genconfig
+          --config-file {{.TALHELPER_CONFIG_FILE}}
+          --secret-file {{.TALHELPER_SECRET_FILE}}
+          --out-dir {{.TALHELPER_CLUSTER_DIR}}
+          {{ .CLI_ARGS }}
+    preconditions:
+      - msg: Missing talhelper config file
+        sh: test -f {{.TALHELPER_CONFIG_FILE}}
+      - msg: Missing Sops config file
+        sh: test -f {{.SOPS_CONFIG_FILE}}
+      - msg: Missing Sops Age key file
+        sh: test -f {{.AGE_FILE}}
+
+  apply:
+    desc: Apply Talos MachineConfig to nodes
+    dir: "{{.KUBERNETES_DIR}}/bootstrap/talos"
+    cmds:
+      - cmd: >-
+          talhelper gencommand apply
+          --config-file {{.TALHELPER_CONFIG_FILE}}
+          --out-dir {{.TALHELPER_CLUSTER_DIR}}
+          {{ .CLI_ARGS }}
+          | bash
+    preconditions:
+      - msg: Missing talhelper config file
+        sh: test -f {{.TALHELPER_CONFIG_FILE}}
+
   bootstrap:
     desc: Bootstrap the Talos cluster
     dir: "{{.KUBERNETES_DIR}}/bootstrap/talos"

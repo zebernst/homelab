@@ -87,8 +87,12 @@ controlPlane:
       configFiles:
         - content: |-
             MONITOR ${upsmonHost} 1 ${upsmonUser} ${upsmonPass} secondary
+            FINALDELAY 0
             SHUTDOWNCMD "/sbin/poweroff"
           mountPath: /usr/local/etc/nut/upsmon.conf
+#        - content: |-
+#            TODO - https://networkupstools.org/docs/user-manual.chunked/ar01s07.html
+#          mountPath: /usr/local/etc/nut/upssched.conf
 
 # Worker configuration
 worker:

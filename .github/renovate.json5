@@ -15,22 +15,22 @@
   "schedule": ["every weekend"],
   "ignorePaths": ["**/*.sops.*"],
   "flux": {
-    "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"]
+    "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml$"]
   },
   "helm-values": {
-    "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"]
+    "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml$"]
   },
   "helmfile": {
-    "fileMatch": ["(^|/)helmfile\\.ya?ml(?:\\.j2)?$"]
+    "fileMatch": ["(^|/)helmfile\\.ya?ml$"]
   },
   "kubernetes": {
-    "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"]
+    "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml$"]
   },
   "kustomize": {
-    "fileMatch": ["(^|/)kustomization\\.ya?ml(?:\\.j2)?$"]
+    "fileMatch": ["(^|/)kustomization\\.ya?ml$"]
   },
   "pip_requirements": {
-    "fileMatch": ["(^|/)[\\w-]*requirements(-\\w+)?\\.(txt|pip)(?:\\.j2)?$"]
+    "fileMatch": ["(^|/)[\\w-]*requirements(-\\w+)?\\.(txt|pip)$"]
   },
   // commit message topics
   "commitMessageTopic": "{{depName}}",
@@ -191,7 +191,7 @@
     {
       "customType": "regex",
       "description": ["Process custom dependencies"],
-      "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$"],
+      "fileMatch": ["(^|/)kubernetes/.+\\.ya?ml$"],
       "matchStrings": [
         // # renovate: datasource=helm depName=cilium repository=https://helm.cilium.io
         // version: 1.15.1
