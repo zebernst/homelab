@@ -8,6 +8,7 @@ resources:
   - ./descheduler.yaml
   - ./jetstack.yaml
   - ./metrics-server.yaml
+  - ./node-feature-discovery.yaml
   - ./grafana.yaml
   - ./openebs.yaml
   - ./postfinance.yaml
