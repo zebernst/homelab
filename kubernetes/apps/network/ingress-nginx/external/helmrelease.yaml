@@ -28,7 +28,7 @@ spec:
     controller:
       service:
         annotations:
-          external-dns.alpha.kubernetes.io/hostname: "external.${SECRET_DOMAIN}"
+          external-dns.alpha.kubernetes.io/hostname: "external.zebernst.dev"
           io.cilium/lb-ipam-ips: "10.10.1.3"
         externalTrafficPolicy: Cluster
       ingressClassResource:
@@ -67,7 +67,7 @@ spec:
           namespaceSelector:
             any: true
       extraArgs:
-        default-ssl-certificate: "network/${SECRET_DOMAIN/./-}-production-tls"
+        default-ssl-certificate: network/zebernst-dev-tls
       resources:
         requests:
           cpu: 100m

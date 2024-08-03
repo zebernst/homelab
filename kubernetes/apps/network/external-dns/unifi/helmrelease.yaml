@@ -67,8 +67,8 @@ spec:
       - --ingress-class=external
     policy: sync
     sources: ["ingress", "service"]
-    txtOwnerId: jupiter
-    txtPrefix: k8s.jupiter.
+    txtOwnerId: "${CLUSTER_NAME}"
+    txtPrefix: "k8s.${CLUSTER_NAME}."
     domainFilters: ["zebernst.dev"]
     serviceMonitor:
       enabled: true

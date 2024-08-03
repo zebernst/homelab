@@ -64,7 +64,7 @@ spec:
           namespaceSelector:
             any: true
       extraArgs:
-        default-ssl-certificate: "network/${SECRET_DOMAIN/./-}-production-tls"
+        default-ssl-certificate: "network/zebernst-dev-tls"
       resources:
         requests:
           cpu: 100m

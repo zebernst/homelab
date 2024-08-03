@@ -22,7 +22,7 @@ spec:
       retries: 3
   values:
     cluster:
-      name: jupiter
+      name: ${CLUSTER_NAME}
     externalServices:
       prometheus:
         secret:

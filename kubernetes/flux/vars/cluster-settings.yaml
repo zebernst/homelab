@@ -5,4 +5,5 @@ metadata:
   name: cluster-settings
   namespace: flux-system
 data:
-  SETTING_EXAMPLE: Global settings for your cluster go in this file, this file is NOT encrypted
+  CLUSTER_NAME: jupiter
+  CLUSTER_CLOUDFLARE_TUNNEL_ID: 465a5e5c-3f01-442a-ae6e-4cc62748e5f4
