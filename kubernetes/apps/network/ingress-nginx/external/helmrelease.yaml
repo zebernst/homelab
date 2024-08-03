@@ -29,7 +29,7 @@ spec:
       service:
         annotations:
           external-dns.alpha.kubernetes.io/hostname: "external.zebernst.dev"
-          io.cilium/lb-ipam-ips: "10.10.1.3"
+          io.cilium/lb-ipam-ips: "10.10.1.2"
         externalTrafficPolicy: Cluster
       ingressClassResource:
         name: external

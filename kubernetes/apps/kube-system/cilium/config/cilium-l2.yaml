@@ -20,4 +20,4 @@ metadata:
 spec:
   allowFirstLastIPs: "Yes"
   blocks:
-    - cidr: "10.2.0.0/16"
+    - cidr: "10.10.0.0/16"
