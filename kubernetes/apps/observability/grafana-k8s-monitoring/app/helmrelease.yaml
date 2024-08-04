@@ -35,7 +35,7 @@ spec:
       tempo:
         secret:
           create: false
-          name: grafanacloud-loki-secret
+          name: grafanacloud-tempo-secret
     metrics:
       enabled: true
       cost:
