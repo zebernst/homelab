@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - ./namespace.yaml
   - ./grafana-k8s-monitoring/ks.yaml
+  - ./unpoller/ks.yaml
