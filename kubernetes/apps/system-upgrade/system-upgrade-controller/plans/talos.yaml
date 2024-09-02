@@ -23,7 +23,7 @@ spec:
         values: ["${TALOS_VERSION}"]
       - key: factory.talos.dev/schematic-id.part-0
         operator: In
-        values: ["${TALOS_SCHEMATIC_ID:0:32}"]
+        values: ["${TALOS_SCHEMATIC_ID:0:32}"] # todo: once talos 1.8 is released, use https://github.com/siderolabs/talos/commit/7a1c62b8bc63f10dbad7673c59b6f62a6c9497bd instead
       - key: factory.talos.dev/schematic-id.part-1
         operator: In
         values: ["${TALOS_SCHEMATIC_ID:32}"]
