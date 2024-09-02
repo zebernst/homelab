@@ -1,0 +1,55 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: synology-csi-driver
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: synology-csi
+      version: 0.9.4
+      sourceRef:
+        kind: HelmRepository
+        name: synology-csi-talos
+        namespace: flux-system
+  dependsOn:
+    - name: snapshot-controller
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    clientInfoSecret:
+      name: synology-csi-driver-credentials
+
+    storageClasses:
+      iscsi:
+        isDefault: true
+        reclaimPolicy: Delete
+        volumeBindingMode: WaitForFirstConsumer
+        parameters:
+          protocol: iscsi
+          formatOptions: "-E nodiscard"
+          fstype: ext4
+      iscsi-retain:
+        isDefault: false
+        reclaimPolicy: Retain
+        volumeBindingMode: WaitForFirstConsumer
+        parameters:
+          protocol: iscsi
+          formatOptions: "-E nodiscard"
+          fstype: ext4
+
+    volumeSnapshotClasses:
+      iscsi:
+        isDefault: true
+        deletionPolicy: Delete
+      iscsi-retain:
+        isDefault: false
+        deletionPolicy: Retain

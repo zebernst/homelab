@@ -1,0 +1,9 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: synology-csi-talos
+  namespace: flux-system
+spec:
+  interval: 1h
+  url: https://zebernst.github.io/synology-csi-talos

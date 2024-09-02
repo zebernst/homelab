@@ -25,3 +25,4 @@ resources:
   - ./prometheus-community.yaml
   - ./spegel.yaml
   - ./stakater.yaml
+  - ./synology-csi-talos.yaml
