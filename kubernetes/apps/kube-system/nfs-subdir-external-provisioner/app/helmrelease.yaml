@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: nfs-subdir-external-provisioner
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: nfs-subdir-external-provisioner
+      version: 4.0.18
+      sourceRef:
+        kind: HelmRepository
+        name: nfs-subdir-external-provisioner
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    storageClass:
+      name: nfs
+      accessModes:
+        - ReadWriteMany
+    nfs:
+      server: ${NAS_HOSTNAME}
+      path: /volume1/kubernetes
