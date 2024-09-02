@@ -6,16 +6,17 @@ resources:
   - ./cilium.yaml
   - ./coredns.yaml
   - ./descheduler.yaml
+  - ./external-dns.yaml
+  - ./external-secrets.yaml
+  - ./grafana.yaml
+  - ./ingress-nginx.yaml
   - ./jetstack.yaml
+  - ./k8s-gateway.yaml
   - ./metrics-server.yaml
   - ./node-feature-discovery.yaml
-  - ./grafana.yaml
   - ./openebs.yaml
+  - ./piraeus.yaml
   - ./postfinance.yaml
   - ./prometheus-community.yaml
   - ./spegel.yaml
   - ./stakater.yaml
-  - ./external-dns.yaml
-  - ./external-secrets.yaml
-  - ./ingress-nginx.yaml
-  - ./k8s-gateway.yaml
