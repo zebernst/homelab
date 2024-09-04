@@ -5,4 +5,5 @@ resources:
   - ./namespace.yaml
   - ./gatus/ks.yaml
   - ./grafana-k8s-monitoring/ks.yaml
+  - ./grafana-operator/ks.yaml
   - ./unpoller/ks.yaml
