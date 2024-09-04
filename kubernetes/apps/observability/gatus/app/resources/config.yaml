@@ -39,7 +39,7 @@ endpoints:
       - type: pushover
   - name: flux-webhook
     group: external
-    url: https://flux-webhook.zebernst.dev
+    url: https://flux-webhook.zebernst.dev/
     interval: 1m
     client:
       dns-resolver: tcp://1.1.1.1:53

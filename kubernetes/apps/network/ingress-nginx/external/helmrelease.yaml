@@ -35,6 +35,8 @@ spec:
           value: ghost
         - name: SHOW_DETAILS # Optional: enables the output of additional information on error pages
           value: 'true'
+        - name: SEND_SAME_HTTP_CODE # Optional: when false, HTTP status code will always be '200'
+          value: 'true'
     controller:
       service:
         annotations:
@@ -55,6 +57,8 @@ spec:
         client-body-buffer-size: 100M
         client-body-timeout: 120
         client-header-timeout: 120
+        custom-http-errors: >-
+          401,403,404,500,501,502,503
         enable-brotli: "true"
         enable-real-ip: "true"
         hsts-max-age: 31449600
