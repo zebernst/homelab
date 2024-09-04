@@ -33,8 +33,8 @@ spec:
       wal:
         compression: bzip2
         maxParallel: 8
-      destinationPath: s3://cloudnative-pg/
-      endpointURL: http://minio.default.svc.cluster.local:9000
+      destinationPath: s3://cluster-db-backup/
+      endpointURL: https://s3.us-west-001.backblazeb2.com
       # Note: serverName version needs to be incremented
       # when recovering from an existing cnpg cluster
       serverName: &currentCluster redspot16-v1
@@ -50,7 +50,7 @@ spec:
   bootstrap:
     initdb: {}
 #    recovery:
-#      source: &previousCluster redspot16-v5
+#      source: &previousCluster redspot16-v0
 #  # Note: externalClusters is needed when recovering from an existing cnpg cluster
 #  externalClusters:
 #    - name: *previousCluster
