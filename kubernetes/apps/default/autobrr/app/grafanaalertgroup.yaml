@@ -5,9 +5,9 @@ metadata:
   name: autobrr
 spec:
 #  folderRef: test-folder
-#  instanceSelector:
-#    matchLabels:
-#      dashboards: "grafana"
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
   interval: 1m
   rules:
     - uid: 1e5d6c2f-d3a5-4742-ae12-57022485d486
