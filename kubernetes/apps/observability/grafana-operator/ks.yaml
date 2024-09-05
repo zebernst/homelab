@@ -10,7 +10,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   path: ./kubernetes/apps/observability/grafana-operator/app
-  prune: false # never should be deleted
+  prune: false
   dependsOn:
     - name: external-secrets-stores
   sourceRef:
@@ -32,7 +32,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   path: ./kubernetes/apps/observability/grafana-operator/resources
-  prune: false # never should be deleted
+  prune: true
   dependsOn:
     - name: external-secrets-stores
     - name: grafana-operator

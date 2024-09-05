@@ -1,0 +1,10 @@
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: jupiter
+spec:
+  title: Jupiter
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana-cloud"

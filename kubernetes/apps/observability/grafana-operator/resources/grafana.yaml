@@ -6,7 +6,6 @@ metadata:
   labels:
     dashboards: "grafana-cloud"
 spec:
-  allowCrossNamespaceImport: true
   external:
     url: https://zebernst.grafana.net/ # Grafana URL
     apiKey:
