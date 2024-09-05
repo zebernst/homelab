@@ -1,0 +1,44 @@
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaAlertRuleGroup
+metadata:
+  name: autobrr
+spec:
+#  folderRef: test-folder
+#  instanceSelector:
+#    matchLabels:
+#      dashboards: "grafana"
+  interval: 1m
+  rules:
+    - uid: 1e5d6c2f-d3a5-4742-ae12-57022485d486
+      title: AutobrrNetworkUnhealthy
+      for: 2m
+      labels:
+        severity: critical
+        category: logs
+      annotations:
+        app: "{{ $labels.app }}"
+        summary: "{{ $labels.app }} has a unhealthy network"
+      condition: A
+      data:
+        - refId: A
+          queryType: instant
+          relativeTimeRange:
+            from: 600
+            to: 0
+          datasourceUid: grafanacloud-logs
+          model:
+            datasource:
+              type: loki
+              uid: grafanacloud-logs
+            editorMode: code
+            expr: sum by (app) (count_over_time({app="autobrr"} |~ "(?i)network unhealthy"[2m])) > 0
+            intervalMs: 1000
+            maxDataPoints: 43200
+            queryType: instant
+            refId: A
+      noDataState: NoData
+      execErrState: Error
+      isPaused: false
+      notification_settings:
+        receiver: discord-alerts-channel
