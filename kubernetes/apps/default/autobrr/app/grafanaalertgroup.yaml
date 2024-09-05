@@ -40,5 +40,5 @@ spec:
       noDataState: NoData
       execErrState: Error
       isPaused: false
-      notification_settings:
+      notificationSettings:
         receiver: discord-alerts-channel
