@@ -27,7 +27,7 @@ l2announcements:
   enabled: true
 loadBalancer:
   algorithm: maglev
-  mode: snat
+  mode: hybrid
 localRedirectPolicy: true
 operator:
   replicas: 1
