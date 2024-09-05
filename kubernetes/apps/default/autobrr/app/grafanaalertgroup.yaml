@@ -32,7 +32,7 @@ spec:
               type: loki
               uid: grafanacloud-logs
             editorMode: code
-            expr: sum by (app) (count_over_time({app="autobrr"} |~ "(?i)network unhealthy"[2m])) > 0
+            expr: sum by (app) (count_over_time({service_name="autobrr"} |~ "(?i)network unhealthy"[2m])) > 0
             intervalMs: 1000
             maxDataPoints: 43200
             queryType: instant

@@ -9,5 +9,5 @@ spec:
   external:
     url: https://zebernst.grafana.net/ # Grafana URL
     apiKey:
-      name: grafanacloud-alloy-token
-      key: credential
+      name: grafana-cloud
+      key: GRAFANA_CLOUD_API_TOKEN
