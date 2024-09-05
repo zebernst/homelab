@@ -4,7 +4,7 @@ kind: GrafanaAlertRuleGroup
 metadata:
   name: autobrr
 spec:
-#  folderRef: test-folder
+  folderRef: default
   instanceSelector:
     matchLabels:
       dashboards: "grafana-cloud"
