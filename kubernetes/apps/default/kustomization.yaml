@@ -8,7 +8,7 @@ resources:
   # Flux-Kustomizations
 #  - ./atuin/ks.yaml
   - ./autobrr/ks.yaml
-  - ./bazarr/ks.yaml
+  #- ./bazarr/ks.yaml
 #  - ./cross-seed/ks.yaml
 #  - ./echo-server/ks.yaml
 #  - ./filebrowser/ks.yaml
@@ -17,19 +17,19 @@ resources:
 #  - ./kopia/ks.yaml
 #  - ./minio/ks.yaml
 #  - ./miniflux/ks.yaml
-  - ./omegabrr/ks.yaml
-  - ./overseerr/ks.yaml
+  #- ./omegabrr/ks.yaml
+  #- ./overseerr/ks.yaml
 #  - ./plex/ks.yaml
-  - ./prowlarr/ks.yaml
-  - ./qbittorrent/ks.yaml
-  - ./radarr/ks.yaml
-  - ./recyclarr/ks.yaml
+  #- ./prowlarr/ks.yaml
+  #- ./qbittorrent/ks.yaml
+  #- ./radarr/ks.yaml
+  #- ./recyclarr/ks.yaml
 #  - ./rtlamr2mqtt/ks.yaml
 #  - ./sabnzbd/ks.yaml
 #  - ./slskd/ks.yaml
 #  - ./smtp-relay/ks.yaml
-  - ./sonarr/ks.yaml
+  #- ./sonarr/ks.yaml
 #  - ./tautulli/ks.yaml
-  - ./unpackerr/ks.yaml
+  #- ./unpackerr/ks.yaml
 #  - ./zigbee2mqtt/ks.yaml
 #  - ./zwave/ks.yaml
