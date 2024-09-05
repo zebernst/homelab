@@ -12,7 +12,7 @@ apiVersion: notification.toolkit.fluxcd.io/v1beta3
 kind: Provider
 metadata:
   name: alert-manager
-  namespace: database
+  namespace: default
 spec:
   type: alertmanager
   address: https://alertmanager-prod-us-east-0.grafana.net  # TODO: configure alert auth (basic auth, credentials already in external secrets)
