@@ -27,15 +27,15 @@ spec:
       prometheus:
         secret:
           create: false
-          name: grafanacloud-prometheus-secret
+          name: prometheus-secret
       loki:
         secret:
           create: false
-          name: grafanacloud-loki-secret
+          name: loki-secret
       tempo:
         secret:
           create: false
-          name: grafanacloud-tempo-secret
+          name: tempo-secret
     metrics:
       enabled: true
       cost:
