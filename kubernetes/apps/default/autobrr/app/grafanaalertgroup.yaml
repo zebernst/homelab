@@ -1,23 +1,11 @@
 ---
 apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaFolder
-metadata:
-  name: autobrr
-spec:
-  title: Autobrr
-  allowCrossNamespaceImport: true
-  parentFolderUID: a03a5932-b7fc-4810-872e-e6297c0a9a7f
-  instanceSelector:
-    matchLabels:
-      dashboards: "grafana-cloud"
----
-apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaAlertRuleGroup
 metadata:
   name: autobrr
 spec:
   allowCrossNamespaceImport: true
-  folderRef: autobrr
+  folderRef: default
   instanceSelector:
     matchLabels:
       dashboards: "grafana-cloud"

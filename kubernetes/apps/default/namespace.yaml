@@ -36,3 +36,14 @@ spec:
     - "dial.*tcp.*timeout"
     - "waiting.*socket"
   suspend: false
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaFolder
+metadata:
+  name: default
+spec:
+  allowCrossNamespaceImport: true
+  parentFolderUID: a03a5932-b7fc-4810-872e-e6297c0a9a7f
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana-cloud"
