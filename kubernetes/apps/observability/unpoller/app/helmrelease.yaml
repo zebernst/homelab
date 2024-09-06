@@ -42,7 +42,7 @@ spec:
               UP_UNIFI_DEFAULT_SAVE_EVENTS: true
               UP_UNIFI_DEFAULT_SAVE_ALARMS: true
               UP_UNIFI_DEFAULT_SAVE_ANOMALIES: true
-              UP_UNIFI_DEFAULT_SAVE_DPI: true
+              UP_UNIFI_DEFAULT_SAVE_DPI: false
               UP_UNIFI_DEFAULT_SITE_0: &site default
             envFrom:
               - secretRef:
