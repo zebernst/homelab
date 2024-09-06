@@ -5,7 +5,7 @@ metadata:
   name: autobrr
 spec:
   allowCrossNamespaceImport: true
-  folderRef: default
+  folderRef: grafana-folder
   instanceSelector:
     matchLabels:
       dashboards: "grafana-cloud"
@@ -18,8 +18,8 @@ spec:
         severity: critical
         category: logs
       annotations:
-        app: "{{ $labels.app }}"
-        summary: "{{ $labels.app }} has a unhealthy network"
+        app: "{{ $labels.service_name }}"
+        summary: "{{ $labels.service_name }} has a unhealthy network"
       condition: A
       data:
         - refId: A
@@ -33,12 +33,12 @@ spec:
               type: loki
               uid: grafanacloud-logs
             editorMode: code
-            expr: sum by (app) (count_over_time({service_name="autobrr"} |~ "(?i)network unhealthy"[2m])) > 0
+            expr: sum by (service_name) (count_over_time({service_name="autobrr"} |~ "(?i)network unhealthy"[2m])) > 0
             intervalMs: 1000
             maxDataPoints: 43200
             queryType: instant
             refId: A
-      noDataState: NoData
+      noDataState: OK
       execErrState: Error
       isPaused: false
       notificationSettings:

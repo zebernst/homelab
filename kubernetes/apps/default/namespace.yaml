@@ -40,8 +40,10 @@ spec:
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaFolder
 metadata:
-  name: default
+  name: grafana-folder
+  namespace: &namespaceName default
 spec:
+  title: *namespaceName
   allowCrossNamespaceImport: true
   parentFolderUID: a03a5932-b7fc-4810-872e-e6297c0a9a7f
   instanceSelector:
