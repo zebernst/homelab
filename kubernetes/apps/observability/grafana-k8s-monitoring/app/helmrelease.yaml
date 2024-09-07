@@ -42,6 +42,8 @@ spec:
         enabled: false
       node-exporter:
         enabled: true
+      kepler:
+        enabled: false
     logs:
       enabled: true
       pod_logs:
