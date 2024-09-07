@@ -6,5 +6,5 @@ resources:
   - ./gatus/ks.yaml
   - ./grafana-k8s-monitoring/ks.yaml
   - ./grafana-operator/ks.yaml
-  - ./kromgo/ks.yaml
+#  - ./kromgo/ks.yaml # FIXME (broken, unsure if kromgo supports https/secured prom instances)
   - ./unpoller/ks.yaml
