@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: overseerr
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: nfs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: overseerr-cache
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 15Gi
+  storageClassName: openebs-hostpath
