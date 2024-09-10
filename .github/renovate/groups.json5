@@ -61,6 +61,16 @@
         "commitMessageTopic": "{{{groupName}}} group"
       },
       "separateMinorPatch": true
-    }
+    },
+    {
+      "description": ["Kubernetes Group"],
+      "groupName": "Kubernetes",
+      "matchPackagePatterns": ["siderolabs/kubelet", "kubectl"],
+      "matchDatasources": ["docker"],
+      "group": {
+        "commitMessageTopic": "{{{groupName}}} group"
+      },
+      "separateMinorPatch": true
+    },
   ]
 }
