@@ -13,6 +13,12 @@ on:
         description: Log Level
         default: debug
         required: false
+        options:
+          - debug
+          - info
+          - warn
+          - error
+          - fatal
       version:
         description: Renovate version
         default: latest
