@@ -7,15 +7,15 @@ on:
     inputs:
       dryRun:
         description: Dry Run
+        type: choice
         default: "false"
-        required: false
         options:
           - "true"
           - "false"
       logLevel:
         description: Log Level
+        type: choice
         default: debug
-        required: false
         options:
           - debug
           - info
