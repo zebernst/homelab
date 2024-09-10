@@ -24,6 +24,8 @@ on:
     paths:
     - .github/renovate.json5
     - .github/renovate/**.json5
+  issue_comment:
+    types: ["edited"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
