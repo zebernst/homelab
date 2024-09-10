@@ -17,6 +17,14 @@ on:
         description: Renovate version
         default: latest
         required: false
+      repoCache:
+        description: 'Reset or disable the cache?'
+        type: choice
+        default: enabled
+        options:
+          - enabled
+          - disabled
+          - reset
   schedule:
   - cron: "0 * * * *" # Every hour
   push:
@@ -41,6 +49,7 @@ env:
   RENOVATE_PLATFORM: github
   RENOVATE_PLATFORM_COMMIT: true
   WORKFLOW_RENOVATE_VERSION: "${{ inputs.version || 'latest' }}"
+  RENOVATE_REPOSITORY_CACHE: "${{ github.event.inputs.repoCache || 'enabled' }}"
 
 jobs:
   renovate:
@@ -58,6 +67,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: "${{ steps.app-token.outputs.token }}"
+
+      - name: Cache
+        uses: actions/cache@v4
+        if: github.event.inputs.repoCache != 'disabled'
+        with:
+          path: /tmp/renovate/cache/
+          key: renovate-cache
 
       - name: Renovate
         uses: renovatebot/github-action@v40.2.7
