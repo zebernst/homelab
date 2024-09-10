@@ -24,6 +24,8 @@ on:
     paths:
     - .github/renovate.json5
     - .github/renovate/**.json5
+  issues:
+    types: ["edited"]
   issue_comment:
     types: ["edited"]
 
