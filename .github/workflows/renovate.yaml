@@ -9,6 +9,9 @@ on:
         description: Dry Run
         default: "false"
         required: false
+        options:
+          - "true"
+          - "false"
       logLevel:
         description: Log Level
         default: debug
