@@ -1,0 +1,47 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/external-secrets.io/externalsecret_v1beta1.json
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: "${APP}-volsync-b2"
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword-connect
+  target:
+    name: "${APP}-volsync-b2-secret"
+    template:
+      engineVersion: v2
+      data:
+        RESTIC_REPOSITORY: "s3:{{ .B2_BUCKET }}/${APP}"
+        RESTIC_PASSWORD: "{{ .RESTIC_PASSWORD }}"
+        AWS_ACCESS_KEY_ID: "{{ .B2_KEY_ID }}"
+        AWS_SECRET_ACCESS_KEY: "{{ .B2_APPLICATION_KEY }}"
+  dataFrom:
+    - extract:
+        key: volsync-b2-template
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationsource_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: "${APP}-b2"
+spec:
+  sourcePVC: "${APP}"
+  trigger:
+    schedule: "0 0 * * *"
+  restic:
+    copyMethod: "${VOLSYNC_COPYMETHOD:-Clone}"
+    pruneIntervalDays: 7
+    repository: "${APP}-volsync-b2-secret"
+    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-4Gi}"
+    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:-openebs-hostpath}"
+    cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:-ReadWriteOnce}"]
+    storageClassName: "${VOLSYNC_STORAGECLASS:-openebs-hostpath"
+    accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteOnce}"]
+    moverSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+    retain:
+      daily: 7
