@@ -112,10 +112,7 @@ spec:
         globalMounts:
           - path: /config/cache
       config:
-        type: persistentVolumeClaim
-        storageClass: iscsi
-        size: 1Gi
-        accessMode: ReadWriteOnce
+        existingClaim: bazarr
       log:
         type: emptyDir
         globalMounts:

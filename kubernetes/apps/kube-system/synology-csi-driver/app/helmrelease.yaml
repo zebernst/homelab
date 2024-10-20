@@ -28,6 +28,18 @@ spec:
     clientInfoSecret:
       name: synology-csi-driver-credentials
 
+    images:
+      attacher:
+        tag: v4.6.1
+      provisioner:
+        tag: v5.0.1
+      resizer:
+        tag: v1.11.2
+      snapshotter:
+        tag: v7.0.1
+      nodeDriverRegistrar:
+        tag: v2.11.1
+
     storageClasses:
       iscsi:
         isDefault: true

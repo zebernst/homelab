@@ -93,7 +93,7 @@ spec:
         globalMounts:
           - path: /app/config
       cache:
-        existingClaim: overseerr-cache
+        type: emptyDir # todo: persist with rook-ceph
         globalMounts:
           - path: /app/config/cache
       logs:
