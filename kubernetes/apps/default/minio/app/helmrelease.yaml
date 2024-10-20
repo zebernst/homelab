@@ -69,14 +69,14 @@ spec:
               limits:
                 memory: 2Gi
     defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 568
-        runAsGroup: 568
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [10000]
-        seccompProfile: { type: RuntimeDefault }
+      securityContext: # todo: not supported by synology-csi
+        runAsNonRoot: false
+#        runAsUser: 568
+#        runAsGroup: 568
+#        fsGroup: 568
+#        fsGroupChangePolicy: OnRootMismatch
+#        supplementalGroups: [10000]
+#        seccompProfile: { type: RuntimeDefault }
     service:
       app:
         controller: minio
@@ -114,8 +114,6 @@ spec:
                   port: s3
     persistence:
       config:
-        type: nfs
-        server: nas.lab.home.arpa
-        path: /volume1/minio
+        existingClaim: minio
         globalMounts:
           - path: /data
