@@ -1,0 +1,191 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app qbittorrent
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: volsync
+      namespace: volsync-system
+  values:
+    controllers:
+      qbittorrent:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/onedr0p/qbittorrent
+              tag: 5.0.0@sha256:4ba2360b71b95afe7d2b4459c54e5146ed682f37a1c1703eba0f29684636de50
+            env:
+              TZ: America/New_York
+              QBT_WEBUI_PORT: &port 80
+              QBT_TORRENTING_PORT: &bittorrentPort 50413
+              CROSS_SEED_HOST: cross-seed.default.svc.cluster.local
+              CROSS_SEED_PORT: 80
+              CROSS_SEED_SLEEP_INTERVAL: 0
+              PUSHOVER_ENABLED: true
+            envFrom:
+              - secretRef:
+                  name: qbittorrent-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/v2/app/version
+                    port: *port
+                  initialDelaySeconds: 15
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 6
+              readiness: *probes
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 10
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 568
+              runAsGroup: 568
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: [ "ALL" ] }
+            resources:
+              requests:
+                cpu: 100m
+#              limits:
+#                memory: 8Gi
+        initContainers:
+          gluetun:
+            restartPolicy: Always
+            image:
+              repository: ghcr.io/qdm12/gluetun
+              tag: v3.39.1
+            env:
+              VPN_TYPE: wireguard
+              VPN_INTERFACE: wg0
+              DNS_KEEP_NAMESERVER: on
+              FIREWALL_INPUT_PORTS: *port
+            envFrom:
+              - secretRef:
+                  name: gluetun-secret
+            securityContext:
+              runAsNonRoot: false
+              runAsUser: 0
+              runAsGroup: 0
+              capabilities:
+                add: [ NET_ADMIN ]
+            probes:
+              liveness: &vpn-probes
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - /gluetun-entrypoint
+                      - healthcheck
+                  initialDelaySeconds: 10
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *vpn-probes
+    defaultPodOptions:
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [ 10000 ]
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        nameOverride: *app
+        controller: *app
+        ports:
+          http:
+            port: *port
+            primary: true
+      bittorrent:
+        controller: *app
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: 10.2.100.21
+        externalTrafficPolicy: Local
+        ports:
+          bittorrent-tcp:
+            port: *bittorrentPort
+            protocol: TCP
+          bittorrent-udp:
+            port: *bittorrentPort
+            protocol: UDP
+      gluetun:
+        controller: *app
+        ports:
+          http:
+            port: 80
+            targetPort: 8000
+            protocol: HTTP
+    ingress:
+      app:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.zebernst.dev
+        className: internal
+        hosts:
+          - host: &host "{{ .Release.Name }}.zebernst.dev"
+            paths: &paths
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+          - host: &customHost qb.zebernst.dev
+            paths: *paths
+        tls:
+          - hosts:
+              - *host
+              - *customHost
+    persistence:
+      config:
+        existingClaim: qbittorrent
+      scripts:
+        type: configMap
+        name: qbittorrent-scripts
+        defaultMode: 0775
+        globalMounts:
+          - readOnly: true
+      media:
+        type: nfs
+        server: nas.lab.home.arpa
+        path: /volume1/media
+        globalMounts:
+          - path: /media/downloads/qbittorrent
+            subPath: downloads/qbittorrent
+          - path: /data/downloads/
+            subPath: downloads/
+      gluetun-tmp:
+        type: emptyDir
+        advancedMounts:
+          qbittorrent:
+            gluetun:
+              - path: /tmp/gluetun
+            port-forward:
+              - path: /tmp/gluetun
+                readOnly: true

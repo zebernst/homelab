@@ -1,0 +1,4 @@
+---
+trackers:
+  - { name: ptp,      required_seed_ratio: 1.01, required_seed_days: 7.1,  urls: ["passthepopcorn.me"] }
+  - { name: tl,       required_seed_ratio: 1.01, required_seed_days: 8.1,  urls: ["tleechreload.org", "torrentleech.org"] }

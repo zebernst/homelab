@@ -96,6 +96,7 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.zebernst.dev
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+          nginx.ingress.kubernetes.io/app-root: "/web"
         className: external
         hosts:
           - host: "{{ .Release.Name }}.zebernst.dev"
