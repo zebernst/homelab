@@ -125,6 +125,7 @@ spec:
         type: emptyDir
       transcode:
         type: emptyDir
+        medium: Memory
       media:
         type: nfs
         server: nas.lab.home.arpa
