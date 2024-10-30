@@ -55,7 +55,6 @@ spec:
               - --last-activity
               - --sites
               - --unregistered
-              - --not-working
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
