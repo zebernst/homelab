@@ -37,7 +37,7 @@ spec:
               tag: 6.0.0-34@sha256:f68f7fd7fa30bf45be844d7012d3b117841dea8fdfa0169d579e44698b041ae4
             env:
               TZ: America/New_York
-            args: ["daemon"]
+            args: [ "daemon" ]
             probes:
               liveness:
                 enabled: true
@@ -46,20 +46,30 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              capabilities: { drop: [ "ALL" ] }
             resources:
               requests:
                 cpu: 10m
               limits:
                 memory: 512Mi
     defaultPodOptions:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - qbittorrent
+              topologyKey: kubernetes.io/hostname
       securityContext:
         runAsNonRoot: true
         runAsUser: 568
         runAsGroup: 568
         fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [10000]
+        supplementalGroups: [ 10000 ]
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
