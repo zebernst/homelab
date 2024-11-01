@@ -37,7 +37,7 @@ spec:
     - name: certificates-import
     - name: cert-manager-issuers
     - name: external-secrets-stores
-  path: ./kubernetes/apps/cert-manager/certificates/app
+  path: ./kubernetes/apps/cert-manager/certificates/export
   prune: false
   sourceRef:
     kind: GitRepository
