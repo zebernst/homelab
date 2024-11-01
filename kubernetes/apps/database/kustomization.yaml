@@ -6,5 +6,6 @@ resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
   # Flux-Kustomizations
-  - ./ferretdb/ks.yaml
   - ./cloudnative-pg/ks.yaml
+  - ./dragonfly/ks.yaml
+  - ./ferretdb/ks.yaml

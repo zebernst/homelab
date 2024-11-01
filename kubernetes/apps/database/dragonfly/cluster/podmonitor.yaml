@@ -1,0 +1,13 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: hindwing
+spec:
+  selector:
+    matchLabels:
+      app: hindwing
+  podTargetLabels:
+    - app
+  podMetricsEndpoints:
+    - port: admin
