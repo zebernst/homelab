@@ -1,6 +1,6 @@
 ---
 trackers:
   - { name: jptv,  required_seed_ratio: 1.01, required_seed_days: 7.1,  urls: ["jptv.club"] }
-  - { name: mlk,   required_seed_ratio: 1.01, required_seed_days: 7.1,  urls: ["cow.milkie.cc"] }
+  - { name: mlk,   required_seed_ratio: 1.01, required_seed_days: 7.1,  urls: ["milkie.cc"] }
   - { name: ptp,   required_seed_ratio: 1.01, required_seed_days: 7.1,  urls: ["passthepopcorn.me"] }
   - { name: tl,    required_seed_ratio: 1.01, required_seed_days: 8.1,  urls: ["tleechreload.org", "torrentleech.org"] }

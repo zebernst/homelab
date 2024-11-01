@@ -103,6 +103,7 @@ spec:
             - orphaned
             - --exclude-pattern=*_unpackerred*
             - --exclude-pattern=*/manual/*
+            - --exclude-pattern=*/temp/*
             - --exclude-pattern=*/xxx/*
         pod:
           restartPolicy: OnFailure
