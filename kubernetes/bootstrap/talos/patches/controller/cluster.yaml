@@ -1,5 +1,5 @@
 cluster:
-  allowSchedulingOnControlPlanes: true
+  allowSchedulingOnControlPlanes: false
   controllerManager:
     extraArgs:
       bind-address: 0.0.0.0

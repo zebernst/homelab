@@ -1,0 +1,138 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: qbtools
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  dependsOn:
+    - name: qbittorrent
+      namespace: default
+  values:
+    controllers:
+      tagging:
+        type: cronjob
+        cronjob: &cronJobSpec
+          schedule: "@hourly"
+          timeZone: &timeZone America/New_York
+          concurrencyPolicy: Forbid
+          successfulJobsHistory: 1
+          failedJobsHistory: 1
+        initContainers:
+          tagging: &container
+            image:
+              repository: ghcr.io/buroa/qbtools
+              tag: v0.19.5@sha256:e9482d3d40c1ab58f50664ad3a24f2d5627d210f1ea140c7f44f516d0bf5f204
+            env:
+              TZ: *timeZone
+              QBITTORRENT_HOST: qbittorrent.default.svc.cluster.local
+              QBITTORRENT_PORT: 80
+              POD_NAMESPACE:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+            args:
+              - tagging
+              - --added-on
+              - --expired
+              - --last-activity
+              - --sites
+              - --unregistered
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 25m
+              limits:
+                memory: 256M
+        containers:
+          prune-unregistered:
+            <<: *container
+            args:
+              - prune
+              - --exclude-tag=expired
+              - --exclude-tag=added:1d
+              - --include-tag=unregistered
+              - --with-data
+          prune-expired:
+            <<: *container
+            args:
+              - prune
+              - --exclude-category=manual
+              - --exclude-tag=activity:1d
+              - --include-tag=expired
+              - --with-data
+          prune-unmapped:
+            <<: *container
+            args:
+              - prune
+              - --exclude-category=manual
+              - --include-tag=added:30d
+              - --include-tag=site:unmapped
+              - --with-data
+        pod:
+          restartPolicy: OnFailure
+      orphaned:
+        type: cronjob
+        cronjob:
+          <<: *cronJobSpec
+          schedule: "@daily"
+        containers:
+          app:
+            <<: *container
+            args:
+            - orphaned
+            - --exclude-pattern=*_unpackerred*
+            - --exclude-pattern=*/manual/*
+            - --exclude-pattern=*/xxx/*
+        pod:
+          restartPolicy: OnFailure
+      reannounce:
+        containers:
+          app:
+            <<: *container
+            args:
+              - reannounce
+              - --process-seeding
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        seccompProfile: { type: RuntimeDefault }
+    persistence:
+      config:
+        type: configMap
+        name: qbtools-configmap
+        globalMounts:
+          - path: /config/config.yaml
+            subPath: config.yaml
+            readOnly: true
+      media:
+        type: nfs
+        server: nas.lab.home.arpa
+        path: /volume1/media
+        advancedMounts:
+          orphaned:
+            app:
+              - path: /media/downloads/qbittorrent
+                subPath: downloads/qbittorrent

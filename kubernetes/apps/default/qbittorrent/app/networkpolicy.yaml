@@ -1,0 +1,56 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: deny-bt-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: ${APP}
+  ingress:
+    - fromEntities:
+        - cluster
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+            - port: "8000"
+              protocol: TCP
+            - port: "50413"
+              protocol: TCP
+            - port: "50413"
+              protocol: UDP
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "1637"
+              protocol: ANY
+  ingressDeny:
+    - fromEntities:
+      - world
+      toPorts:
+        - ports:
+            - port: "50413"
+              protocol: TCP
+            - port: "50413"
+              protocol: UDP
+  egress:
+    - toEntities:
+        - cluster
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "1637"
+              protocol: ANY

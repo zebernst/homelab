@@ -10,7 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/main/apps/default/tautulli/app
+  path: ./kubernetes/apps/default/tautulli/app
   prune: true
   sourceRef:
     kind: GitRepository

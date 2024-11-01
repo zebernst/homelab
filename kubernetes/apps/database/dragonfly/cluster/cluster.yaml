@@ -1,0 +1,31 @@
+---
+apiVersion: dragonflydb.io/v1alpha1
+kind: Dragonfly
+metadata:
+  name: hindwing
+spec:
+  image: ghcr.io/dragonflydb/dragonfly:v1.24.0
+  replicas: 3
+  args:
+    - --maxmemory=$(MAX_MEMORY)Mi
+    - --proactor_threads=2
+    - --cluster_mode=emulated
+    - --lock_on_hashtags
+  env:
+    - name: MAX_MEMORY
+      valueFrom:
+        resourceFieldRef:
+          resource: limits.memory
+          divisor: 1Mi
+  resources:
+    requests:
+      cpu: 100m
+    limits:
+      memory: 512Mi
+#  snapshot:
+#    dir: s3://
+  serviceSpec:
+    type: LoadBalancer
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: redis.zebernst.dev
+      io.cilium/lb-ipam-ips: 10.2.100.14
