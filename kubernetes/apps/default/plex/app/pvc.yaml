@@ -9,3 +9,14 @@ spec:
     requests:
       storage: 100Gi
   storageClassName: iscsi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: plex-optimized-media
+spec:
+  accessModes: ["ReadWriteMany"]
+  resources:
+    requests:
+      storage: 250Gi
+  storageClassName: iscsi
