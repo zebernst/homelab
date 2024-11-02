@@ -6,6 +6,7 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ../../../../templates/gatus/guarded
+  - ./pvc.yaml
 configMapGenerator:
   - name: sonarr-configmap
     files:

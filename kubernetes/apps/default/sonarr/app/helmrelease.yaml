@@ -103,6 +103,11 @@ spec:
     persistence:
       config:
         type: emptyDir
+      cache:
+        existingClaim: sonarr-cache
+        globalMounts:
+          - path: /config/MediaCover
+            subPath: MediaCover
       scripts:
         type: configMap
         name: sonarr-configmap
