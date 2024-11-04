@@ -96,7 +96,61 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.zebernst.dev
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-          nginx.ingress.kubernetes.io/app-root: "/web"
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            if ($http_x_plex_device_name = '') {
+                rewrite ^/$ /web/index.html;
+            }
+
+            gzip on;
+            gzip_vary on;
+            gzip_min_length 256;
+            gzip_proxied any;
+            gzip_comp_level 9;
+            gzip_disable "MSIE [1-6]\.";
+            gzip_types
+                text/css
+                text/xml
+                text/plain
+                text/javascript
+                text/cache-manifest
+                text/x-cross-domain-policy
+                application/javascript
+                application/x-javascript
+                application/json
+                application/manifest+json
+                application/xml
+                application/xml+rss
+                application/xhtml+xml
+                application/rss+xml
+                application/rdf+xml
+                application/atom+xml
+                application/atom_xml
+                application/geo+json
+                application/ttf
+                application/x-ttf
+                application/x-font-ttf
+                application/x-font-otf
+                application/x-font-truetype
+                application/x-font-opentype
+                application/x-web-app-manifest+json
+                application/vnd.ms-fontobject
+                font/eot
+                font/otf
+                font/ttf
+                font/opentype
+                image/svg+xml
+                image/x-icon
+                image/bmp;
+
+            send_timeout 3600; #Some players don't reopen a socket and playback stops totally instead of resuming after an extended pause (e.g. Chrome)
+
+            proxy_set_header Sec-Websocket-Extensions $http_sec_websocket_extensions;
+            proxy_set_header Sec-Websocket-Key $http_sec_websocket_key;
+            proxy_set_header Sec-Websocket-Protocol $http_sec_websocket_protocol;
+            proxy_set_header Sec-Websocket-Version $http_sec_websocket_version;
+
+            proxy_set_header Accept-Encoding "";
+
         className: external
         hosts:
           - host: "{{ .Release.Name }}.zebernst.dev"
