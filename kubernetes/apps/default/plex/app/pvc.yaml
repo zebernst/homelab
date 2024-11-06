@@ -7,7 +7,7 @@ spec:
   accessModes: ["ReadWriteMany"]
   resources:
     requests:
-      storage: 100Gi
+      storage: 200Gi
   storageClassName: iscsi
 ---
 apiVersion: v1
@@ -18,5 +18,5 @@ spec:
   accessModes: ["ReadWriteMany"]
   resources:
     requests:
-      storage: 1Ti
+      storage: 1.5Ti
   storageClassName: iscsi
