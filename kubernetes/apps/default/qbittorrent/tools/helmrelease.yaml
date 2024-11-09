@@ -73,14 +73,14 @@ spec:
               - --exclude-tag=added:1d
               - --include-tag=unregistered
               - --with-data
-          prune-expired:
-            <<: *container
-            args:
-              - prune
-              - --exclude-category=manual
-              - --exclude-tag=activity:1d
-              - --include-tag=expired
-              - --with-data
+#          prune-expired:
+#            <<: *container
+#            args:
+#              - prune
+#              - --exclude-category=manual
+#              - --exclude-tag=activity:1d
+#              - --include-tag=expired
+#              - --with-data
           prune-unmapped:
             <<: *container
             args:
