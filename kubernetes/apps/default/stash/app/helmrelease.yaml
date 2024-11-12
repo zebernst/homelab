@@ -1,0 +1,108 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: stash
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  driftDetection:
+    mode: enabled
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      stash:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          stash:
+            image:
+              repository: stashapp/stash
+              tag: v0.27.2@sha256:28a04a0db254602c60af337e46770544f4b3f3e0cc0772603a673f6424336a61
+              pullPolicy: IfNotPresent
+            env:
+              TZ: America/New_York
+              USER: 1000
+              STASH_CONFIG_FILE: /config/config.yml
+              STASH_STASH: /media/xxx/
+              STASH_GENERATED: /generated/
+              STASH_METADATA: /metadata/
+              STASH_CACHE: /cache/
+              STASH_PORT: &port 9999
+              STASH_EXTERNAL_HOST: https://stash.zebernst.dev
+
+            probes:
+              liveness: &probe
+                enabled: true
+              readiness: *probe
+              startup: *probe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+#        seccompProfile: { type: RuntimeDefault }
+    service:
+      stash:
+        controller: stash
+        ports:
+          http:
+            port: *port
+    ingress:
+      stash:
+        className: internal
+        hosts:
+          - host: stash.zebernst.dev
+            paths:
+              - path: /
+                service:
+                  identifier: stash
+                  port: http
+    persistence:
+      config:
+        existingClaim: stash
+        globalMounts:
+          - path: /config
+            subPath: config
+          - path: /blobs
+            subPath: blobs
+      cache:
+        enabled: true
+        existingClaim: stash-cache
+        globalMounts:
+          - path: /cache
+            subPath: cache
+          - path: /generated
+            subPath: generated
+      media:
+        type: nfs
+        server: nas.lab.home.arpa
+        path: /volume1/media
+        globalMounts:
+          - path: /media
