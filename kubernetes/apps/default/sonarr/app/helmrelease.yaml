@@ -126,4 +126,7 @@ spec:
         server: nas.lab.home.arpa
         path: /volume1/media
         globalMounts:
-          - path: /media
+          - path: /media/tv
+            subPath: tv
+          - path: /media/downloads/qbittorrent/seeding
+            subPath: downloads/qbittorrent/seeding
