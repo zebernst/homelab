@@ -9,7 +9,7 @@ data:
   config.yaml: |
     endpoints:
       - name: mongo
-        group: infrastructure
+        group: data
         url: tcp://ferretdb.database.svc.cluster.local:27017
         interval: 1m
         ui:

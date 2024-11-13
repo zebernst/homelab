@@ -9,7 +9,7 @@ data:
   config.yaml: |
     endpoints:
       - name: postgres
-        group: infrastructure
+        group: data
         url: tcp://redspot16-rw.database.svc.cluster.local:5432
         interval: 1m
         ui:

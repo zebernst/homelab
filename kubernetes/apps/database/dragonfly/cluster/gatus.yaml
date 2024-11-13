@@ -9,7 +9,7 @@ data:
   config.yaml: |
     endpoints:
       - name: redis
-        group: infrastructure
+        group: data
         url: tcp://hindwing.database.svc.cluster.local:6379
         interval: 1m
         ui:
