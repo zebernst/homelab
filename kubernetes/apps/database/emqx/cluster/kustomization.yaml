@@ -5,3 +5,4 @@ resources:
   - ./cluster.yaml
   - ./ingress.yaml
   - ./podmonitor.yaml
+  - ./gatus.yaml
