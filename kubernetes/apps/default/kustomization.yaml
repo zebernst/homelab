@@ -6,11 +6,9 @@ resources:
   # Pre Flux-Kustomizations
   - namespace.yaml
   # Flux-Kustomizations
-  - atuin/ks.yaml
   - autobrr/ks.yaml
   - bazarr/ks.yaml
   - cross-seed/ks.yaml
-  - hajimari/ks.yaml
   - maintainerr/ks.yaml
   - minio/ks.yaml
   - omegabrr/ks.yaml

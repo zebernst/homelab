@@ -6,14 +6,14 @@ metadata:
   name: &app atuin
   namespace: flux-system
 spec:
-  targetNamespace: default
+  targetNamespace: home
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: cloudnative-pg-cluster
     - name: external-secrets-stores
-  path: ./kubernetes/apps/default/atuin/app
+  path: ./kubernetes/apps/home/atuin/app
   prune: true
   sourceRef:
     kind: GitRepository

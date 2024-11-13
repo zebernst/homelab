@@ -3,6 +3,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ./externalsecret.yaml
-  - ./helmrelease.yaml
-  - ../../../../templates/gatus/guarded
+  # Pre Flux-Kustomizations
+  - namespace.yaml
+  # Flux-Kustomizations
+  - atuin/ks.yaml
+  - hajimari/ks.yaml
