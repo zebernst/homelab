@@ -70,7 +70,7 @@ spec:
     cleanupCachePVC: true
     storageClassName: "${VOLSYNC_STORAGECLASS:-iscsi}"
     accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteMany}"]
-    cleanupTempPVC: true
+    cleanupTempPVC: false  # needs to be false, or else the VolumeSnapContent gets deleted with the PVC.
     capacity: "${VOLSYNC_CAPACITY}"
     moverSecurityContext:
       runAsUser: ${APP_UID:-568}
