@@ -35,13 +35,11 @@ spec:
     storageClassName: "${VOLSYNC_STORAGECLASS:-iscsi}"
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:-iscsi}"
     accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteMany}"]
-    cleanupTempPVC: true
     pruneIntervalDays: 7
     repository: "${APP}-volsync-secret"
     cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-4Gi}"
     cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:-openebs-hostpath}"
     cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:-ReadWriteOnce}"]
-    cleanupCachePVC: true
     moverSecurityContext:
       runAsUser: ${APP_UID:-568}
       runAsGroup: ${APP_GID:-568}
@@ -70,7 +68,7 @@ spec:
     cleanupCachePVC: true
     storageClassName: "${VOLSYNC_STORAGECLASS:-iscsi}"
     accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteMany}"]
-    cleanupTempPVC: true
+    cleanupTempPVC: false  # needs to be false, or else the VolumeSnapContent gets deleted with the PVC.
     capacity: "${VOLSYNC_CAPACITY}"
     moverSecurityContext:
       runAsUser: ${APP_UID:-568}
