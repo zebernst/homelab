@@ -39,7 +39,7 @@ spec:
           tagging: &container
             image:
               repository: ghcr.io/buroa/qbtools
-              tag: v0.19.7@sha256:ceb38f6794b10a8f1147dbc8a4df24857e0dae72341eaf2d435796937d77ba3a
+              tag: v0.19.10@sha256:fc9c2fd65a454d39084d3b7ea802c92dba4032fb0b4eaadf6a684fdf740b8c17
             env:
               TZ: *timeZone
               QBITTORRENT_HOST: qbittorrent.default.svc.cluster.local
