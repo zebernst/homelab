@@ -35,11 +35,13 @@ spec:
     storageClassName: "${VOLSYNC_STORAGECLASS:-iscsi}"
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:-iscsi}"
     accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteMany}"]
+    cleanupTempPVC: true
     pruneIntervalDays: 7
     repository: "${APP}-volsync-b2-secret"
     cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-4Gi}"
     cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:-openebs-hostpath}"
     cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:-ReadWriteOnce}"]
+    cleanupCachePVC: true
     moverSecurityContext:
       runAsUser: ${APP_UID:-568}
       runAsGroup: ${APP_GID:-568}
