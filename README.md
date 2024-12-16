@@ -149,10 +149,10 @@ Alternative solutions to the first two of these problems would be to host a Kube
 </details>
 
 
-| Device    | Count | CPU      | OS Disk   | Data Disk | RAM  | OS    | Purpose                |
-|-----------|-------|----------|-----------|-----------|------|-------|------------------------|
-| M93p Tiny | 3     | i5-4570T | 128GB SSD | -         | 8GB  | Talos | control plane          |
-| M93p Tiny | 4     | i7-4765T | 256GB SSD | -         | 16GB | Talos | general-purpose worker |
+| Device                       | Count | CPU      | OS Disk   | Data Disk | RAM  | OS    | Purpose                |
+|------------------------------|-------|----------|-----------|-----------|------|-------|------------------------|
+| Lenovo ThinkCentre M93p Tiny | 3     | i5-4570T | 128GB SSD | -         | 8GB  | Talos | control plane          |
+| Lenovo ThinkCentre M93p Tiny | 4     | i7-4765T | 256GB SSD | -         | 16GB | Talos | general-purpose worker |
 
 Total CPU: 32 threads<br>
 Total RAM: 64GB
