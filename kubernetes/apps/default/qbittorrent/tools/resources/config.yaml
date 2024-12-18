@@ -1,5 +1,7 @@
 ---
 trackers:
+  - { name: gt,    required_seed_ratio: 0,    required_seed_days: 0,    urls: ["gay-torrents.net"] }
+  - { name: hds,   required_seed_ratio: 0,    required_seed_days: 7.1,  urls: ["hd-space.pw"] }
   - { name: huno,  required_seed_ratio: 1.01, required_seed_days: 5.1,  urls: ["hawke.uno"] }
   - { name: jptv,  required_seed_ratio: 1.01, required_seed_days: 7.1,  urls: ["jptv.club"] }
   - { name: mlk,   required_seed_ratio: 1.01, required_seed_days: 7.1,  urls: ["milkie.cc"] }

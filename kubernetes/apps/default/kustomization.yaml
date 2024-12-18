@@ -9,6 +9,7 @@ resources:
   - autobrr/ks.yaml
   - bazarr/ks.yaml
   - cross-seed/ks.yaml
+  - flaresolverr/ks.yaml
   - maintainerr/ks.yaml
   - minio/ks.yaml
   - omegabrr/ks.yaml
