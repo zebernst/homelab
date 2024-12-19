@@ -51,8 +51,10 @@ spec:
             args:
               - tagging
               - --added-on
-              - --expired
+#              - --expired
               - --last-activity
+              - --not-linked
+              - --not-working
               - --sites
               - --unregistered
             securityContext:
@@ -65,29 +67,21 @@ spec:
               limits:
                 memory: 256M
         containers:
-          prune-unregistered:
-            <<: *container
-            args:
-              - prune
-              - --exclude-tag=expired
-              - --exclude-tag=added:1d
-              - --include-tag=unregistered
-              - --with-data
 #          prune-expired:
 #            <<: *container
 #            args:
 #              - prune
+#              - --exclude-category=cross-seed
 #              - --exclude-category=manual
 #              - --exclude-tag=activity:1d
 #              - --include-tag=expired
 #              - --with-data
-          prune-unmapped:
+          prune-unregistered:
             <<: *container
             args:
               - prune
-              - --exclude-category=manual
-              - --include-tag=added:30d
-              - --include-tag=site:unmapped
+              - --exclude-tag=added:1d
+              - --include-tag=unregistered
               - --with-data
         pod:
           restartPolicy: OnFailure
@@ -103,8 +97,7 @@ spec:
             - orphaned
             - --exclude-pattern=*_unpackerred*
             - --exclude-pattern=*/manual/*
-            - --exclude-pattern=*/temp/*
-            - --exclude-pattern=*/xxx/*
+            - --dry-run
         pod:
           restartPolicy: OnFailure
       reannounce:

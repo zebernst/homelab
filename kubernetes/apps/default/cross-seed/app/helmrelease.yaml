@@ -34,15 +34,27 @@ spec:
           app:
             image:
               repository: ghcr.io/cross-seed/cross-seed
-              tag: 6.1.1@sha256:5cb54b46a614f362c0332a91e5754d6998d45ae27ccc2c77b04b1a3493816331
+              tag: 6.2.3@sha256:22184878995cd3ea7027ec2045aec0323f43621135f51747ca00adfc17e6d01f
             env:
+              CROSS_SEED_PORT: &port 2468
               TZ: America/New_York
+            envFrom:
+              - secretRef:
+                  name: cross-seed-secret
             args: [ "daemon" ]
             probes:
-              liveness:
+              liveness: &probes
                 enabled: true
-              readiness:
-                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/ping
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -51,7 +63,7 @@ spec:
               requests:
                 cpu: 10m
               limits:
-                memory: 512Mi
+                memory: 256Mi
     defaultPodOptions:
       affinity:
         podAffinity:
@@ -76,13 +88,13 @@ spec:
         controller: cross-seed
         ports:
           http:
-            port: 80
+            port: *port
     persistence:
       config:
         type: emptyDir
-      secret-file:
-        type: secret
-        name: cross-seed-secret
+      config-file:
+        type: configMap
+        name: cross-seed-configmap
         globalMounts:
           - path: /config/config.js
             subPath: config.js
@@ -99,3 +111,5 @@ spec:
         path: /volume1/media
         globalMounts:
           - path: /media
+      tmp:
+        type: emptyDir
