@@ -8,3 +8,5 @@ resources:
   # Flux-Kustomizations
   - radarr/ks.yaml
   - sonarr/ks.yaml
+  - unpackerr/ks.yaml
+  - whisparr/ks.yaml

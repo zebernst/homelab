@@ -21,5 +21,4 @@ resources:
   - recyclarr/ks.yaml
   - stash/ks.yaml
   - tautulli/ks.yaml
-  - unpackerr/ks.yaml
-  - whisparr/ks.yaml
+
