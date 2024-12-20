@@ -22,7 +22,7 @@ module.exports = {
   sonarr: [`http://sonarr.downloads.svc.cluster.local/?apikey=$${process.env.SONARR_API_KEY}`],
   torznab: [], // only using autobrr announcements
 
-  qbittorrentUrl: "http://qbittorrent.default.svc.cluster.local",
+  qbittorrentUrl: "http://qbittorrent.downloads.svc.cluster.local",
   duplicateCategories: false,
   skipRecheck: false,
 

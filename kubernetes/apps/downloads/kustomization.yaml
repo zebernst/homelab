@@ -8,11 +8,11 @@ resources:
   # Flux-Kustomizations
   - autobrr/ks.yaml
   - bazarr/ks.yaml
-#  - qbittorrent/ks.yaml
   - cross-seed/ks.yaml
   - flaresolverr/ks.yaml
   - omegabrr/ks.yaml
   - prowlarr/ks.yaml
+  - qbittorrent/ks.yaml
   - radarr/ks.yaml
   - recyclarr/ks.yaml
   - sonarr/ks.yaml

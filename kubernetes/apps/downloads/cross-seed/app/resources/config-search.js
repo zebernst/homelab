@@ -40,9 +40,9 @@ module.exports = {
       52, // SP
       53, // HUNO
       54, // HDS
-  ].map(i => `http://prowlarr.default.svc.cluster.local/$${i}/api?apikey=$${process.env.PROWLARR_API_KEY}`),
+  ].map(i => `http://prowlarr.downloads.svc.cluster.local/$${i}/api?apikey=$${process.env.PROWLARR_API_KEY}`),
 
-  qbittorrentUrl: "http://qbittorrent.default.svc.cluster.local",
+  qbittorrentUrl: "http://qbittorrent.downloads.svc.cluster.local",
   duplicateCategories: false,
   skipRecheck: false,
 

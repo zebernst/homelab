@@ -11,7 +11,6 @@ resources:
   - minio/ks.yaml
   - overseerr/ks.yaml
   - plex/ks.yaml
-  - qbittorrent/ks.yaml
   - stash/ks.yaml
   - tautulli/ks.yaml
 

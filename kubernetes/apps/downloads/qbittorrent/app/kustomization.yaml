@@ -11,13 +11,13 @@ resources:
 configMapGenerator:
   - name: qbittorrent-loki-rules
     files:
-      - qbittorrent.yaml=./resources/lokirule.yaml
+      - qbittorrent.yaml=resources/lokirule.yaml
     options:
       labels:
         loki_rule: "true"
   - name: qbittorrent-scripts
     files:
-      - post-process.sh=./resources/post-process.sh
+      - post-process.sh=resources/post-process.sh
 generatorOptions:
   disableNameSuffixHash: true
   annotations:
