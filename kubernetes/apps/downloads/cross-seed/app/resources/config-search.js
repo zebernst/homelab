@@ -29,8 +29,8 @@ module.exports = {
   linkDir: "/media/downloads/qbittorrent/seeding/cross-seed",
   linkType: "hardlink",
 
-  radarr: [`http://radarr.downloads.svc.cluster.local/?apikey=${process.env.RADARR_API_KEY}`],
-  sonarr: [`http://sonarr.downloads.svc.cluster.local/?apikey=${process.env.SONARR_API_KEY}`],
+  radarr: [`http://radarr.downloads.svc.cluster.local/?apikey=$${process.env.RADARR_API_KEY}`],
+  sonarr: [`http://sonarr.downloads.svc.cluster.local/?apikey=$${process.env.SONARR_API_KEY}`],
   torznab: [
       2,  // PTP
       12, // TL
@@ -40,7 +40,7 @@ module.exports = {
       52, // SP
       53, // HUNO
       54, // HDS
-  ].map(i => `http://prowlarr.default.svc.cluster.local/${i}/api?apikey=${process.env.PROWLARR_API_KEY}`),
+  ].map(i => `http://prowlarr.default.svc.cluster.local/$${i}/api?apikey=$${process.env.PROWLARR_API_KEY}`),
 
   qbittorrentUrl: "http://qbittorrent.default.svc.cluster.local",
   duplicateCategories: false,

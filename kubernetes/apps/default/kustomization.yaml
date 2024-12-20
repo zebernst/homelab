@@ -7,16 +7,11 @@ resources:
   - namespace.yaml
   # Flux-Kustomizations
   - calibre-web/ks.yaml
-  - cross-seed/ks.yaml
-  - flaresolverr/ks.yaml
   - maintainerr/ks.yaml
   - minio/ks.yaml
-  - omegabrr/ks.yaml
   - overseerr/ks.yaml
   - plex/ks.yaml
-  - prowlarr/ks.yaml
   - qbittorrent/ks.yaml
-  - recyclarr/ks.yaml
   - stash/ks.yaml
   - tautulli/ks.yaml
 
