@@ -27,11 +27,13 @@ spec:
       namespace: default
   values:
     controllers:
-      cross-seed:
+      daemon:
+
         annotations:
           reloader.stakater.com/auto: "true"
+
         containers:
-          app:
+          app: &container
             image:
               repository: ghcr.io/cross-seed/cross-seed
               tag: 6.2.3@sha256:22184878995cd3ea7027ec2045aec0323f43621135f51747ca00adfc17e6d01f
@@ -55,15 +57,42 @@ spec:
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-            securityContext:
+
+            securityContext: &secctx
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: [ "ALL" ] }
-            resources:
+
+            resources: &resources
               requests:
                 cpu: 10m
               limits:
                 memory: 256Mi
+
+      search:
+        type: cronjob
+        cronjob:
+          schedule: "@monthly"
+          timeZone: America/New_York
+          concurrencyPolicy: Forbid
+          successfulJobsHistory: 1
+          failedJobsHistory: 1
+
+        annotations:
+          reloader.stakater.com/auto: "true"
+
+        containers:
+          app:
+            <<: *container
+            args: [ "search" ]
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+            resources: *resources
+            securityContext: *secctx
+
     defaultPodOptions:
       affinity:
         podAffinity:
@@ -83,22 +112,41 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [ 10000 ]
         seccompProfile: { type: RuntimeDefault }
+
     service:
       app:
-        controller: cross-seed
+        controller: daemon
         ports:
           http:
             port: *port
+
     persistence:
       config:
         type: emptyDir
-      config-file:
+      config-daemon:
         type: configMap
         name: cross-seed-configmap
-        globalMounts:
-          - path: /config/config.js
-            subPath: config.js
-            readOnly: true
+        advancedMounts:
+          daemon:
+            app:
+              - path: /config/config.js
+                subPath: config.js
+                readOnly: true
+        items:
+          - key: config-daemon.js
+            path: config.js
+      config-search:
+        type: configMap
+        name: cross-seed-configmap
+        advancedMounts:
+          search:
+            app:
+              - path: /config/config.js
+                subPath: config.js
+                readOnly: true
+        items:
+          - key: config-search.js
+            path: config.js
       qbittorrent:
         existingClaim: qbittorrent
         globalMounts:
