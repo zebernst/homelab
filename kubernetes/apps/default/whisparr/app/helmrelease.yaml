@@ -46,7 +46,7 @@ spec:
               WHISPARR__ANALYTICS_ENABLED: "False"
               WHISPARR__AUTHENTICATION_METHOD: External
               WHISPARR__AUTHENTICATION_REQUIRED: DisabledForLocalAddresses
-              WHISPARR__BRANCH: develop
+              WHISPARR__BRANCH: nightly
               WHISPARR__INSTANCE_NAME: Whisparr
               WHISPARR__LOG_LEVEL: info
               WHISPARR__PORT: &port 80
