@@ -28,6 +28,5 @@ module.exports = {
   torznab: [
       2,  // PTP
       53, // HUNO
-      54, // HDS
   ].map(i => `http://prowlarr.default.svc.cluster.local/${i}/api?apikey=${process.env.PROWLARR_API_KEY}`),
 };
