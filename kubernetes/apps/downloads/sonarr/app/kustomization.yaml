@@ -3,15 +3,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ./externalsecret.yaml
-  - ./helmrelease.yaml
+  - externalsecret.yaml
+  - helmrelease.yaml
   - ../../../../templates/gatus/guarded
-  - ./pvc.yaml
+  - pvc.yaml
 configMapGenerator:
   - name: sonarr-configmap
     files:
-      - pushover-notify.sh=./resources/pushover-notify.sh
-      - refresh-series.sh=./resources/refresh-series.sh
+      - pushover-notify.sh=resources/pushover-notify.sh
+      - refresh-series.sh=resources/refresh-series.sh
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

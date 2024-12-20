@@ -6,3 +6,5 @@ resources:
   # Pre Flux-Kustomizations
   - namespace.yaml
   # Flux-Kustomizations
+  - radarr/ks.yaml
+  - sonarr/ks.yaml
