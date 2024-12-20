@@ -1,0 +1,90 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app monica
+spec:
+  releaseName: monica
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      monica:
+
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 16
+            envFrom: &envFrom
+              - secretRef:
+                  name: monica-secret
+
+        containers:
+          app: &container
+            image:
+              repository: ghcr.io/monicahq/monica-next
+              tag: main
+            env:
+              TZ: America/New_York
+              APP_ENV: production
+              APP_URL: https://monica.zebernst.dev
+              APP_TRUSTED_PROXIES: "*"
+              CACHE_DRIVER: redis
+              DEFAULT_MAX_STORAGE_SIZE: 4096
+              MAIL_MAILER: log
+              QUEUE_CONNECTION: redis
+              REDIS_HOST: hindwing.database.svc.cluster.local
+            envFrom: *envFrom
+
+          cron:
+            <<: *container
+            command:
+              - cron.sh
+          queue:
+            <<: *container
+            command:
+              - queue.sh
+
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: 80
+
+    ingress:
+      app:
+        className: internal
+        hosts:
+        - host: "{{ .Release.Name }}.zebernst.dev"
+          paths:
+          - path: /
+            service:
+              identifier: app
+              port: http
+    persistence:
+      config:
+        enabled: true
+        existingClaim: *app
+        globalMounts:
+          - path: /var/www/html/storage
