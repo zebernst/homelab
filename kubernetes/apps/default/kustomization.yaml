@@ -6,8 +6,6 @@ resources:
   # Pre Flux-Kustomizations
   - namespace.yaml
   # Flux-Kustomizations
-  - autobrr/ks.yaml
-  - bazarr/ks.yaml
   - calibre-web/ks.yaml
   - cross-seed/ks.yaml
   - flaresolverr/ks.yaml

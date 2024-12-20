@@ -6,7 +6,7 @@ metadata:
   name: &app autobrr
   namespace: flux-system
 spec:
-  targetNamespace: default
+  targetNamespace: downloads
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
@@ -14,7 +14,7 @@ spec:
     - name: cloudnative-pg-cluster
     - name: external-secrets-stores
     - name: grafana-operator
-  path: ./kubernetes/apps/default/autobrr/app
+  path: ./kubernetes/apps/downloads/autobrr/app
   prune: true
   sourceRef:
     kind: GitRepository

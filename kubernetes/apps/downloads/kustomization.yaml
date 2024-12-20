@@ -6,6 +6,13 @@ resources:
   # Pre Flux-Kustomizations
   - namespace.yaml
   # Flux-Kustomizations
+  - autobrr/ks.yaml
+  - bazarr/ks.yaml
+#  - cross-seed/ks.yaml
+#  - flaresolverr/ks.yaml
+#  - omegabrr/ks.yaml
+#  - prowlarr/ks.yaml
+#  - qbittorrent/ks.yaml
   - radarr/ks.yaml
   - sonarr/ks.yaml
   - unpackerr/ks.yaml
