@@ -1,0 +1,110 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: calibre-web-automated
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  interval: 30m
+  values:
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+
+    controllers:
+      calibre-web:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: crocodilestick/calibre-web-automated
+              tag: dev # V2.1.2
+            env:
+              CACHE_DIR: /cache
+              TZ: America/New_York
+              PUID: "${APP_UID}"
+              PGID: "${APP_GID}"
+              DOCKER_MODS: >-
+                {{- $items := list
+                  "// renovate: lsio-docker-mod"
+                  "ghcr.io/linuxserver/mods:universal-calibre-v7.16.0"
+                -}}
+                {{- $filtered := list -}}
+                {{- range $item := $items -}}
+                  {{- if not (hasPrefix "//" $item) -}}
+                    {{- $filtered = append $filtered $item -}}
+                  {{- end -}}
+                {{- end -}}
+                {{- $filtered | join "|" -}}
+
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  initialDelaySeconds: 60
+                  failureThreshold: 45
+                  periodSeconds: 5
+
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 768Mi
+
+    service:
+      app:
+        controller: calibre-web
+        ports:
+          http:
+            port: 8083
+
+    ingress:
+      app:
+        className: internal
+        hosts:
+          - host: calibre.zebernst.dev
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+
+    persistence:
+      config:
+        existingClaim: calibre-web
+        advancedMounts:
+          calibre-web:
+            app:
+              - path: /config
+      media:
+        type: nfs
+        server: nas.lab.home.arpa
+        path: /volume1/media
+        globalMounts:
+          - path: /calibre-library
+            subPath: books
+          - path: /cwa-book-ingest
+            subPath: downloads/qbittorrent/seeding/readarr
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /cache
