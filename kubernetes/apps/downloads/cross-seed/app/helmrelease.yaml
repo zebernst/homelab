@@ -121,9 +121,14 @@ spec:
             port: *port
 
     persistence:
-      config:
-        type: emptyDir
-      config-daemon:
+      state:
+        type: persistentVolumeClaim
+        size: 5Gi
+        storageClass: iscsi
+        accessMode: ReadWriteMany
+        globalMounts:
+          - path: /config
+      config-daemon: &config
         type: configMap
         name: cross-seed-configmap
         advancedMounts:
@@ -136,14 +141,7 @@ spec:
           - key: config-daemon.js
             path: config.js
       config-search:
-        type: configMap
-        name: cross-seed-configmap
-        advancedMounts:
-          search:
-            app:
-              - path: /config/config.js
-                subPath: config.js
-                readOnly: true
+        <<: *config
         items:
           - key: config-search.js
             path: config.js
