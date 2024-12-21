@@ -132,7 +132,7 @@ spec:
         type: configMap
         name: cross-seed-configmap
         advancedMounts:
-          daemon:
+          daemon: &mount
             app:
               - path: /config/config.js
                 subPath: config.js
@@ -142,6 +142,8 @@ spec:
             path: config.js
       config-search:
         <<: *config
+        advancedMounts:
+          search: *mount
         items:
           - key: config-search.js
             path: config.js
