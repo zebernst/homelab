@@ -3,17 +3,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app stash
+  name: &app overseerr
   namespace: flux-system
 spec:
-  targetNamespace: default
+  targetNamespace: media
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: cloudnative-pg-cluster
-    - name: external-secrets-stores
-  path: ./kubernetes/apps/default/stash/app
+  path: ./kubernetes/apps/media/overseerr/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -25,4 +22,6 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      GATUS_SUBDOMAIN: requests
+      GATUS_PATH: /api/v1/status
       VOLSYNC_CAPACITY: 10Gi

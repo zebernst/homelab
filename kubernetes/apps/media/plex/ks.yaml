@@ -6,13 +6,13 @@ metadata:
   name: &app plex
   namespace: flux-system
 spec:
-  targetNamespace: default
+  targetNamespace: media
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
-  path: ./kubernetes/apps/default/plex/app
+  path: ./kubernetes/apps/media/plex/app
   prune: true
   sourceRef:
     kind: GitRepository
