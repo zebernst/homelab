@@ -38,9 +38,9 @@ spec:
               UN_WEBSERVER_LOG_FILE: /logs/webserver.log
               UN_ACTIVITY: true
               UN_SONARR_0_URL: http://sonarr.downloads.svc.cluster.local
-              UN_SONARR_0_PATHS_0: /media/downloads/qbittorrent/tv
+              UN_SONARR_0_PATHS_0: /media/downloads/qbittorrent/seeding/tv
               UN_RADARR_0_URL: http://radarr.downloads.svc.cluster.local
-              UN_RADARR_0_PATHS_0: /media/downloads/qbittorrent/movies
+              UN_RADARR_0_PATHS_0: /media/downloads/qbittorrent/seeding/movies
             envFrom:
               - secretRef:
                   name: unpackerr-secret
