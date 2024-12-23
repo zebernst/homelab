@@ -29,7 +29,8 @@ spec:
     controllers:
       qbittorrent:
         annotations:
-          reloader.stakater.com/auto: "true"
+          configmap.reloader.stakater.com/reload: qbittorrent-scripts
+          secret.reloader.stakater.com/reload: qbittorrent-secret,gluetun-secret
         containers:
           app:
             image:
@@ -38,7 +39,7 @@ spec:
             env:
               TZ: America/New_York
               QBT_WEBUI_PORT: &port 80
-              QBT_TORRENTING_PORT: &bittorrentPort 50413
+              QBT_TORRENTING_PORT: &bittorrentPort 61267
               CROSS_SEED_ENABLED: true
               CROSS_SEED_HOST: cross-seed.downloads.svc.cluster.local
               CROSS_SEED_PORT: 80
@@ -90,6 +91,8 @@ spec:
               VPN_INTERFACE: wg0
               DNS_KEEP_NAMESERVER: on
               FIREWALL_INPUT_PORTS: *port
+              FIREWALL_VPN_INPUT_PORTS: *bittorrentPort
+              FIREWALL_OUTBOUND_SUBNETS: 10.69.0.0/16,10.96.0.0/16  # k8s subnet access
             envFrom:
               - secretRef:
                   name: gluetun-secret
@@ -111,7 +114,7 @@ spec:
                     command:
                       - /gluetun-entrypoint
                       - healthcheck
-                  initialDelaySeconds: 10
+                  initialDelaySeconds: 20
                   periodSeconds: 5
                   timeoutSeconds: 5
                   failureThreshold: 3
@@ -130,26 +133,26 @@ spec:
           http:
             port: *port
             primary: true
-      bittorrent:
-        controller: *app
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 10.2.100.21
-        externalTrafficPolicy: Local
-        ports:
-          bittorrent-tcp:
-            port: *bittorrentPort
-            protocol: TCP
-          bittorrent-udp:
-            port: *bittorrentPort
-            protocol: UDP
-      gluetun:
-        controller: *app
-        ports:
-          http:
-            port: 80
-            targetPort: 8000
-            protocol: HTTP
+#      bittorrent:
+#        controller: *app
+#        type: LoadBalancer
+#        annotations:
+#          lbipam.cilium.io/ips: 10.2.100.21
+#        externalTrafficPolicy: Local
+#        ports:
+#          bittorrent-tcp:
+#            port: *bittorrentPort
+#            protocol: TCP
+#          bittorrent-udp:
+#            port: *bittorrentPort
+#            protocol: UDP
+#      gluetun:
+#        controller: *app
+#        ports:
+#          http:
+#            port: 80
+#            targetPort: 8000
+#            protocol: HTTP
     ingress:
       app:
         annotations:
@@ -171,16 +174,30 @@ spec:
     persistence:
       config:
         existingClaim: qbittorrent
+        advancedMounts:
+          qbittorrent:
+            app:
+              - path: /config
+      config-empty:
+        type: emptyDir
+        advancedMounts:
+          qbittorrent:
+            port-forward:
+              - path: /config
       scripts:
         type: configMap
         name: qbittorrent-scripts
         defaultMode: 0775
-        globalMounts:
-          - readOnly: true
-      media:
+        advancedMounts:
+          qbittorrent:
+            app:
+              - path: /scripts
+      downloads:
         type: nfs
         server: nas.lab.home.arpa
         path: /volume1/media
-        globalMounts:
-          - path: /media/downloads/
-            subPath: downloads/
+        advancedMounts:
+          qbittorrent:
+            app:
+              - path: /media/downloads/qbittorrent
+                subPath: downloads/qbittorrent
