@@ -11,6 +11,7 @@ resources:
   - cross-seed/ks.yaml
   - flaresolverr/ks.yaml
   - omegabrr/ks.yaml
+  - openbooks/ks.yaml
   - prowlarr/ks.yaml
   - qbittorrent/ks.yaml
   - radarr/ks.yaml

@@ -32,7 +32,7 @@ spec:
           app:
             image:
               repository: crocodilestick/calibre-web-automated
-              tag: dev # V2.1.2
+              tag: dev
             env:
               CACHE_DIR: /cache
               TZ: America/New_York
@@ -81,11 +81,10 @@ spec:
       app:
         className: internal
         annotations:
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            client_max_body_size 512m;
-            proxy_buffer_size 128k;
-            proxy_buffers 4 256k;
-            proxy_busy_buffers_size 256k;
+          nginx.ingress.kubernetes.io/proxy-body-size: "0"
+          nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+          nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+          nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
         hosts:
           - host: calibre.zebernst.dev
             paths:
@@ -109,7 +108,7 @@ spec:
           - path: /calibre-library
             subPath: books
           - path: /cwa-book-ingest
-            subPath: downloads/qbittorrent/seeding/readarr
+            subPath: downloads/openbooks
       cache:
         type: emptyDir
         globalMounts:
