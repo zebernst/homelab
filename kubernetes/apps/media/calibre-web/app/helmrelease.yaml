@@ -73,6 +73,16 @@ spec:
     service:
       app:
         controller: calibre-web
+        primary: true
+        ports:
+          http:
+            port: 8083
+      tailscale:
+        controller: calibre-web
+        type: LoadBalancer
+        loadBalancerClass: tailscale
+        annotations:
+          tailscale.com/hostname: calibre-web
         ports:
           http:
             port: 8083
