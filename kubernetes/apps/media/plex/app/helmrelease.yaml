@@ -104,9 +104,30 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.zebernst.dev
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+#          nginx.ingress.kubernetes.io/enable-cors: "true"
+#          nginx.ingress.kubernetes.io/cors-allow-origin: "https://plex.zebernst.dev, https://app.plex.tv"
           nginx.ingress.kubernetes.io/configuration-snippet: |
-            if ($http_x_plex_device_name = '') {
-                rewrite ^/$ /web/index.html;
+            # Need this in the config snippet until this issue is resolved: https://github.com/kubernetes/ingress-nginx/pull/12424
+            if ($http_origin ~* "^https://((?:.*.plex.tv)|(?:plex.zebernst.dev))$") { set $allow_origin $http_origin; }
+            more_set_headers 'Access-Control-Allow-Origin: $allow_origin';
+            more_set_headers 'Access-Control-Allow-Credentials: true';
+            more_set_headers 'Access-Control-Allow-Methods: GET, PUT, POST, DELETE, PATCH, OPTIONS';
+            more_set_headers 'Access-Control-Allow-Headers: Authorization,Content-Type';
+            if ($request_method = 'OPTIONS') {
+                more_set_headers 'Access-Control-Max-Age: 1728000';
+                more_set_headers 'Content-Type: text/plain charset=UTF-8';
+                more_set_headers 'Content-Length: 0';
+                return 204;
+            }
+
+            # If a request to / comes in, 301 redirect to the main plex page,
+            # but only if it doesn't contain the X-Plex-Device-Name header or query argument.
+            # This fixes a bug where you get permission issues when accessing the web dashboard.
+            set $root_redir "";
+            if ($http_x_plex_device_name = '') { set $root_redir Y; }
+            if ($arg_X-Plex-Device-Name = '')  { set $root_redir "${root_redir}Y"; }
+            if ($test = YY) {
+              rewrite ^/$ https://$best_http_host/web/index.html;
             }
 
             gzip on;
@@ -159,7 +180,7 @@ spec:
 
             proxy_set_header Accept-Encoding "";
 
-            add_header Referrer-Policy "same-origin" always;
+            add_header Referrer-Policy "origin-when-cross-origin" always;
             add_header X-Content-Type-Options "nosniff" always;
             add_header X-Frame-Options sameorigin;
             add_header X-XSS-Protection "1; mode=block" always;
