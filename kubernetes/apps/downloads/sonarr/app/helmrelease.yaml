@@ -84,6 +84,7 @@ spec:
     service:
       app:
         controller: sonarr
+        nameOverride: sonarr
         ports:
           http:
             port: *port
