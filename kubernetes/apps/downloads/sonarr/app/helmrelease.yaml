@@ -87,6 +87,16 @@ spec:
         ports:
           http:
             port: *port
+      tailscale:
+        controller: sonarr
+        type: LoadBalancer
+        loadBalancerClass: tailscale
+        annotations:
+          tailscale.com/hostname: sonarr
+        ports:
+          http:
+            port: 80
+            targetPort: *port
     ingress:
       app:
         annotations:
