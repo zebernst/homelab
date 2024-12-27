@@ -21,11 +21,6 @@ spec:
       enableServiceLinks: false
       securityContext:
         fsGroupChangePolicy: OnRootMismatch
-        capabilities:
-            drop:
-            - "ALL"
-            add:
-            - "NET_BIND_SERVICE"
         seccompProfile:
           type: RuntimeDefault
 
@@ -40,7 +35,7 @@ spec:
               tag: dev
             env:
               CACHE_DIR: /cache
-              CALIBRE_PORT: &port 80
+              CALIBRE_PORT: &port 8083
               TZ: America/New_York
               PUID: "${APP_UID}"
               PGID: "${APP_GID}"
@@ -82,7 +77,8 @@ spec:
         primary: true
         ports:
           http:
-            port: *port
+            port: 80
+            targetPort: *port
       tailscale:
         controller: calibre-web
         type: LoadBalancer
@@ -91,7 +87,8 @@ spec:
           tailscale.com/hostname: calibre-web
         ports:
           http:
-            port: *port
+            port: 80
+            targetPort: *port
 
     ingress:
       app:
