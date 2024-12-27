@@ -41,7 +41,7 @@ spec:
               tag: 1.41.3.9314-a0bfb8370@sha256:38fcbef239341db591f8ff87f20777d9a783b79f757fc42e360041d7ba78eada
             env:
               TZ: America/New_York
-              PLEX_ADVERTISE_URL: https://plex.zebernst.dev:443,http://10.2.100.10:32400
+              PLEX_ADVERTISE_URL: https://plex.zebernst.dev:443,http://10.2.100.10:32400,http://plex.kite-harmonic.ts.net:32400
               PLEX_NO_AUTH_NETWORKS: 10.0.0.0/8
             probes:
               liveness: &probes
@@ -87,6 +87,15 @@ spec:
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: 10.2.100.10
+        ports:
+          http:
+            port: 32400
+      tailscale:
+        controller: plex
+        type: LoadBalancer
+        loadBalancerClass: tailscale
+        annotations:
+          tailscale.com/hostname: plex
         ports:
           http:
             port: 32400
