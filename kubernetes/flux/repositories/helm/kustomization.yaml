@@ -29,3 +29,4 @@ resources:
   - ./spegel.yaml
   - ./stakater.yaml
   - ./synology-csi-talos.yaml
+  - ./tailscale.yaml
