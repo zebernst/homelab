@@ -90,6 +90,15 @@ spec:
         ports:
           http:
             port: *port
+      tailscale:
+        controller: radarr
+        type: LoadBalancer
+        loadBalancerClass: tailscale
+        annotations:
+          tailscale.com/hostname: radarr
+        ports:
+          http:
+            port: *port
     ingress:
       app:
         annotations:
