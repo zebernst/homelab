@@ -44,6 +44,7 @@ module.exports = {
       56, // GTRU
       57, // OE
       58, // OT
+      59, // LST
   ].map(i => `http://prowlarr.downloads.svc.cluster.local/$${i}/api?apikey=$${process.env.PROWLARR_API_KEY}`),
 
   qbittorrentUrl: "http://qbittorrent.downloads.svc.cluster.local",
