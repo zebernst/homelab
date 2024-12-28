@@ -106,8 +106,14 @@ spec:
           external-dns.alpha.kubernetes.io/target: external.zebernst.dev
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
           nginx.ingress.kubernetes.io/configuration-snippet: |
-            if ($http_x_plex_device_name = '') {
-                rewrite ^/$ /web/index.html;
+            # App root redirect: If a request to / comes in -> 302 redirect to the plex landing page
+            # (but only if it doesn't contain the X-Plex-Device-Name header or query argument)
+            # This retains API endpoint access for official Plex clients and authenticated sessions.
+            set $r "";
+            if ($http_x_plex_device_name = '') { set $r "Y"; }         # for web and tv clients (header)
+            if ($arg_X-Plex-Device-Name = '')  { set $r "$${r}Y"; }    # for iOS clients (query argument)
+            if ($r = YY) {
+              rewrite ^/$ https://$http_host/web/index.html;
             }
 
             gzip on;
@@ -151,7 +157,7 @@ spec:
                 image/x-icon
                 image/bmp;
 
-            send_timeout 3600; #Some players don't reopen a socket and playback stops totally instead of resuming after an extended pause (e.g. Chrome)
+            send_timeout 3600; # some players don't reopen a socket and playback stops totally instead of resuming after an extended pause (e.g. Chrome)
 
             proxy_set_header Sec-Websocket-Extensions $http_sec_websocket_extensions;
             proxy_set_header Sec-Websocket-Key $http_sec_websocket_key;
@@ -188,13 +194,6 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /config/Library/Application Support/Plex Media Server/Logs
-
-      tmp:
-        type: emptyDir
-      transcode:
-        type: emptyDir
-        medium: Memory
-
       media:
         type: nfs
         server: nas.lab.home.arpa
@@ -213,3 +212,8 @@ spec:
         existingClaim: plex-optimized-media
         globalMounts:
           - path: /media/plex/optimized
+      tmp:
+        type: emptyDir
+      transcode:
+        type: emptyDir
+        medium: Memory
