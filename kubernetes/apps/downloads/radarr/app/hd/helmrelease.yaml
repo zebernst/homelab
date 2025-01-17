@@ -87,26 +87,26 @@ spec:
     service:
       app:
         controller: radarr
-        nameOverride: radarr
-        ports:
-          http:
-            port: *port
-      tailscale:
-        controller: radarr
-        type: LoadBalancer
-        loadBalancerClass: tailscale
-        annotations:
-          tailscale.com/hostname: radarr
+        nameOverride: "{{ .Release.Name }}"
         ports:
           http:
             port: *port
     ingress:
-      app:
+      lan:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.zebernst.dev
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.zebernst.dev"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "{{ .Release.Name }}"
             paths:
               - path: /
                 service:
@@ -135,4 +135,7 @@ spec:
         server: nas.lab.home.arpa
         path: /volume1/media
         globalMounts:
-          - path: /media
+          - path: /media/movies
+            subPath: movies
+          - path: /media/downloads/qbittorrent/seeding
+            subPath: downloads/qbittorrent/seeding
