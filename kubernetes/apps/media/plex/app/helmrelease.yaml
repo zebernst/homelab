@@ -202,8 +202,14 @@ spec:
           - path: /media/tv
             subPath: tv
             readOnly: true
+          - path: /media/tv-uhd
+            subPath: tv-uhd
+            readOnly: true
           - path: /media/movies
             subPath: movies
+            readOnly: true
+          - path: /media/movies-uhd
+            subPath: movies-uhd
             readOnly: true
           - path: /media/plex/posters
             subPath: posters
