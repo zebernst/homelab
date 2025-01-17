@@ -1,0 +1,141 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: sonarr
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.6.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      sonarr:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 16
+            envFrom: &envFrom
+              - secretRef:
+                  name: sonarr-secret
+        containers:
+          app:
+            image:
+              repository: ghcr.io/onedr0p/sonarr-develop
+              tag: 4.0.11.2804@sha256:cb7d3b0cd6f465868df6b88bfa78d52899b9955ced2bf03720eccc3fba402635
+            env:
+              SONARR__APP__INSTANCENAME: Sonarr
+              SONARR__APP__THEME: dark
+              SONARR__AUTH__METHOD: External
+              SONARR__AUTH__REQUIRED: DisabledForLocalAddresses
+              SONARR__LOG__DBENABLED: "False"
+              SONARR__LOG__LEVEL: info
+              SONARR__SERVER__PORT: &port 80
+              SONARR__UPDATE__BRANCH: develop
+              TZ: America/New_York
+            envFrom: *envFrom
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /ping
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+              limits:
+                memory: 4Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: ${APP_UID:-1024}
+        runAsGroup: ${APP_GID:-100}
+        fsGroup: ${APP_GID:-100}
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: sonarr
+        nameOverride: "{{ .Release.Name }}"
+        ports:
+          http:
+            port: *port
+    ingress:
+      lan:
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.zebernst.dev
+        className: internal
+        hosts:
+          - host: "{{ .Release.Name }}.zebernst.dev"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "{{ .Release.Name }}"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+    persistence:
+      config:
+        type: emptyDir
+      cache:
+        existingClaim: sonarr-cache
+        globalMounts:
+          - path: /config/MediaCover
+            subPath: MediaCover
+      scripts:
+        type: configMap
+        name: sonarr-configmap
+        defaultMode: 0775
+        globalMounts:
+          - path: /scripts/pushover-notify.sh
+            subPath: pushover-notify.sh
+            readOnly: true
+          - path: /scripts/refresh-series.sh
+            subPath: refresh-series.sh
+            readOnly: true
+      tmp:
+        type: emptyDir
+      media:
+        type: nfs
+        server: nas.lab.home.arpa
+        path: /volume1/media
+        globalMounts:
+          - path: /media/tv
+            subPath: tv
+          - path: /media/downloads/qbittorrent/seeding
+            subPath: downloads/qbittorrent/seeding

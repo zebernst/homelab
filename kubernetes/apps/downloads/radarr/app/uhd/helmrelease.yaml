@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: radarr
+  name: radarr-uhd
 spec:
   interval: 30m
   chart:
@@ -44,7 +44,7 @@ spec:
               repository: ghcr.io/onedr0p/radarr-develop
               tag: 5.17.0.9555@sha256:d29684557a373f6efd8ac98f0b7b3007264599d3d83160bdaef9366a3b4f5d5a
             env:
-              RADARR__APP__INSTANCENAME: Radarr
+              RADARR__APP__INSTANCENAME: Radarr (UHD)
               RADARR__APP__THEME: dark
               RADARR__AUTH__METHOD: External
               RADARR__AUTH__REQUIRED: DisabledForLocalAddresses
@@ -87,26 +87,26 @@ spec:
     service:
       app:
         controller: radarr
-        nameOverride: radarr
-        ports:
-          http:
-            port: *port
-      tailscale:
-        controller: radarr
-        type: LoadBalancer
-        loadBalancerClass: tailscale
-        annotations:
-          tailscale.com/hostname: radarr
+        nameOverride: "{{ .Release.Name }}"
         ports:
           http:
             port: *port
     ingress:
-      app:
+      lan:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.zebernst.dev
         className: internal
         hosts:
           - host: "{{ .Release.Name }}.zebernst.dev"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: "{{ .Release.Name }}"
             paths:
               - path: /
                 service:
