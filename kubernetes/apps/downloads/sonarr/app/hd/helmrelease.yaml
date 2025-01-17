@@ -100,15 +100,18 @@ spec:
                 service:
                   identifier: app
                   port: http
-      tailscale:
+      ts:
         className: tailscale
         hosts:
-          - host: "{{ .Release.Name }}"
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
                   identifier: app
                   port: http
+        tls:
+          - hosts:
+            - *tsHost
     persistence:
       config:
         type: emptyDir

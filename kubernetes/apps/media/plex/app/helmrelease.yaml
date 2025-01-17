@@ -91,7 +91,7 @@ spec:
         ports:
           http:
             port: 32400
-      tailscale:
+      ts:
         controller: plex
         type: LoadBalancer
         loadBalancerClass: tailscale
@@ -101,7 +101,7 @@ spec:
           http:
             port: 32400
     ingress:
-      app:
+      external:
         annotations:
           external-dns.alpha.kubernetes.io/target: external.zebernst.dev
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
