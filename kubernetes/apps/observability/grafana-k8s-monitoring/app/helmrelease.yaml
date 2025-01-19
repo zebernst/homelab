@@ -69,6 +69,13 @@ spec:
 
     clusterMetrics:
       enabled: true
+      controlPlane:
+        enabled: true
+      kube-state-metrics:
+        metricLabelsAllowlist:
+          - pods=[*]
+          - deployments=[*]
+          - persistentvolumeclaims=[*]
     clusterEvents:
       enabled: true
     nodeLogs:
@@ -82,7 +89,7 @@ spec:
     prometheusOperatorObjects:
       enabled: true
       crds:
-        deploy: true
+        deploy: false
 
     alloy-metrics:
       enabled: true

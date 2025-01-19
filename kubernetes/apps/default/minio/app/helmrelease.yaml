@@ -35,9 +35,9 @@ spec:
             env:
               MINIO_API_CORS_ALLOW_ORIGIN: https://minio.zebernst.dev,https://s3.zebernst.dev
               MINIO_BROWSER_REDIRECT_URL: https://minio.zebernst.dev
-#              MINIO_PROMETHEUS_JOB_ID: minio
-#              MINIO_PROMETHEUS_URL: https://prometheus.zebernst.dev
-#              MINIO_PROMETHEUS_AUTH_TYPE: public
+              MINIO_PROMETHEUS_JOB_ID: minio
+              MINIO_PROMETHEUS_URL: http://prometheus-operated.observability.svc.cluster.local:9090
+              MINIO_PROMETHEUS_AUTH_TYPE: public
               MINIO_SERVER_URL: https://s3.zebernst.dev
 #              MINIO_STORAGE_CLASS_RRS: EC:0
 #              MINIO_STORAGE_CLASS_STANDARD: EC:0
@@ -86,13 +86,21 @@ spec:
           s3:
             port: 9000
     serviceMonitor:
-      app:
+      node:
+        serviceName: minio
+        endpoints:
+          - port: s3
+            scheme: http
+            path: /minio/v2/metrics/node
+            interval: 30s
+            scrapeTimeout: 10s
+      cluster:
         serviceName: minio
         endpoints:
           - port: s3
             scheme: http
             path: /minio/v2/metrics/cluster
-            interval: 1m
+            interval: 30s
             scrapeTimeout: 10s
     ingress:
       app:
