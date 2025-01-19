@@ -3,16 +3,16 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: cloudnative-pg
+  name: promtail
 spec:
   interval: 30m
   chart:
     spec:
-      chart: cloudnative-pg
-      version: 0.23.0
+      chart: promtail
+      version: 6.16.6
       sourceRef:
         kind: HelmRepository
-        name: cloudnative-pg
+        name: grafana
         namespace: flux-system
   install:
     remediation:
@@ -20,13 +20,11 @@ spec:
   upgrade:
     cleanupOnFail: true
     remediation:
-      strategy: rollback
       retries: 3
-  dependsOn:
-    - name: openebs
-      namespace: openebs-system
   values:
-    crds:
-      create: true
-    monitoring:
-      podMonitorEnabled: true
+    fullnameOverride: promtail
+    config:
+      clients:
+        - url: http://loki-headless.observability.svc.cluster.local:3100/loki/api/v1/push
+    serviceMonitor:
+      enabled: true

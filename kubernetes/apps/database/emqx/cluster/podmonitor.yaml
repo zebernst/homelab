@@ -22,6 +22,10 @@ spec:
           targetLabel: from
         - action: replace
           # fix value, don't modify
+          replacement: emqx
+          targetLabel: job
+        - action: replace
+          # fix value, don't modify
           sourceLabels:
             - pod
           targetLabel: instance
