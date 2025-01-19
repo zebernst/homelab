@@ -12,6 +12,7 @@ spec:
   path: ./kubernetes/apps/observability/grafana-k8s-monitoring/app
   prune: false # never should be deleted
   dependsOn:
+    - name: kube-prometheus-stack-crds
     - name: external-secrets-stores
   sourceRef:
     kind: GitRepository
