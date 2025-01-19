@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: k8s-monitoring
-      version: 1.6.16
+      version: 2.0.4
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -23,52 +23,72 @@ spec:
   values:
     cluster:
       name: ${CLUSTER_NAME}
-    externalServices:
-      prometheus:
+
+    destinations:
+      - name: cloudMetrics
+        type: prometheus
+        url: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom/push
+        auth:
+          type: basic
         secret:
           create: false
           name: prometheus-secret
-      loki:
+        metricProcessingRules: |-
+          write_relabel_config {
+            source_labels = ["namespace","pod"]
+            separator = "@"
+            regex = "flux-system@(.+)-.+-.+"
+            target_label = "uid"
+            replacement = ""
+          }
+          write_relabel_config {
+            source_labels = ["namespace","pod"]
+            separator = "@"
+            regex = "flux-system@(.+)-.+-.+"
+            target_label = "pod"
+            replacement = "$1"
+          }
+
+      - name: cloudLogs
+        type: loki
+        url: https://logs-prod-006.grafana.net/loki/api/v1/push
+        auth:
+          type: basic
         secret:
           create: false
           name: loki-secret
-      tempo:
+
+      - name: cloudTraces
+        type: otlp
+        url: https://tempo-prod-04-prod-us-east-0.grafana.net/tempo/v1/traces
+        auth:
+          type: basic
         secret:
           create: false
           name: tempo-secret
-    metrics:
+
+    clusterMetrics:
       enabled: true
-      cost:
-        enabled: false
-      node-exporter:
-        enabled: true
-      kepler:
-        enabled: false
-    logs:
+    clusterEvents:
       enabled: true
-      pod_logs:
-        enabled: true
-      cluster_events:
-        enabled: true
-    traces:
+    nodeLogs:
+      enabled: false # talos doesn't allow this
+    podLogs:
       enabled: true
-    receivers:
-      grpc:
-        enabled: true
-      http:
-        enabled: true
-      zipkin:
-        enabled: true
-      grafanaCloudMetrics:
-        enabled: true
-    opencost:
+      gatherMethod: kubernetesApi
+    selfReporting:
       enabled: false
-    kube-state-metrics:
+
+    prometheusOperatorObjects:
       enabled: true
-    prometheus-node-exporter:
+      crds:
+        deploy: true
+
+    alloy-metrics:
       enabled: true
-    prometheus-operator-crds:
+    alloy-logs:
       enabled: true
-    alloy: {}
-    alloy-events: {}
-    alloy-logs: {}
+      controller:
+        type: deployment # DaemonSet not necessary without nodeLogs
+    alloy-singleton:
+      enabled: true
