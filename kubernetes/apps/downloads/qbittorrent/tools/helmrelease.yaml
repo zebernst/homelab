@@ -51,9 +51,8 @@ spec:
             args:
               - tagging
               - --added-on
-#              - --expired
+              - --expired
               - --last-activity
-              - --not-working
               - --sites
               - --unregistered
             securityContext:
@@ -66,15 +65,15 @@ spec:
               limits:
                 memory: 256M
         containers:
-#          prune-expired:
-#            <<: *container
-#            args:
-#              - prune
-#              - --exclude-category=cross-seed
-#              - --exclude-category=manual
-#              - --exclude-tag=activity:1d
-#              - --include-tag=expired
-#              - --with-data
+          prune-expired:
+            <<: *container
+            args:
+              - prune
+              - --exclude-category=cross-seed
+              - --exclude-category=manual
+              - --exclude-tag=activity:1d
+              - --include-tag=expired
+              - --with-data
           prune-unregistered:
             <<: *container
             args:
