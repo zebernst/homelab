@@ -4,3 +4,13 @@ kind: Kustomization
 resources:
   - helmrelease.yaml
   - prometheusrule.yaml
+configMapGenerator:
+  - name: snmp-exporter
+    files:
+      - snmp.yaml=resources/snmp.yml
+generatorOptions:
+  disableNameSuffixHash: true
+labels:
+  - pairs:
+      app.kubernetes.io/name: snmp-exporter
+      app.kubernetes.io/instance: snmp-exporter

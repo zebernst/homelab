@@ -23,6 +23,17 @@ spec:
       retries: 3
   values:
     fullnameOverride: *app
+    extraArgs:
+      - "--config.file=/config/snmp.yaml"
+    extraConfigmapMounts:
+      - name: *app
+        mountPath: /config/snmp.yaml
+        subPath: snmp.yaml
+        configMap: *app
+        readOnly: true
+        defaultMode: 420
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: *app
     serviceMonitor:
       enabled: true
       params:

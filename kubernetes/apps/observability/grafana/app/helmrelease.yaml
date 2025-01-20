@@ -274,6 +274,7 @@ spec:
           revision: 10
           datasource:
             - { name: DS_PROMETHEUS, value: Prometheus }
+            - { name: VAR_NASDEVICES, value: 1 }
         node-exporter-full:
           # renovate: depName="Node Exporter Full"
           gnetId: 1860
