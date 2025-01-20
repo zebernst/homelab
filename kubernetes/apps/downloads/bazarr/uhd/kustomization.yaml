@@ -8,9 +8,9 @@ resources:
   - ../../../../templates/gatus/guarded
   - ../../../../templates/volsync
 configMapGenerator:
-  - name: bazarr-scripts
+  - name: bazarr-uhd-scripts
     files:
-      - subcleaner.sh=resources/subcleaner.sh
+      - subcleaner.sh=../resources/subcleaner.sh
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

@@ -13,7 +13,6 @@ spec:
   dependsOn:
     - name: cloudnative-pg-cluster
     - name: external-secrets-stores
-    - name: grafana-operator
   path: ./kubernetes/apps/downloads/autobrr/app
   prune: true
   sourceRef:

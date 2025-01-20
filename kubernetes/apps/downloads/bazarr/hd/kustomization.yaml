@@ -6,12 +6,12 @@ resources:
   - externalsecret.yaml
   - helmrelease.yaml
   - ../../../../templates/gatus/guarded
+  - ../../../../templates/volsync
 configMapGenerator:
-  - name: autobrr-loki-rules
+  - name: bazarr-scripts
     files:
-      - autobrr.yaml=resources/lokirule.yaml
-    options:
-      labels:
-        loki_rule: "true"
+      - subcleaner.sh=../resources/subcleaner.sh
 generatorOptions:
   disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled

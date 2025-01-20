@@ -17,7 +17,9 @@ module.exports = {
   dataDirs: [
     "/media/books",
     "/media/movies",
+    "/media/movies-uhd",
     "/media/tv",
+    "/media/tv-uhd",
     "/media/xxx"
   ],
   maxDataDepth: 3,
@@ -29,8 +31,14 @@ module.exports = {
   linkDir: "/media/downloads/qbittorrent/seeding/cross-seed",
   linkType: "hardlink",
 
-  radarr: [`http://radarr.downloads.svc.cluster.local/?apikey=$${process.env.RADARR_API_KEY}`],
-  sonarr: [`http://sonarr.downloads.svc.cluster.local/?apikey=$${process.env.SONARR_API_KEY}`],
+  radarr: [
+    `http://radarr.downloads.svc.cluster.local/?apikey=$${process.env.RADARR_API_KEY}`,
+    `http://radarr-uhd.downloads.svc.cluster.local/?apikey=$${process.env.RADARR_API_KEY}`,
+  ],
+  sonarr: [
+    `http://sonarr.downloads.svc.cluster.local/?apikey=$${process.env.SONARR_API_KEY}`,
+    `http://sonarr-uhd.downloads.svc.cluster.local/?apikey=$${process.env.SONARR_API_KEY}`,
+  ],
   torznab: [
       2,  // PTP
       12, // TL

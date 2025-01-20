@@ -39,8 +39,12 @@ spec:
               UN_ACTIVITY: true
               UN_SONARR_0_URL: http://sonarr.downloads.svc.cluster.local
               UN_SONARR_0_PATHS_0: /media/downloads/qbittorrent/seeding/tv
+              UN_SONARR_1_URL: http://sonarr-uhd.downloads.svc.cluster.local
+              UN_SONARR_1_PATHS_0: /media/downloads/qbittorrent/seeding/tv-uhd
               UN_RADARR_0_URL: http://radarr.downloads.svc.cluster.local
               UN_RADARR_0_PATHS_0: /media/downloads/qbittorrent/seeding/movies
+              UN_RADARR_1_URL: http://radarr-uhd.downloads.svc.cluster.local
+              UN_RADARR_1_PATHS_0: /media/downloads/qbittorrent/seeding/movies-uhd
             envFrom:
               - secretRef:
                   name: unpackerr-secret
