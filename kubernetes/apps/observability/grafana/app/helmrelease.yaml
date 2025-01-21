@@ -196,6 +196,10 @@ spec:
           gnetId: 11312
           revision: 9
           datasource: Prometheus
+        unifi-pdu:
+          url: https://raw.githubusercontent.com/kashalls/home-cluster/refs/heads/main/kubernetes/main/apps/observability/grafana/app/dashboards/UniFi-Poller_PDU%20Insights%20-%20Prometheus.json
+          datasource:
+            - { name: DS_PROMETHEUS, value: Prometheus }
       k8s:
         kubernetes-api-server:
           # renovate: depName="Kubernetes / System / API Server"
