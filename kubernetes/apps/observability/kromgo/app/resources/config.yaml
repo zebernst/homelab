@@ -40,13 +40,13 @@ metrics:
     query: round(sum(node_memory_MemTotal_bytes{kubernetes_node!=""} - node_memory_MemAvailable_bytes{kubernetes_node!=""}) / sum(node_memory_MemTotal_bytes{kubernetes_node!=""}) * 100, 0.1)
     suffix: "%"
     colors:
-      - { color: green, min: 0, max: 35 }
-      - { color: orange, min: 36, max: 75 }
-      - { color: red, min: 76, max: 9999 }
+      - { color: "green", min: 0, max: 35 }
+      - { color: "orange", min: 36, max: 75 }
+      - { color: "red", min: 76, max: 9999 }
     title: Memory
 
   - name: cluster_power_usage
-    query: round(upsHighPrecOutputLoad, 0.1)
+    query: round(unpoller_device_outlet_ac_power_consumption{name="PDU Pro"}, 0.1)
     suffix: "w"
     colors:
       - { color: "green", min: 0, max: 400 }
