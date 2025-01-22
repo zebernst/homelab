@@ -108,7 +108,7 @@ graph TD;
 <details>
   <summary>Click to see a high-level network diagram</summary>
 
-  > Coming soon...
+  <img src="docs/assets/network-diagram.excalidraw.svg" align="center" width="600px" alt="network"/>
 </details>
 
 ---
@@ -144,7 +144,7 @@ Alternative solutions to the first two of these problems would be to host a Kube
 
 <details>
   <summary>Click to see my rack</summary>
-  
+
   ![9D083950-181C-4A32-A221-75832EAC5B2D](https://github.com/user-attachments/assets/c2921799-8319-4dd2-ab96-67a9b6885a3d)
 </details>
 
