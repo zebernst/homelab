@@ -159,9 +159,9 @@ Total RAM: 64GB
 
 ### Supporting Hardware
 
-| Device                | CPU                 | OS Disk  | Data Disk               | RAM | OS    | Purpose         |
-|-----------------------|---------------------|----------|-------------------------|-----|-------|-----------------|
-| Synology DS918+       | Intel Celeron J3455 | -        | 2x14TB HDD + 2x18TB HDD | 4GB | DSM 7 | NAS/NFS/Backup  |
+| Device          | CPU                 | OS Disk | Data Disk               | RAM  | OS    | Purpose        |
+|-----------------|---------------------|---------|-------------------------|------|-------|----------------|
+| Synology DS918+ | Intel Celeron J3455 | -       | 2x14TB HDD + 2x18TB HDD | 16GB | DSM 7 | NAS/NFS/Backup |
 
 ### Home Automation
 
