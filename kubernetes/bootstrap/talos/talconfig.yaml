@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
 ---
 # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-talosVersion: v1.8.4
+talosVersion: v1.9.2
 # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
 kubernetesVersion: v1.31.4
 
@@ -61,13 +61,15 @@ patches:
 
 # Control plane configuration
 controlPlane:
-  schematic:
+  schematic: &schematic
     customization:
       systemExtensions:
         officialExtensions:
-          - siderolabs/intel-ucode
+          - siderolabs/i915
+          - siderolabs/iscsi-tools
           - siderolabs/nut-client
-          # - siderolabs/stargz-snapshotter -- temporarily disabled, see https://github.com/siderolabs/extensions/issues/245
+          - siderolabs/stargz-snapshotter
+          - siderolabs/util-linux-tools
 
   networkInterfaces:
     - interface: eno1
@@ -96,15 +98,7 @@ controlPlane:
 
 # Worker configuration
 worker:
-  schematic:
-    customization:
-      systemExtensions:
-        officialExtensions:
-          - siderolabs/intel-ucode
-          - siderolabs/i915-ucode
-          - siderolabs/iscsi-tools
-          - siderolabs/nut-client
-          # - siderolabs/stargz-snapshotter -- temporarily disabled, see https://github.com/siderolabs/extensions/issues/245
+  schematic: *schematic
 
   networkInterfaces:
     - interface: eno1
