@@ -18,13 +18,15 @@ spec:
         bootstrap_type = "plain"
       }
       authorization {
+        deny_action = ignore
+        no_match = allow
         sources = [
           {
-            type = built_in_database
+            type = file
             enable = true
+            path = "/etc/acl.conf"
           }
         ]
-        no_match: "deny"
       }
   coreTemplate:
     metadata:
@@ -36,14 +38,18 @@ spec:
         - secretRef:
             name: emqx-secret
       extraVolumeMounts:
-        - name: init-user
+        - name: authz
           mountPath: /opt/init-user.json
           subPath: init-user.json
           readOnly: true
+        - name: authz
+          mountPath: /etc/acl.conf
+          subPath: acl.conf
+          readOnly: true
       extraVolumes:
-        - name: init-user
+        - name: authz
           secret:
-            secretName: emqx-init-user-secret
+            secretName: emqx-authz-secret
   listenersServiceTemplate:
     metadata:
       annotations:
