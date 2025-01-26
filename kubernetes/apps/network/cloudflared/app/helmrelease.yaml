@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: cloudflared
+  name: &app cloudflared
 spec:
   interval: 30m
   chart:
@@ -24,10 +24,11 @@ spec:
     controllers:
       cloudflared:
         strategy: RollingUpdate
+        replicas: 2
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          app:
+          cloudflared:
             image:
               repository: docker.io/cloudflare/cloudflared
               tag: 2025.1.0
@@ -78,14 +79,14 @@ spec:
         runAsGroup: 65534
         seccompProfile: { type: RuntimeDefault }
     service:
-      app:
-        controller: cloudflared
+      cloudflared:
+        controller: *app
         ports:
           http:
             port: *port
     serviceMonitor:
-      app:
-        serviceName: cloudflared
+      cloudflared:
+        serviceName: *app
         endpoints:
           - port: http
             scheme: http
