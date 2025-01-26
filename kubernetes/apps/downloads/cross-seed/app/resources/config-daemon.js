@@ -15,7 +15,7 @@ module.exports = {
   matchMode: "partial",
 
   linkCategory: "cross-seed",
-  linkDir: "/media/downloads/qbittorrent/seeding/cross-seed",
+  linkDirs: ["/media/downloads/qbittorrent/seeding/cross-seed"],
   linkType: "hardlink",
 
   radarr: [
