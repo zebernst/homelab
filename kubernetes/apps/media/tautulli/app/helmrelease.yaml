@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: tautulli
+  name: &app tautulli
 spec:
   interval: 30m
   chart:
@@ -33,7 +33,7 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          app:
+          tautulli:
             image:
               repository: ghcr.io/tautulli/tautulli
               tag: v2.15.1@sha256:7755360de25d5b60aaf67a0aa4f1f71fb4fc12a1a668bb9ced09e9f4ab5239cd
@@ -76,13 +76,13 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
     service:
-      app:
-        controller: tautulli
+      tautulli:
+        controller: *app
         ports:
           http:
             port: *port
     ingress:
-      app:
+      lan:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.zebernst.dev
         className: internal
@@ -91,11 +91,23 @@ spec:
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
+      ts:
+        className: tailscale
+        hosts:
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
+            paths:
+              - path: /
+                service:
+                  identifier: *app
+                  port: http
+        tls:
+          - hosts:
+              - *tsHost
     persistence:
       config:
-        existingClaim: tautulli
+        existingClaim: *app
       cache:
         existingClaim: tautulli-cache
         globalMounts:
