@@ -32,7 +32,7 @@ spec:
           configmap.reloader.stakater.com/reload: qbittorrent-scripts
           secret.reloader.stakater.com/reload: qbittorrent-secret,gluetun-secret
         containers:
-          app:
+          qbittorrent:
             image:
               repository: ghcr.io/onedr0p/qbittorrent-beta
               tag: 5.0.3@sha256:4b9de3356475bd97fda3fb4d98f213e8d139aef15e7bd20dab72973e661901dd
@@ -126,26 +126,13 @@ spec:
         supplementalGroups: [ 10000 ]
         seccompProfile: { type: RuntimeDefault }
     service:
-      app:
+      qbittorrent:
         nameOverride: *app
         controller: *app
         ports:
           http:
             port: *port
             primary: true
-#      bittorrent:
-#        controller: *app
-#        type: LoadBalancer
-#        annotations:
-#          lbipam.cilium.io/ips: 10.2.100.21
-#        externalTrafficPolicy: Local
-#        ports:
-#          bittorrent-tcp:
-#            port: *bittorrentPort
-#            protocol: TCP
-#          bittorrent-udp:
-#            port: *bittorrentPort
-#            protocol: UDP
 #      gluetun:
 #        controller: *app
 #        ports:
@@ -154,7 +141,7 @@ spec:
 #            targetPort: 8000
 #            protocol: HTTP
     ingress:
-      app:
+      lan:
         annotations:
           external-dns.alpha.kubernetes.io/target: internal.zebernst.dev
         className: internal
@@ -163,7 +150,7 @@ spec:
             paths: &paths
               - path: /
                 service:
-                  identifier: app
+                  identifier: qbittorrent
                   port: http
           - host: &customHost qb.zebernst.dev
             paths: *paths
@@ -171,12 +158,24 @@ spec:
           - hosts:
               - *host
               - *customHost
+      ts:
+        className: tailscale
+        hosts:
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
+            paths:
+              - path: /
+                service:
+                  identifier: qbittorrent
+                  port: http
+        tls:
+          - hosts:
+              - *tsHost
     persistence:
       config:
         existingClaim: qbittorrent
         advancedMounts:
           qbittorrent:
-            app:
+            qbittorrent:
               - path: /config
       config-empty:
         type: emptyDir
@@ -190,7 +189,7 @@ spec:
         defaultMode: 0775
         advancedMounts:
           qbittorrent:
-            app:
+            qbittorrent:
               - path: /scripts
       downloads:
         type: nfs
@@ -198,6 +197,6 @@ spec:
         path: /volume1/media
         advancedMounts:
           qbittorrent:
-            app:
+            qbittorrent:
               - path: /media/downloads/qbittorrent
                 subPath: downloads/qbittorrent
