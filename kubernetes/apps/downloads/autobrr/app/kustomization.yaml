@@ -13,5 +13,13 @@ configMapGenerator:
     options:
       labels:
         loki_rule: "true"
+  - name: autobrr-grafana-dashboard
+    files:
+      - autobrr.json=resources/grafana-dashboard.json
+    options:
+      annotations:
+        grafana_folder: "Media"
+      labels:
+        grafana_dashboard: "true"
 generatorOptions:
   disableNameSuffixHash: true
