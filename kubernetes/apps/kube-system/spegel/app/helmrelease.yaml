@@ -26,5 +26,7 @@ spec:
   values:
     grafanaDashboard:
       enabled: true
+      annotations:
+        grafana_folder: "Kubernetes"
     serviceMonitor:
       enabled: true
