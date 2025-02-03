@@ -184,7 +184,7 @@ spec:
         unifi-usg:
           # renovate: depName="UniFi-Poller: USG Insights - Prometheus"
           gnetId: 11313
-          revision: 19
+          revision: 9
           datasource: Prometheus
         unifi-uap:
           # renovate: depName="UniFi-Poller: UAP Insights - Prometheus"
