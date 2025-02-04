@@ -1,0 +1,5 @@
+cluster:
+  discovery:
+    registries:
+      kubernetes:
+        disabled: true
