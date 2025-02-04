@@ -43,7 +43,7 @@ spec:
             envFrom:
               - secretRef:
                   name: cross-seed-secret
-            args: [ "daemon" ]
+            args: [ "daemon", "-v" ]
             probes:
               liveness: &probes
                 enabled: true
@@ -84,7 +84,7 @@ spec:
         containers:
           app:
             <<: *container
-            args: [ "search" ]
+            args: [ "search", "-v" ]
             probes:
               liveness:
                 enabled: false
