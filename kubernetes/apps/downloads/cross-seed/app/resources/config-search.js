@@ -9,9 +9,8 @@ module.exports = {
 
   action: "inject",
   delay: 30,
-  flatLinking: false,
-  includeSingleEpisodes: true,
   includeNonVideos: false,
+  seasonFromEpisodes: 0.98,
   matchMode: "partial",
 
   dataDirs: [
@@ -23,9 +22,9 @@ module.exports = {
     "/media/xxx"
   ],
   maxDataDepth: 3,
-  searchCadence: "4w",
-  excludeRecentSearch: "13w",
-  excludeOlder: "1y",
+  searchCadence: "1 day",
+  excludeRecentSearch: "3 days",
+  excludeOlder: "2 weeks",
 
   linkCategory: "cross-seed",
   linkDirs: ["/media/downloads/qbittorrent/seeding/cross-seed"],
@@ -59,7 +58,7 @@ module.exports = {
   duplicateCategories: false,
   skipRecheck: false,
 
-  outputDir: "/tmp",
-  torrentDir: null,
+  outputDir: "/config/torrents",
+  useClientTorrents: true,
 };
 

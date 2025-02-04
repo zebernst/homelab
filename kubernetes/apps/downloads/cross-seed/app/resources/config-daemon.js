@@ -9,9 +9,8 @@ module.exports = {
 
   action: "inject",
   delay: 30,
-  flatLinking: false,
-  includeSingleEpisodes: true,
   includeNonVideos: false,
+  seasonFromEpisodes: 0.98,
   matchMode: "partial",
 
   linkCategory: "cross-seed",
@@ -32,6 +31,6 @@ module.exports = {
   duplicateCategories: false,
   skipRecheck: false,
 
-  outputDir: "/tmp",
-  torrentDir: "/qbittorrent/qBittorrent/BT_backup",
+  outputDir: "/config/torrents",
+  useClientTorrents: true,
 };
