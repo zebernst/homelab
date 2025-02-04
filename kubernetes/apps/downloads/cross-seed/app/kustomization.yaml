@@ -10,5 +10,11 @@ configMapGenerator:
     files:
       - resources/config-daemon.js
       - resources/config-search.js
+  - name: cross-seed-loki-rules
+    files:
+      - ./resources/lokirule.yaml
+    options:
+      labels:
+        loki_rule: "true"
 generatorOptions:
   disableNameSuffixHash: true
