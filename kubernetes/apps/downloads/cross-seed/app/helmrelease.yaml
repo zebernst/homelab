@@ -84,7 +84,7 @@ spec:
         containers:
           app:
             <<: *container
-            args: [ "search", "-v" ]
+            args: [ "search" ]
             probes:
               liveness:
                 enabled: false
@@ -94,16 +94,6 @@ spec:
             securityContext: *secctx
 
     defaultPodOptions:
-      affinity:
-        podAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: app.kubernetes.io/name
-                    operator: In
-                    values:
-                      - qbittorrent
-              topologyKey: kubernetes.io/hostname
       securityContext:
         runAsNonRoot: true
         runAsUser: ${APP_UID:-1024}
