@@ -25,7 +25,21 @@ module.exports = {
     `http://sonarr.downloads.svc.cluster.local/?apikey=$${process.env.SONARR_API_KEY}`,
     `http://sonarr-uhd.downloads.svc.cluster.local/?apikey=$${process.env.SONARR_API_KEY}`,
   ],
-  torznab: [], // only using autobrr announcements
+  torznab: [
+    2,  // PTP
+    12, // TL
+    16, // GTN
+    18, // MLK
+    19, // JPTV
+    52, // SP
+    53, // HUNO
+    54, // HDS
+    55, // ABT
+    56, // GTRU
+    57, // OE
+    58, // OT
+    59, // LST
+  ].map(i => `http://prowlarr.downloads.svc.cluster.local/$${i}/api?apikey=$${process.env.PROWLARR_API_KEY}`),
 
   qbittorrentUrl: "http://qbittorrent.downloads.svc.cluster.local",
   duplicateCategories: false,
