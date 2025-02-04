@@ -84,6 +84,9 @@ controlPlane:
     - "@./patches/controller/disable-admission-controller.yaml"
     - "@./patches/controller/etcd.yaml"
 
+  extraManifests:
+    - patches/global/watchdog.yaml
+
   extensionServices:
     - &nut-config
       name: nut-client
@@ -108,3 +111,5 @@ worker:
   extensionServices:
     - *nut-config
 
+  extraManifests:
+    - patches/global/watchdog.yaml
