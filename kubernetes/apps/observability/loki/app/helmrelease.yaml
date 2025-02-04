@@ -56,6 +56,10 @@ spec:
               period: 24h
       limits_config:
         retention_period: 14d
+        allow_structured_metadata: true
+        volume_enabled: true
+      pattern_ingester:
+        enabled: true
     singleBinary:
       replicas: 1
       persistence:
