@@ -27,13 +27,12 @@ spec:
       namespace: downloads
   values:
     controllers:
-      daemon:
-
+      cross-seed:
         annotations:
           reloader.stakater.com/auto: "true"
 
         containers:
-          app: &container
+          cross-seed:
             image:
               repository: ghcr.io/cross-seed/cross-seed
               tag: 6.10.0@sha256:d3d640ac22be2b144424a2446bedb220e9b7c93e5bbcc21f659798a0587ef76d
@@ -43,7 +42,7 @@ spec:
             envFrom:
               - secretRef:
                   name: cross-seed-secret
-            args: [ "daemon", "-v" ]
+            args: [ "daemon", "--verbose" ]
             probes:
               liveness: &probes
                 enabled: true
@@ -58,40 +57,16 @@ spec:
                   failureThreshold: 3
               readiness: *probes
 
-            securityContext: &secctx
+            securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: [ "ALL" ] }
 
-            resources: &resources
+            resources:
               requests:
                 cpu: 10m
               limits:
                 memory: 256Mi
-
-      search:
-        type: cronjob
-        cronjob:
-          schedule: "0 0 1 */3 *"  # quarterly
-          timeZone: America/New_York
-          concurrencyPolicy: Forbid
-          successfulJobsHistory: 1
-          failedJobsHistory: 1
-
-        annotations:
-          reloader.stakater.com/auto: "true"
-
-        containers:
-          app:
-            <<: *container
-            args: [ "search" ]
-            probes:
-              liveness:
-                enabled: false
-              readiness:
-                enabled: false
-            resources: *resources
-            securityContext: *secctx
 
     defaultPodOptions:
       securityContext:
@@ -103,8 +78,8 @@ spec:
         seccompProfile: { type: RuntimeDefault }
 
     service:
-      app:
-        controller: daemon
+      cross-seed:
+        controller: cross-seed
         ports:
           http:
             port: *port
@@ -117,30 +92,13 @@ spec:
         accessMode: ReadWriteMany
         globalMounts:
           - path: /config
-      config-daemon:
+      config:
         type: configMap
         name: cross-seed-configmap
-        advancedMounts:
-          daemon:
-            app:
-              - path: /config/config.js
-                subPath: config.js
-                readOnly: true
-        items:
-          - key: config-daemon.js
-            path: config.js
-      config-search:
-        type: configMap
-        name: cross-seed-configmap
-        advancedMounts:
-          search:
-            app:
-              - path: /config/config.js
-                subPath: config.js
-                readOnly: true
-        items:
-          - key: config-search.js
-            path: config.js
+        globalMounts:
+          - path: /config/config.js
+            subPath: config.js
+            readOnly: true
       media:
         type: nfs
         server: nas.lab.home.arpa
