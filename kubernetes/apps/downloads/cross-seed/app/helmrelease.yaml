@@ -42,7 +42,7 @@ spec:
             envFrom:
               - secretRef:
                   name: cross-seed-secret
-            args: [ "daemon", "--verbose" ]
+            args: [ "daemon" ]
             probes:
               liveness: &probes
                 enabled: true
