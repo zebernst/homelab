@@ -51,9 +51,9 @@ spec:
                   httpGet:
                     path: /api/ping
                     port: *port
-                  initialDelaySeconds: 30
+                  initialDelaySeconds: 60
                   periodSeconds: 10
-                  timeoutSeconds: 3
+                  timeoutSeconds: 5
                   failureThreshold: 3
               readiness: *probes
 
