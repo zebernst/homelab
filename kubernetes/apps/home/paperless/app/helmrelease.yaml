@@ -54,7 +54,9 @@ spec:
               tag: 2.14.7
             env:
               # Configure application
-              PAPERLESS_URL: https://paperless.zebernst.dev
+              PAPERLESS_URL: "https://{{ .Release.Name }}.zebernst.dev"
+              PAPERLESS_CSRF_TRUSTED_ORIGINS: "https://{{ .Release.Name }}.kite-harmonic.ts.net"
+              PAPERLESS_CORS_ALLOWED_HOSTS: "https://{{ .Release.Name }}.kite-harmonic.ts.net"
               PAPERLESS_PORT: &port "8000"
               PAPERLESS_TIME_ZONE: "America/New_York"
               PAPERLESS_WEBSERVER_WORKERS: "2"
@@ -146,8 +148,11 @@ spec:
       ts:
         className: tailscale
         hosts:
-          - host: "{{ .Release.Name }}.kite-harmonic.ts.net"
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths: *paths
+        tls:
+          - hosts:
+              - *tsHost
 
     serviceMonitor:
       app:
