@@ -1,0 +1,42 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: paperless-rules
+  labels:
+    prometheus: k8s
+    role: alert-rules
+spec:
+  groups:
+    - name: paperless.rules
+      rules:
+        - alert: CeleryWorkerOffline
+          expr: flower_worker_online == 0
+          for: 2m
+          labels:
+            severity: critical
+            context: celery-worker
+          annotations:
+            summary: Celery worker offline
+            description: Celery worker {{ $labels.worker }} has been offline for more than 2 minutes.
+
+        - alert: TaskFailureRatioTooHigh
+          expr: (sum(avg_over_time(flower_events_total{type="task-failed"}[15m])) by (task) / sum(avg_over_time(flower_events_total{type=~"task-failed|task-succeeded"}[15m])) by (task)) * 100 > 1
+          for: 5m
+          labels:
+            severity: critical
+            context: celery-task
+          annotations:
+            summary: Task Failure Ratio Too High.
+            description: Average task failure ratio for task {{ $labels.task }} is {{ $value }}.
+
+        - alert: TaskPrefetchTimeTooHigh
+          expr: sum(avg_over_time(flower_task_prefetch_time_seconds[15m])) by (task, worker) > 1
+          for: 5m
+          labels:
+            severity: critical
+            context: celery-task
+          annotations:
+            summary: Average Task Prefetch Time Too High.
+            description: Average task prefetch time at worker for task {{ $labels.task }} and worker {{ $labels.worker }} is {{ $value }}.
