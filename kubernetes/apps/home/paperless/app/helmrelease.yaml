@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: paperless
+  name: &app paperless
 spec:
   interval: 30m
   chart:
@@ -28,8 +28,15 @@ spec:
   values:
     controllers:
       paperless:
+
         annotations:
           reloader.stakater.com/auto: "true"
+
+        pod:
+          securityContext:
+            supplementalGroups:
+              - 65539
+              - 1000
 
         initContainers:
           init-db:
@@ -41,7 +48,7 @@ spec:
                   name: paperless-secret
 
         containers:
-          app:
+          paperless:
             image:
               repository: ghcr.io/paperless-ngx/paperless-ngx
               tag: 2.14.7
@@ -52,6 +59,9 @@ spec:
               PAPERLESS_TIME_ZONE: "America/New_York"
               PAPERLESS_WEBSERVER_WORKERS: "2"
               PAPERLESS_TASK_WORKERS: "2"
+              # Configure Remote User auth
+              PAPERLESS_ACCOUNT_ALLOW_SIGNUPS: "false"
+              PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS: "false"
               # Configure folders
               PAPERLESS_CONSUMPTION_DIR: /data/nas/incoming
               PAPERLESS_DATA_DIR: /data/local/data
@@ -64,14 +74,21 @@ spec:
               # Configure OCR
               PAPERLESS_OCR_LANGUAGES: eng
               PAPERLESS_OCR_LANGUAGE: eng
+              # Enable TIKA
+              PAPERLESS_TIKA_ENABLED: true
+              PAPERLESS_TIKA_ENDPOINT: http://127.0.0.1:9998
+              PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://127.0.0.1:3000
+              # Enable monitoring
+              PAPERLESS_ENABLE_FLOWER: true
+              FLOWER_PORT: &metricsPort 5555
               # Configure database
               PAPERLESS_DBENGINE: postgresql
               # Configure redis integration
               PAPERLESS_REDIS: redis://hindwing.database.svc.cluster.local:6379
               # Configure user permissions
-              USERMAP_GID: "65539" # synology:services
+              USERMAP_UID: "${APP_UID:-568}"
+              USERMAP_GID: "${APP_GID:-568}" # synology:services
             envFrom: *envFrom
-
             probes:
               liveness:
                 enabled: true
@@ -88,13 +105,33 @@ spec:
                 memory: 2Gi
               limits:
                 memory: 6Gi
+          tika:
+            image:
+              repository: docker.io/apache/tika
+              tag: 3.0.0.0-full
+              pullPolicy: IfNotPresent
+            ports:
+              - containerPort: 9998
+          gotenberg:
+            image:
+              repository: gotenberg/gotenberg
+              tag: 8.15.3
+              pullPolicy: IfNotPresent
+            ports:
+              - containerPort: 3000
+            command:
+              - "gotenberg"
+              - "--chromium-disable-javascript=true"
+              - "--chromium-allow-list=file:///tmp/.*"
 
     service:
       app:
-        controller: paperless
+        controller: *app
         ports:
           http:
             port: *port
+          metrics:
+            port: *metricsPort
 
     ingress:
       lan:
@@ -112,9 +149,19 @@ spec:
           - host: "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths: *paths
 
+    serviceMonitor:
+      app:
+        serviceName: *app
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
+
     persistence:
       data:
-        existingClaim: paperless
+        existingClaim: *app
         globalMounts:
           - path: /data/local
       nas:
