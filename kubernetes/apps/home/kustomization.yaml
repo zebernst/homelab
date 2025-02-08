@@ -8,5 +8,6 @@ resources:
   # Flux-Kustomizations
   - atuin/ks.yaml
   - hajimari/ks.yaml
+  - it-tools/ks.yaml
   - monica/ks.yaml
   - paperless/ks.yaml
