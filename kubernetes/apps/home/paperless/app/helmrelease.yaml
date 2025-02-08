@@ -1,0 +1,125 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: paperless
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.6.1
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      paperless:
+        annotations:
+          reloader.stakater.com/auto: "true"
+
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 16
+            envFrom: &envFrom
+              - secretRef:
+                  name: paperless-secret
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/paperless-ngx/paperless-ngx
+              tag: 2.14.7
+            env:
+              # Configure application
+              PAPERLESS_URL: https://paperless.zebernst.dev
+              PAPERLESS_PORT: &port "8000"
+              PAPERLESS_TIME_ZONE: "America/New_York"
+              PAPERLESS_WEBSERVER_WORKERS: "2"
+              PAPERLESS_TASK_WORKERS: "2"
+              # Configure folders
+              PAPERLESS_CONSUMPTION_DIR: /data/nas/incoming
+              PAPERLESS_DATA_DIR: /data/local/data
+              PAPERLESS_EXPORT_DIR: /data/nas/export
+              PAPERLESS_MEDIA_ROOT: /data/local/media
+              # Configure folder importer
+              PAPERLESS_CONSUMER_POLLING: "60"
+              PAPERLESS_CONSUMER_RECURSIVE: "true"
+              PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
+              # Configure OCR
+              PAPERLESS_OCR_LANGUAGES: eng
+              PAPERLESS_OCR_LANGUAGE: eng
+              # Configure database
+              PAPERLESS_DBENGINE: postgresql
+              # Configure redis integration
+              PAPERLESS_REDIS: redis://hindwing.database.svc.cluster.local:6379
+              # Configure user permissions
+              USERMAP_GID: "65539" # synology:services
+            envFrom: *envFrom
+
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 25m
+                memory: 2Gi
+              limits:
+                memory: 6Gi
+
+    service:
+      app:
+        controller: paperless
+        ports:
+          http:
+            port: *port
+
+    ingress:
+      lan:
+        className: internal
+        hosts:
+          - host: "{{ .Release.Name }}.zebernst.dev"
+            paths: &paths
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+      ts:
+        className: tailscale
+        hosts:
+          - host: "{{ .Release.Name }}.kite-harmonic.ts.net"
+            paths: *paths
+
+    persistence:
+      data:
+        existingClaim: paperless
+        globalMounts:
+          - path: /data/local
+      nas:
+        type: nfs
+        server: nas.lab.home.arpa
+        path: /volume1/apps/paperless
+        globalMounts:
+          - path: /data/nas
