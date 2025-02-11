@@ -9,42 +9,23 @@ on:
         description: Dry Run
         type: choice
         default: "false"
-        options:
-          - "true"
-          - "false"
+        options: ["true", "false"]
       logLevel:
         description: Log Level
         type: choice
-        default: debug
-        options:
-          - debug
-          - info
-          - warn
-          - error
-          - fatal
+        default: info
+        options: [debug, info, warn, error, fatal]
       version:
         description: Renovate version
         default: latest
         required: false
-      repoCache:
-        description: 'Reset or disable the cache?'
-        type: choice
-        default: enabled
-        options:
-          - enabled
-          - disabled
-          - reset
   schedule:
-  - cron: "0 * * * *" # Every hour
+    - cron: "0 * * * *" # Every hour
   push:
     branches: ["main"]
     paths:
-    - .github/renovate.json5
-    - .github/renovate/**.json5
-  issues:
-    types: ["edited"]
-  issue_comment:
-    types: ["edited"]
+      - .github/renovate.json5
+      - .github/renovate/**.json5
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -58,7 +39,6 @@ env:
   RENOVATE_PLATFORM: github
   RENOVATE_PLATFORM_COMMIT: true
   WORKFLOW_RENOVATE_VERSION: "${{ inputs.version || 'latest' }}"
-  RENOVATE_REPOSITORY_CACHE: "${{ github.event.inputs.repoCache || 'enabled' }}"
 
 jobs:
   renovate:
@@ -77,17 +57,9 @@ jobs:
         with:
           token: "${{ steps.app-token.outputs.token }}"
 
-      - name: Cache
-        uses: actions/cache@v4
-        if: github.event.inputs.repoCache != 'disabled'
-        with:
-          path: /tmp/renovate/cache/
-          key: renovate-cache
-
       - name: Renovate
         uses: renovatebot/github-action@v41.0.13
         with:
           configurationFile: .github/renovate.json5
           token: "${{ steps.app-token.outputs.token }}"
           renovate-version: "${{ env.WORKFLOW_RENOVATE_VERSION }}"
-          docker-user: 1001
