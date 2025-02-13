@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/alertmanagerconfig_v1alpha1.json
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: AlertmanagerConfig
 metadata:
@@ -14,7 +15,7 @@ spec:
       - receiver: "null"
         matchers: [{name: alertname, value: InfoInhibitor, matchType: =}]
       - receiver: heartbeat
-        groupInterval: 15s
+        groupInterval: 5m
         groupWait: 0s
         repeatInterval: 5m
         matchers: [{name: alertname, value: Watchdog, matchType: =}]
@@ -53,9 +54,9 @@ spec:
               {{- end }}
               {{- if gt (len .Labels.SortedPairs) 0 }}
                 <small>
-                {{- range .Labels.SortedPairs }}
-                  <b>{{ .Name }}:</b> {{ .Value }}
-                {{- end }}
+                  {{- range .Labels.SortedPairs }}
+                    <b>{{ .Name }}:</b> {{ .Value }}
+                  {{- end }}
                 </small>
               {{- end }}
             {{- end }}

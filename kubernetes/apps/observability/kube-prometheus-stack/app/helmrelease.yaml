@@ -9,29 +9,28 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 69.2.3
+      version: 69.2.4
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
         namespace: flux-system
   install:
-    crds: Skip
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
-    crds: Skip
     remediation:
       strategy: rollback
       retries: 3
   dependsOn:
-    - name: kube-prometheus-stack-crds
-      namespace: observability
     - name: synology-csi-driver
       namespace: kube-system
   values:
     crds:
-      enabled: false
+      enabled: true
+      upgradeJob:
+        enabled: true
+        forceConflicts: true
     cleanPrometheusOperatorObjectNames: true
     alertmanager:
       ingress:
