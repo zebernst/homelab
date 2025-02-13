@@ -111,7 +111,7 @@ spec:
             # This retains API endpoint access for official Plex clients and authenticated sessions.
             set $r "";
             if ($http_x_plex_device_name = '') { set $r "Y"; }         # for web and tv clients (header)
-            if ($arg_X-Plex-Device-Name = '')  { set $r "$${r}Y"; }    # for iOS clients (query argument)
+            if ($arg_X-Plex-Device-Name = '')  { set $r "${r}Y"; }    # for iOS clients (query argument)
             if ($r = YY) {
               rewrite ^/$ https://$http_host/web/index.html;
             }

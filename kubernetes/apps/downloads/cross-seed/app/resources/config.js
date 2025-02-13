@@ -28,12 +28,12 @@ module.exports = {
 
   // Connections
   radarr: [
-    `http://radarr.downloads.svc.cluster.local/?apikey=$${process.env.RADARR_API_KEY}`,
-    `http://radarr-uhd.downloads.svc.cluster.local/?apikey=$${process.env.RADARR_API_KEY}`,
+    `http://radarr.downloads.svc.cluster.local/?apikey=${process.env.RADARR_API_KEY}`,
+    `http://radarr-uhd.downloads.svc.cluster.local/?apikey=${process.env.RADARR_API_KEY}`,
   ],
   sonarr: [
-    `http://sonarr.downloads.svc.cluster.local/?apikey=$${process.env.SONARR_API_KEY}`,
-    `http://sonarr-uhd.downloads.svc.cluster.local/?apikey=$${process.env.SONARR_API_KEY}`,
+    `http://sonarr.downloads.svc.cluster.local/?apikey=${process.env.SONARR_API_KEY}`,
+    `http://sonarr-uhd.downloads.svc.cluster.local/?apikey=${process.env.SONARR_API_KEY}`,
   ],
   torznab: [
     2,  // PTP
@@ -49,7 +49,7 @@ module.exports = {
     57, // OE
     58, // OT
     59, // LST
-  ].map(i => `http://prowlarr.downloads.svc.cluster.local/$${i}/api?apikey=$${process.env.PROWLARR_API_KEY}`),
+  ].map(i => `http://prowlarr.downloads.svc.cluster.local/${i}/api?apikey=${process.env.PROWLARR_API_KEY}`),
 
   // Data-based searching
   dataDirs: [
