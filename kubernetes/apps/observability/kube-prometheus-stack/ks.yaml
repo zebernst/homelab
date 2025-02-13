@@ -17,7 +17,7 @@ spec:
     substitute:
       APP: kube-prometheus-stack
       GATUS_SUBDOMAIN: prometheus
-  prune: true
+  prune: false # revert to true
   sourceRef:
     kind: GitRepository
     name: home-kubernetes

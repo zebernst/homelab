@@ -14,7 +14,7 @@ spec:
     - name: cloudnative-pg-cluster
     - name: external-secrets-stores
   path: ./kubernetes/apps/downloads/whisparr/app
-  prune: true
+  prune: false # revert to true
   sourceRef:
     kind: GitRepository
     name: home-kubernetes
