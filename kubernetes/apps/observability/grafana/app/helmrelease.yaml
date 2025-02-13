@@ -244,10 +244,12 @@ spec:
           url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/control-plane.json
           datasource: Prometheus
       data:
-        minio:
-          # renovate: depName="MinIO Dashboard"
-          gnetId: 13502
-          revision: 26
+        minio-cluster:
+          url: https://raw.githubusercontent.com/minio/minio/master/docs/metrics/prometheus/grafana/minio-dashboard.json
+          datasource:
+            - { name: DS_PROMETHEUS, value: Prometheus }
+        minio-bucket:
+          url: https://raw.githubusercontent.com/minio/minio/master/docs/metrics/prometheus/grafana/bucket/minio-bucket.json
           datasource:
             - { name: DS_PROMETHEUS, value: Prometheus }
         cnpg:
