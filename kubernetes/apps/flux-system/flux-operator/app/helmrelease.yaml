@@ -3,16 +3,16 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: nfs-subdir-external-provisioner
+  name: flux-operator
 spec:
   interval: 30m
   chart:
     spec:
-      chart: nfs-subdir-external-provisioner
-      version: 4.0.18
+      chart: flux-operator
+      version: 0.12.0
       sourceRef:
         kind: HelmRepository
-        name: nfs-subdir-external-provisioner
+        name: controlplaneio
         namespace: flux-system
   install:
     remediation:
@@ -22,11 +22,6 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  values:
-    storageClass:
-      name: nfs
-      accessModes:
-        - ReadWriteMany
-    nfs:
-      server: nas.lab.home.arpa
-      path: /volume1/kubernetes
+  valuesFrom:
+    - kind: ConfigMap
+      name: flux-operator-helm-values
