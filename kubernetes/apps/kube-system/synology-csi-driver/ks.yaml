@@ -11,7 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   path: ./kubernetes/apps/kube-system/synology-csi-driver/app
-  prune: false # revert to true
+  prune: true
   dependsOn:
     - name: external-secrets-stores
   sourceRef:

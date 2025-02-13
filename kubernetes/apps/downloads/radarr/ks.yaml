@@ -14,7 +14,7 @@ spec:
     - name: cloudnative-pg-cluster
     - name: external-secrets-stores
   path: ./kubernetes/apps/downloads/radarr/app/hd
-  prune: false # revert to true
+  prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -41,7 +41,7 @@ spec:
     - name: cloudnative-pg-cluster
     - name: external-secrets-stores
   path: ./kubernetes/apps/downloads/radarr/app/uhd
-  prune: false # revert to true
+  prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
