@@ -16,7 +16,7 @@ spec:
     - name: external-secrets-stores
   sourceRef:
     kind: GitRepository
-    name: home-kubernetes
+    name: flux-system
   wait: false
   interval: 30m
   retryInterval: 1m

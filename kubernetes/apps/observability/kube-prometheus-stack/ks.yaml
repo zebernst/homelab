@@ -20,7 +20,7 @@ spec:
   prune: false # revert to true
   sourceRef:
     kind: GitRepository
-    name: home-kubernetes
+    name: flux-system
   targetNamespace: observability
   timeout: 5m
   wait: false
