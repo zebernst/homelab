@@ -6,4 +6,5 @@ resources:
   - ./alertmanagerconfig.yaml
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./scrapeconfigs/minio.yaml
   - ../../../../templates/gatus/guarded
