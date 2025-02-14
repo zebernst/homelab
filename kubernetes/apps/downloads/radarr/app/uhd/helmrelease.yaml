@@ -189,7 +189,7 @@ spec:
         type: emptyDir
       media:
         type: nfs
-        server: nas.lab.home.arpa
+        server: nas.internal
         path: /volume1/media
         advancedMounts:
           radarr:

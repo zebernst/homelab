@@ -11,12 +11,12 @@ tasks:
     cmds:
       - ignore_error: true
         cmd: >-
-          ssh -t root@nas.lab.home.arpa
+          ssh -t root@nas.internal
           LE_WORKING_DIR="{{.LE_WORKING_DIR}}"
           {{.LE_WORKING_DIR}}/acme.sh --issue --server letsencrypt --dns "dns_cf" --keylength 2048
           {{- range (splitList "," .DOMAIN) }} -d {{.}} {{- end }}
       - cmd: >-
-          ssh -t root@nas.lab.home.arpa
+          ssh -t root@nas.internal
           PATH=/usr/syno/sbin:/usr/syno/bin:$PATH
           LE_WORKING_DIR="{{.LE_WORKING_DIR}}"
           SYNO_USE_TEMP_ADMIN=1

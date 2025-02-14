@@ -28,5 +28,5 @@ spec:
       accessModes:
         - ReadWriteMany
     nfs:
-      server: nas.lab.home.arpa
+      server: nas.internal
       path: /volume1/kubernetes

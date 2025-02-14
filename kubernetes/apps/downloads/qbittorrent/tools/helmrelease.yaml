@@ -121,7 +121,7 @@ spec:
             readOnly: true
       media:
         type: nfs
-        server: nas.lab.home.arpa
+        server: nas.internal
         path: /volume1/media
         advancedMounts:
           orphaned:

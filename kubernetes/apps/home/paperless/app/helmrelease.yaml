@@ -171,7 +171,7 @@ spec:
           - path: /data/local
       nas:
         type: nfs
-        server: nas.lab.home.arpa
+        server: nas.internal
         path: /volume1/apps/paperless
         globalMounts:
           - path: /data/nas

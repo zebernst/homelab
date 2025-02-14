@@ -193,7 +193,7 @@ spec:
               - path: /scripts
       downloads:
         type: nfs
-        server: nas.lab.home.arpa
+        server: nas.internal
         path: /volume1/media
         advancedMounts:
           qbittorrent:
