@@ -1,5 +1,6 @@
 ---
 fullnameOverride: coredns
+replicaCount: 2
 k8sAppLabelOverride: kube-dns
 serviceAccount:
   create: true
@@ -31,7 +32,6 @@ servers:
       - name: forward
         parameters: . /etc/resolv.conf
       - name: cache
-        parameters: 30
       - name: loop
       - name: reload
       - name: loadbalance

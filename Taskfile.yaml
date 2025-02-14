@@ -1,32 +1,26 @@
 ---
-# yaml-language-server: $schema=https://taskfile.dev/schema.json
-version: "3"
+version: '3'
+
+set: [pipefail]
+shopt: [globstar]
 
 vars:
-  # Directories
-  KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
-  PRIVATE_DIR: "{{.ROOT_DIR}}/.private"
-  SCRIPTS_DIR: "{{.ROOT_DIR}}/scripts"
-  # Files
-  AGE_FILE: "{{.ROOT_DIR}}/age.key"
-  BOOTSTRAP_CONFIG_FILE: "{{.ROOT_DIR}}/config.yaml"
-  KUBECONFIG_FILE: "{{.ROOT_DIR}}/kubeconfig"
-  SOPS_CONFIG_FILE: "{{.ROOT_DIR}}/.sops.yaml"
+  KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
+  TALOS_DIR: '{{.ROOT_DIR}}/talos'
 
 env:
-  KUBECONFIG: "{{.KUBECONFIG_FILE}}"
-  SOPS_AGE_KEY_FILE: "{{.AGE_FILE}}"
+  KUBECONFIG: '{{.KUBERNETES_DIR}}/kubeconfig'
+  MINIJINJA_CONFIG_FILE: '{{.ROOT_DIR}}/.minijinja.toml'
+  SOPS_AGE_KEY_FILE: '{{.ROOT_DIR}}/age.key'
+  TALOSCONFIG: '{{.TALOS_DIR}}/clusterconfig/talosconfig'
 
 includes:
-  kubernetes: .taskfiles/Kubernetes
-  flux: .taskfiles/Flux
-  repository: .taskfiles/Repository
-  talos: .taskfiles/Talos
-  sops: .taskfiles/Sops
-  user:
-    taskfile: .taskfiles/User
-    optional: true
+  bootstrap: .taskfiles/bootstrap
+  kubernetes: .taskfiles/kubernetes
+  synology: .taskfiles/synology
+  talos: .taskfiles/talos
+  volsync: .taskfiles/volsync
 
 tasks:
 
-  default: task --list
+  default: task -l

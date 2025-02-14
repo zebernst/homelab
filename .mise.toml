@@ -1,0 +1,33 @@
+[env]
+KUBECONFIG = '{{config_root}}/kubernetes/kubeconfig'
+MINIJINJA_CONFIG_FILE = '{{config_root}}/.minijinja.toml'
+SOPS_AGE_KEY_FILE = '{{config_root}}/age.key'
+TALOSCONFIG = '{{config_root}}/talos/clusterconfig/talosconfig'
+
+[tools]
+1password-cli = "latest"
+age = "latest"
+"aqua:cert-manager/cmctl" = "latest"
+"aqua:cloudnative-pg/cloudnative-pg/kubectl-cnpg" = "latest"
+"aqua:elsesiy/kubectl-view-secret" = "latest"
+"aqua:kvaps/kubectl-node-shell" = "latest"
+cilium-cli = "latest"
+cloudflared = "latest"
+flux2 = "latest"
+gh = "latest"
+gum = "latest"
+helm = "latest"
+helmfile = "latest"
+jq = "latest"
+k9s = "latest"
+krew = "latest"
+kubecolor = "latest"
+kubeconform = "latest"
+kubectl = "latest"
+kustomize = "latest"
+sops = "latest"
+talhelper = "latest"
+talosctl = "latest"
+task = "latest"
+"ubi:clbx/kubectl-browse-pvc" = "latest"
+yq = "latest"

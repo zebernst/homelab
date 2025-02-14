@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: '3'
+
+tasks:
+
+  provision-cert:
+    desc: Provision a new LE certificate in DSM [DOMAIN=required]
+    vars:
+      LE_WORKING_DIR: '{{.LE_WORKING_DIR | default "/usr/local/share/acme.sh"}}'
+    cmds:
+      - ignore_error: true
+        cmd: >-
+          ssh -t root@nas.lab.home.arpa
+          LE_WORKING_DIR="{{.LE_WORKING_DIR}}"
+          {{.LE_WORKING_DIR}}/acme.sh --issue --server letsencrypt --dns "dns_cf" --keylength 2048
+          {{- range (splitList "," .DOMAIN) }} -d {{.}} {{- end }}
+      - cmd: >-
+          ssh -t root@nas.lab.home.arpa
+          PATH=/usr/syno/sbin:/usr/syno/bin:$PATH
+          LE_WORKING_DIR="{{.LE_WORKING_DIR}}"
+          SYNO_USE_TEMP_ADMIN=1
+          SYNO_CERTIFICATE='{{.DOMAIN}}'
+          SYNO_CREATE=1
+          {{.LE_WORKING_DIR}}/acme.sh --deploy --deploy-hook synology_dsm
+          {{- range (splitList "," .DOMAIN) }} -d {{.}} {{- end }}
+
+    requires:
+      vars: [DOMAIN]

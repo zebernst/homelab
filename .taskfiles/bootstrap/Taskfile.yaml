@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: '3'
+
+tasks:
+
+  age:
+    desc: Fetch age key from 1password
+    cmds:
+      - op read --out-file {{.ROOT_DIR}}/age.key op://Secrets/age/age.key
+    preconditions:
+      - which op
+
+  talos:
+    desc: Bootstrap Talos
+    prompt: Bootstrap Talos ...?
+    cmds:
+      - until talosctl --nodes {{.TALOS_CONTROLLER}} bootstrap; do sleep 10; done
+      - talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force {{.KUBERNETES_DIR}}
+    vars:
+      TALOS_CONTROLLER:
+        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
+    preconditions:
+      - talosctl config info
+      - which talosctl
+
+  apps:
+    desc: Bootstrap Kubernetes Apps [ROOK_DISK={{.ROOK_DISK}}]
+    prompt: Bootstrap Kubernetes Apps ...?
+    cmds:
+      - kubectl config set-cluster {{.TALOS_CONTEXT}} --server https://{{.TALOS_CONTROLLER}}:6443
+      - defer: talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force {{.KUBERNETES_DIR}}
+      - helmfile --file {{.KUBERNETES_DIR}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
+    vars:
+      TALOS_CONTEXT:
+        sh: talosctl config info --output json | jq --raw-output '.context'
+      TALOS_CONTROLLER:
+        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
+    env:
+      ROOK_DISK: '{{.ROOK_DISK | default "SAMSUNG MZQL23T8HCLS-00A07"}}'
+    preconditions:
+      - op user get --me
+      - talosctl config info
+      - test -f {{.KUBERNETES_DIR}}/bootstrap/helmfile.yaml
+      - which jq helmfile kubectl op talosctl
