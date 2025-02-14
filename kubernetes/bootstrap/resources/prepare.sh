@@ -38,6 +38,23 @@ function apply_prometheus_crds() {
     done
 }
 
+function apply_tailscale_crds() {
+    local -r crds=("connectors" "dnsconfigs" "proxyclasses" "proxygroups" "recorders")
+
+    # renovate: datasource=github-releases depName=tailscale/tailscale
+    local -r version=v1.80.0
+
+    for crd in "${crds[@]}"; do
+        if kubectl get crd "${crd}.tailscale.com" &>/dev/null; then
+            log "Tailscale CRD '${crd}' is up-to-date. Skipping..."
+            continue
+        fi
+        log "Applying Tailscale CRD '${crd}'..."
+        kubectl apply --server-side \
+            --filename "https://raw.githubusercontent.com/tailscale/tailscale/${version}/cmd/k8s-operator/deploy/crds/tailscale.com_${crd}.yaml"
+    done
+}
+
 function apply_secrets() {
     local -r secrets_file="./resources/secrets.yaml.tpl"
 
@@ -80,6 +97,7 @@ function wipe_rook_disks() {
 function main() {
     wait_for_nodes
     apply_prometheus_crds
+    apply_tailscale_crds
     apply_secrets
     wipe_rook_disks
 }

@@ -10,30 +10,29 @@ spec:
     spec:
       chart: app-template
       version: 3.7.1
-      interval: 30m
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-  driftDetection:
-    mode: enabled
-
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
   values:
-    defaultPodOptions:
-      priorityClassName: system-node-critical
-
     controllers:
-      device:
+      generic-device-plugin:
         type: daemonset
-        strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
-
         containers:
           app:
             image:
               repository: ghcr.io/squat/generic-device-plugin
-              tag: 36bfc606bba2064de6ede0ff2764cbb52edff70d@sha256:ba6f0b4cf6c858d6ad29ba4d32e4da11638abbc7d96436bf04f582a97b2b8821
+              tag: latest@sha256:ba6f0b4cf6c858d6ad29ba4d32e4da11638abbc7d96436bf04f582a97b2b8821
             args:
               - --log-level=info
               - --config=/config/config.yaml
@@ -43,13 +42,11 @@ spec:
               limits:
                 memory: 64Mi
             securityContext:
-              # privileged: true
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
-
+              capabilities: { drop: ["ALL"] }
+    defaultPodOptions:
+      priorityClassName: system-node-critical
     persistence:
       config:
         type: configMap
@@ -61,8 +58,6 @@ spec:
       dev:
         type: hostPath
         hostPath: /dev
-        globalMounts:
-          - readOnly: true
       sys:
         type: hostPath
         hostPath: /sys

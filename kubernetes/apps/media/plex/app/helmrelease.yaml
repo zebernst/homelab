@@ -41,7 +41,7 @@ spec:
               tag: 1.41.4.9463-630c9f557@sha256:1f66577fe4fa60dc0984d568ca55fb5c2b3fae8498ef96ac1ed57710517552be
             env:
               TZ: America/New_York
-              PLEX_ADVERTISE_URL: https://plex.zebernst.dev:443,http://10.2.100.10:32400,http://plex.kite-harmonic.ts.net:32400
+              PLEX_ADVERTISE_URL: https://plex.zebernst.dev:443,http://192.168.20.5:32400,http://[::ffff:c0a8:1405]:32400,http://plex.kite-harmonic.ts.net:32400
               PLEX_NO_AUTH_NETWORKS: 10.0.0.0/8
             probes:
               liveness: &probes
@@ -70,13 +70,13 @@ spec:
                 cpu: 100m
               limits:
                 gpu.intel.com/i915: 1
-#                memory: 12Gi
+                memory: 12Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
         runAsUser: ${APP_UID:-1024}
-        runAsGroup: ${APP_GID:-100}
-        fsGroup: ${APP_GID:-100}
+        runAsGroup: ${APP_GID:-65539}
+        fsGroup: ${APP_GID:-65539}
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
       nodeSelector:
@@ -87,7 +87,7 @@ spec:
         nameOverride: plex
         type: LoadBalancer
         annotations:
-          io.cilium/lb-ipam-ips: 10.2.100.10
+          lbipam.cilium.io/ips: 192.168.20.5, ::ffff:c0a8:1405
         ports:
           http:
             port: 32400
@@ -111,7 +111,7 @@ spec:
             # This retains API endpoint access for official Plex clients and authenticated sessions.
             set $r "";
             if ($http_x_plex_device_name = '') { set $r "Y"; }         # for web and tv clients (header)
-            if ($arg_X-Plex-Device-Name = '')  { set $r "${r}Y"; }    # for iOS clients (query argument)
+            if ($arg_X-Plex-Device-Name = '')  { set $r "$${r}Y"; }    # for iOS clients (query argument)
             if ($r = YY) {
               rewrite ^/$ https://$http_host/web/index.html;
             }

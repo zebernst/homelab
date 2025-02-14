@@ -89,10 +89,10 @@ spec:
             env:
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
-              DNS_KEEP_NAMESERVER: on
+              DNS_KEEP_NAMESERVER: off
               FIREWALL_INPUT_PORTS: *port
               FIREWALL_VPN_INPUT_PORTS: *bittorrentPort
-              FIREWALL_OUTBOUND_SUBNETS: 10.69.0.0/16,10.96.0.0/16  # k8s subnet access
+              FIREWALL_OUTBOUND_SUBNETS: 10.244.0.0/16,10.245.0.0/16  # k8s subnet access
             envFrom:
               - secretRef:
                   name: gluetun-secret

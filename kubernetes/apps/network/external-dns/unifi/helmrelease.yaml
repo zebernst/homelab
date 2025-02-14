@@ -9,22 +9,23 @@ spec:
   chart:
     spec:
       chart: external-dns
-      version: 1.15.1
+      version: 1.15.2
       sourceRef:
         kind: HelmRepository
         name: external-dns
         namespace: flux-system
   install:
+    crds: CreateReplace
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
+    crds: CreateReplace
     remediation:
       strategy: rollback
       retries: 3
   values:
     fullnameOverride: *app
-    logLevel: debug
     provider:
       name: webhook
       webhook:
@@ -33,22 +34,12 @@ spec:
           tag: v0.4.1@sha256:5c01923d9a2c050362335c1750c2361046c0d2caf1ab796661c215da47446aad
         env:
           - name: UNIFI_HOST
+            value: https://unifi
+          - name: &name UNIFI_API_KEY
             valueFrom:
               secretKeyRef:
                 name: &secret external-dns-unifi-secret
-                key: hostname
-          - name: UNIFI_USER
-            valueFrom:
-              secretKeyRef:
-                name: *secret
-                key: username
-          - name: UNIFI_PASS
-            valueFrom:
-              secretKeyRef:
-                name: *secret
-                key: password
-          # - name: LOG_LEVEL
-          #   value: "debug"
+                key: *name
         livenessProbe:
           httpGet:
             path: /healthz
@@ -63,12 +54,11 @@ spec:
           timeoutSeconds: 5
     extraArgs:
       - --ignore-ingress-tls-spec
-      - --ingress-class=internal
-      - --ingress-class=external
+    triggerLoopOnEvent: true
     policy: sync
     sources: ["ingress", "service"]
-    txtOwnerId: "jupiter"
-    txtPrefix: "k8s.jupiter."
+    txtOwnerId: "k8s"
+    txtPrefix: "k8s."
     domainFilters: ["zebernst.dev"]
     serviceMonitor:
       enabled: true

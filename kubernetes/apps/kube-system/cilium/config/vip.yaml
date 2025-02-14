@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-vip
+  annotations:
+    lbipam.cilium.io/ips: 192.168.20.2, ::ffff:c0a8:1402
+spec:
+  type: LoadBalancer
+  selector:
+    k8s-app: kube-apiserver
+    tier: control-plane
+  ports:
+    - name: https
+      port: 6443
+      protocol: TCP
+      targetPort: 6443

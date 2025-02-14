@@ -60,14 +60,14 @@ spec:
             resources:
               requests:
                 cpu: 10m
-#              limits:
-#                memory: 8Gi
+              limits:
+                memory: 8Gi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: ${APP_UID:-1024}
-        runAsGroup: ${APP_GID:-100}
-        fsGroup: ${APP_GID:-100}
+        runAsUser: 1024
+        runAsGroup: 100
+        fsGroup: 100
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
     service:

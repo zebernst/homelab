@@ -37,7 +37,7 @@ spec:
       endpointURL: https://s3.us-west-001.backblazeb2.com
       # Note: serverName version needs to be incremented
       # when recovering from an existing cnpg cluster
-      serverName: &currentCluster redspot16-v1
+      serverName: &currentCluster redspot16-v2
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
@@ -48,12 +48,12 @@ spec:
   # Note: previousCluster needs to be set to the name of the previous
   # cluster when recovering from an existing cnpg cluster
   bootstrap:
-    initdb: {}
-#    recovery:
-#      source: &previousCluster redspot16-v0
-#  # Note: externalClusters is needed when recovering from an existing cnpg cluster
-#  externalClusters:
-#    - name: *previousCluster
-#      barmanObjectStore:
-#        <<: *barmanObjectStore
-#        serverName: *previousCluster
+    # initdb: {}
+    recovery:
+      source: &previousCluster redspot16-v1
+  # Note: externalClusters is needed when recovering from an existing cnpg cluster
+  externalClusters:
+    - name: *previousCluster
+      barmanObjectStore:
+        <<: *barmanObjectStore
+        serverName: *previousCluster

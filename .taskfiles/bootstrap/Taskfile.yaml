@@ -35,9 +35,7 @@ tasks:
       TALOS_CONTEXT:
         sh: talosctl config info --output json | jq --raw-output '.context'
       TALOS_CONTROLLER:
-        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
-    env:
-      ROOK_DISK: '{{.ROOK_DISK | default "SAMSUNG MZQL23T8HCLS-00A07"}}'
+        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | head -n 1
     preconditions:
       - op user get --me
       - talosctl config info
