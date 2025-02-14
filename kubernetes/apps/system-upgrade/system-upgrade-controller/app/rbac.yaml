@@ -15,7 +15,6 @@ subjects:
 apiVersion: talos.dev/v1alpha1
 kind: ServiceAccount
 metadata:
-  name: talos
+  name: system-upgrade
 spec:
-  roles:
-    - os:admin
+  roles: ["os:admin"]
