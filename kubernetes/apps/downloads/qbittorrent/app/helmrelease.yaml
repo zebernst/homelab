@@ -30,7 +30,7 @@ spec:
       qbittorrent:
         annotations:
           configmap.reloader.stakater.com/reload: qbittorrent-scripts
-          secret.reloader.stakater.com/reload: qbittorrent-secret,gluetun-secret
+          secret.reloader.stakater.com/reload: qbittorrent-secret
         containers:
           qbittorrent:
             image:
@@ -50,22 +50,20 @@ spec:
                   name: qbittorrent-secret
             probes:
               liveness: &probes
-                enabled: false
+                enabled: true
                 custom: true
                 spec:
                   httpGet:
                     path: /api/v2/app/version
                     port: *port
-                  initialDelaySeconds: 5
-                  periodSeconds: 30
-                  timeoutSeconds: 10
-                  failureThreshold: 6
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
               readiness: *probes
               startup:
                 enabled: true
                 spec:
-                  tcpSocket:
-                    port: *port
                   failureThreshold: 30
                   periodSeconds: 10
             securityContext:
@@ -80,45 +78,6 @@ spec:
                 cpu: 100m
 #              limits:
 #                memory: 8Gi
-        initContainers:
-          gluetun:
-            restartPolicy: Always
-            image:
-              repository: ghcr.io/qdm12/gluetun
-              tag: v3.40.0
-            env:
-              VPN_TYPE: wireguard
-              VPN_INTERFACE: wg0
-              DNS_KEEP_NAMESERVER: off
-              FIREWALL_INPUT_PORTS: *port
-              FIREWALL_VPN_INPUT_PORTS: *bittorrentPort
-              FIREWALL_OUTBOUND_SUBNETS: 10.244.0.0/16,10.245.0.0/16  # k8s subnet access
-            envFrom:
-              - secretRef:
-                  name: gluetun-secret
-            securityContext:
-              runAsNonRoot: false
-              runAsUser: 0
-              runAsGroup: 0
-              capabilities:
-                add: [ NET_ADMIN ]
-            resources:
-              limits:
-                squat.ai/tun: "1"
-            probes:
-              liveness: &vpn-probes
-                enabled: true
-                custom: true
-                spec:
-                  exec:
-                    command:
-                      - /gluetun-entrypoint
-                      - healthcheck
-                  initialDelaySeconds: 20
-                  periodSeconds: 5
-                  timeoutSeconds: 5
-                  failureThreshold: 3
-              readiness: *vpn-probes
     defaultPodOptions:
       securityContext:
         fsGroup: 568
@@ -126,31 +85,30 @@ spec:
         supplementalGroups: [ 10000 ]
         seccompProfile: { type: RuntimeDefault }
     service:
-      qbittorrent:
-        nameOverride: *app
+      app:
         controller: *app
+        nameOverride: *app
         ports:
           http:
             port: *port
-            primary: true
-#      gluetun:
-#        controller: *app
-#        ports:
-#          http:
-#            port: 80
-#            targetPort: 8000
-#            protocol: HTTP
+      bittorrent:
+        controller: *app
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: 192.168.20.14, ::ffff:c0a8:140e
+        ports:
+          bittorrent-tcp:
+            port: *bittorrentPort
+            protocol: TCP
     ingress:
       lan:
-        annotations:
-          external-dns.alpha.kubernetes.io/target: internal.zebernst.dev
         className: internal
         hosts:
           - host: &host "{{ .Release.Name }}.zebernst.dev"
             paths: &paths
               - path: /
                 service:
-                  identifier: qbittorrent
+                  identifier: app
                   port: http
           - host: &customHost qb.zebernst.dev
             paths: *paths
@@ -165,24 +123,14 @@ spec:
             paths:
               - path: /
                 service:
-                  identifier: qbittorrent
+                  identifier: app
                   port: http
         tls:
           - hosts:
               - *tsHost
     persistence:
       config:
-        existingClaim: qbittorrent
-        advancedMounts:
-          qbittorrent:
-            qbittorrent:
-              - path: /config
-      config-empty:
-        type: emptyDir
-        advancedMounts:
-          qbittorrent:
-            port-forward:
-              - path: /config
+        existingClaim: *app
       scripts:
         type: configMap
         name: qbittorrent-scripts
