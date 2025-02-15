@@ -38,14 +38,12 @@ module.exports = {
   torznab: [
     2,  // PTP
     12, // TL
-    16, // GTN
     18, // MLK
     19, // JPTV
     52, // SP
     53, // HUNO
     54, // HDS
-    55, // ABT
-    56, // GTRU
+    56, // GT
     57, // OE
     58, // OT
     59, // LST

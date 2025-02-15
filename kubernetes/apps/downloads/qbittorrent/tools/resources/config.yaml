@@ -1,8 +1,6 @@
 ---
 trackers:
-  - { name: ab,    required_seed_ratio: 1.01, required_seed_days: 14.3, urls: ["abtorrents.me"] }
-  - { name: gtn,   required_seed_ratio: 0,    required_seed_days: 0,    urls: ["gay-torrents.net"] }
-  - { name: gtru,  required_seed_ratio: 1.01, required_seed_days: 0,    urls: ["gaytor.rent"] }
+  - { name: gt,    required_seed_ratio: 1.01, required_seed_days: 0,    urls: ["gaytor.rent"] }
   - { name: hds,   required_seed_ratio: 0,    required_seed_days: 7.3,  urls: ["hd-space.pw"] }
   - { name: huno,  required_seed_ratio: 1.01, required_seed_days: 5.3,  urls: ["hawke.uno"] }
   - { name: jptv,  required_seed_ratio: 1.01, required_seed_days: 7.3,  urls: ["jptv.club"] }
