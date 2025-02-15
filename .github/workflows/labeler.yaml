@@ -1,6 +1,5 @@
 ---
-# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "Labeler"
+name: Labeler
 
 on:
   workflow_dispatch:
@@ -15,7 +14,15 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - name: Generate Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
       - name: Labeler
         uses: actions/labeler@v5
         with:
           configuration-path: .github/labeler.yaml
+          repo-token: "${{ steps.app-token.outputs.token }}"

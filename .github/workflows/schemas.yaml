@@ -8,12 +8,16 @@ on:
 #    - cron: "0 0 * * *" # Every day at midnight
 #  push:
 #    branches: ["main"]
-#    paths: [".github/workflows/publish-schemas.yaml"]
+#    paths: [".github/workflows/schemas.yaml"]
+
+env:
+  HOMEBREW_NO_ANALYTICS: "1"
+  UV_SYSTEM_PYTHON: "1"
 
 jobs:
   publish:
     name: Schemas
-    runs-on: ["gha-runner-scale-set"]
+    runs-on: ["homelab-runner"]
     permissions:
       contents: read
       packages: write
@@ -34,30 +38,22 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@master
 
       - name: Setup Workflow Tools
-        shell: bash
-        run: brew install kubernetes-cli
+        run: brew install kubectl uv
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: 3.13.x
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 22.x
 
-      - name: Write kubeconfig
-        id: kubeconfig
-        uses: timheuer/base64-to-file@v1
-        with:
-          encodedString: "${{ secrets.KUBECONFIG }}"
-          fileName: kubeconfig
+      - name: Install Python Dependencies
+        run: uv pip install pyyaml
 
       - name: Download and run crd-extractor
-        env:
-          KUBECONFIG: "${{ steps.kubeconfig.outputs.filePath }}"
-        shell: bash
         run: |
           curl -fsSL -o $GITHUB_WORKSPACE/crd-extractor.sh \
               https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/Utilities/crd-extractor.sh

@@ -1,6 +1,5 @@
 ---
-# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: "Renovate"
+name: Renovate
 
 on:
   workflow_dispatch:
@@ -23,9 +22,7 @@ on:
     - cron: "0 * * * *" # Every hour
   push:
     branches: ["main"]
-    paths:
-      - .github/renovate.json5
-      - .github/renovate/**.json5
+    paths: [".github/renovate.json5", ".github/renovate/**.json5"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
