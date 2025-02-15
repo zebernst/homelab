@@ -1,4 +1,3 @@
-# yaml-language-server: $schema=https://taskfile.dev/schema.json
 ---
 version: '3'
 
@@ -25,19 +24,22 @@ tasks:
       - which talosctl
 
   apps:
-    desc: Bootstrap Kubernetes Apps [ROOK_DISK={{.ROOK_DISK}}]
+    desc: Bootstrap Kubernetes Apps
     prompt: Bootstrap Kubernetes Apps ...?
     cmds:
       - kubectl config set-cluster {{.TALOS_CONTEXT}} --server https://{{.TALOS_CONTROLLER}}:6443
       - defer: talosctl kubeconfig --nodes {{.TALOS_CONTROLLER}} --force {{.KUBERNETES_DIR}}
+      - until kubectl wait nodes --for=condition=Ready=False --all --timeout=10m; do sleep 5; done
+      - op inject --in-file {{.KUBERNETES_DIR}}/bootstrap/resources/secrets.yaml.tpl | kubectl apply --server-side --filename -
       - helmfile --file {{.KUBERNETES_DIR}}/bootstrap/helmfile.yaml apply --skip-diff-on-install --suppress-diff
     vars:
       TALOS_CONTEXT:
         sh: talosctl config info --output json | jq --raw-output '.context'
       TALOS_CONTROLLER:
-        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | head -n 1
+        sh: talosctl config info --output json | jq --raw-output '.endpoints[]' | shuf -n 1
     preconditions:
       - op user get --me
       - talosctl config info
       - test -f {{.KUBERNETES_DIR}}/bootstrap/helmfile.yaml
-      - which jq helmfile kubectl op talosctl
+      - test -f {{.KUBERNETES_DIR}}/bootstrap/resources/secrets.yaml.tpl
+      - which helmfile jq kubectl op talosctl
