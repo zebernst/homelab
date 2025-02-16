@@ -154,7 +154,7 @@ Alternative solutions to the first two of these problems would be to host a Kube
 
 | Device                  | Count | OS Disk     | Data Disk                                                              | RAM  | OS          | Purpose         |
 |-------------------------|-------|-------------|------------------------------------------------------------------------|------|-------------|-----------------|
-| MS-01 (i9-1200H)        | 3     | 1TB M.2 SSD | -                                                                      | 32GB | Talos Linux | Kubernetes      |
+| MS-01 (i9-12900H)       | 3     | 1TB M.2 SSD | -                                                                      | 32GB | Talos Linux | Kubernetes      |
 | Synology DS918+         | 1     | -           | 2x14TB&nbsp;HDD + 2x18TB&nbsp;HDD + 2x1TB&nbsp;SSD&nbsp;R/W&nbsp;Cache | 16GB | DSM 7       | NAS/NFS/Backup  |
 | JetKVM                  | 2     | -           | -                                                                      | -    | -           | KVM             |
 | Home Assistant Yellow   | 1     | 8GB eMMC    | 1TB M.2 SSD                                                            | 4GB  | HAOS        | Home Automation |
