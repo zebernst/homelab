@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/onedr0p/home-ops/main/docs/src/assets/logo.png" align="center" width="144px" height="144px"/>
+<img src="https://github.com/user-attachments/assets/0248f379-cc4a-4a59-a400-014a750c61fa" align="center" width="144px" height="144px"/>
 
 
 ### My homelab k8s cluster <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2728/512.gif" alt="🚀" width="16" height="16">
@@ -21,7 +21,7 @@ _... automated via [Flux](https://github.com/fluxcd/flux2), [Renovate](https://g
 
 [![Home-Internet](https://img.shields.io/uptimerobot/status/m798207245-e361357b4ae0adccce695dd9?style=for-the-badge&logo=ubiquiti&logoColor=white&logoSize=auto&label=Home%20Internet&color=brightgreen)](https://status.zebernst.dev)&nbsp;&nbsp;
 [![Status-Page](https://img.shields.io/uptimerobot/status/m798207270-986abc3b5ee42d8f51b9fc5c?color=brightgreeen&label=Status%20Page&style=for-the-badge&logo=statuspage&logoColor=white)](https://status.zebernst.dev)&nbsp;&nbsp;
-[![Alertmanager](https://img.shields.io/uptimerobot/status/m798207288-a3073fd18aa0eb537100f92b?color=brightgreeen&label=Alertmanager&style=for-the-badge&logo=prometheus&logoColor=white)](https://status.zebernst.dev)
+[![Alertmanager](https://img.shields.io/endpoint?url=https%3A%2F%2Fhealthchecks.io%2Fb%2F2%2F75190d22-c52a-410d-9f45-9bd7c95cbb96.shields?color=brightgreeen&label=Alertmanager&style=for-the-badge&logo=prometheus&logoColor=white)](https://status.zebernst.dev)
 </div>
 
 <div align="center">
@@ -46,7 +46,7 @@ This is a repository for my home infrastructure and Kubernetes cluster. I try to
 
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f331/512.gif" alt="🌱" width="20" height="20"> Kubernetes
 
-This semi-hyper-converged cluster runs [Talos Linux](https://github.com/siderolabs/talos), an immutable and ephemeral Linux distribution tailored for [Kubernetes](https://github.com/kubernetes/kubernetes), and is deployed on bare-metal Lenovo ThinkCentre PCs. Currently, persistent file storage is provided via a custom fork of the [Synology CSI](https://github.com/zebernst/synology-csi-talos), however I plan to incorporate [Rook](https://github.com/rook/rook) in order to enable block- and object-storage within the cluster. A separate NAS handles media file storage and backups. The cluster is designed to enable a full teardown without any data loss.
+This semi-hyper-converged cluster runs [Talos Linux](https://github.com/siderolabs/talos), an immutable and ephemeral Linux distribution tailored for [Kubernetes](https://github.com/kubernetes/kubernetes), and is deployed on bare-metal Minisforum MS-01 mini-PCs. Currently, persistent file storage is provided via a custom fork of the [Synology CSI](https://github.com/zebernst/synology-csi-talos), however I plan to incorporate [Rook](https://github.com/rook/rook) in order to enable block- and object-storage within the cluster. A separate NAS handles media file storage and backups. The cluster is designed to enable a full teardown without any data loss.
 
 🔸 _[Click here](./kubernetes/bootstrap/talos/talconfig.yaml) to see my Talos configuration._
 
@@ -117,6 +117,8 @@ graph TD;
 
 In my cluster there are two instances of [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) running: one for syncing private DNS records to my router using the [ExternalDNS webhook provider for UniFi](https://github.com/kashalls/external-dns-unifi-webhook), and another instance for syncing public DNS records to Cloudflare. This setup is managed by creating ingresses with two specific classes: `internal` for private DNS and `external` for public DNS. The `external-dns` instances then sync the DNS records to their respective platforms.
 
+I also run [Tailscale](https://tailscale.com/kb/1236/kubernetes-operator) in my cluster, which serves as both a Kubernetes auth proxy (used with [Nautik](https://nautik.io/) to monitor and administer my Kubernetes cluster on-the-go), as well as to provide remote access to services while I'm not on my home network. Creating an ingress with the `tailscale` class will expose the application to my Tailnet, and automagically configure DNS records and HTTPS certificates for the tailnet accordingly.
+
 ---
 
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f48e/512.gif" alt="☁️" width="20" height="20"> Cloud Dependencies
@@ -128,15 +130,16 @@ While most of my infrastructure and workloads are self-hosted, I do rely upon th
 
 Alternative solutions to the first two of these problems would be to host a Kubernetes cluster in the cloud and deploy applications like [Vault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/); however, maintaining another cluster and monitoring another group of workloads would frankly be more time and effort than I am willing to put in. (and would probably cost more or equal out to the same costs as described below)
 
-| Service                                   | Use                                                               | Cost           |
-|-------------------------------------------|-------------------------------------------------------------------|----------------|
-| [1Password](https://1password.com/)       | Secrets with [External Secrets](https://external-secrets.io/)     | ~$36/yr        |
-| [Cloudflare](https://www.cloudflare.com/) | Domain/DNS                                                        | ~$24/yr        |
-| [Backblaze](https://www.backblaze.com)    | S3-compatible object storage                                      | ~$36/yr        |
-| [GitHub](https://github.com/)             | Hosting this repository and continuous integration/deployments    | Free           |
-| [Pushover](https://pushover.net/)         | Kubernetes Alerts and application notifications                   | $5 OTP         |
-| [UptimeRobot](https://uptimerobot.com/)   | Monitoring internet connectivity and external facing applications | Free           |
-|                                           |                                                                   | Total: ~$10/mo |
+| Service                                     | Use                                                               | Cost           |
+|---------------------------------------------|-------------------------------------------------------------------|----------------|
+| [1Password](https://1password.com/)         | Secrets with [External Secrets](https://external-secrets.io/)     | ~$36/yr        |
+| [Cloudflare](https://www.cloudflare.com/)   | Domain/DNS                                                        | ~$24/yr        |
+| [Backblaze](https://www.backblaze.com)      | S3-compatible object storage                                      | ~$36/yr        |
+| [GitHub](https://github.com/)               | Hosting this repository and continuous integration/deployments    | Free           |
+| [Pushover](https://pushover.net/)           | Kubernetes Alerts and application notifications                   | $5 OTP         |
+| [UptimeRobot](https://uptimerobot.com/)     | Monitoring internet connectivity and external facing applications | Free           |
+| [Healthchecks.io](https://healthchecks.io/) | Dead man's switch for monitoring cron jobs                        | Free           |
+|                                             |                                                                   | Total: ~$10/mo |
 
 ---
 
@@ -145,62 +148,22 @@ Alternative solutions to the first two of these problems would be to host a Kube
 <details>
   <summary>Click to see my rack</summary>
 
-  ![9D083950-181C-4A32-A221-75832EAC5B2D](https://github.com/user-attachments/assets/c2921799-8319-4dd2-ab96-67a9b6885a3d)
+  ![1B51EA7B-3517-4614-B7FC-A15943763705_1_105_c](https://github.com/user-attachments/assets/dd9a2259-7ff3-42d4-a420-2711557483eb)
 </details>
 
 
-| Device                       | Count | CPU      | OS Disk   | Data Disk | RAM  | OS    | Purpose                |
-|------------------------------|-------|----------|-----------|-----------|------|-------|------------------------|
-| Lenovo ThinkCentre M93p Tiny | 3     | i5-4570T | 128GB SSD | -         | 8GB  | Talos | control plane          |
-| Lenovo ThinkCentre M93p Tiny | 4     | i7-4765T | 256GB SSD | -         | 16GB | Talos | general-purpose worker |
-
-Total CPU: 32 threads<br>
-Total RAM: 64GB
-
-### Supporting Hardware
-
-| Device          | CPU                 | OS Disk | Data Disk               | RAM  | OS    | Purpose        |
-|-----------------|---------------------|---------|-------------------------|------|-------|----------------|
-| Synology DS918+ | Intel Celeron J3455 | -       | 2x14TB HDD + 2x18TB HDD | 16GB | DSM 7 | NAS/NFS/Backup |
-
-### Home Automation
-
-| Device                | Count | CPU                  | OS Disk  | Data Disk | RAM   | OS      | Purpose             |
-|-----------------------|-------|----------------------|----------|-----------|-------|---------|---------------------|
-| Home Assistant Yellow | 1     | Raspberry Pi CM4     | 8GB eMMC | 1TB nVME  | 4GB   | HAOS    | Home Automation     |
-| Hue Bridge            | 1     | -                    | -        | -         | -     | -       | Smart Lighting Hub  |
-| ESP32                 | 2     | Tensilica Xtensa LX6 | -        | -         | 512KB | ESPHome | Bluetooth Proxy     |
-
-### Networking & Power
-
-| Device                  | Purpose                |
-|-------------------------|------------------------|
-| Unifi UDM Pro           | Network - Router & NVR |
-| Unifi USW Pro 24 PoE    | Network - Switch       |
-| Unifi USP PDU Pro       | Power - PDU            |
-| CyberPower OR500LCDRM1U | Power - UPS            |
-
+| Device                  | Count | OS Disk     | Data Disk                                                              | RAM  | OS          | Purpose         |
+|-------------------------|-------|-------------|------------------------------------------------------------------------|------|-------------|-----------------|
+| MS-01 (i9-1200H)        | 3     | 1TB M.2 SSD | -                                                                      | 32GB | Talos Linux | Kubernetes      |
+| Synology DS918+         | 1     | -           | 2x14TB&nbsp;HDD + 2x18TB&nbsp;HDD + 2x1TB&nbsp;SSD&nbsp;R/W&nbsp;Cache | 16GB | DSM 7       | NAS/NFS/Backup  |
+| JetKVM                  | 2     | -           | -                                                                      | -    | -           | KVM             |
+| Home Assistant Yellow   | 1     | 8GB eMMC    | 1TB M.2 SSD                                                            | 4GB  | HAOS        | Home Automation |
+| UniFi UDM Pro           | 1     | -           | -                                                                      | -    | UniFi OS    | Router          |
+| UniFi USW Pro 24 PoE    | 1     | -           | -                                                                      | -    | UniFi OS    | Core Switch     |
+| Unifi USP PDU Pro       | 1     | -           | -                                                                      | -    | UniFi OS    | PDU             |
+| CyberPower OR500LCDRM1U | 1     | -           | -                                                                      | -    | -           | UPS             |
 
 ---
-
-<!--
-## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f31f/512.gif" alt="🌟" width="20" height="20"> Stargazers
-
-<div align="center">
-
-<a href="https://star-history.com/#zebernst/homelab&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=zebernst/homelab&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=zebernst/homelab&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=zebernst/homelab&type=Date" />
-  </picture>
-</a>
-
-</div>
-
----
-
--->
 
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f64f/512.gif" alt="🙏" width="20" height="20"> Gratitude and Thanks
 
