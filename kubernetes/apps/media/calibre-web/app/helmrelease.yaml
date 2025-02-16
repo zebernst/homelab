@@ -32,7 +32,7 @@ spec:
           app:
             image:
               repository: crocodilestick/calibre-web-automated
-              tag: dev
+              tag: V3.0.4
             env:
               CACHE_DIR: /cache
               CALIBRE_PORT: &port 8083
@@ -63,7 +63,6 @@ spec:
                   initialDelaySeconds: 60
                   failureThreshold: 45
                   periodSeconds: 5
-
             resources:
               requests:
                 cpu: 10m
@@ -79,19 +78,9 @@ spec:
           http:
             port: 80
             targetPort: *port
-      tailscale:
-        controller: calibre-web
-        type: LoadBalancer
-        loadBalancerClass: tailscale
-        annotations:
-          tailscale.com/hostname: calibre-web
-        ports:
-          http:
-            port: 80
-            targetPort: *port
 
     ingress:
-      app:
+      lan:
         className: internal
         annotations:
           nginx.ingress.kubernetes.io/proxy-body-size: "0"
@@ -105,6 +94,18 @@ spec:
                 service:
                   identifier: app
                   port: http
+      ts:
+        className: tailscale
+        hosts:
+          - host: &tsHost "calibre-web.kite-harmonic.ts.net"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - *tsHost
 
     persistence:
       config:
