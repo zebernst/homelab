@@ -48,18 +48,4 @@ module.exports = {
     58, // OT
     59, // LST
   ].map(i => `http://prowlarr.downloads.svc.cluster.local/${i}/api?apikey=${process.env.PROWLARR_API_KEY}`),
-
-  // Data-based searching
-  dataDirs: [
-    "/media/books",
-    "/media/movies",
-    "/media/movies-uhd",
-    "/media/tv",
-    "/media/tv-uhd",
-    "/media/xxx"
-  ],
-  maxDataDepth: 3,
-  searchCadence: "1 day",
-  excludeRecentSearch: "3 days",
-  excludeOlder: "2 weeks",
 };
