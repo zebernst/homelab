@@ -4,19 +4,23 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app bazarr
-  namespace: flux-system
+  namespace: &ns downloads
 spec:
-  targetNamespace: downloads
+  targetNamespace: *ns
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/volsync
   dependsOn:
     - name: external-secrets-stores
-  path: ./kubernetes/apps/downloads/bazarr/hd
+      namespace: external-secrets
+  path: kubernetes/apps/downloads/bazarr/hd
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
+    namespace: flux-system
   wait: false
   interval: 30m
   retryInterval: 1m
@@ -31,19 +35,23 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app bazarr-uhd
-  namespace: flux-system
+  namespace: &ns downloads
 spec:
-  targetNamespace: downloads
+  targetNamespace: *ns
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/volsync
   dependsOn:
     - name: external-secrets-stores
-  path: ./kubernetes/apps/downloads/bazarr/uhd
+      namespace: external-secrets
+  path: kubernetes/apps/downloads/bazarr/uhd
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
+    namespace: flux-system
   wait: false
   interval: 30m
   retryInterval: 1m

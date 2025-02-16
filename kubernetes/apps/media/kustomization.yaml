@@ -2,10 +2,10 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: media
+components:
+  - ../../components/common
 resources:
-  # Pre Flux-Kustomizations
-  - namespace.yaml
-  # Flux-Kustomizations
   - calibre-web/ks.yaml
   - maintainerr/ks.yaml
   - overseerr/ks.yaml

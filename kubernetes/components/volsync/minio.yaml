@@ -29,48 +29,47 @@ metadata:
 spec:
   sourcePVC: "${APP}"
   trigger:
-    schedule: "0 * * * *"
+    schedule: "30 */4 * * *"
   restic:
-    copyMethod: "${VOLSYNC_COPYMETHOD:-Snapshot}"
-    storageClassName: "${VOLSYNC_STORAGECLASS:-iscsi}"
-    volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:-iscsi}"
-    accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteMany}"]
-    pruneIntervalDays: 7
     repository: "${APP}-volsync-secret"
-    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-4Gi}"
-    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:-openebs-hostpath}"
-    cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:-ReadWriteOnce}"]
+    copyMethod: "${VOLSYNC_COPYMETHOD:=Snapshot}"
+    volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=iscsi}"
+    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:=openebs-hostpath}"
+    cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:=ReadWriteOnce}"]
+    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:=4Gi}"
+    storageClassName: "${VOLSYNC_STORAGECLASS:=iscsi}"
+    accessModes: ["${VOLSYNC_ACCESSMODES:=ReadWriteMany}"]
     moverSecurityContext:
-      runAsUser: ${APP_UID:-568}
-      runAsGroup: ${APP_GID:-568}
-      fsGroup: ${APP_GID:-568}
+      runAsUser: ${APP_UID:=568}
+      runAsGroup: ${APP_GID:=568}
+      fsGroup: ${APP_GID:=568}
     retain:
       hourly: 24
       daily: 7
-      weekly: 5
-      monthly: 3
+      weekly: 4
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationdestination_v1alpha1.json
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
 metadata:
-  name: "${APP}-dst"
+  name: "${APP}"
 spec:
   trigger:
     manual: restore-once
   restic:
     repository: "${APP}-volsync-secret"
     copyMethod: Snapshot # must be Snapshot
-    volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:-iscsi}"
-    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:-openebs-hostpath}"
-    cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:-ReadWriteOnce}"]
-    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-8Gi}"
-    cleanupCachePVC: true
-    storageClassName: "${VOLSYNC_STORAGECLASS:-iscsi}"
-    accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteMany}"]
-    cleanupTempPVC: false  # needs to be false, or else the VolumeSnapContent gets deleted with the PVC.
+    volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=iscsi}"
+    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:=openebs-hostpath}"
+    cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:=ReadWriteOnce}"]
+    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:=8Gi}"
+    storageClassName: "${VOLSYNC_STORAGECLASS:=iscsi}"
+    accessModes: ["${VOLSYNC_ACCESSMODES:=ReadWriteMany}"]
     capacity: "${VOLSYNC_CAPACITY}"
     moverSecurityContext:
-      runAsUser: ${APP_UID:-568}
-      runAsGroup: ${APP_GID:-568}
-      fsGroup: ${APP_GID:-568}
+      runAsUser: ${APP_UID:=568}
+      runAsGroup: ${APP_GID:=568}
+      fsGroup: ${APP_GID:=568}
+    enableFileDeletion: false
+    cleanupCachePVC: true
+    cleanupTempPVC: false  # needs to be false, or else the VolumeSnapContent gets deleted with the PVC.

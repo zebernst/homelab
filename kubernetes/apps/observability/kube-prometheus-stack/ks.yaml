@@ -4,15 +4,16 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app kube-prometheus-stack
-  namespace: flux-system
+  namespace: &ns observability
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
+      namespace: external-secrets
   interval: 30m
-  path: ./kubernetes/apps/observability/kube-prometheus-stack/app
+  path: kubernetes/apps/observability/kube-prometheus-stack/app
   postBuild:
     substitute:
       APP: kube-prometheus-stack
@@ -21,6 +22,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: observability
+    namespace: flux-system
+  targetNamespace: *ns
   timeout: 5m
   wait: false

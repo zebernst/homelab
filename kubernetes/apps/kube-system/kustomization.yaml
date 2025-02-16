@@ -2,19 +2,21 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: kube-system
+components:
+  - ../../components/common
 resources:
-  - ./namespace.yaml
-  - ./cilium/ks.yaml
-  - ./coredns/ks.yaml
-  - ./descheduler/ks.yaml
-  - ./generic-device-plugin/ks.yaml
-  - ./intel-device-plugin/ks.yaml
-  - ./kubelet-csr-approver/ks.yaml
-  - ./metrics-server/ks.yaml
-  - ./nfs-subdir-external-provisioner/ks.yaml
-  - ./node-feature-discovery/ks.yaml
-  - ./node-problem-detector/ks.yaml
-  - ./reloader/ks.yaml
-  - ./snapshot-controller/ks.yaml
-  - ./spegel/ks.yaml
-  - ./synology-csi-driver/ks.yaml
+  - cilium/ks.yaml
+  - coredns/ks.yaml
+  - descheduler/ks.yaml
+  - generic-device-plugin/ks.yaml
+  - intel-device-plugin/ks.yaml
+  - kubelet-csr-approver/ks.yaml
+  - metrics-server/ks.yaml
+  - nfs-subdir-external-provisioner/ks.yaml
+  - node-feature-discovery/ks.yaml
+  - node-problem-detector/ks.yaml
+  - reloader/ks.yaml
+  - snapshot-controller/ks.yaml
+  - spegel/ks.yaml
+  - synology-csi-driver/ks.yaml

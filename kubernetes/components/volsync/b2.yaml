@@ -29,20 +29,20 @@ metadata:
 spec:
   sourcePVC: "${APP}"
   trigger:
-    schedule: "0 0 * * *"
+    schedule: "45 1 * * *"
   restic:
-    copyMethod: "${VOLSYNC_COPYMETHOD:-Snapshot}"
-    storageClassName: "${VOLSYNC_STORAGECLASS:-iscsi}"
-    volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:-iscsi}"
-    accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteMany}"]
+    copyMethod: "${VOLSYNC_COPYMETHOD:=Snapshot}"
+    storageClassName: "${VOLSYNC_STORAGECLASS:=iscsi}"
+    volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=iscsi}"
+    accessModes: ["${VOLSYNC_ACCESSMODES:=ReadWriteMany}"]
     pruneIntervalDays: 7
     repository: "${APP}-volsync-b2-secret"
-    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-4Gi}"
-    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:-openebs-hostpath}"
-    cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:-ReadWriteOnce}"]
+    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:=4Gi}"
+    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:=openebs-hostpath}"
+    cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:=ReadWriteOnce}"]
     moverSecurityContext:
-      runAsUser: ${APP_UID:-568}
-      runAsGroup: ${APP_GID:-568}
-      fsGroup: ${APP_GID:-568}
+      runAsUser: ${APP_UID:=568}
+      runAsGroup: ${APP_GID:=568}
+      fsGroup: ${APP_GID:=568}
     retain:
       daily: 7

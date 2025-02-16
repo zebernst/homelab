@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: cross-seed
+  name: &app cross-seed
 spec:
   interval: 30m
   chart:
@@ -85,14 +85,9 @@ spec:
             port: *port
 
     persistence:
-      state:
-        type: persistentVolumeClaim
-        size: 5Gi
-        storageClass: nfs
-        accessMode: ReadWriteMany
-        globalMounts:
-          - path: /config
       config:
+        existingClaim: *app
+      config-file:
         type: configMap
         name: cross-seed-configmap
         globalMounts:

@@ -4,17 +4,20 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app calibre-web
-  namespace: flux-system
+  namespace: &ns media
 spec:
-  targetNamespace: media
+  targetNamespace: *ns
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/media/calibre-web/app
+  components:
+    - ../../../../components/volsync
+  path: kubernetes/apps/media/calibre-web/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
+    namespace: flux-system
   wait: false
   interval: 30m
   retryInterval: 1m
