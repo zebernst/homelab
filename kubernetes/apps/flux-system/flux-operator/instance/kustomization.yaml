@@ -9,6 +9,13 @@ resources:
 configMapGenerator:
   - name: flux-instance-helm-values
     files:
-      - values.yaml=./helm-values.yaml
+      - values.yaml=helm-values.yaml
+  - name: flux-webhook-gatus-ep
+    files:
+      - config.yaml=webhook/gatus-config.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        gatus.io/enabled: "true"
 configurations:
   - kustomizeconfig.yaml
