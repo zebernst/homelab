@@ -73,7 +73,7 @@ spec:
         runAsNonRoot: true
         runAsUser: ${APP_UID:-1024}
         runAsGroup: ${APP_GID:-100}
-        fsGroup: ${APP_GID:-100}
+        fsGroup: ${APP_GID:-65539}
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
 
