@@ -2,7 +2,118 @@
 ---
 version: '3'
 
+vars:
+  SID:
+    sh: >-
+      curl
+      --silent
+      --get
+      --header "Content-Type: application/json"
+      --data-urlencode "api=SYNO.API.Auth"
+      --data-urlencode "version=6"
+      --data-urlencode "method=login"
+      --data-urlencode "account=$(op read -- 'op://Homelab/Synology/username')"
+      --data-urlencode "passwd=$(op read -- 'op://Homelab/Synology/password')"
+      --data-urlencode "enable_syno_token=no"
+      --url "http://nas.internal:5000/webapi/entry.cgi"
+      | jq .data.sid
+
 tasks:
+
+  api-call:
+    internal: true
+    cmd: >-
+      curl
+      --silent
+      --get
+      --header "Content-Type: application/json"
+      --data-urlencode "_sid={{.SID}}"
+      --data-urlencode "api={{.API}}"
+      --data-urlencode "method={{.METHOD}}"
+      --data-urlencode "version={{.VERSION}}"
+      {{ range $key, $val := .PARAMS -}}
+      --data-urlencode '{{ $key | lower }}={{ $val }}'
+      {{- end }}
+      --url "http://nas.internal:5000/webapi/entry.cgi"
+    vars:
+      PARAMS: { ref: .PARAMS | default dict }
+    requires:
+      vars:
+        - API
+        - VERSION
+        - METHOD
+    preconditions:
+      - which curl
+
+  delete-target:
+    desc: Delete iSCSI Target [TARGET_ID=required]
+    cmds:
+      - task: api-call
+        vars:
+          API: "SYNO.Core.ISCSI.Target"
+          METHOD: delete
+          VERSION: 1
+          PARAMS: { ref: dict "TARGET_ID" (quote .TARGET_ID) }
+    requires:
+      vars: [ TARGET_ID ]
+
+  delete-lun:
+    desc: Delete iSCSI LUN [UUID=required]
+    cmds:
+      - task: api-call
+        vars:
+          API: "SYNO.Core.ISCSI.LUN"
+          METHOD: delete
+          VERSION: 1
+          PARAMS: { ref: dict "UUID" (quote .UUID) }
+    requires:
+      vars: [ UUID ]
+
+  clean-unmapped-targets:
+    cmds:
+      - for: { var: TARGETS }
+        task: delete-target
+        vars:
+          TARGET_ID: '{{.ITEM}}'
+    vars:
+      TARGETS:
+        sh: >-
+          curl
+          --silent
+          --get
+          --header "Content-Type: application/json"
+          --data-urlencode "additional=[\"mapped_lun\",\"connected_sessions\"]"
+          --data-urlencode "api=SYNO.Core.ISCSI.Target"
+          --data-urlencode "method=list"
+          --data-urlencode "version=1"
+          --data-urlencode "_sid={{.SID}}"
+          --url "http://nas.internal:5000/webapi/entry.cgi" |
+          jq --join-output '[.data.targets[] | select(.mapped_luns == []) | .target_id] | join(" ")'
+    preconditions:
+      - which jq curl
+
+  clean-unmapped-luns:
+    cmds:
+      - for: { var: LUNS }
+        task: delete-lun
+        vars:
+          UUID: '{{.ITEM}}'
+    vars:
+      LUNS:
+        sh: >-
+          curl
+          --silent
+          --get
+          --header "Content-Type: application/json"
+          --data-urlencode "additional=[\"is_mapped\"]"
+          --data-urlencode "api=SYNO.Core.ISCSI.LUN"
+          --data-urlencode "method=list"
+          --data-urlencode "version=1"
+          --data-urlencode "_sid={{.SID}}"
+          --url "http://nas.internal:5000/webapi/entry.cgi" |
+          jq --join-output '[.data.luns[] | select(.is_mapped == false) | .uuid] | join(" ")'
+    preconditions:
+      - which jq curl
 
   provision-cert:
     desc: Provision a new LE certificate in DSM [DOMAIN=required]
@@ -24,6 +135,7 @@ tasks:
           SYNO_CREATE=1
           {{.LE_WORKING_DIR}}/acme.sh --deploy --deploy-hook synology_dsm
           {{- range (splitList "," .DOMAIN) }} -d {{.}} {{- end }}
-
+    preconditions:
+      - which ssh
     requires:
       vars: [DOMAIN]
