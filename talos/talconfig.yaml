@@ -29,6 +29,18 @@ nodes:
         vlans:
           - { vlanId: 20, dhcp: false, mtu: 1500 }
           - { vlanId: 30, dhcp: false, mtu: 1500 }
+      - deviceSelector:
+          busPath: 0-1.0 # ganymede
+        dhcp: false
+        mtu: 65520
+        addresses: [ "169.254.255.10/32" ]
+        routes: [ { network: "169.254.255.11/32", metric: 2048 } ]
+      - deviceSelector:
+          busPath: 1-1.0 # callisto
+        dhcp: false
+        mtu: 65520
+        addresses: [ "169.254.255.10/32" ]
+        routes: [ { network: "169.254.255.12/32", metric: 2048 } ]
 
   - hostname: ganymede.k8s.internal
     ipAddress: 192.168.10.11
@@ -38,6 +50,18 @@ nodes:
     machineDisks: []
     networkInterfaces:
       - <<: *bond0
+      - deviceSelector:
+          busPath: 0-1.0 # io
+        dhcp: false
+        mtu: 65520
+        addresses: [ "169.254.255.11/32" ]
+        routes: [ { network: "169.254.255.10/32", metric: 2048 } ]
+      - deviceSelector:
+          busPath: 1-1.0 # callisto
+        dhcp: false
+        mtu: 65520
+        addresses: [ "169.254.255.11/32" ]
+        routes: [ { network: "169.254.255.12/32", metric: 2048 } ]
 
   - hostname: callisto.k8s.internal
     ipAddress: 192.168.10.12
@@ -47,6 +71,18 @@ nodes:
     machineDisks: []
     networkInterfaces:
       - <<: *bond0
+      - deviceSelector:
+          busPath: 0-1.0 # io
+        dhcp: false
+        mtu: 65520
+        addresses: [ "169.254.255.12/32" ]
+        routes: [ { network: "169.254.255.10/32", metric: 2048 } ]
+      - deviceSelector:
+          busPath: 1-1.0 # ganymede
+        dhcp: false
+        mtu: 65520
+        addresses: [ "169.254.255.12/32" ]
+        routes: [ { network: "169.254.255.11/32", metric: 2048 } ]
 
 controlPlane:
   noSchematicValidate: true
@@ -70,7 +106,6 @@ controlPlane:
           - siderolabs/iscsi-tools
           - siderolabs/mei
           - siderolabs/thunderbolt
-
 
   nodeLabels:
     topology.kubernetes.io/region: *cluster
