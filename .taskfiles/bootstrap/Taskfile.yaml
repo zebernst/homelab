@@ -9,6 +9,8 @@ tasks:
       - op read --out-file {{.ROOT_DIR}}/age.key op://Secrets/age/age.key
     preconditions:
       - which op
+    generates:
+      - "{{.ROOT_DIR}}/age.key"
 
   talos:
     desc: Bootstrap Talos
