@@ -47,9 +47,17 @@ tasks:
       - which talosctl jq
 
   reset-node:
-    desc: Reset Talos on a single node [NODE=required]
+    desc: Reset Talos on a single node [NODE=required] [CSI_DISK={{.CSI_DISK}}]
     prompt: Reset Talos on {{.NODE}} ... continue?
-    cmd: talosctl reset --nodes {{.NODE}} --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL --graceful=false --reboot
+    cmds:
+      - talosctl --nodes {{.NODE}} wipe disk {{.CSI_DISKS}}
+      - talosctl --nodes {{.NODE}} reset --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL --graceful=false --reboot
+    vars:
+      CSI_DISK: '{{.CSI_DISK | default "Samsung SSD 970 EVO Plus 2TB"}}'
+      CSI_DISKS:
+        sh: |-
+          talosctl --nodes {{.NODE}} get disks --output json \
+            | jq --raw-output 'select(.spec.model == "{{.CSI_DISK}}") | .metadata.id' | xargs
     requires:
       vars: [NODE]
     preconditions:

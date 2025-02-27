@@ -27,6 +27,7 @@ resources:
   - piraeus.yaml
   - postfinance.yaml
   - prometheus-community.yaml
+  - rook-ceph.yaml
   - spegel.yaml
   - stakater.yaml
   - synology-csi-talos.yaml

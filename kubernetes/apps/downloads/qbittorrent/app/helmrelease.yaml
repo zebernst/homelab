@@ -80,9 +80,10 @@ spec:
 #                memory: 8Gi
     defaultPodOptions:
       securityContext:
-        fsGroup: 568
+        runAsNonRoot: true
+        runAsUser: ${APP_UID:=568}
+        runAsGroup: ${APP_GID:=568}
         fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [ 10000 ]
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
