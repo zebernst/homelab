@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: onepassword-connect
+  name: &app onepassword
 spec:
   interval: 30m
   chart:
@@ -24,7 +24,7 @@ spec:
       retries: 3
   values:
     controllers:
-      onepassword-connect:
+      onepassword:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -70,7 +70,7 @@ spec:
               requests:
                 cpu: 10m
               limits:
-                memory: 256M
+                memory: 64Mi
           sync:
             image:
               repository: docker.io/1password/connect-sync
@@ -111,14 +111,24 @@ spec:
         runAsNonRoot: true
         runAsUser: 999
         runAsGroup: 999
-    service:
+    ingress:
       app:
-        controller: onepassword-connect
-        ports:
-          http:
-            port: *apiPort
+        className: internal
+        hosts:
+          - host: "{{ .Release.Name }}.zebernst.dev"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
     persistence:
       config:
         type: emptyDir
         globalMounts:
           - path: *configDir
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: *apiPort

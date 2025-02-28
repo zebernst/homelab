@@ -17,7 +17,7 @@ spec:
       namespace: database
     - name: dragonfly-cluster
       namespace: database
-    - name: external-secrets-stores
+    - name: onepassword
       namespace: external-secrets
     - name: rook-ceph-cluster
       namespace: rook-ceph
