@@ -37,7 +37,7 @@ spec:
               pullPolicy: IfNotPresent
             env:
               TZ: America/New_York
-              USER: 1000
+              USER: 568
               STASH_CONFIG_FILE: /config/config.yml
               STASH_STASH: /media/xxx/
               STASH_GENERATED: /generated/
@@ -63,11 +63,11 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: ${APP_UID:-1024}
-        runAsGroup: ${APP_GID:-100}
-        fsGroup: ${APP_GID:-100}
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
-        seccompProfile: { type: RuntimeDefault }
+        supplementalGroups: [65568]
     service:
       stash:
         controller: stash

@@ -19,10 +19,13 @@ spec:
     defaultPodOptions:
       automountServiceAccountToken: false
       enableServiceLinks: false
-      securityContext:
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
+#      securityContext:
+#        runAsNonRoot: true
+#        runAsUser: 568
+#        runAsGroup: 568
+#        fsGroup: 568
+#        fsGroupChangePolicy: OnRootMismatch
+#        supplementalGroups: [ 65568 ]
 
     controllers:
       calibre-web:
@@ -37,8 +40,8 @@ spec:
               CACHE_DIR: /cache
               CALIBRE_PORT: &port 8083
               TZ: America/New_York
-              PUID: "${APP_UID}"
-              PGID: "${APP_GID}"
+              PUID: 568
+              PGID: 65568
               DOCKER_MODS: >-
                 {{- $items := list
                   "// renovate: lsio-docker-mod"

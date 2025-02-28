@@ -75,9 +75,8 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 65534
-        runAsGroup: 65534
-        seccompProfile: { type: RuntimeDefault }
+        runAsUser: 568
+        runAsGroup: 568
     service:
       cloudflared:
         controller: *app

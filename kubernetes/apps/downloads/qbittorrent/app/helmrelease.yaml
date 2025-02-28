@@ -67,9 +67,6 @@ spec:
                   failureThreshold: 30
                   periodSeconds: 10
             securityContext:
-              runAsNonRoot: true
-              runAsUser: 1024
-              runAsGroup: 100
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: [ "ALL" ] }
@@ -81,10 +78,11 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: ${APP_UID:=568}
-        runAsGroup: ${APP_GID:=568}
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
-        seccompProfile: { type: RuntimeDefault }
+        supplementalGroups: [ 65568 ]
     service:
       app:
         controller: *app

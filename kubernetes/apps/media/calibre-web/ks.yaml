@@ -25,6 +25,4 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      APP_UID: "1024"
-      APP_GID: "100"
       VOLSYNC_CAPACITY: 20Gi

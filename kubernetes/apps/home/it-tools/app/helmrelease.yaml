@@ -24,10 +24,9 @@ spec:
 
         pod:
           securityContext:
+            runAsNonRoot: true
             runAsUser: 568
-            runAsGroup: 65539
-            fsGroup: 65539
-            fsGroupChangePolicy: "OnRootMismatch"
+            runAsGroup: 568
 
         containers:
           app:
@@ -42,9 +41,7 @@ spec:
                 memory: 256Mi
             securityContext:
               allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                  - ALL
+              capabilities: {drop: ["ALL"]}
               readOnlyRootFilesystem: true
 
     service:

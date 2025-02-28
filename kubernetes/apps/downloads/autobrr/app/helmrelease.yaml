@@ -74,11 +74,8 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: ${APP_UID:-1024}
-        runAsGroup: ${APP_GID:-100}
-        fsGroup: ${APP_GID:-100}
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile: { type: RuntimeDefault }
+        runAsUser: 568
+        runAsGroup: 568
     service:
       app:
         controller: *app
