@@ -13,6 +13,7 @@ _... automated via [Flux](https://github.com/fluxcd/flux2), [Renovate](https://g
 
 [![Talos](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.zebernst.dev%2Ftalos_version&style=for-the-badge&logo=talos&logoColor=white&color=blue&label=%20)](https://talos.dev)&nbsp;&nbsp;
 [![Kubernetes](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.zebernst.dev%2Fkubernetes_version&style=for-the-badge&logo=kubernetes&logoColor=white&color=blue&label=%20)](https://kubernetes.io)&nbsp;&nbsp;
+[![Flux](https://img.shields.io/endpoint?url=https%3A%2F%2Fkromgo.zebernst.dev%2Fflux_version&style=for-the-badge&logo=flux&logoColor=white&color=blue&label=%20)](https://fluxcd.io)&nbsp;&nbsp;
 [![Renovate](https://img.shields.io/github/actions/workflow/status/zebernst/homelab/renovate.yaml?branch=main&label=&logo=renovate&style=for-the-badge&color=blue)](https://github.com/zebernst/homelab/actions/workflows/renovate.yaml)
 
 </div>
@@ -46,7 +47,7 @@ This is a repository for my home infrastructure and Kubernetes cluster. I try to
 
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f331/512.gif" alt="🌱" width="20" height="20"> Kubernetes
 
-This semi-hyper-converged cluster runs [Talos Linux](https://github.com/siderolabs/talos), an immutable and ephemeral Linux distribution tailored for [Kubernetes](https://github.com/kubernetes/kubernetes), and is deployed on bare-metal Minisforum MS-01 mini-PCs. Currently, persistent file storage is provided via a custom fork of the [Synology CSI](https://github.com/zebernst/synology-csi-talos), however I plan to incorporate [Rook](https://github.com/rook/rook) in order to enable block- and object-storage within the cluster. A separate NAS handles media file storage and backups. The cluster is designed to enable a full teardown without any data loss.
+This hyper-converged cluster runs [Talos Linux](https://github.com/siderolabs/talos), an immutable and ephemeral Linux distribution tailored for [Kubernetes](https://github.com/kubernetes/kubernetes), and is deployed on bare-metal Minisforum MS-01 mini-PCs. Currently, persistent storage is provided via [Rook](https://github.com/rook/rook) in order to enable resilient block-, file-, and object-storage within the cluster. A Synology NAS handles media file storage and backups, and is also available as an alternate storage location with the help of a custom fork of the official [Synology CSI](https://github.com/zebernst/synology-csi-talos) for workloads that should not be hyper-converged. The cluster is designed to enable a full teardown without any data loss.
 
 🔸 _[Click here](./kubernetes/bootstrap/talos/talconfig.yaml) to see my Talos configuration._
 
@@ -61,8 +62,7 @@ There is a template at [onedr0p/cluster-template](https://github.com/onedr0p/clu
 - [external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically syncs ingress DNS records to a DNS provider.
 - [external-secrets](https://github.com/external-secrets/external-secrets): Managed Kubernetes secrets using [1Password Connect](https://github.com/1Password/connect).
 - [ingress-nginx](https://github.com/kubernetes/ingress-nginx): Kubernetes ingress controller using NGINX as a reverse proxy and load balancer.
-- [rook](https://github.com/rook/rook): Distributed block, file, and object storage for stateful workloads. [**WIP**]
-- [sops](https://github.com/getsops/sops): Managed secrets for Kubernetes which are commited to Git. (Used solely for initial bootstrapping of cluster)
+- [rook](https://github.com/rook/rook): Distributed block, file, and object storage for stateful workloads.
 - [spegel](https://github.com/spegel-org/spegel): Stateless cluster-local OCI registry mirror.
 - [volsync](https://github.com/backube/volsync): Backup and recovery of persistent volume claims.
 
@@ -82,8 +82,8 @@ This Git repository contains the following directories under [kubernetes/](./kub
 📁 kubernetes
 ├── 📁 apps           # applications
 ├── 📁 bootstrap      # bootstrap procedures
-├── 📁 flux           # core flux configuration
-└── 📁 templates      # reusable components
+├── 📁 components     # reusable components
+└── 📁 flux           # core flux configuration
 ```
 
 ### Cluster layout
@@ -154,7 +154,7 @@ Alternative solutions to the first two of these problems would be to host a Kube
 
 | Device                  | Count | OS Disk     | Data Disk                                                              | RAM  | OS          | Purpose         |
 |-------------------------|-------|-------------|------------------------------------------------------------------------|------|-------------|-----------------|
-| MS-01 (i9-12900H)       | 3     | 1TB M.2 SSD | -                                                                      | 32GB | Talos Linux | Kubernetes      |
+| MS-01 (i9-12900H)       | 3     | 1TB M.2 SSD | 2TB M.2 SSD (Rook)                                                     | 32GB | Talos Linux | Kubernetes      |
 | Synology DS918+         | 1     | -           | 2x14TB&nbsp;HDD + 2x18TB&nbsp;HDD + 2x1TB&nbsp;SSD&nbsp;R/W&nbsp;Cache | 16GB | DSM 7       | NAS/NFS/Backup  |
 | JetKVM                  | 2     | -           | -                                                                      | -    | -           | KVM             |
 | Home Assistant Yellow   | 1     | 8GB eMMC    | 1TB M.2 SSD                                                            | 4GB  | HAOS        | Home Automation |
@@ -167,7 +167,7 @@ Alternative solutions to the first two of these problems would be to host a Kube
 
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f64f/512.gif" alt="🙏" width="20" height="20"> Gratitude and Thanks
 
-Huge thank-you to the folks over on the [Home Operations](https://discord.gg/home-operations) Discord community, especially [@onedrop](https://github.com/onedr0p), [@bjw-s](https://github.com/bjw-s), and [@buroa](https://github.com/buroa). Their home-ops repos have been an amazing resource to reference as I embarked on this journey.
+Huge thank-you to the folks over on the [Home Operations](https://discord.gg/home-operations) Discord community, especially [@onedrop](https://github.com/onedr0p), [@bjw-s](https://github.com/bjw-s), and [@buroa](https://github.com/buroa) – their home-ops repos have been an amazing resource to draw upon.
 
 Be sure to check out [kubesearch.dev](https://kubesearch.dev) for further ideas and reference for deploying applications on Kubernetes.
 
