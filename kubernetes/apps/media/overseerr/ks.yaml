@@ -13,6 +13,11 @@ spec:
   components:
     - ../../../../components/gatus
     - ../../../../components/volsync
+  dependsOn:
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
   path: kubernetes/apps/media/overseerr/app
   prune: true
   sourceRef:

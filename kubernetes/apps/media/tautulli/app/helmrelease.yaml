@@ -22,11 +22,6 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  dependsOn:
-    - name: synology-csi-driver
-      namespace: kube-system
-    - name: volsync
-      namespace: volsync-system
   values:
     controllers:
       tautulli:

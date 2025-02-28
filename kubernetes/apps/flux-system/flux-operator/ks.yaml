@@ -33,6 +33,9 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: flux-operator
+      namespace: *ns
+    - name: external-secrets-stores
+      namespace: external-secrets
   path: kubernetes/apps/flux-system/flux-operator/instance
   prune: false # never should be deleted
   sourceRef:

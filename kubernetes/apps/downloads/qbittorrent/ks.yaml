@@ -15,6 +15,10 @@ spec:
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
   path: kubernetes/apps/downloads/qbittorrent/app
   prune: true
   sourceRef:
@@ -45,6 +49,9 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: qbittorrent
+      namespace: *ns
   path: kubernetes/apps/downloads/qbittorrent/tools
   prune: true
   sourceRef:

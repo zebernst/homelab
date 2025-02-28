@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: omegabrr
+  name: &app omegabrr
 spec:
   interval: 30m
   chart:
@@ -14,6 +14,9 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
+  dependsOn:
+    - name: autobrr
+      namespace: downloads
   install:
     remediation:
       retries: 3
@@ -53,7 +56,7 @@ spec:
 
     service:
       app:
-        controller: omegabrr
+        controller: *app
         ports:
           http:
             port: 80

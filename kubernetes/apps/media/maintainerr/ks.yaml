@@ -22,13 +22,12 @@ spec:
     namespace: flux-system
   wait: false
   dependsOn:
-    - name: synology-csi-driver
-      namespace: kube-system
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
     - name: volsync
       namespace: volsync-system
     - name: external-secrets-stores
       namespace: external-secrets
-    - name: plex
   postBuild:
     substitute:
       APP: *appname

@@ -15,6 +15,10 @@ spec:
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
   path: kubernetes/apps/downloads/bazarr/hd
   prune: true
   sourceRef:
@@ -46,6 +50,10 @@ spec:
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
   path: kubernetes/apps/downloads/bazarr/uhd
   prune: true
   sourceRef:

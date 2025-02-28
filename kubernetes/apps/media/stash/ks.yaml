@@ -17,6 +17,10 @@ spec:
       namespace: database
     - name: external-secrets-stores
       namespace: external-secrets
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
   path: kubernetes/apps/media/stash/app
   prune: true
   sourceRef:

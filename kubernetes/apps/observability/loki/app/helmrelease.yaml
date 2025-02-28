@@ -24,9 +24,6 @@ spec:
     remediation:
       strategy: rollback
       retries: 3
-  dependsOn:
-    - name: synology-csi-driver
-      namespace: kube-system
   values:
     deploymentMode: SingleBinary
     loki:
@@ -64,7 +61,7 @@ spec:
       replicas: 1
       persistence:
         enabled: true
-        storageClass: iscsi
+        storageClass: ceph-block
         size: 50Gi
     gateway:
       replicas: 0

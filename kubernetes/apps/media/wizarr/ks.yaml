@@ -14,8 +14,8 @@ spec:
     - ../../../../components/gatus
     - ../../../../components/volsync
   dependsOn:
-    - name: plex
-    - name: overseerr
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
     - name: volsync
       namespace: volsync-system
   path: kubernetes/apps/media/wizarr/app

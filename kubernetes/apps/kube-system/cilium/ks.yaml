@@ -32,6 +32,7 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: cilium
+      namespace: *ns
   path: kubernetes/apps/kube-system/cilium/config
   prune: false # never should be deleted
   sourceRef:

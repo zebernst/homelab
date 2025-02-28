@@ -23,8 +23,8 @@ spec:
       strategy: rollback
       retries: 3
   dependsOn:
-    - name: synology-csi-driver
-      namespace: kube-system
+    - name: plex
+    - name: overseerr
   values:
     controllers:
       wizarr:
@@ -43,13 +43,13 @@ spec:
                 memory: 180M
               limits:
                 memory: 300M
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 568
-        runAsGroup: 568
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
+#    defaultPodOptions:
+#      securityContext:
+#        runAsNonRoot: true
+#        runAsUser: 568
+#        runAsGroup: 568
+#        fsGroup: 568
+#        fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         controller: *app

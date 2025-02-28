@@ -14,8 +14,6 @@ spec:
         kind: HelmRepository
         name: synology-csi-talos
         namespace: flux-system
-  dependsOn:
-    - name: snapshot-controller
   install:
     remediation:
       retries: 3

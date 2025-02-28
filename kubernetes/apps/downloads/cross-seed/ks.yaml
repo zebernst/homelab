@@ -15,6 +15,10 @@ spec:
   dependsOn:
     - name: external-secrets-stores
       namespace: external-secrets
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
   path: kubernetes/apps/downloads/cross-seed/app
   prune: true
   sourceRef:

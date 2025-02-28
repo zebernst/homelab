@@ -75,6 +75,7 @@ spec:
           failureDomain: host
           replicated:
             size: 3
+          enableRBDStats: true
         storageClass:
           enabled: true
           name: ceph-block

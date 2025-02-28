@@ -10,7 +10,8 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: external-dns-cloudflare
+    - name: external-secrets-stores
+      namespace: external-secrets
   path: kubernetes/apps/network/cloudflared/app
   prune: true
   sourceRef:

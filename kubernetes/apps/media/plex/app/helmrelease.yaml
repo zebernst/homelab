@@ -25,10 +25,6 @@ spec:
   dependsOn:
     - name: intel-device-plugin-gpu
       namespace: kube-system
-    - name: synology-csi-driver
-      namespace: kube-system
-    - name: volsync
-      namespace: volsync-system
   values:
     controllers:
       plex:

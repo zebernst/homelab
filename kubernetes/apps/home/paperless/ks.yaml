@@ -19,6 +19,10 @@ spec:
       namespace: database
     - name: external-secrets-stores
       namespace: external-secrets
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
   path: kubernetes/apps/home/paperless/app
   prune: true
   sourceRef:
@@ -33,5 +37,5 @@ spec:
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 15Gi
-      VOLSYNC_PUID: 1000
-      VOLSYNC_PGID: 1000
+      VOLSYNC_PUID: "1000"
+      VOLSYNC_PGID: "1000"
