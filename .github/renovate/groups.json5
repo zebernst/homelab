@@ -24,13 +24,12 @@
       groupName: "Flux Operator",
       matchPackagePatterns: ["flux-operator", "flux-instance"],
       matchDatasources: ["docker"],
-      versioning: "semver",
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
     },
     {
-      description: ["Intel-Device-Plugins Group"],
+      description: ["Intel Device Plugins Group"],
       groupName: "Intel-Device-Plugins",
       matchPackagePatterns: ["intel-device-plugins"],
       matchDatasources: ["helm"],
@@ -47,23 +46,5 @@
         commitMessageTopic: "{{{groupName}}} group",
       },
     },
-    {
-      description: ["Talos Group"],
-      groupName: "Talos",
-      matchPackagePatterns: ["siderolabs/installer", "siderolabs/talosctl"],
-      matchDatasources: ["docker"],
-      group: {
-        commitMessageTopic: "{{{groupName}}} group",
-      },
-    },
-    {
-      description: ["Kubernetes Group"],
-      groupName: "Kubernetes",
-      matchPackagePatterns: ["siderolabs/kubelet", "kubectl"],
-      matchDatasources: ["docker"],
-      group: {
-        "commitMessageTopic": "{{{groupName}}} group"
-      },
-    }
   ],
 }

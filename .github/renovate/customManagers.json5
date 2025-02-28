@@ -3,27 +3,17 @@
   customManagers: [
     {
       customType: "regex",
-      description: ["Process YAML custom dependencies"],
-      fileMatch: [
-        "(^|/)talos/.+\\.ya?ml$",
-        "(^|/)kubernetes/.+\\.ya?ml$",
-      ],
+      description: ["Process annotated dependencies"],
+      fileMatch: ["(^|/).+\\.ya?ml(?:\\.j2)?$"],
       matchStrings: [
-        // # renovate: depName=kubernetes/kubernetes datasource=github-releases
+        // # renovate: datasource=github-releases depName=kubernetes/kubernetes
         // version: 1.29.1
-        "depName=(?<depName>\\S+) datasource=(?<datasource>\\S+)\\n.+ (?<currentValue>[v|\\d]\\S+)",
-        // # renovate: depName=rancher/system-upgrade-controller datasource=github-releases
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+ (?<currentValue>[v|\\d]\\S+)",
+        // # renovate: datasource=github-releases depName=rancher/system-upgrade-controller
         // https://github.com/rancher/system-upgrade-controller/releases/download/v0.13.2/crd.yaml
-        "depName=(?<depName>\\S+) datasource=(?<datasource>\\S+)\\n.+/(?<currentValue>[v|\\d][^/]+)",
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+/(?<currentValue>[v|\\d][^/]+)",
       ],
       datasourceTemplate: "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
-    },
-    {
-      customType: "regex",
-      description: ["Process any imageName keys in YAML files (cloudnative-pg)"],
-      fileMatch: ["(^|/)kubernetes/.+\\.ya?ml$"],
-      matchStrings: ["imageName: (?<depName>\\S+):(?<currentValue>\\S+)@(?<currentDigest>\\S+)"],
-      datasourceTemplate: "docker",
     },
   ],
 }
