@@ -34,6 +34,11 @@ spec:
     - name: cert-manager
       namespace: cert-manager
   path: kubernetes/apps/cert-manager/cert-manager/issuers
+  healthCheckExprs:
+    - apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   prune: true
   sourceRef:
     kind: GitRepository
@@ -60,6 +65,11 @@ spec:
     - name: cert-manager-issuers
       namespace: cert-manager
   path: kubernetes/apps/cert-manager/cert-manager/tls
+  healthCheckExprs:
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   prune: true
   sourceRef:
     kind: GitRepository
