@@ -8,6 +8,7 @@ spec:
   instances: 3
   imageName: ghcr.io/cloudnative-pg/postgresql:16.6-27
   primaryUpdateStrategy: unsupervised
+  failoverDelay: 2
   storage:
     size: 20Gi
     storageClass: openebs-hostpath
@@ -20,7 +21,8 @@ spec:
       shared_buffers: 256MB
   resources:
     requests:
-      cpu: 500m
+      cpu: 200m
+      memory: 512Mi
     limits:
       hugepages-2Mi: 2Gi # Requires sysctl set on the host
       memory: 4Gi
@@ -42,7 +44,7 @@ spec:
       endpointURL: https://s3.us-west-001.backblazeb2.com
       # Note: serverName version needs to be incremented
       # when recovering from an existing cnpg cluster
-      serverName: &currentCluster redspot16-v3
+      serverName: redspot16-v3
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
