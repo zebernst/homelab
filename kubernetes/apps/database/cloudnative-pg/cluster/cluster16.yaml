@@ -3,7 +3,7 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: redspot16
+  name: &cluster redspot16
 spec:
   instances: 3
   imageName: ghcr.io/cloudnative-pg/postgresql:16.6-27
@@ -26,10 +26,13 @@ spec:
     limits:
       hugepages-2Mi: 2Gi # Requires sysctl set on the host
       memory: 4Gi
-  affinity:
-    enablePodAntiAffinity: true
-    topologyKey: kubernetes.io/hostname
-    podAntiAffinityType: required
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          cnpg.io/cluster: *cluster
   monitoring:
     enablePodMonitor: true
   backup:
@@ -42,8 +45,7 @@ spec:
         maxParallel: 8
       destinationPath: s3://cluster-db-backup/
       endpointURL: https://s3.us-west-001.backblazeb2.com
-      # Note: serverName version needs to be incremented
-      # when recovering from an existing cnpg cluster
+      # Note: serverName version needs to be incremented when recovering from an existing cnpg cluster
       serverName: redspot16-v3
       s3Credentials:
         accessKeyId:
@@ -52,8 +54,8 @@ spec:
         secretAccessKey:
           name: cloudnative-pg-secret
           key: aws-secret-access-key
-  # # Note: previousCluster needs to be set to the name of the previous
-  # # cluster when recovering from an existing cnpg cluster
+  # Note: previousCluster needs to be set to the name of the previous
+  # cluster when recovering from an existing cnpg cluster
   bootstrap:
     recovery:
       source: &previousCluster redspot16-v2

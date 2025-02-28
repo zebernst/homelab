@@ -2,7 +2,7 @@
 apiVersion: apps.emqx.io/v2beta1
 kind: EMQX
 metadata:
-  name: emqx
+  name: &cluster emqx
 spec:
   image: public.ecr.aws/emqx/emqx:5.8.4
   config:
@@ -50,6 +50,14 @@ spec:
         - name: authz
           secret:
             secretName: emqx-authz-secret
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              apps.emqx.io/instance: *cluster
+              apps.emqx.io/db-role: core
   listenersServiceTemplate:
     metadata:
       annotations:

@@ -2,7 +2,7 @@
 apiVersion: dragonflydb.io/v1alpha1
 kind: Dragonfly
 metadata:
-  name: hindwing
+  name: &cluster hindwing
 spec:
   image: ghcr.io/dragonflydb/dragonfly:v1.27.1
   replicas: 3
@@ -28,3 +28,10 @@ spec:
     type: LoadBalancer
     annotations:
       external-dns.alpha.kubernetes.io/hostname: redis.zebernst.dev
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app: *cluster
