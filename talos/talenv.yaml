@@ -4,6 +4,6 @@ KUBERNETES_VERSION: v1.32.2
 # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
 TALOS_VERSION: v1.9.4
 # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
-PROMETHEUS_OPERATOR_VERSION: v0.80.0
+PROMETHEUS_OPERATOR_VERSION: v0.80.1
 # renovate: datasource=github-releases depName=tailscale/tailscale
 TAILSCALE_VERSION: v1.80.0
