@@ -9,8 +9,9 @@ resources:
 configMapGenerator:
   - name: sonarr-configmap
     files:
-      - pushover-notify.sh=../resources/pushover-notify.sh
-      - refresh-series.sh=../resources/refresh-series.sh
+      - notify-pushover.sh=../scripts/notify-pushover.sh
+      - refresh-tba.sh=../scripts/refresh-tba.sh
+      - tag-codec.sh=../scripts/tag-codec.sh
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

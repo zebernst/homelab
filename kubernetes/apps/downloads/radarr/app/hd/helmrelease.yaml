@@ -167,31 +167,22 @@ spec:
         type: emptyDir
       cache:
         existingClaim: radarr-cache
-        advancedMounts:
-          radarr:
-            app:
-            - path: /config/MediaCover
-              subPath: MediaCover
+        globalMounts:
+          - path: /config/MediaCover
+            subPath: MediaCover
       scripts:
         type: configMap
         name: radarr-configmap
         defaultMode: 0775
-        advancedMounts:
-          radarr:
-            app:
-            - path: /scripts/pushover-notify.sh
-              subPath: pushover-notify.sh
-              readOnly: true
+        globalMounts:
+          - path: /scripts/pushover-notify.sh
+            subPath: pushover-notify.sh
+            readOnly: true
       tmp:
         type: emptyDir
       media:
         type: nfs
         server: nas.internal
         path: /volume1/media
-        advancedMounts:
-          radarr:
-            app:
-            - path: /media/movies
-              subPath: movies
-            - path: /media/downloads/qbittorrent/seeding
-              subPath: downloads/qbittorrent/seeding
+        globalMounts:
+          - path: /media

@@ -122,14 +122,17 @@ spec:
             subPath: MediaCover
       scripts:
         type: configMap
-        name: sonarr-configmap
+        name: sonarr-uhd-configmap
         defaultMode: 0775
         globalMounts:
-          - path: /scripts/pushover-notify.sh
-            subPath: pushover-notify.sh
+          - path: /scripts/notify-pushover.sh
+            subPath: notify-pushover.sh
             readOnly: true
-          - path: /scripts/refresh-series.sh
-            subPath: refresh-series.sh
+          - path: /scripts/refresh-tba.sh
+            subPath: refresh-tba.sh
+            readOnly: true
+          - path: /scripts/tag-codec.sh
+            subPath: tag-codec.sh
             readOnly: true
       tmp:
         type: emptyDir
@@ -138,7 +141,4 @@ spec:
         server: nas.internal
         path: /volume1/media
         globalMounts:
-          - path: /media/tv-uhd
-            subPath: tv-uhd
-          - path: /media/downloads/qbittorrent/seeding
-            subPath: downloads/qbittorrent/seeding
+          - path: /media

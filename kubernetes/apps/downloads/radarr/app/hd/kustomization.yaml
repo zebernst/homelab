@@ -9,7 +9,7 @@ resources:
 configMapGenerator:
   - name: radarr-configmap
     files:
-      - pushover-notify.sh=../resources/pushover-notify.sh
+      - notify-pushover.sh=../scripts/notify-pushover.sh
 generatorOptions:
   disableNameSuffixHash: true
   annotations:
