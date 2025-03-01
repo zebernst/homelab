@@ -175,8 +175,8 @@ spec:
         name: radarr-configmap
         defaultMode: 0775
         globalMounts:
-          - path: /scripts/pushover-notify.sh
-            subPath: pushover-notify.sh
+          - path: /scripts/notify-pushover.sh
+            subPath: notify-pushover.sh
             readOnly: true
       tmp:
         type: emptyDir
