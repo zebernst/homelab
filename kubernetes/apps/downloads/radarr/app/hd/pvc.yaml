@@ -4,8 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: radarr-cache
 spec:
-  accessModes: ["ReadWriteMany"]
+  accessModes: ["ReadWriteOnce"]
   resources:
     requests:
       storage: 30Gi
-  storageClassName: nfs
+  storageClassName: ceph-block

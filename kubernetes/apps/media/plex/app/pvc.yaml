@@ -4,11 +4,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: plex-cache
 spec:
-  accessModes: ["ReadWriteMany"]
+  accessModes: ["ReadWriteOnce"]
   resources:
     requests:
       storage: 500Gi
-  storageClassName: nfs
+  storageClassName: ceph-block
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
