@@ -14,9 +14,8 @@ configMapGenerator:
     files:
       - config.yaml=webhook/gatus-config.yaml
     options:
+      disableNameSuffixHash: true
       labels:
         gatus.io/enabled: "true"
 configurations:
   - kustomizeconfig.yaml
-generatorOptions:
-  disableNameSuffixHash: true
