@@ -39,7 +39,7 @@ spec:
           app:
             image:
               repository: ghcr.io/ferretdb/ferretdb
-              tag: 2.0.0@sha256:6808ccc6bb8df8738e276488639c6b23baed5d60d1c9f0413e503c1f7d0c7d9c
+              tag: 2.0.0@sha256:ee7cd35b5f8eabec9b645cd5ea0b63f4c608e03dc70584e61d49f8501b62fc76
             env:
               FERRETDB_HANDLER: pg
               FERRETDB_MODE: normal
