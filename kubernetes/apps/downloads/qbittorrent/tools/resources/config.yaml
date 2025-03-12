@@ -4,7 +4,7 @@ trackers:
   - { name: hds,   required_seed_ratio: 0,    required_seed_days: 7.3,  urls: ["hd-space.pw"] }
   - { name: huno,  required_seed_ratio: 1.01, required_seed_days: 5.3,  urls: ["hawke.uno"] }
   - { name: jptv,  required_seed_ratio: 1.01, required_seed_days: 7.3,  urls: ["jptv.club"] }
-  - { name: lst,   required_seed_ratio: 1.01, required_seed_days: 3.3,  urls: ["lst.gg"]}
+  - { name: lst,   required_seed_ratio: 0,    required_seed_days: 3.3,  urls: ["lst.gg"]}
   - { name: mlk,   required_seed_ratio: 1.01, required_seed_days: 7.3,  urls: ["milkie.cc"] }
   - { name: oe,    required_seed_ratio: 1.01, required_seed_days: 2.3,  urls: ["onlyencodes.cc"] }
   - { name: ot,    required_seed_ratio: 0.41, required_seed_days: 2.3,  urls: ["oldtoons.world"] }
