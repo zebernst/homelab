@@ -1,0 +1,83 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app nocodb
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.2
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  values:
+    controllers:
+      nocodb:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 16
+            envFrom: &envFrom
+              - secretRef:
+                  name: nocodb-secret
+        containers:
+          app:
+            image:
+              repository: docker.io/nocodb/nocodb
+              tag: 0.262.2@sha256:75c718b3a5ab713b8c32f896de281e21232ca01cd3d9be354af77d5f764e1202
+            env:
+              PORT: &port 8080
+              NC_JWT_EXPIRES_IN: 48h
+              NC_PUBLIC_URL: "https://{{ .Release.Name }}.zebernst.dev"
+            envFrom: *envFrom
+            resources:
+              requests:
+                cpu: 5m
+                memory: 128M
+              limits:
+                memory: 2G
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [ 65568 ]
+    service:
+      app:
+        controller: nocodb
+        ports:
+          http:
+            port: *port
+    ingress:
+      app:
+        className: internal
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: apps
+          gethomepage.dev/name: nocodb
+          gethomepage.dev/icon: nocodb.png
+          gethomepage.dev/description: airtable alt
+        hosts:
+          - host: "{{ .Release.Name }}.zebernst.dev"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+    persistence:
+      data:
+        existingClaim: *app
+        advancedMounts:
+          nocodb:
+            app:
+              - path: /usr/app/data
