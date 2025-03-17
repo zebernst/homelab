@@ -81,6 +81,20 @@ spec:
           http:
             port: 80
             targetPort: *port
+      # ref: https://github.com/janeczku/calibre-web/issues/1470
+      # Kobo doesn't support direct https access for certain endpoints, and as of now
+      # Tailscale doesn't allow injecting custom ingress headers (X-Scheme: https).
+      # Workaround: expose http for API access
+      api:
+        controller: calibre-web
+        type: LoadBalancer
+        loadBalancerClass: tailscale
+        annotations:
+          tailscale.com/hostname: calibre-web-api
+        ports:
+          http:
+            port: 80
+            targetPort: *port
 
     ingress:
       lan:
@@ -100,7 +114,7 @@ spec:
       ts:
         className: tailscale
         hosts:
-          - host: &tsHost "calibre-web.kite-harmonic.ts.net"
+          - host: &tsHost calibre.kite-harmonic.ts.net
             paths:
               - path: /
                 service:
