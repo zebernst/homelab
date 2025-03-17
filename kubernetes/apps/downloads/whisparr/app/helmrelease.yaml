@@ -41,7 +41,7 @@ spec:
           whisparr:
             image:
               repository: ghcr.io/jfroy/whisparr-nightly
-              tag: 2.0.0.787@sha256:15b02a8ebf60b26bf55f8a6b5583389fb4a1b17eb15e5025cb75972a210be1dc
+              tag: 2.0.0.872@sha256:45af298c9bac4f7677bf9997f70e2825bd20949ef924b8fa7f3046126f07c647
             env:
               WHISPARR__ANALYTICS_ENABLED: "False"
               WHISPARR__AUTHENTICATION_METHOD: External
