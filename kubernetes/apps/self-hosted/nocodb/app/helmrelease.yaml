@@ -36,7 +36,7 @@ spec:
             env:
               PORT: &port 8080
               NC_JWT_EXPIRES_IN: 48h
-              NC_PUBLIC_URL: "https://{{ .Release.Name }}.zebernst.dev"
+              NC_PUBLIC_URL: "https://{{ .Release.Name }}.kite-harmonic.ts.net"
             envFrom: *envFrom
             resources:
               requests:
@@ -59,21 +59,18 @@ spec:
           http:
             port: *port
     ingress:
-      app:
-        className: internal
-        annotations:
-          getself-hostedpage.dev/enabled: "true"
-          getself-hostedpage.dev/group: apps
-          getself-hostedpage.dev/name: nocodb
-          getself-hostedpage.dev/icon: nocodb.png
-          getself-hostedpage.dev/description: airtable alt
+      ts:
+        className: tailscale
         hosts:
-          - host: "{{ .Release.Name }}.zebernst.dev"
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
                   identifier: app
                   port: http
+        tls:
+          - hosts:
+              - *tsHost
     persistence:
       data:
         existingClaim: *app
