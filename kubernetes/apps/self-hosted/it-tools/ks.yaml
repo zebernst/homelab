@@ -4,7 +4,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app it-tools
-  namespace: &ns home
+  namespace: &ns self-hosted
 spec:
   targetNamespace: *ns
   commonMetadata:
@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   interval: 30m
   timeout: 5m
-  path: kubernetes/apps/home/it-tools/app
+  path: kubernetes/apps/self-hosted/it-tools/app
   prune: true
   sourceRef:
     kind: GitRepository

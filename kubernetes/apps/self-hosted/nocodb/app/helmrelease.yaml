@@ -62,11 +62,11 @@ spec:
       app:
         className: internal
         annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: apps
-          gethomepage.dev/name: nocodb
-          gethomepage.dev/icon: nocodb.png
-          gethomepage.dev/description: airtable alt
+          getself-hostedpage.dev/enabled: "true"
+          getself-hostedpage.dev/group: apps
+          getself-hostedpage.dev/name: nocodb
+          getself-hostedpage.dev/icon: nocodb.png
+          getself-hostedpage.dev/description: airtable alt
         hosts:
           - host: "{{ .Release.Name }}.zebernst.dev"
             paths:

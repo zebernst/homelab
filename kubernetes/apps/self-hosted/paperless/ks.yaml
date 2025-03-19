@@ -3,19 +3,27 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app atuin
-  namespace: &ns home
+  name: &app paperless
+  namespace: &ns self-hosted
 spec:
   targetNamespace: *ns
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/volsync
   dependsOn:
     - name: cloudnative-pg-cluster
       namespace: database
+    - name: dragonfly-cluster
+      namespace: database
     - name: onepassword
       namespace: external-secrets
-  path: kubernetes/apps/home/atuin/app
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
+  path: kubernetes/apps/self-hosted/paperless/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -28,4 +36,6 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_SUBDOMAIN: sh
+      VOLSYNC_CAPACITY: 15Gi
+      VOLSYNC_PUID: "1000"
+      VOLSYNC_PGID: "1000"
