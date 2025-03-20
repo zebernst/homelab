@@ -24,7 +24,7 @@ spec:
       retries: 3
   values:
     controllers:
-      stash:
+      app:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -42,7 +42,7 @@ spec:
               STASH_METADATA: /metadata/
               STASH_CACHE: /cache/
               STASH_PORT: &port 9999
-              STASH_EXTERNAL_HOST: https://stash.zebernst.dev
+              STASH_EXTERNAL_HOST: https://stash.kite-harmonic.ts.net
 
             probes:
               liveness: &probe
@@ -67,21 +67,24 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [65568]
     service:
-      stash:
-        controller: stash
+      app:
+        controller: app
         ports:
           http:
             port: *port
     ingress:
-      stash:
-        className: internal
+      ts:
+        className: tailscale
         hosts:
-          - host: stash.zebernst.dev
+          - host: &host "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: stash
+                  identifier: app
                   port: http
+        tls:
+          - hosts:
+              - *host
     persistence:
       config:
         existingClaim: stash

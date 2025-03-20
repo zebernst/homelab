@@ -97,20 +97,6 @@ spec:
             targetPort: *port
 
     ingress:
-      lan:
-        className: internal
-        annotations:
-          nginx.ingress.kubernetes.io/proxy-body-size: "0"
-          nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
-          nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
-          nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "256k"
-        hosts:
-          - host: calibre.zebernst.dev
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
       ts:
         className: tailscale
         hosts:

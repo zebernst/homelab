@@ -15,19 +15,16 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-
   values:
     controllers:
       it-tools:
         annotations:
           reloader.stakater.com/auto: "true"
-
         pod:
           securityContext:
             runAsNonRoot: true
             runAsUser: 568
             runAsGroup: 568
-
         containers:
           app:
             image:
@@ -43,25 +40,25 @@ spec:
               allowPrivilegeEscalation: false
               capabilities: {drop: ["ALL"]}
               readOnlyRootFilesystem: true
-
     service:
       app:
         controller: it-tools
         ports:
           http:
             port: 8080
-
     ingress:
-      app:
-        className: internal
+      ts:
+        className: tailscale
         hosts:
-          - host: "{{ .Release.Name }}.zebernst.dev"
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
                   identifier: app
                   port: http
-
+        tls:
+          - hosts:
+              - *tsHost
     persistence:
       tmp:
         type: emptyDir

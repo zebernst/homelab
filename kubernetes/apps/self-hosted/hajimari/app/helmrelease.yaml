@@ -26,6 +26,7 @@ spec:
       TZ: ${TIMEZONE}
     hajimari:
       title: Apps
+      instanceName: tailscale
       lightTheme: paper
       darkTheme: chalk
       alwaysTargetBlank: true
@@ -41,23 +42,15 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: internal
-        annotations:
-          hajimari.io/enable: "false"
+        ingressClassName: tailscale
         hosts:
-          - host: &host "{{ .Release.Name }}.zebernst.dev"
-            paths: &paths
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
+            paths:
               - path: /
                 pathType: Prefix
-          - host: &customHost0 www.zebernst.dev
-            paths: *paths
-          - host: &customHost1 zebernst.dev
-            paths: *paths
         tls:
           - hosts:
-              - *host
-              - *customHost0
-              - *customHost1
+              - *tsHost
     podAnnotations:
       configmap.reloader.stakater.com/reload: hajimari-settings
     persistence:

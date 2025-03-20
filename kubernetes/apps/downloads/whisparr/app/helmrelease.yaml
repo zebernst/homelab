@@ -26,7 +26,7 @@ spec:
       retries: 3
   values:
     controllers:
-      whisparr:
+      app:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -81,21 +81,24 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [65568]
     service:
-      whisparr:
-        controller: whisparr
+      app:
+        controller: app
         ports:
           http:
             port: *port
     ingress:
-      whisparr:
-        className: internal
+      ts:
+        className: tailscale
         hosts:
-          - host: "whisparr.zebernst.dev"
+          - host: &host "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: whisparr
+                  identifier: app
                   port: http
+        tls:
+          - hosts:
+              - *host
     persistence:
       config:
         existingClaim: whisparr

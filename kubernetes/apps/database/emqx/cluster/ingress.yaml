@@ -4,11 +4,12 @@ kind: Ingress
 metadata:
   name: emqx
   annotations:
+    hajimari.io/instance: tailscale
     hajimari.io/icon: simple-icons:mqtt
 spec:
-  ingressClassName: internal
+  ingressClassName: tailscale
   rules:
-    - host: &host emqx.zebernst.dev
+    - host: &host emqx.kite-harmonic.ts.net
       http:
         paths:
           - path: /

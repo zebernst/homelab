@@ -89,17 +89,6 @@ spec:
           http:
             port: *port
     ingress:
-      lan:
-        annotations:
-          external-dns.alpha.kubernetes.io/target: internal.zebernst.dev
-        className: internal
-        hosts:
-          - host: "{{ .Release.Name }}.zebernst.dev"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
       ts:
         className: tailscale
         hosts:

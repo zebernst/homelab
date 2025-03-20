@@ -28,10 +28,12 @@ spec:
       createPrometheusRules: true
     ingress:
       dashboard:
-        ingressClassName: internal
+        ingressClassName: tailscale
         host:
-          name: rook.zebernst.dev
+          name: &host "rook.kite-harmonic.ts.net"
           path: /
+        tls:
+          - hosts: [ *host ]
     toolbox:
       enabled: true
     cephClusterSpec:

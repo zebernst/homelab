@@ -97,21 +97,6 @@ spec:
             port: *bittorrentPort
             protocol: TCP
     ingress:
-      lan:
-        className: internal
-        hosts:
-          - host: &host "{{ .Release.Name }}.zebernst.dev"
-            paths: &paths
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-          - host: &customHost qb.zebernst.dev
-            paths: *paths
-        tls:
-          - hosts:
-              - *host
-              - *customHost
       ts:
         className: tailscale
         hosts:

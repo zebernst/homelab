@@ -89,17 +89,18 @@ spec:
           http:
             port: *port
     ingress:
-      app:
-        annotations:
-          external-dns.alpha.kubernetes.io/target: internal.zebernst.dev
-        className: internal
+      ts:
+        className: tailscale
         hosts:
-          - host: bazarr-uhd.zebernst.dev
+          - host: &host "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
                   identifier: app
                   port: http
+        tls:
+          - hosts:
+              - *host
     persistence:
       add-ons:
         type: emptyDir

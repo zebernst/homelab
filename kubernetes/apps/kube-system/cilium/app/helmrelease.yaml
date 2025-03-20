@@ -47,9 +47,10 @@ spec:
         enabled: true
         rollOutPods: true
         ingress:
-          enabled: true
-          className: internal
-          hosts: ["hubble.zebernst.dev"]
+          className: tailscale
+          hosts: [&host "{{ .Release.Name }}.kite-harmonic.ts.net"]
+          tls:
+            - hosts: [*host]
     operator:
       prometheus:
         enabled: true

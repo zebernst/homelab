@@ -168,7 +168,7 @@ spec:
             add_header X-XSS-Protection "1; mode=block" always;
         className: external
         hosts:
-          - host: "{{ .Release.Name }}.zebernst.dev"
+          - host: "plex.zebernst.dev"
             paths:
               - path: /
                 service:

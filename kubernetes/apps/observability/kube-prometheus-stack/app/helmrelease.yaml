@@ -32,9 +32,10 @@ spec:
     alertmanager:
       ingress:
         enabled: true
-        ingressClassName: internal
-        hosts: ["alertmanager.zebernst.dev"]
-        pathType: Prefix
+        ingressClassName: tailscale
+        hosts: [&amHost "alertmanager.kite-harmonic.ts.net"]
+        tls:
+          - hosts: [*amHost]
       alertmanagerSpec:
         alertmanagerConfiguration:
           name: alertmanager
@@ -67,9 +68,10 @@ spec:
     prometheus:
       ingress:
         enabled: true
-        ingressClassName: internal
-        hosts: ["prometheus.zebernst.dev"]
-        pathType: Prefix
+        ingressClassName: tailscale
+        hosts: [&promHost "prometheus.kite-harmonic.ts.net"]
+        tls:
+          - hosts: [*promHost]
       prometheusSpec:
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false
