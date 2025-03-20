@@ -47,7 +47,7 @@ This is a repository for my home infrastructure and Kubernetes cluster. I try to
 
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f331/512.gif" alt="🌱" width="20" height="20"> Kubernetes
 
-This hyper-converged cluster runs [Talos Linux](https://github.com/siderolabs/talos), an immutable and ephemeral Linux distribution tailored for [Kubernetes](https://github.com/kubernetes/kubernetes), and is deployed on bare-metal Minisforum MS-01 mini-PCs. Currently, persistent storage is provided via [Rook](https://github.com/rook/rook) in order to enable resilient block-, file-, and object-storage within the cluster. A Synology NAS handles media file storage and backups, and is also available as an alternate storage location with the help of a custom fork of the official [Synology CSI](https://github.com/zebernst/synology-csi-talos) for workloads that should not be hyper-converged. The cluster is designed to enable a full teardown without any data loss.
+This hyper-converged cluster runs [Talos Linux](https://github.com/siderolabs/talos), an immutable and ephemeral Linux distribution tailored for [Kubernetes](https://github.com/kubernetes/kubernetes), and is deployed on bare-metal Minisforum MS-01 mini-PCs. Currently, persistent storage is provided via [Rook](https://github.com/rook/rook) in order to enable resilient block-, file-, and object-storage within the cluster. A Synology NAS handles media file storage and backups, and is also available as an alternate storage location with the help of a [custom fork](https://github.com/zebernst/synology-csi-talos) of the official Synology CSI for workloads that should not be hyper-converged. The cluster is designed to enable a full teardown without any data loss.
 
 🔸 _[Click here](./kubernetes/bootstrap/talos/talconfig.yaml) to see my Talos configuration._
 
@@ -57,8 +57,8 @@ There is a template at [onedr0p/cluster-template](https://github.com/onedr0p/clu
 
 [//]: # (- [actions-runner-controller]&#40;https://github.com/actions/actions-runner-controller&#41;: Self-hosted Github runners.)
 - [cert-manager](https://github.com/cert-manager/cert-manager): Manage SSL certificates for services in my cluster.
-- [cilium](https://github.com/cilium/cilium): Internal Kubernetes container networking interface (CNI).
-- [cloudflared](https://github.com/cloudflare/cloudflared): Enables external access to certain services via Cloudflare tunnels.
+- [cilium](https://github.com/cilium/cilium): eBPF-based networking for my workloads.
+- [cloudflared](https://github.com/cloudflare/cloudflared): Enables Cloudflare secure access to my services.
 - [external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically syncs ingress DNS records to a DNS provider.
 - [external-secrets](https://github.com/external-secrets/external-secrets): Managed Kubernetes secrets using [1Password Connect](https://github.com/1Password/connect).
 - [ingress-nginx](https://github.com/kubernetes/ingress-nginx): Kubernetes ingress controller using NGINX as a reverse proxy and load balancer.
@@ -82,42 +82,56 @@ This Git repository contains the following directories under [kubernetes/](./kub
 📁 kubernetes
 ├── 📁 apps           # applications
 ├── 📁 bootstrap      # bootstrap procedures
-├── 📁 components     # reusable components
+├── 📁 components     # reusable kustomize components
 └── 📁 flux           # core flux configuration
 ```
 
 ### Cluster layout
 
-This is a high-level look how Flux deploys my applications with dependencies. Below there are 3 Flux kustomizations `postgres`, `postgres-cluster`, and `atuin`. `postgres` is the first app that needs to be running and healthy before `postgres-cluster` and once `postgres-cluster` is healthy, then `atuin` will be deployed.
+This is a high-level look how Flux deploys my applications with dependencies. Below there are 3 Flux kustomizations `cloudnative-pg`, `postgres-cluster`, and `atuin`. `cloudnative-pg` is the first app that needs to be running and healthy before `postgres-cluster` and once `postgres-cluster` is healthy, then `atuin` will be deployed.
 
 ```mermaid
 graph TD;
   id1>Kustomization: cluster] -->|Creates| id2>Kustomization: cluster-apps];
-  id2>Kustomization: cluster-apps] -->|Creates| id3>Kustomization: postgres];
+  id2>Kustomization: cluster-apps] -->|Creates| id3>Kustomization: cloudnative-pg];
   id2>Kustomization: cluster-apps] -->|Creates| id5>Kustomization: postgres-cluster]
   id2>Kustomization: cluster-apps] -->|Creates| id8>Kustomization: atuin]
-  id3>Kustomization: postgres] -->|Creates| id4[HelmRelease: postgres];
-  id5>Kustomization: postgres-cluster] -->|Depends on| id3>Kustomization: postgres];
+  id3>Kustomization: cloudnative-pg] -->|Creates| id4[HelmRelease: cloudnative-pg];
+  id5>Kustomization: postgres-cluster] -->|Depends on| id3>Kustomization: cloudnative-pg];
   id5>Kustomization: postgres-cluster] -->|Creates| id10[Postgres Cluster];
   id8>Kustomization: atuin] -->|Creates| id9(HelmRelease: atuin);
   id8>Kustomization: atuin] -->|Depends on| id5>Kustomization: postgres-cluster];
 ```
 
-### Networking
+---
+
+## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f30e/512.gif" alt="🌎" width="20" height="20"> Networking & DNS
 
 <details>
-  <summary>Click to see a high-level network diagram</summary>
+  <summary>Click to see a high-level phsyical network diagram</summary>
 
   <img src="docs/assets/network-diagram.excalidraw.svg" align="center" width="600px" alt="network"/>
 </details>
 
----
+Apps hosted on my cluster are exposed using any combination of three different methods, depending on their use-case, security requirements, and intended audience. All three methods utilise fully encrypted HTTPS connections – TLS certificates are automatically provisioned and renewed by [Cert Manager](https://cert-manager.io) for each application.
 
-## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f30e/512.gif" alt="🌎" width="20" height="20"> DNS
+### Local Network
 
-In my cluster there are two instances of [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) running: one for syncing private DNS records to my router using the [ExternalDNS webhook provider for UniFi](https://github.com/kashalls/external-dns-unifi-webhook), and another instance for syncing public DNS records to Cloudflare. This setup is managed by creating ingresses with two specific classes: `internal` for private DNS and `external` for public DNS. The `external-dns` instances then sync the DNS records to their respective platforms.
+The first and easiest way that an app can be exposed is strictly on my local network. This is most often used for apps and services that have to do with home automation – given that every smart home device is on my local network, there is no need to expose e.g. a supporting service like MQTT any further than that.
 
-I also run [Tailscale](https://tailscale.com/kb/1236/kubernetes-operator) in my cluster, which serves as both a Kubernetes auth proxy (used with [Nautik](https://nautik.io/) to monitor and administer my Kubernetes cluster on-the-go), as well as to provide remote access to services while I'm not on my home network. Creating an ingress with the `tailscale` class will expose the application to my Tailnet, and automagically configure DNS records and HTTPS certificates for the tailnet accordingly.
+Local deployments are accomplished by creating an Ingress of type `internal`, which will register a virtual IP for the service in a designated subnet (advertised via BGP) and provision a DNS record on the router with  the [ExternalDNS webhook provider for UniFi](https://github.com/kashalls/external-dns-unifi-webhook).
+
+### Privately Exposed (Tailscale)
+
+The second and most common way that an app can be exposed is via [Tailscale](https://tailscale.com/kb/1236/kubernetes-operator). Creating an Ingress with the `tailscale` class will expose the application to my Tailnet, and [automagically](https://tailscale.com/kb/1081/magicdns) configure DNS records. Most self-hosted apps and dashboards are exposed using this Ingress class, so that they are accessible on my personal devices at a consistent URL no matter if I'm at home or abroad.
+
+Tailscale also serves as a Kubernetes auth proxy, which I use in conjunction with the [Nautik](https://nautik.io/) iOS app to monitor and administer my Kubernetes cluster on-the-go.
+
+### Publicly Exposed
+
+The final and least common way to expose an app is via `cloudflared`, the [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) daemon. By routing all external traffic through Cloudflare's infrastructure, I gain the benefits of their global security infrastructure (notably DDoS protection). This is generally used for webhook endpoints which require access from the wider Internet, though I do expose a select few apps for friends and family.
+
+Creating an `external` Ingress will trigger using [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to provision a CNAME DNS record on Cloudflare which points at the Cloudflare Tunnel endpoint. The tunnel routes traffic securely into my cluster, where the ingress controller further routes it to the destination Service.
 
 ---
 
@@ -167,7 +181,7 @@ Alternative solutions to the first two of these problems would be to host a Kube
 
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f64f/512.gif" alt="🙏" width="20" height="20"> Gratitude and Thanks
 
-Huge thank-you to the folks over on the [Home Operations](https://discord.gg/home-operations) Discord community, especially [@onedrop](https://github.com/onedr0p), [@bjw-s](https://github.com/bjw-s), and [@buroa](https://github.com/buroa) – their home-ops repos have been an amazing resource to draw upon.
+Huge thank-you to the folks over at the [Home Operations](https://github.com/home-operations) community, especially [@onedrop](https://github.com/onedr0p), [@bjw-s](https://github.com/bjw-s), and [@buroa](https://github.com/buroa) – their home-ops repos have been an amazing resource to draw upon.
 
 Be sure to check out [kubesearch.dev](https://kubesearch.dev) for further ideas and reference for deploying applications on Kubernetes.
 
