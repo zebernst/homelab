@@ -10,6 +10,7 @@ resources:
   - bazarr/ks.yaml
   - cross-seed/ks.yaml
   - flaresolverr/ks.yaml
+  - lidarr/ks.yaml
   - omegabrr/ks.yaml
   - openbooks/ks.yaml
   - prowlarr/ks.yaml
