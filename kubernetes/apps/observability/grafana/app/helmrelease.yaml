@@ -43,6 +43,13 @@ spec:
         org_id: 1
         org_name: Main Org.
         org_role: Viewer
+      auth.proxy:
+        enabled: true
+        whitelist: 10.244.0.0/16  # pod cidr
+        header_name: Tailscale-User-Login
+        header_property: email
+        headers: Name:Tailscale-User-Name
+        auto_sign_up: true
       news:
         news_feed_enabled: false
     datasources:
