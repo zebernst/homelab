@@ -37,14 +37,18 @@ spec:
               UN_WEBSERVER_METRICS: true
               UN_WEBSERVER_LOG_FILE: /logs/webserver.log
               UN_ACTIVITY: true
+              UN_LIDARR_0_URL: http://lidarr.downloads.svc.cluster.local
+              UN_LIDARR_0_PATHS_0: /media/downloads/qbittorrent/seeding/lidarr
               UN_SONARR_0_URL: http://sonarr.downloads.svc.cluster.local
-              UN_SONARR_0_PATHS_0: /media/downloads/qbittorrent/seeding/tv
+              UN_SONARR_0_PATHS_0: /media/downloads/qbittorrent/seeding/sonarr
               UN_SONARR_1_URL: http://sonarr-uhd.downloads.svc.cluster.local
-              UN_SONARR_1_PATHS_0: /media/downloads/qbittorrent/seeding/tv-uhd
+              UN_SONARR_1_PATHS_0: /media/downloads/qbittorrent/seeding/sonarr-uhd
               UN_RADARR_0_URL: http://radarr.downloads.svc.cluster.local
-              UN_RADARR_0_PATHS_0: /media/downloads/qbittorrent/seeding/movies
+              UN_RADARR_0_PATHS_0: /media/downloads/qbittorrent/seeding/radarr
               UN_RADARR_1_URL: http://radarr-uhd.downloads.svc.cluster.local
-              UN_RADARR_1_PATHS_0: /media/downloads/qbittorrent/seeding/movies-uhd
+              UN_RADARR_1_PATHS_0: /media/downloads/qbittorrent/seeding/radarr-uhd
+              UN_WHISPARR_0_URL: http://whisparr.downloads.svc.cluster.local
+              UN_WHISPARR_0_PATHS_0: /media/downloads/qbittorrent/seeding/xxx
             envFrom:
               - secretRef:
                   name: unpackerr-secret
