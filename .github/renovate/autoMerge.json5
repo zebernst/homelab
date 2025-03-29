@@ -9,9 +9,7 @@
       matchUpdateTypes: ["digest"],
       matchPackagePatterns: [
         "ghcr.io/zebernst",
-        "ghcr.io/onedr0p",
-        "ghcr.io/bjw-s",
-        "ghcr.io/buroa",
+        "ghcr.io/home-operations",
       ],
     },
     {
