@@ -35,7 +35,7 @@ spec:
           app:
             image:
               repository: crocodilestick/calibre-web-automated
-              tag: dev-dev
+              tag: V3.0.4
             env:
               CACHE_DIR: /cache
               CALIBRE_PORT: &port 8083
@@ -54,9 +54,6 @@ spec:
                   {{- end -}}
                 {{- end -}}
                 {{- $filtered | join "|" -}}
-            envFrom:
-              - secretRef:
-                  name: cwa-secret
 
             probes:
               liveness:
