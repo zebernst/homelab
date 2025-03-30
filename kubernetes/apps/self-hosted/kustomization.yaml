@@ -8,6 +8,7 @@ components:
 resources:
   - atuin/ks.yaml
   - hajimari/ks.yaml
+  - homebox/ks.yaml
   - it-tools/ks.yaml
   - nocodb/ks.yaml
   - paperless/ks.yaml
