@@ -50,7 +50,7 @@ spec:
               TZ: America/New_York
               HBOX_LOG_LEVEL: info
               HBOX_LOG_FORMAT: json
-              HBOX_MEB_MAX_UPLOAD_SIZE: 10
+              HBOX_WEB_MAX_UPLOAD_SIZE: 10
               HBOX_OPTIONS_CHECK_GITHUB_RELEASE: false
               HBOX_DATABASE_DRIVER: postgres
             envFrom: *envFrom
