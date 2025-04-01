@@ -11,5 +11,6 @@ resources:
   - hajimari/ks.yaml
   - homebox/ks.yaml
   - it-tools/ks.yaml
+  - mealie/ks.yaml
   - nocodb/ks.yaml
   - paperless/ks.yaml
