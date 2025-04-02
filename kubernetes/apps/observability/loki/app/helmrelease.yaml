@@ -57,6 +57,11 @@ spec:
         volume_enabled: true
       pattern_ingester:
         enabled: true
+    ingress:
+      enabled: true
+      ingressClassName: internal
+      hosts:
+        - loki.zebernst.dev
     singleBinary:
       replicas: 1
       persistence:
