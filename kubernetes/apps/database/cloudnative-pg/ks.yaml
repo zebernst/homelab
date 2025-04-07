@@ -48,13 +48,13 @@ spec:
   postBuild:
     substitute:
       # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
-      POSTGRESQL_VERSION: "17.0"
+      POSTGRESQL_VERSION: 16.6-27
   prune: true
   retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *ns
+  targetNamespace: *namespace
   timeout: 5m
   wait: true
