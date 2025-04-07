@@ -1,0 +1,91 @@
+---
+version: v1alpha1
+debug: false
+persist: true
+machine:
+  type: worker
+  token: op://Secrets/talos/MACHINE_TOKEN
+  ca:
+    crt: op://Secrets/talos/MACHINE_CA_CRT
+    key: op://Secrets/talos/MACHINE_CA_KEY
+  kubelet:
+    image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
+    extraConfig:
+      maxPods: 150
+      serializeImagePulls: false
+    extraMounts:
+      - destination: /var/mnt/extra
+        type: bind
+        source: /var/mnt/extra
+        options: ["bind", "rshared", "rw"]
+    defaultRuntimeSeccompProfileEnabled: true
+    nodeIP:
+      validSubnets: ["192.168.10.0/24"]
+    disableManifestsDirectory: true
+  network:
+    nameservers: ["192.168.10.1"]
+    disableSearchDomain: true
+  install:
+    extraKernelArgs:
+      - apparmor=0              # Less security, faster puter
+      - init_on_alloc=0         # Less security, faster puter
+      - init_on_free=0          # Less security, faster puter
+      - iommu=pt                # PCI Passthrough
+      - mitigations=off         # Less security, faster puter
+      - security=none           # Less security, faster puter
+      - talos.auditd.disabled=1 # Less security, faster puter
+    image: factory.talos.dev/installer/5c030c38dbb790ca3298ec86a336ea4e6d287256dd5c5bbc7c56c347b0df5f3f:{{ ENV.TALOS_VERSION }}
+    wipe: false
+  files:
+    - op: create
+      path: /etc/cri/conf.d/20-customization.part
+      content: |
+        [plugins."io.containerd.cri.v1.images"]
+          discard_unpacked_layers = false
+    - op: overwrite
+      path: /etc/nfsmount.conf
+      permissions: 0o644
+      content: |
+        [ NFSMount_Global_Options ]
+        nfsvers=4.1
+        hard=True
+        nconnect=16
+        noatime=True
+  time:
+    disabled: false
+    servers: ["time.cloudflare.com"]
+  sysctls:
+    fs.inotify.max_user_instances: 8192    # Watchdog
+    fs.inotify.max_user_watches: 1048576   # Watchdog
+    net.core.default_qdisc: fq             # 10Gb/s
+    net.core.rmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
+    net.core.wmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
+    net.ipv4.tcp_congestion_control: bbr   # 10Gb/s
+    net.ipv4.tcp_fastopen: 3               # Send and accept data in the opening SYN packet
+    net.ipv4.tcp_mtu_probing: 1            # 10Gb/s | Jumbo frames
+    net.ipv4.tcp_rmem: 4096 87380 33554432 # 10Gb/s
+    net.ipv4.tcp_wmem: 4096 65536 33554432 # 10Gb/s
+    net.ipv4.tcp_window_scaling: 1         # 10Gb/s
+    vm.nr_hugepages: 1024                  # PostgreSQL
+  features:
+    rbac: true
+    stableHostname: true
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles: ["os:admin"]
+      allowedKubernetesNamespaces: ["actions-runner-system", "system-upgrade"]
+    apidCheckExtKeyUsage: true
+    diskQuotaSupport: true
+    kubePrism:
+      enabled: true
+      port: 7445
+    hostDNS:
+      enabled: true
+      forwardKubeDNSToHost: false
+      resolveMemberNames: true
+  kernel:
+    modules:
+      - name: nbd
+  nodeLabels:
+    topology.kubernetes.io/region: jupiter
+    topology.kubernetes.io/zone: w

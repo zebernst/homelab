@@ -16,21 +16,21 @@ spec:
         namespace: flux-system
   install:
     remediation:
-      retries: 3
+      retries: -1
   upgrade:
     cleanupOnFail: true
     remediation:
-      strategy: rollback
       retries: 3
   values:
     controllers:
       system-upgrade-controller:
         strategy: RollingUpdate
+        replicas: 2
         containers:
           app:
             image:
               repository: docker.io/rancher/system-upgrade-controller
-              tag: v0.15.0-rc2
+              tag: v0.15.2@sha256:3e899833afcea9a8788d384ce976df9a05be84636fe5c01ec2307b5bd8fe9810
             env:
               SYSTEM_UPGRADE_CONTROLLER_LEADER_ELECT: true
               SYSTEM_UPGRADE_CONTROLLER_NAME: *app
@@ -42,6 +42,7 @@ spec:
                 valueFrom:
                   fieldRef:
                     fieldPath: spec.nodeName
+              SYSTEM_UPGRADE_JOB_BACKOFF_LIMIT: "99"
               SYSTEM_UPGRADE_JOB_PRIVILEGED: false
             securityContext:
               allowPrivilegeEscalation: false
@@ -50,19 +51,8 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 568
-        runAsGroup: 568
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: node-role.kubernetes.io/control-plane
-                    operator: Exists
-      tolerations:
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: NoSchedule
+        runAsUser: 1000
+        runAsGroup: 1000
     serviceAccount:
-      name: system-upgrade
+      name: *app
       create: true

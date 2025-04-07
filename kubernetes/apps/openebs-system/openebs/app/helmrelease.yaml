@@ -14,11 +14,14 @@ spec:
         name: openebs
         namespace: flux-system
   install:
+    disableHooks: true
     remediation:
       retries: 3
   upgrade:
     cleanupOnFail: true
+    disableHooks: true
     remediation:
+      strategy: rollback
       retries: 3
   values:
     engines:
@@ -34,12 +37,23 @@ spec:
       csi:
         volumeSnapshots:
           enabled: false
+          keep: false
     localpv-provisioner:
       localpv:
         image:
           registry: quay.io/
+        basePath: &basePath /var/mnt/extra/openebs/local
       hostpathClass:
         enabled: true
         name: openebs-hostpath
         isDefaultClass: false
-        basePath: /var/openebs/local
+        basePath: *basePath
+      helperPod:
+        image:
+          registry: quay.io/
+    zfs-localpv:
+      enabled: false
+    lvm-localpv:
+      enabled: false
+    mayastor:
+      enabled: false

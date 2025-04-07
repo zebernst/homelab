@@ -1,5 +1,5 @@
-# yaml-language-server: $schema=https://taskfile.dev/schema.json
 ---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
 # Taskfile used to manage certain VolSync tasks for a given application, limitations are as followed.
@@ -38,7 +38,7 @@ tasks:
   snapshot:
     desc: Snapshot an app [NS={{.NS}}] [APP=required]
     cmds:
-      - kubectl --namespace {{.NS}} patch replicationsources {{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"{{now | unixEpoch}}"}}}'
+      - kubectl --namespace {{.NS}} patch replicationsources/{{.APP}} --type merge -p '{"spec":{"trigger":{"manual":"{{now | unixEpoch}}"}}}'
       - until kubectl --namespace {{.NS}} get job/{{.JOB}} &>/dev/null; do sleep 5; done
       - kubectl --namespace {{.NS}} wait job/{{.JOB}} --for=condition=complete --timeout=120m
     vars:
@@ -77,18 +77,19 @@ tasks:
       APP: '{{.APP}}'
       PREVIOUS: '{{.PREVIOUS}}'
       CLAIM:
-        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.sourcePVC}"
+        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.sourcePVC}'
       ACCESS_MODES:
-        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.restic.accessModes}"
+        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.restic.accessModes}'
       STORAGE_CLASS_NAME:
-        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.restic.storageClassName}"
+        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.restic.storageClassName}'
       PUID:
-        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.restic.moverSecurityContext.runAsUser}"
+        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.restic.moverSecurityContext.runAsUser}'
       PGID:
-        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
+        sh: kubectl --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath='{.spec.restic.moverSecurityContext.runAsGroup}'
     requires:
       vars: [APP, PREVIOUS]
     preconditions:
+      - kubectl --namespace {{.NS}} get replicationsources {{.APP}}
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.yaml.j2
       - which flux kubectl minijinja-cli
 

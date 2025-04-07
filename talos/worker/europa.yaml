@@ -1,0 +1,21 @@
+---
+machine:
+  disks:
+    - device: /dev/disk/by-id/nvme-<tbd>
+      partitions: [{ mountpoint: /var/mnt/extra }]
+  install:
+    diskSelector:
+      serial: <tbd>
+    extraKernelArgs:
+      - amd_iommu=on            # PCI Passthrough
+  network:
+    hostname: europa.k8s.internal
+    interfaces:
+      - interface: en0
+        dhcp: true
+        mtu: 9000
+        vlans:
+          - { vlanId: 20, dhcp: false, mtu: 1500 }
+          - { vlanId: 30, dhcp: false, mtu: 1500 }
+  nodeTaints:
+    dedicated-gpu: true:PreferNoSchedule

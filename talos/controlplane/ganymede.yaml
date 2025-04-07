@@ -1,0 +1,20 @@
+---
+machine:
+  install:
+    diskSelector:
+      serial: 50026B728363E11C
+  network:
+    hostname: ganymede.k8s.internal
+    interfaces:
+      - # io
+        deviceSelector: { busPath: 0-1.0 }
+        dhcp: false
+        mtu: 65520
+        addresses: [169.254.255.11/32]
+        routes: [{ network: 169.254.255.10/32, metric: 2048 }]
+      - # callisto
+        deviceSelector: { busPath: 1-1.0 }
+        dhcp: false
+        mtu: 65520
+        addresses: [169.254.255.11/32]
+        routes: [{ network: 169.254.255.12/32, metric: 2048 }]

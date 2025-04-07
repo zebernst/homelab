@@ -1,8 +1,13 @@
 [env]
-KUBECONFIG = '{{config_root}}/kubernetes/kubeconfig'
-MINIJINJA_CONFIG_FILE = '{{config_root}}/.minijinja.toml'
-SOPS_AGE_KEY_FILE = '{{config_root}}/age.key'
-TALOSCONFIG = '{{config_root}}/talos/clusterconfig/talosconfig'
+KUBECONFIG = "{{config_root}}/kubernetes/kubeconfig"
+MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
+SOPS_AGE_KEY_FILE = "{{config_root}}/age.key"
+TALOSCONFIG = "{{config_root}}/talos/talosconfig"
+
+# Included file paths
+_.file = [
+  "{{config_root}}/kubernetes/apps/system-upgrade/versions.env"
+]
 
 [tools]
 1password-cli = "latest"
@@ -30,5 +35,6 @@ talhelper = "latest"
 talosctl = "latest"
 task = "latest"
 "ubi:clbx/kubectl-browse-pvc" = "latest"
+"ubi:mitsuhiko/minijinja" = { version = "latest", exe = "minijinja-cli" }
 "ubi:rook/kubectl-rook-ceph" = "latest"
 yq = "latest"
