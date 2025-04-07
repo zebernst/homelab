@@ -46,7 +46,7 @@ spec:
       destinationPath: s3://cluster-db-backup/
       endpointURL: https://s3.us-west-001.backblazeb2.com
       # Note: serverName version needs to be incremented when recovering from an existing cnpg cluster
-      serverName: postgres-v16-4
+      serverName: postgres-v17
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
