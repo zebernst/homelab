@@ -3,5 +3,3 @@
 *.yml linguist-language=YAML
 *.yaml linguist-detectable=true
 *.yaml linguist-language=YAML
-*.sops.* diff=sopsdiffer
-*.sops.toml linguist-language=JSON

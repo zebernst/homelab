@@ -1,7 +1,6 @@
 [env]
 KUBECONFIG = "{{config_root}}/kubernetes/kubeconfig"
 MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
-SOPS_AGE_KEY_FILE = "{{config_root}}/age.key"
 TALOSCONFIG = "{{config_root}}/talos/talosconfig"
 
 # Included file paths
@@ -30,7 +29,6 @@ kubecolor = "latest"
 kubectl = "latest"
 kustomize = "latest"
 "pipx:allenporter/flux-local" = "latest"
-sops = "latest"
 talhelper = "latest"
 talosctl = "latest"
 task = "latest"
