@@ -3,7 +3,7 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: &cluster redspot16
+  name: &cluster redspot
 spec:
   instances: 3
   imageName: ghcr.io/cloudnative-pg/postgresql:${POSTGRESQL_VERSION}
@@ -46,7 +46,7 @@ spec:
       destinationPath: s3://cluster-db-backup/
       endpointURL: https://s3.us-west-001.backblazeb2.com
       # Note: serverName version needs to be incremented when recovering from an existing cnpg cluster
-      serverName: redspot16-v4
+      serverName: postgres-v16-4
       s3Credentials:
         accessKeyId:
           name: cloudnative-pg-secret
