@@ -23,6 +23,7 @@ resources:
   - metrics-server.yaml
   - nfs-subdir-external-provisioner.yaml
   - node-feature-discovery.yaml
+  - nvidia.yaml
   - openebs.yaml
   - piraeus.yaml
   - postfinance.yaml
