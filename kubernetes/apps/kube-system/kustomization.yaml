@@ -17,7 +17,7 @@ resources:
   - nfs-subdir-external-provisioner/ks.yaml
   - node-feature-discovery/ks.yaml
   - node-problem-detector/ks.yaml
-  - nvidia-gpu-operator/ks.yaml
+  - nvidia-device-plugin/ks.yaml
   - reloader/ks.yaml
   - snapshot-controller/ks.yaml
   - spegel/ks.yaml
