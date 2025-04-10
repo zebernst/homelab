@@ -7,7 +7,6 @@ machine:
   token: op://Secrets/talos/MACHINE_TOKEN
   ca:
     crt: op://Secrets/talos/MACHINE_CA_CRT
-    key: op://Secrets/talos/MACHINE_CA_KEY
   kubelet:
     image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
     extraConfig:
@@ -34,7 +33,7 @@ machine:
       - mitigations=off         # Less security, faster puter
       - security=none           # Less security, faster puter
       - talos.auditd.disabled=1 # Less security, faster puter
-    image: factory.talos.dev/installer/5c030c38dbb790ca3298ec86a336ea4e6d287256dd5c5bbc7c56c347b0df5f3f:{{ ENV.TALOS_VERSION }}
+    image: "factory.talos.dev/installer/ffb0c3521ac24e3d3378c572fa8ec5c38ba93b60404cf06a3291d259dc7c8b10:{{ ENV.TALOS_VERSION }}"
     wipe: false
   files:
     - op: create
@@ -70,10 +69,6 @@ machine:
   features:
     rbac: true
     stableHostname: true
-    kubernetesTalosAPIAccess:
-      enabled: true
-      allowedRoles: ["os:admin"]
-      allowedKubernetesNamespaces: ["actions-runner-system", "system-upgrade"]
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
     kubePrism:
@@ -89,3 +84,77 @@ machine:
   nodeLabels:
     topology.kubernetes.io/region: jupiter
     topology.kubernetes.io/zone: w
+cluster:
+  id: op://Secrets/talos/CLUSTER_ID
+  secret: op://Secrets/talos/CLUSTER_SECRET
+  allowSchedulingOnControlPlanes: true
+  controlPlane:
+    endpoint: https://k8s.internal:6443
+  clusterName: jupiter
+  network:
+    cni:
+      name: none
+    dnsDomain: cluster.local
+    podSubnets: ["10.244.0.0/16"]
+    serviceSubnets: ["10.245.0.0/16"]
+  coreDNS:
+    disabled: true
+  discovery:
+    enabled: true
+    registries:
+      kubernetes:
+        disabled: true
+      service:
+        disabled: false
+  extraManifests:
+    - # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
+      https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/experimental-install.yaml
+    - # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
+      https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.81.0/stripped-down-crds.yaml
+    {% for crd in ["connectors", "dnsconfigs", "proxyclasses", "proxygroups", "recorders"] %}
+    - # renovate: datasource=github-releases depName=tailscale/tailscale
+      https://raw.githubusercontent.com/tailscale/tailscale/v1.80.0/cmd/k8s-operator/deploy/crds/tailscale.com_{{ crd }}.yaml
+    {% endfor %}
+  token: op://Secrets/talos/CLUSTER_TOKEN
+  secretboxEncryptionSecret: op://Secrets/talos/CLUSTER_SECRETBOX_ENCRYPTION_SECRET
+  ca:
+    crt: op://Secrets/talos/CLUSTER_CA_CRT
+  aggregatorCA:
+    crt: op://Secrets/talos/CLUSTER_AGGREGATOR_CA_CRT
+    key: op://Secrets/talos/CLUSTER_AGGREGATOR_CA_KEY
+  serviceAccount:
+    key: op://Secrets/talos/CLUSTER_SERVICE_ACCOUNT_KEY
+  apiServer:
+    image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
+    extraArgs:
+      enable-aggregator-routing: true
+    certSANs: ["k8s.internal"]
+    disablePodSecurityPolicy: true
+  controllerManager:
+    image: registry.k8s.io/kube-controller-manager:{{ ENV.KUBERNETES_VERSION }}
+    extraArgs:
+      bind-address: 0.0.0.0
+  proxy:
+    disabled: true
+    image: registry.k8s.io/kube-proxy:{{ ENV.KUBERNETES_VERSION }}
+  scheduler:
+    image: registry.k8s.io/kube-scheduler:{{ ENV.KUBERNETES_VERSION }}
+    extraArgs:
+      bind-address: 0.0.0.0
+    config:
+      apiVersion: kubescheduler.config.k8s.io/v1
+      kind: KubeSchedulerConfiguration
+      profiles:
+        - schedulerName: default-scheduler
+          plugins:
+            score:
+              disabled:
+                - name: ImageLocality
+          pluginConfig:
+            - name: PodTopologySpread
+              args:
+                defaultingType: List
+                defaultConstraints:
+                  - maxSkew: 1
+                    topologyKey: kubernetes.io/hostname
+                    whenUnsatisfiable: ScheduleAnyway

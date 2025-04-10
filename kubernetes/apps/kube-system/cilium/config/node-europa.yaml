@@ -1,0 +1,10 @@
+apiVersion: cilium.io/v2
+kind: CiliumNodeConfig
+metadata:
+  name: node-europa
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/hostname: "europa"
+  defaults:
+    devices: enp12s0

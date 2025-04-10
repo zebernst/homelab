@@ -1,21 +1,33 @@
 ---
 machine:
   disks:
-    - device: /dev/disk/by-id/nvme-<tbd>
+    - device: /dev/nvme0n1
       partitions: [{ mountpoint: /var/mnt/extra }]
   install:
     diskSelector:
-      serial: <tbd>
+      serial: S5H9NS0N517111K
     extraKernelArgs:
       - amd_iommu=on            # PCI Passthrough
+  kernel:
+    modules:
+      - name: nvidia
+      - name: nvidia_uvm
+      - name: nvidia_drm
+      - name: nvidia_modeset
+  kubelet:
+    extraConfig:
+      registerWithTaints:
+        - key: "nvidia.com/gpu"
+          value: "true"
+          effect: PreferNoSchedule
   network:
     hostname: europa.k8s.internal
     interfaces:
-      - interface: en0
+      - interface: enp12s0
         dhcp: true
         mtu: 9000
         vlans:
           - { vlanId: 20, dhcp: false, mtu: 1500 }
           - { vlanId: 30, dhcp: false, mtu: 1500 }
-  nodeTaints:
-    dedicated-gpu: true:PreferNoSchedule
+  sysctls:
+    net.core.bpf_jit_harden: 1

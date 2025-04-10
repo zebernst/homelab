@@ -4,5 +4,6 @@ kind: Kustomization
 resources:
   - l2.yaml
   - l3.yaml
+  - node-europa.yaml
   - pool.yaml
   - vip.yaml

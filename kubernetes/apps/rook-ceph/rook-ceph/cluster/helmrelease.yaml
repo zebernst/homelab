@@ -66,6 +66,14 @@ spec:
         useAllNodes: true
         useAllDevices: false
         devicePathFilter: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_2TB_.*
+      placement:
+         all:
+           nodeAffinity:
+             requiredDuringSchedulingIgnoredDuringExecution:
+               nodeSelectorTerms:
+                 - matchExpressions:
+                   - key: node-role.kubernetes.io/control-plane
+                     operator: Exists
     cephBlockPools:
       - name: ceph-blockpool
         spec:
