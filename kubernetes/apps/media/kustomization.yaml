@@ -11,5 +11,6 @@ resources:
   - overseerr/ks.yaml
   - plex/ks.yaml
   - stash/ks.yaml
+  - steam/ks.yaml
   - tautulli/ks.yaml
   - wizarr/ks.yaml

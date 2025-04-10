@@ -1,0 +1,119 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app steam
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      app:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          steam:
+            image:
+              repository: josh5/steam-headless
+              tag: latest@sha256:1c028fa228d258243441e41b2e0fe6fa6dc58669d77393442ec3cf0ea2bbdd30
+              pullPolicy: IfNotPresent
+            envFrom:
+              - secretRef:
+                  name: steam-headless-secret
+            env:
+              NAME: SteamHeadless
+              TZ: America/New_York
+              HOME_DIR: &homeDir /home/steam
+              GAMES_DIR: &gameDir /mnt/games
+
+              PUID: 568
+              PGID: 568
+
+              MODE: primary
+              WEB_UI_MODE: vnc
+              ENABLE_VNC_AUDIO: true
+              PORT_NOVNC_WEB: &port 8083
+              ENABLE_EVDEV_INPUTS: false
+
+              STEAM_ARGS: -silent
+              ENABLE_SUNSHINE: true
+            probes:
+              liveness: &probe
+                enabled: true
+              readiness: *probe
+              startup: *probe
+            securityContext:
+              privileged: true
+              runAsNonRoot: false
+              readOnlyRootFilesystem: false
+              runAsUser: 0
+              runAsGroup: 0
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 32Gi
+                nvidia.com/gpu: 3
+    defaultPodOptions:
+      hostUsers: false
+      runtimeClassName: nvidia
+      securityContext:
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [65568]
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+    service:
+      app:
+        controller: app
+        ports:
+          http:
+            port: *port
+    ingress:
+      lan:
+        className: internal
+        hosts:
+          - host: "{{ .Release.Name }}.zebernst.dev"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+      ts:
+        className: tailscale
+        hosts:
+          - host: &host "{{ .Release.Name }}.kite-harmonic.ts.net"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - *host
+    persistence:
+      home:
+        existingClaim: *app
+        globalMounts:
+          - path: *homeDir
+      games:
+        existingClaim: steam-library
+        globalMounts:
+          - path: *gameDir
