@@ -11,6 +11,9 @@ machine:
   kubelet:
     image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
     extraConfig:
+      featureGates:
+        UserNamespacesSupport: true
+        UserNamespacesPodSecurityStandards: true
       maxPods: 150
       serializeImagePulls: false
     extraMounts:
@@ -81,6 +84,7 @@ machine:
     net.ipv4.tcp_wmem: 4096 65536 33554432 # 10Gb/s
     net.ipv4.tcp_window_scaling: 1         # 10Gb/s
     vm.nr_hugepages: 1024                  # PostgreSQL
+    user.max_user_namespaces: "11255"      # Steam/Flatpak support
   sysfs:
     devices.system.cpu.intel_pstate.hwp_dynamic_boost: 1
   features:
@@ -158,6 +162,7 @@ cluster:
     image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
     extraArgs:
       enable-aggregator-routing: true
+      feature-gates: UserNamespacesSupport=true,UserNamespacesPodSecurityStandards=true
     certSANs: ["k8s.internal"]
     disablePodSecurityPolicy: true
   controllerManager:
