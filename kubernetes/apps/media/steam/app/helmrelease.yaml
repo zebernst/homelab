@@ -39,15 +39,12 @@ spec:
             env:
               NAME: SteamHeadless
               TZ: America/New_York
-              HOME_DIR: &homeDir /home/steam
+              HOME_DIR: &homeDir /home/default
               GAMES_DIR: &gameDir /mnt/games
-
-              PUID: 568
-              PGID: 568
 
               MODE: primary
               WEB_UI_MODE: vnc
-              ENABLE_VNC_AUDIO: true
+              ENABLE_VNC_AUDIO: false
               PORT_NOVNC_WEB: &port 8083
               ENABLE_EVDEV_INPUTS: false
 
@@ -60,22 +57,18 @@ spec:
               startup: *probe
             securityContext:
               privileged: true
-              runAsNonRoot: false
-              readOnlyRootFilesystem: false
-              runAsUser: 0
-              runAsGroup: 0
             resources:
               requests:
-                cpu: 10m
+                memory: 24G
+                cpu: 6
               limits:
-                memory: 32Gi
+                memory: 24G
+                cpu: 6
                 nvidia.com/gpu: 3
     defaultPodOptions:
-      hostUsers: false
-      runtimeClassName: nvidia
+      hostNetwork: true
       securityContext:
-        fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [65568]
+        fsGroup: 1000
       tolerations:
         - key: nvidia.com/gpu
           operator: Exists
@@ -83,19 +76,13 @@ spec:
     service:
       app:
         controller: app
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: 192.168.20.16, ::ffff:c0a8:1410
         ports:
           http:
             port: *port
     ingress:
-      lan:
-        className: internal
-        hosts:
-          - host: "{{ .Release.Name }}.zebernst.dev"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
       ts:
         className: tailscale
         hosts:
@@ -117,3 +104,8 @@ spec:
         existingClaim: steam-library
         globalMounts:
           - path: *gameDir
+      dev-shm:
+        type: emptyDir
+        medium: Memory
+        globalMounts:
+          - path: /dev/shm
