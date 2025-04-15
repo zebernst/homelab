@@ -264,7 +264,7 @@ spec:
         cnpg:
           # renovate: depName="CloudNativePG"
           gnetId: 20417
-          revision: 3
+          revision: 4
           datasource:
             - { name: DS_PROMETHEUS, value: Prometheus }
         dragonfly:
