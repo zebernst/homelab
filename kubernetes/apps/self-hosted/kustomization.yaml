@@ -14,3 +14,4 @@ resources:
   - mealie/ks.yaml
   - nocodb/ks.yaml
   - paperless/ks.yaml
+  - radicale/ks.yaml

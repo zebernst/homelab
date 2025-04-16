@@ -1,0 +1,99 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app radicale
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+
+  values:
+    controllers:
+      radicale:
+        annotations:
+          reloader.stakater.com/auto: "true"
+
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: "OnRootMismatch"
+
+        containers:
+          radicale:
+            image:
+              repository: ghcr.io/bjw-s-labs/radicale
+              tag: 3.5.1
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 32m
+                memory: 192Mi
+              limits:
+                memory: 1024Mi
+
+    service:
+      app:
+        controller: radicale
+        ports:
+          http:
+            port: 5232
+
+    ingress:
+      app:
+        className: tailscale
+        hosts:
+          - host: &host radicale.kite-harmonic.ts.net
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - *host
+    persistence:
+      config:
+        type: configMap
+        name: radicale-configmap
+        globalMounts:
+          - path: /config/config
+            subPath: config.cfg
+            readOnly: true
+      data:
+        existingClaim: *app
+        globalMounts:
+          - path: /data
+      auth:
+        type: secret
+        name: radicale-secret
+        globalMounts:
+          - path: /config/users
+            subPath: users
+            readOnly: true
