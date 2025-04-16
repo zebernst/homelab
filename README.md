@@ -166,16 +166,17 @@ Alternative solutions to the first two of these problems would be to host a Kube
 </details>
 
 
-| Device                  | Count | OS Disk     | Data Disk                                                              | RAM  | OS          | Purpose         |
-|-------------------------|-------|-------------|------------------------------------------------------------------------|------|-------------|-----------------|
-| MS-01 (i9-12900H)       | 3     | 1TB M.2 SSD | 2TB M.2 SSD (Rook)                                                     | 96GB | Talos Linux | Kubernetes      |
-| Synology DS918+         | 1     | -           | 2x14TB&nbsp;HDD + 2x18TB&nbsp;HDD + 2x1TB&nbsp;SSD&nbsp;R/W&nbsp;Cache | 16GB | DSM 7       | NAS/NFS/Backup  |
-| JetKVM                  | 2     | -           | -                                                                      | -    | -           | KVM             |
-| Home Assistant Yellow   | 1     | 8GB eMMC    | 1TB M.2 SSD                                                            | 4GB  | HAOS        | Home Automation |
-| UniFi UDM Pro           | 1     | -           | -                                                                      | -    | UniFi OS    | Router          |
-| UniFi USW Pro 24 PoE    | 1     | -           | -                                                                      | -    | UniFi OS    | Core Switch     |
-| Unifi USP PDU Pro       | 1     | -           | -                                                                      | -    | UniFi OS    | PDU             |
-| CyberPower OR500LCDRM1U | 1     | -           | -                                                                      | -    | -           | UPS             |
+| Device                      | Count | OS Disk     | Data Disk                                                              | RAM  | OS          | Purpose                    |
+|-----------------------------|-------|-------------|------------------------------------------------------------------------|------|-------------|----------------------------|
+| MS-01 (i9-12900H)           | 3     | 1TB M.2 SSD | 2TB M.2 SSD (Rook)                                                     | 96GB | Talos Linux | Kubernetes (control plane) |
+| Custom build ([link][pcpp]) | 1     | 1TB M.2 SSD | 4TB M.2 SSD                                                            | 96GB | Talos Linux | Kubernetes (gpu workloads) |
+| Synology DS918+             | 1     | -           | 2x14TB&nbsp;HDD + 2x18TB&nbsp;HDD + 2x1TB&nbsp;SSD&nbsp;R/W&nbsp;Cache | 16GB | DSM 7       | NAS/NFS/Backup             |
+| JetKVM                      | 2     | -           | -                                                                      | -    | -           | KVM                        |
+| Home Assistant Yellow       | 1     | 8GB eMMC    | 1TB M.2 SSD                                                            | 4GB  | HAOS        | Home Automation            |
+| UniFi UDM Pro               | 1     | -           | -                                                                      | -    | UniFi OS    | Router                     |
+| UniFi USW Pro 24 PoE        | 1     | -           | -                                                                      | -    | UniFi OS    | Core Switch                |
+| Unifi USP PDU Pro           | 1     | -           | -                                                                      | -    | UniFi OS    | PDU                        |
+| CyberPower OR500LCDRM1U     | 1     | -           | -                                                                      | -    | -           | UPS                        |
 
 ---
 
@@ -196,3 +197,5 @@ See the latest [release](https://github.com/zebernst/homelab/releases/latest) no
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2696_fe0f/512.gif" alt="⚖" width="20" height="20"> License
 
 See [LICENSE](./LICENSE).
+
+[pcpp]: https://pcpartpicker.com/b/qLrD4D
