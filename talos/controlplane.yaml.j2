@@ -143,7 +143,7 @@ cluster:
     - # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
       https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/experimental-install.yaml
     - # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
-      https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.81.0/stripped-down-crds.yaml
+      https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.82.0/stripped-down-crds.yaml
     {% for crd in ["connectors", "dnsconfigs", "proxyclasses", "proxygroups", "recorders"] %}
     - # renovate: datasource=github-releases depName=tailscale/tailscale
       https://raw.githubusercontent.com/tailscale/tailscale/v1.82.0/cmd/k8s-operator/deploy/crds/tailscale.com_{{ crd }}.yaml
