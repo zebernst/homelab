@@ -68,8 +68,6 @@ spec:
     triggerLoopOnEvent: true
     policy: sync
     sources: ["ingress", "service"]
-    txtOwnerId: "jupiter"
-    txtPrefix: "k8s.jupiter."
     domainFilters: ["zebernst.dev", "internal"]
     serviceMonitor:
       enabled: true
