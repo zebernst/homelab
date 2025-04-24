@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: redspot-lb
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: redspot.zebernst.dev
+    external-dns.alpha.kubernetes.io/hostname: redspot.internal
 spec:
   type: LoadBalancer
   ports:

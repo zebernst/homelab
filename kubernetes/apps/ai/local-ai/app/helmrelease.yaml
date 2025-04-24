@@ -60,7 +60,7 @@ spec:
     service:
       annotations:
         io.cilium/lb-ipam-ips: 192.168.20.40
-        external-dns.alpha.kubernetes.io/hostname: localai.zebernst.dev
+        external-dns.alpha.kubernetes.io/hostname: localai.internal
       type: LoadBalancer
       ports:
         http:

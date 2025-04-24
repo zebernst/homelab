@@ -27,7 +27,7 @@ spec:
   serviceSpec:
     type: LoadBalancer
     annotations:
-      external-dns.alpha.kubernetes.io/hostname: redis.zebernst.dev
+      external-dns.alpha.kubernetes.io/hostname: redis.internal
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
