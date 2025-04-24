@@ -50,7 +50,7 @@ spec:
               TZ: "America/New_York"
               BASE_URL: https://mealie.kite-harmonic.ts.net
               DB_ENGINE: postgres
-              API_PORT: &port 9000
+              API_PORT: &port 80
             envFrom: *envFrom
             securityContext:
               allowPrivilegeEscalation: false
@@ -72,20 +72,14 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: mealie.internal
         controller: *app
+        type: LoadBalancer
         ports:
           http:
             port: *port
     ingress:
-      lan:
-        className: internal
-        hosts:
-          - host: "{{ .Release.Name }}.zebernst.dev"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
       tailscale:
         className: tailscale
         hosts:
