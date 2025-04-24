@@ -35,11 +35,21 @@ spec:
         env:
           - name: UNIFI_HOST
             value: https://unifi
-          - name: &name UNIFI_API_KEY
+          - name: UNIFI_USER
             valueFrom:
               secretKeyRef:
                 name: &secret external-dns-unifi-secret
-                key: *name
+                key: UNIFI_USERNAME
+          - name: UNIFI_PASS
+            valueFrom:
+              secretKeyRef:
+                name: *secret
+                key: UNIFI_PASSWORD
+          # - name: LOG_LEVEL
+          #   value: "debug"
+        envFrom:
+          - secretRef:
+              name: &secret external-dns-unifi-secret
         livenessProbe:
           httpGet:
             path: /healthz
@@ -54,12 +64,13 @@ spec:
           timeoutSeconds: 5
     extraArgs:
       - --ignore-ingress-tls-spec
+      - --ingress-class=internal
     triggerLoopOnEvent: true
     policy: sync
     sources: ["ingress", "service"]
-    txtOwnerId: "k8s"
-    txtPrefix: "k8s."
-    domainFilters: ["zebernst.dev"]
+    txtOwnerId: "jupiter"
+    txtPrefix: "k8s.jupiter."
+    domainFilters: ["zebernst.dev", "internal"]
     serviceMonitor:
       enabled: true
     podAnnotations:
