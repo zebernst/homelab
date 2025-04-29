@@ -7,11 +7,13 @@ tasks:
   apply-node:
     desc: Apply Talos config to a node [NODE=required] [MODE=auto] [DRY_RUN=false]
     cmd: |-
-      minijinja-cli {{.TALOS_DIR}}/{{.MACHINE_TYPE}}.yaml.j2 | op inject \
+      minijinja-cli {{.TALOS_DIR}}/machineconfig.yaml.j2 | op inject \
         | talosctl --nodes {{.NODE}} apply-config \
           --mode {{.MODE}} \
           --config-patch @{{.TALOS_DIR}}/{{.MACHINE_TYPE}}/{{.NODE}}.yaml \
           --file /dev/stdin {{if .INSECURE}}--insecure{{end}} {{if .DRY_RUN}}--dry-run{{end}}
+    env:
+      MACHINE_TYPE: '{{.MACHINE_TYPE}}'
     vars:
       MODE: '{{.MODE | default "auto"}}'
       DRY_RUN: '{{.DRY_RUN | default ""}}'
@@ -26,7 +28,7 @@ tasks:
     preconditions:
       - op user get --me
       - talosctl config info
-      - test -f {{.TALOS_DIR}}/{{.MACHINE_TYPE}}.yaml.j2
+      - test -f {{.TALOS_DIR}}/machineconfig.yaml.j2
       - test -f {{.TALOS_DIR}}/{{.MACHINE_TYPE}}/{{.NODE}}.yaml
       - which minijinja-cli op talosctl
 

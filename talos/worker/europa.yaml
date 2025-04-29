@@ -1,13 +1,26 @@
 ---
 machine:
   disks:
-    - device: /dev/nvme0n1
+    - device: /dev/disk/by-id/nvme-Samsung_SSD_990_PRO_4TB_S7KGNU0XC10841D
       partitions: [{ mountpoint: /var/mnt/extra }]
+  files:
+    - path: /etc/cri/conf.d/20-customization.part
+      $patch: delete
+    - op: create
+      path: /etc/cri/conf.d/20-customization.part
+      content: |
+        [plugins."io.containerd.cri.v1.images"]
+          discard_unpacked_layers = false
+        [plugins."io.containerd.cri.v1.runtime"]
+          [plugins."io.containerd.cri.v1.runtime".containerd]
+            default_runtime_name = "nvidia"
   install:
     diskSelector:
       serial: S5H9NS0N517111K
     extraKernelArgs:
       - amd_iommu=on            # PCI Passthrough
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+    image: factory.talos.dev/installer/ffb0c3521ac24e3d3378c572fa8ec5c38ba93b60404cf06a3291d259dc7c8b10:v1.9.5
   kernel:
     modules:
       - name: nvidia
@@ -29,5 +42,7 @@ machine:
         vlans:
           - { vlanId: 20, dhcp: false, mtu: 1500 }
           - { vlanId: 30, dhcp: false, mtu: 1500 }
+  nodeLabels:
+    topology.kubernetes.io/zone: w
   sysctls:
-    net.core.bpf_jit_harden: 1
+    net.core.bpf_jit_harden: 1    # required for NVIDIA kernel modules

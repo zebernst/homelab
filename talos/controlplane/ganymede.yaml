@@ -3,9 +3,23 @@ machine:
   install:
     diskSelector:
       serial: 50026B728363E11C
+    extraKernelArgs:
+      - intel_iommu=on          # PCI Passthrough
   network:
     hostname: ganymede.k8s.internal
     interfaces:
+      - interface: bond0
+        bond:
+          deviceSelectors: [ { hardwareAddr: "58:47:ca:7a:*", driver: igc } ]
+          mode: 802.3ad
+          xmitHashPolicy: layer3+4
+          lacpRate: fast
+          miimon: 1000
+        dhcp: true
+        mtu: 9000
+        vlans:
+          - { vlanId: 20, dhcp: false, mtu: 1500 }
+          - { vlanId: 30, dhcp: false, mtu: 1500 }
       - # io
         deviceSelector: { busPath: 0-1.0 }
         dhcp: false
@@ -18,3 +32,7 @@ machine:
         mtu: 65520
         addresses: [169.254.255.11/32]
         routes: [{ network: 169.254.255.12/32, metric: 2048 }]
+  nodeLabels:
+    topology.kubernetes.io/zone: m
+  sysfs:
+    devices.system.cpu.intel_pstate.hwp_dynamic_boost: 1
