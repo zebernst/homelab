@@ -32,7 +32,7 @@ spec:
           app:
             image:
               repository: docker.io/nocodb/nocodb
-              tag: 0.262.5@sha256:3478bce1f128d46eb9d4a838cf2ce320693750a785aad6efa8de3235ab3733c5
+              tag: 0.263.4@sha256:8b8177622c1a797ed18252e908376a7222580ea2c117b8bd47f46fecb8b33eff
             env:
               PORT: &port 8080
               NC_JWT_EXPIRES_IN: 48h
