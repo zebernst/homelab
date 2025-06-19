@@ -34,22 +34,24 @@ spec:
           app:
             image:
               repository:  ghcr.io/wizarrrr/wizarr
-              tag: 4.2.0
+              tag: 2025.6.4
             env:
-              TZ: ${TIMEZONE}
+              TZ: America/Chicago
+              PUID: 568
+              PGID: 568
             resources:
               requests:
                 cpu: 15m
                 memory: 180M
               limits:
                 memory: 300M
-#    defaultPodOptions:
-#      securityContext:
+    defaultPodOptions:
+      securityContext:
 #        runAsNonRoot: true
 #        runAsUser: 568
 #        runAsGroup: 568
-#        fsGroup: 568
-#        fsGroupChangePolicy: OnRootMismatch
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         controller: *app
