@@ -34,9 +34,11 @@ spec:
           app:
             image:
               repository:  ghcr.io/wizarrrr/wizarr
-              tag: 4.2.0
+              tag: 2025.5.1
             env:
-              TZ: ${TIMEZONE}
+              TZ: America/Chicago
+#              PUID: 568
+#              PGID: 568
             resources:
               requests:
                 cpu: 15m
