@@ -1,0 +1,96 @@
+---
+auths:
+  public_v1:
+    version: 1
+  public_v2:
+    version: 2
+
+modules:
+  # SNMPv2-MIB for things like sysDescr, sysUpTime, etc.
+  system:
+    walk:
+      - "SNMPv2-MIB::system"
+    lookups:
+      - source_indexes: [ sysORIndex ]
+        lookup: "SNMPv2-MIB::sysORDescr"
+
+  # Synology
+  #
+  # Synology MIBs can be found here:
+  #   http://www.synology.com/support/snmp_mib.php
+  #   http://dedl.synology.com/download/Document/MIBGuide/Synology_MIB_File.zip
+  synology:
+    walk:
+      - SYNOLOGY-SYSTEM-MIB::synoSystem         # 1.3.6.1.4.1.6574.1
+      - SYNOLOGY-DISK-MIB::synoDisk             # 1.3.6.1.4.1.6574.2
+      - SYNOLOGY-RAID-MIB::synoRaid             # 1.3.6.1.4.1.6574.3
+      - SYNOLOGY-UPS-MIB::synoUPS               # 1.3.6.1.4.1.6574.4
+      - SYNOLOGY-SMART-MIB::synologyDiskSMART   # 1.3.6.1.4.1.6574.5
+      - SYNOLOGY-SERVICES-MIB::synologyService  # 1.3.6.1.4.1.6574.6
+      - SYNOLOGY-STORAGEIO-MIB::storageIO       # 1.3.6.1.4.1.6574.101
+      - SYNOLOGY-SPACEIO-MIB::spaceIO           # 1.3.6.1.4.1.6574.102
+      - SYNOLOGY-ISCSILUN-MIB::synologyiSCSILUN # 1.3.6.1.4.1.6574.104
+    lookups:
+      - source_indexes: [spaceIOIndex]
+        lookup: spaceIODevice
+        drop_source_indexes: true
+      - source_indexes: [storageIOIndex]
+        lookup: storageIODevice
+        drop_source_indexes: true
+      - source_indexes: [serviceInfoIndex]
+        lookup: serviceName
+        drop_source_indexes: true
+      - source_indexes: [diskIndex]
+        lookup: diskID
+        drop_source_indexes: true
+      - source_indexes: [raidIndex]
+        lookup: raidName
+        drop_source_indexes: true
+    overrides:
+      SYNOLOGY-DISK-MIB::diskModel:
+        type: DisplayString
+      SYNOLOGY-DISK-MIB::diskType:
+        type: DisplayString
+      SYNOLOGY-RAID-MIB::raidFreeSize:
+        type: gauge
+      SYNOLOGY-RAID-MIB::raidName:
+        type: DisplayString
+      SYNOLOGY-RAID-MIB::raidTotalSize:
+        type: gauge
+      SYNOLOGY-SERVICES-MIB::serviceName:
+        type: DisplayString
+      SYNOLOGY-SMART-MIB::diskSMARTAttrName:
+        type: DisplayString
+      SYNOLOGY-SMART-MIB::diskSMARTAttrStatus:
+        type: DisplayString
+      SYNOLOGY-SMART-MIB::diskSMARTInfoDevName:
+        type: DisplayString
+      SYNOLOGY-SYSTEM-MIB::modelName:
+        type: DisplayString
+      SYNOLOGY-SYSTEM-MIB::serialNumber:
+        type: DisplayString
+      SYNOLOGY-SYSTEM-MIB::version:
+        type: DisplayString
+
+  # Eaton Network-M2 Card
+  # MIBs found at:
+  #   https://www.eaton.com/us/en-us/catalog/backup-power-ups-surge-it-power-distribution/eaton-gigabit-network-card---na/network-m2.html
+  eaton_xups:
+    walk:
+      - xupsIdent
+      - xupsBattery
+      - xupsInput
+      - xupsOutput
+      - xupsBypass
+      - xupsEnvironment
+      - xupsAlarm
+      - xupsTest
+      - xupsRecep
+      - xupsConfig
+    lookups:
+      - source_indexes: [ xupsInputTable ]
+        lookup: xupsInputVoltage
+      - source_indexes: [ xupsOutputTable ]
+        lookup: xupsOutputVoltage
+      - source_indexes: [ xupsBypassTable ]
+        lookup: xupsBypassFrequency
