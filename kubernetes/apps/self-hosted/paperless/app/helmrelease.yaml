@@ -45,7 +45,7 @@ spec:
           paperless:
             image:
               repository: ghcr.io/paperless-ngx/paperless-ngx
-              tag: 2.15.3
+              tag: 2.17.1
             env:
               # Configure application
               PAPERLESS_URL: "https://{{ .Release.Name }}.kite-harmonic.ts.net"
