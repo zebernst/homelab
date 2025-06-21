@@ -30,7 +30,7 @@ spec:
     deployment:
       image:
         repository: quay.io/go-skynet/local-ai
-        tag: v2.28.0-aio-gpu-nvidia-cuda-12
+        tag: v3.0.0-aio-gpu-nvidia-cuda-12
       env:
         threads: 8
         context_size: 512
