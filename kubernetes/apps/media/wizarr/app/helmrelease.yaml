@@ -34,22 +34,24 @@ spec:
           app:
             image:
               repository:  ghcr.io/wizarrrr/wizarr
-              tag: 4.2.0
+              tag: 2025.6.4@sha256:653eb00402b5e1007e01307d3018f040c434e860a7259fd3bf32168ea31cf3d1
             env:
-              TZ: ${TIMEZONE}
+              TZ: America/Chicago
+              PUID: 568
+              PGID: 568
             resources:
               requests:
                 cpu: 15m
                 memory: 180M
               limits:
                 memory: 300M
-#    defaultPodOptions:
-#      securityContext:
-#        runAsNonRoot: true
-#        runAsUser: 568
-#        runAsGroup: 568
-#        fsGroup: 568
-#        fsGroupChangePolicy: OnRootMismatch
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         controller: *app
@@ -69,7 +71,17 @@ spec:
                   identifier: app
                   port: http
     persistence:
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /.cache
       config:
         existingClaim: *app
         globalMounts:
           - path: /data/database
+      onboarding-plex:
+        type: configMap
+        name: onboarding-plex-configmap
+        globalMounts:
+          - path: /data/wizard_steps/plex/
+            readOnly: true

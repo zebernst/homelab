@@ -35,7 +35,7 @@ spec:
           app:
             image:
               repository: crocodilestick/calibre-web-automated
-              tag: V3.0.4
+              tag: dev@sha256:cef87464a141209dcd56278be8010cab55a1c867dad0096c1aa7c59f9c1f6a02
             env:
               CACHE_DIR: /cache
               CALIBRE_PORT: &port 8083
@@ -63,8 +63,8 @@ spec:
               startup:
                 enabled: true
                 spec:
-                  initialDelaySeconds: 60
-                  failureThreshold: 45
+                  initialDelaySeconds: 10
+                  failureThreshold: 15
                   periodSeconds: 5
             resources:
               requests:
