@@ -3,3 +3,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - helmrelease.yaml
+patches:
+- path: rule-patches.yaml
+  target:
+    group: monitoring.coreos.com
+    kind: PrometheusRule
+    name: prometheus-ceph-rules
+    version: v1
