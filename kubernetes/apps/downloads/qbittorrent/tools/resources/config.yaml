@@ -6,6 +6,7 @@ trackers:
   - { name: jptv,  required_seed_ratio: 1.01, required_seed_days: 7.3,  urls: ["jptv.club"] }
   - { name: lst,   required_seed_ratio: 0,    required_seed_days: 3.3,  urls: ["lst.gg"]}
   - { name: mlk,   required_seed_ratio: 1.01, required_seed_days: 7.3,  urls: ["milkie.cc"] }
+  - { name: mam,   required_seed_ratio: 0,    required_seed_days: 3.3,  urls: ["myanonamouse.net"] }
   - { name: oe,    required_seed_ratio: 0,    required_seed_days: 2.3,  urls: ["onlyencodes.cc"] }
   - { name: ot,    required_seed_ratio: 0.41, required_seed_days: 2.3,  urls: ["oldtoons.world"] }
   - { name: ptp,   required_seed_ratio: 1.01, required_seed_days: 7.3,  urls: ["passthepopcorn.me"] }
