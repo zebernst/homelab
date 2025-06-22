@@ -121,6 +121,10 @@ spec:
               - op: add
                 path: /spec/groups/6/rules/1/for
                 value: 5m
+              # CephNodeNetworkPacketErrors
+              - op: add
+                path: /spec/groups/6/rules/2/for
+                value: 5m
 
               # CephMonClockSkew
               - op: replace
