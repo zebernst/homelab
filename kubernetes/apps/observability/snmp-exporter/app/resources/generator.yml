@@ -6,14 +6,6 @@ auths:
     version: 2
 
 modules:
-  # SNMPv2-MIB for things like sysDescr, sysUpTime, etc.
-  system:
-    walk:
-      - "SNMPv2-MIB::system"
-    lookups:
-      - source_indexes: [ sysORIndex ]
-        lookup: "SNMPv2-MIB::sysORDescr"
-
   # Synology
   #
   # Synology MIBs can be found here:
@@ -31,19 +23,19 @@ modules:
       - SYNOLOGY-SPACEIO-MIB::spaceIO           # 1.3.6.1.4.1.6574.102
       - SYNOLOGY-ISCSILUN-MIB::synologyiSCSILUN # 1.3.6.1.4.1.6574.104
     lookups:
-      - source_indexes: [spaceIOIndex]
+      - source_indexes: [ spaceIOIndex ]
         lookup: spaceIODevice
         drop_source_indexes: true
-      - source_indexes: [storageIOIndex]
+      - source_indexes: [ storageIOIndex ]
         lookup: storageIODevice
         drop_source_indexes: true
-      - source_indexes: [serviceInfoIndex]
+      - source_indexes: [ serviceInfoIndex ]
         lookup: serviceName
         drop_source_indexes: true
-      - source_indexes: [diskIndex]
+      - source_indexes: [ diskIndex ]
         lookup: diskID
         drop_source_indexes: true
-      - source_indexes: [raidIndex]
+      - source_indexes: [ raidIndex ]
         lookup: raidName
         drop_source_indexes: true
     overrides:
@@ -77,20 +69,21 @@ modules:
   #   https://www.eaton.com/us/en-us/catalog/backup-power-ups-surge-it-power-distribution/eaton-gigabit-network-card---na/network-m2.html
   eaton_xups:
     walk:
-      - xupsIdent
-      - xupsBattery
-      - xupsInput
-      - xupsOutput
-      - xupsBypass
-      - xupsEnvironment
-      - xupsAlarm
-      - xupsTest
-      - xupsRecep
-      - xupsConfig
+      - XUPS-MIB::xupsIdent             # 1.3.6.1.4.1.534.1.1
+      - XUPS-MIB::xupsBattery           # 1.3.6.1.4.1.534.1.2
+      - UPS-MIB::upsSecondsOnBattery    # 1.3.6.1.2.1.33.1.2.2.0
+      - UPS-MIB::upsBatteryTemperature  # 1.3.6.1.2.1.33.1.2.7.0
+      - XUPS-MIB::xupsInput             # 1.3.6.1.4.1.534.1.3
+      - XUPS-MIB::xupsOutput            # 1.3.6.1.4.1.534.1.4
+      - XUPS-MIB::xupsBypass            # 1.3.6.1.4.1.534.1.5
+      - XUPS-MIB::xupsAlarm             # 1.3.6.1.4.1.534.1.7
+      - XUPS-MIB::xupsTest              # 1.3.6.1.4.1.534.1.8
+      - XUPS-MIB::xupsConfig            # 1.3.6.1.4.1.534.1.10
+      - XUPS-MIB::xupsRecep             # 1.3.6.1.4.1.534.1.12
     lookups:
-      - source_indexes: [ xupsInputTable ]
-        lookup: xupsInputVoltage
-      - source_indexes: [ xupsOutputTable ]
-        lookup: xupsOutputVoltage
-      - source_indexes: [ xupsBypassTable ]
-        lookup: xupsBypassFrequency
+      - source_indexes: [ upsAlarmId ]
+        lookup: upsAlarmDescr
+      - source_indexes: [ xupsAlarmId ]
+        lookup: xupsAlarmDescr
+      - source_indexes: [ xupsAlarmEventID ]
+        lookup: xupsAlarmEventMsg
