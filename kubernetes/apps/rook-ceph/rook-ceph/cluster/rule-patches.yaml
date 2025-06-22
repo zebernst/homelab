@@ -1,9 +1,0 @@
-# CephNodeNetworkPacketDrops
-- op: add
-  path: /spec/groups/6/rules/1/for
-  value: 2m
-
-# CephMonClockSkew
-- op: replace
-  path: /spec/groups/1/rules/4/for
-  value: 5m

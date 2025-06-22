@@ -108,3 +108,21 @@ spec:
       deletionPolicy: Delete
     cephFileSystems: []
     cephObjectStores: []
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: monitoring.coreos.com
+              kind: PrometheusRule
+              name: prometheus-ceph-rules
+              version: v1
+            patch: |-
+              # CephNodeNetworkPacketDrops
+              - op: add
+                path: /spec/groups/6/rules/1/for
+                value: 5m
+
+              # CephMonClockSkew
+              - op: replace
+                path: /spec/groups/1/rules/4/for
+                value: 5m
