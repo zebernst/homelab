@@ -5,10 +5,11 @@ kind: Kustomization
 resources:
   - externalsecret.yaml
   - helmrelease.yaml
+  - prometheusrule.yaml
 configMapGenerator:
   - name: autobrr-loki-rules
     files:
-      - autobrr.yaml=resources/lokirule.yaml
+      - autobrr.yaml=lokirule.yaml
     options:
       labels:
         loki_rule: "true"
