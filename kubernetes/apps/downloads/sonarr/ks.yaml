@@ -11,7 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../components/keda/nfs-scaler
+    - ../../../../../components/keda/nfs-scaler
   dependsOn:
     - name: cloudnative-pg-cluster
       namespace: database
@@ -45,7 +45,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../components/keda/nfs-scaler
+    - ../../../../../components/keda/nfs-scaler
   dependsOn:
     - name: cloudnative-pg-cluster
       namespace: database
