@@ -39,9 +39,6 @@ spec:
             env:
               API_URI: https://{{ .Release.Name }}.zebernst.dev
               HANAMI_PORT: &port 2300
-              FIRMWARE_ROOT: /data/firmware
-              PREVIEWS_ROOT: /data/previews
-              SCREENS_ROOT: /data/screens
               LOG_LEVEL: debug
             envFrom: *envFrom
             image:
@@ -86,5 +83,7 @@ spec:
                 service:
                   identifier: app
     persistence:
-      data:
+      assets:
         existingClaim: *app
+        globalMounts:
+          - path: /app/public/assets
