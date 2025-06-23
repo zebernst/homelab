@@ -74,6 +74,34 @@ spec:
               limits:
                 memory: 128Mi
             securityContext: *securityContext
+          exporter:
+            dependsOn: app
+            image:
+              repository: ghcr.io/onedr0p/exportarr
+              tag: v2.2.0
+            args: [ "bazarr" ]
+            env:
+              PORT: &metricsPort 9707
+              URL: "http://{{ .Release.Name }}"
+              ENABLE_ADDITIONAL_METRICS: "true"
+              ENABLE_UNKNOWN_QUEUE_ITEMS: "true"
+              API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: bazarr-secret
+                    key: BAZARR__AUTH__APIKEY
+            probes:
+              liveness: &metricsProbes
+                <<: *probes
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: *metricsPort
+              readiness: *metricsProbes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: [ "ALL" ] }
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
