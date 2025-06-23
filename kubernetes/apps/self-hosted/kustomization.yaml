@@ -14,3 +14,4 @@ resources:
   - nocodb/ks.yaml
   - paperless/ks.yaml
   - radicale/ks.yaml
+  - trmnl/ks.yaml

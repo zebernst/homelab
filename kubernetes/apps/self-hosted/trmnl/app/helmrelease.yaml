@@ -1,0 +1,93 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app trmnl
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    controllers:
+      trmnl:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/onedr0p/postgres-init
+              tag: 17
+            envFrom: &envFrom
+              - secretRef:
+                  name: trmnl-secret
+        containers:
+          trmnl:
+            env:
+              API_URI: https://{{ .Release.Name }}
+              HANAMI_PORT: &port 2300
+              FIRMWARE_ROOT: /data/firmware
+              PREVIEWS_ROOT: /data/previews
+              SCREENS_ROOT: /data/screens
+            envFrom: *envFrom
+            image:
+              repository: ghcr.io/usetrmnl/terminus
+              tag: 0.14.0
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 32m
+                memory: 192Mi
+              limits:
+                memory: 1Gi
+    service:
+      app:
+        controller: trmnl
+        ports:
+          http:
+            port: *port
+    ingress:
+      lan:
+        className: internal
+        hosts:
+          - host: "{{ .Release.Name }}.zebernst.dev"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+      ts:
+        className: tailscale
+        hosts:
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+        tls:
+          - hosts:
+              - *tsHost
+    persistence:
+      data:
+        existingClaim: *app
