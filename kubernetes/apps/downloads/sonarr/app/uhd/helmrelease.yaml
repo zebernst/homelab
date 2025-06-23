@@ -31,7 +31,7 @@ spec:
           init-db:
             image:
               repository: ghcr.io/onedr0p/postgres-init
-              tag: 16
+              tag: 17
             envFrom: &envFrom
               - secretRef:
                   name: sonarr-uhd-secret
