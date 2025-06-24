@@ -30,6 +30,7 @@ spec:
     enableDiscoveryDaemon: true
     monitoring:
       enabled: true
+    obcAllowAdditionalConfigFields: "maxObjects,maxSize,bucketPolicy,bucketLifecycle"
     resources:
       requests:
         cpu: 100m # unchangable
