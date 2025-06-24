@@ -41,7 +41,6 @@ spec:
         mgr:
           mgr/dashboard/ALERTMANAGER_API_HOST: http://alertmanager-operated.observability.svc.cluster.local:9093
           mgr/dashboard/GRAFANA_API_URL: http://grafana.observability.svc.cluster.local
-          mgr/dashboard/PROMETHEUS_API_HOST: http://prometheus-operated.observability.svc.cluster.local:9090
       crashCollector:
         disable: false
       csi:
@@ -51,6 +50,7 @@ spec:
         enabled: true
         urlPrefix: /
         ssl: false
+        prometheusEndpoint: http://prometheus-operated.observability.svc.cluster.local:9090
       mgr:
         modules:
           - name: insights
