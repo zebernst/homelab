@@ -31,7 +31,7 @@ spec:
         type: cronjob
         cronjob: &cronJobSpec
           schedule: "@hourly"
-          timeZone: &timeZone America/New_York
+          timeZone: &timeZone America/Chicago
           concurrencyPolicy: Forbid
           successfulJobsHistory: 1
           failedJobsHistory: 1

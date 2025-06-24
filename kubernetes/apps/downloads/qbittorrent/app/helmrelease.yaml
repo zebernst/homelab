@@ -34,7 +34,7 @@ spec:
               repository: ghcr.io/home-operations/qbittorrent
               tag: 5.1.0@sha256:37aefd713ba31d51255995261616f1144378887bc5f21665a0ebf851fb85f69a
             env:
-              TZ: America/New_York
+              TZ: America/Chicago
               QBT_WEBUI_PORT: &port 80
               QBT_TORRENTING_PORT: &bittorrentPort 61267
               CROSS_SEED_ENABLED: true

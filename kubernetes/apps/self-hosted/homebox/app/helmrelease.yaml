@@ -47,7 +47,7 @@ spec:
               repository: ghcr.io/sysadminsmedia/homebox
               tag: 0.19.0@sha256:55b97a62f2a6a834d3f4ab66ab362ed23ed32efe312a0973830a318344a5781e
             env:
-              TZ: America/New_York
+              TZ: America/Chicago
               HBOX_LOG_LEVEL: info
               HBOX_LOG_FORMAT: json
               HBOX_WEB_MAX_UPLOAD_SIZE: 10

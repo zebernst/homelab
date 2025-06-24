@@ -50,7 +50,7 @@ spec:
               WHISPARR__INSTANCE_NAME: Whisparr
               WHISPARR__LOG_LEVEL: info
               WHISPARR__PORT: &port 80
-              TZ: America/New_York
+              TZ: America/Chicago
             envFrom:
               - secretRef:
                   name: whisparr-secret

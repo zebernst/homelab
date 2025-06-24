@@ -39,7 +39,7 @@ spec:
             env:
               CACHE_DIR: /cache
               CALIBRE_PORT: &port 8083
-              TZ: America/New_York
+              TZ: America/Chicago
               PUID: 568
               PGID: 65568
               DOCKER_MODS: >-

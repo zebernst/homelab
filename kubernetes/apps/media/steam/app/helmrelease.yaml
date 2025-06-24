@@ -38,7 +38,7 @@ spec:
                   name: steam-headless-secret
             env:
               NAME: SteamHeadless
-              TZ: America/New_York
+              TZ: America/Chicago
               HOME_DIR: &homeDir /home/default
               GAMES_DIR: &gameDir /mnt/games
 

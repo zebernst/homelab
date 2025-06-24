@@ -38,7 +38,7 @@ spec:
               tag: 6.12.7@sha256:84f50b090f732254d3846ad77c8bf9f451fd169465c88b3da4fec715da29a5ff
             env:
               CROSS_SEED_PORT: &port 80
-              TZ: America/New_York
+              TZ: America/Chicago
             envFrom:
               - secretRef:
                   name: cross-seed-secret

@@ -49,7 +49,7 @@ spec:
               PROWLARR__LOG__LEVEL: info
               PROWLARR__SERVER__PORT: &port 80
               PROWLARR__UPDATE__BRANCH: develop
-              TZ: America/New_York
+              TZ: America/Chicago
             envFrom: *envFrom
             probes:
               liveness: &probes

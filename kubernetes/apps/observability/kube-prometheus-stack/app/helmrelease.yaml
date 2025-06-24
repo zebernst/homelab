@@ -125,7 +125,7 @@ spec:
     grafana:
       enabled: false
       forceDeployDashboards: true
-      defaultDashboardsTimezone: America/New_York
+      defaultDashboardsTimezone: America/Chicago
     additionalPrometheusRulesMap:
       dockerhub-rules:
         groups:

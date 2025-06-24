@@ -9,7 +9,7 @@
     ':gitSignOff',
     ':semanticCommits',
     ':skipStatusChecks',
-    ':timezone(America/New_York)',
+    ':timezone(America/Chicago)',
     'github>zebernst/homelab//.github/renovate/allowedVersions.json5',
     'github>zebernst/homelab//.github/renovate/autoMerge.json5',
     'github>zebernst/homelab//.github/renovate/customManagers.json5',
