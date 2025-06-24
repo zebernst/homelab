@@ -8,7 +8,7 @@ spec:
   scheme: HTTPS
   staticConfigs:
     - targets:
-        - s3.zebernst.dev
+        - minio.zebernst.dev
   metricsPath: /minio/metrics/v3
   relabelings:
     - action: replace
@@ -23,7 +23,7 @@ spec:
   scheme: HTTPS
   staticConfigs:
     - targets:
-        - s3.zebernst.dev
+        - minio.zebernst.dev
   metricsPath: /minio/v2/metrics/cluster
   relabelings:
     - action: replace
@@ -38,7 +38,7 @@ spec:
   scheme: HTTPS
   staticConfigs:
     - targets:
-        - s3.zebernst.dev
+        - minio.zebernst.dev
   metricsPath: /minio/v2/metrics/bucket
   relabelings:
     - action: replace
@@ -53,7 +53,7 @@ spec:
   scheme: HTTPS
   staticConfigs:
     - targets:
-        - s3.zebernst.dev
+        - minio.zebernst.dev
   metricsPath: /minio/v2/metrics/resource
   relabelings:
     - action: replace
