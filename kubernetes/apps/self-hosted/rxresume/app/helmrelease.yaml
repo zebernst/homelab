@@ -65,10 +65,31 @@ spec:
               CHROME_URL: ws://localhost:3000
               # S3
               STORAGE_URL: https://s3.zebernst.dev/rxresume
-              STORAGE_ENDPOINT: s3.zebernst.dev
-              STORAGE_REGION: us-east-1
-              STORAGE_PORT: 9000
-              STORAGE_BUCKET: rxresume
+              STORAGE_ENDPOINT:
+                valueFrom:
+                  configMapKeyRef:
+                    name: rxresume-bucket
+                    key: BUCKET_HOST
+              STORAGE_BUCKET:
+                valueFrom:
+                  configMapKeyRef:
+                    name: rxresume-bucket
+                    key: BUCKET_NAME
+              STORAGE_PORT:
+                valueFrom:
+                  configMapKeyRef:
+                    name: rxresume-bucket
+                    key: BUCKET_PORT
+              STORAGE_ACCESS_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: rxresume-bucket
+                    key: AWS_ACCESS_KEY_ID
+              STORAGE_SECRET_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: rxresume-bucket
+                    key: AWS_SECRET_ACCESS_KEY
             envFrom:
               - secretRef:
                   name: rxresume-secret
