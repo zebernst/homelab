@@ -96,8 +96,10 @@ machine:
     vm.nr_hugepages: 1024                  # PostgreSQL
     user.max_user_namespaces: "11255"      # Steam/Flatpak support
   time:
-    disabled: false
-    servers: ["time.cloudflare.com"]
+    servers:
+      - nas.internal
+      - time.cloudflare.com
+      - time.nist.gov
   udev:
     rules:
       - # Thunderbolt
