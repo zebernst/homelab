@@ -1,7 +1,7 @@
 apiVersion: objectbucket.io/v1alpha1
 kind: ObjectBucketClaim
 metadata:
-  name: ${APP}
+  name: ${APP}-bucket
   namespace: rook-ceph
 spec:
   bucketName: ${APP}
