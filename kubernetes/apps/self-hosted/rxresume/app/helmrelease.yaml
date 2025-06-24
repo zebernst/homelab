@@ -61,7 +61,7 @@ spec:
               TZ: America/Chicago
               PORT: &port 3001
               NODE_ENV: production
-              PUBLIC_URL: https://cv.zebernst.dev
+              PUBLIC_URL: https://rxresume.zebernst.dev
               CHROME_URL: ws://localhost:3000
               # S3
               STORAGE_URL: https://s3.zebernst.dev/rxresume
@@ -107,8 +107,19 @@ spec:
             port: *port
     ingress:
       app:
+        className: internal
+        hosts:
+          - host: "rxresume.zebernst.dev"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+      cv:
         annotations:
+          # todo: replace with webapp redirect once https://github.com/AmruthPillai/Reactive-Resume/issues/2115 is fixed
           external-dns.alpha.kubernetes.io/target: external.zebernst.dev
+          nginx.ingress.kubernetes.io/server-snippet: |
+            return 302 https://s3.zebernst.dev/rxresume/cmc9yncjy0000qbijs9oqtb4u/resumes/main.pdf;
         className: external
         hosts:
           - host: "cv.zebernst.dev"
