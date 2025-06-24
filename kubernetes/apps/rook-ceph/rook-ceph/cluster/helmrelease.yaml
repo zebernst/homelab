@@ -143,7 +143,7 @@ spec:
       ingress:
         enabled: true
         annotations:
-          external-dns.alpha.kubernetes.io/hostname: external.zebernst.dev
+          external-dns.alpha.kubernetes.io/target: "external.zebernst.dev"
           nginx.ingress.kubernetes.io/proxy-body-size: "0"
           nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
         host:
