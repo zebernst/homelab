@@ -49,7 +49,7 @@ This is a repository for my home infrastructure and Kubernetes cluster. I try to
 
 This hyper-converged cluster runs [Talos Linux](https://github.com/siderolabs/talos), an immutable and ephemeral Linux distribution tailored for [Kubernetes](https://github.com/kubernetes/kubernetes), and is deployed on bare-metal Minisforum MS-01 mini-PCs. Currently, persistent storage is provided via [Rook](https://github.com/rook/rook) in order to enable resilient block-, file-, and object-storage within the cluster. A Synology NAS handles media file storage and backups, and is also available as an alternate storage location with the help of a [custom fork](https://github.com/zebernst/synology-csi-talos) of the official Synology CSI for workloads that should not be hyper-converged. The cluster is designed to enable a full teardown without any data loss.
 
-🔸 _[Click here](./kubernetes/bootstrap/talos/talconfig.yaml) to see my Talos configuration._
+🔸 _[Click here](./kubernetes/bootstrap/talos/machineconfig.yaml.j2) to see my Talos configuration._
 
 There is a template at [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) if you want to follow along with many of the practices I use here.
 
