@@ -33,7 +33,7 @@ spec:
           chrome:
             image:
               repository: ghcr.io/browserless/chromium
-              tag: v2.31.1@sha256:ab6b5d5359beb63ee186f2622100557cda7f845a5a8ab198b25d5b85e9ce6039
+              tag: v2.18.0
             env:
               TZ: America/Chicago
               DEBUG: "browserless*,-*:trace,-*:verbose"
