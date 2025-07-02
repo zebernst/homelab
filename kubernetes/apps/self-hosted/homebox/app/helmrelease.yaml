@@ -45,7 +45,7 @@ spec:
           app:
             image:
               repository: ghcr.io/sysadminsmedia/homebox
-              tag: 0.19.0@sha256:55b97a62f2a6a834d3f4ab66ab362ed23ed32efe312a0973830a318344a5781e
+              tag: 0.20.2@sha256:c5e13bf9d8f925c0c68a59518bf0bc7f1f26673e479ebf30fe64d0469770e48d
             env:
               TZ: America/Chicago
               HBOX_LOG_LEVEL: info
