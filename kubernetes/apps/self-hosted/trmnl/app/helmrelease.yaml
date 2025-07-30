@@ -83,7 +83,7 @@ spec:
                 service:
                   identifier: app
     persistence:
-      assets:
+      data:
         existingClaim: *app
         globalMounts:
-          - path: /app/public/assets
+          - path: /app/public/uploads
