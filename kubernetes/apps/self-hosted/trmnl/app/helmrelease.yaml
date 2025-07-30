@@ -39,7 +39,7 @@ spec:
             env:
               API_URI: https://{{ .Release.Name }}.zebernst.dev
               HANAMI_PORT: &port 2300
-              LOG_LEVEL: debug
+              LOG_LEVEL: INFO
             envFrom: *envFrom
             image:
               repository: ghcr.io/usetrmnl/terminus
