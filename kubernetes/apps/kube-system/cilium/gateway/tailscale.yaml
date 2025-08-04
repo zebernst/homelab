@@ -29,10 +29,6 @@ metadata:
 spec:
   gatewayClassName: cilium-ts
   infrastructure:
-    parametersRef:
-      group: cilium.io
-      kind: CiliumGatewayClassConfig
-      name: tailscale-gateway-config
     annotations:
       tailscale.com/hostname: cilium-gateway
   listeners:
