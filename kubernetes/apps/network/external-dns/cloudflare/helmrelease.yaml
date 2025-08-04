@@ -39,7 +39,7 @@ spec:
       - --cloudflare-proxied
       - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
       - --crd-source-kind=DNSEndpoint
-      - --gateway-name=external
+      - --gateway-label-filter=external-dns.alpha.kubernetes.io/registry=cloudflare
       - --ignore-ingress-tls-spec
       - --ingress-class=external
     triggerLoopOnEvent: true

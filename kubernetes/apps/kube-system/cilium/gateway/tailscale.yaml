@@ -11,6 +11,8 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: tailscale
+  annotations:
+    external-dns.alpha.kubernetes.io/registry: unifi
 spec:
   gatewayClassName: cilium
   addresses:
