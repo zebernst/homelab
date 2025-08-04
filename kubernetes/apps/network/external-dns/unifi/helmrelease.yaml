@@ -65,9 +65,11 @@ spec:
     extraArgs:
       - --ignore-ingress-tls-spec
       - --ingress-class=internal
+      - --gateway-name=internal
+      - --gateway-name=tailscale
     triggerLoopOnEvent: true
     policy: sync
-    sources: ["ingress", "service"]
+    sources: ["ingress", "service", "gateway-httproute", "gateway-tlsroute"]
     domainFilters: ["zebernst.dev", "internal"]
     serviceMonitor:
       enabled: true

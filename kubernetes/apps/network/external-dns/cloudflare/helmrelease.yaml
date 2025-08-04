@@ -39,11 +39,12 @@ spec:
       - --cloudflare-proxied
       - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
       - --crd-source-kind=DNSEndpoint
+      - --gateway-name=external
       - --ignore-ingress-tls-spec
       - --ingress-class=external
     triggerLoopOnEvent: true
     policy: sync
-    sources: ["crd", "ingress"]
+    sources: ["crd", "ingress", "gateway-httproute", "gateway-tlsroute"]
     domainFilters: ["zebernst.dev"]
     serviceMonitor:
       enabled: true
