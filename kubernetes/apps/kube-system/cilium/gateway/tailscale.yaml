@@ -12,7 +12,7 @@ kind: Gateway
 metadata:
   name: tailscale
 spec:
-  gatewayClassName: cilium-ts
+  gatewayClassName: cilium
   infrastructure:
     parametersRef:
       group: cilium.io
