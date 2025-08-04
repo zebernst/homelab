@@ -5,3 +5,4 @@ resources:
   - external.yaml
   - internal.yaml
   - redirect.yaml
+  - tailscale.yaml
