@@ -28,9 +28,6 @@ metadata:
     external-dns.alpha.kubernetes.io/registry: unifi
 spec:
   gatewayClassName: cilium-ts
-  addresses:
-    - type: Hostname
-      value: cilium-gateway.kite-harmonic.ts.net
   infrastructure:
     parametersRef:
       group: cilium.io
@@ -47,7 +44,6 @@ spec:
         namespaces:
           from: All
       tls:
-        mode: Terminate
         certificateRefs:
           - kind: Secret
             name: zebernst-tls

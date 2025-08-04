@@ -5,3 +5,4 @@ kind: Kustomization
 resources:
   - certificates.yaml
   - pushsecret.yaml
+  - referencegrant.yaml
