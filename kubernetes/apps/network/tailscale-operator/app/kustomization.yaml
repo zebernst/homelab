@@ -4,5 +4,6 @@ kind: Kustomization
 resources:
   - clusterrolebinding.yaml
   - externalsecret.yaml
+  - gateway.yaml
   - helmrelease.yaml
   - proxyclass.yaml
