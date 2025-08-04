@@ -13,6 +13,11 @@ metadata:
   name: tailscale
 spec:
   gatewayClassName: cilium
+  addresses:
+    - type: IPAddress
+      value: 192.168.20.22
+    - type: IPAddress
+      value: ::ffff:192.168.20.22
   infrastructure:
     parametersRef:
       group: cilium.io
