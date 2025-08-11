@@ -105,6 +105,8 @@ spec:
             subPath: generated
           - path: /metadata
             subPath: metadata
+          - path: /pip-install
+            subPath: pip
       media:
         type: nfs
         server: nas.internal
