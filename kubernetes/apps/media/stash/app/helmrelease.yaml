@@ -30,12 +30,12 @@ spec:
         containers:
           stash:
             image:
-              repository: stashapp/stash
-              tag: v0.28.1@sha256:645f6c15b079410d50d488dbeb247c92f25534094dad4e15d886e47648b897f7
+              repository: ghcr.io/feederbox826/stash-s6
+              tag: hwaccel-alpine-2025-08-08@sha256:504d262b0f49d43440a22119f4f4a784ba5c91868bf43241ea4e480b3fd43f81
               pullPolicy: IfNotPresent
             env:
               TZ: America/Chicago
-              USER: 568
+              PUID: 568
               STASH_CONFIG_FILE: /config/config.yml
               STASH_STASH: /media/xxx/
               STASH_GENERATED: /generated/
@@ -58,7 +58,8 @@ spec:
                 cpu: 10m
                 memory: 1Gi
               limits:
-                memory: 8Gi
+                memory: 12Gi
+                gpu.intel.com/i915: 1
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -102,6 +103,8 @@ spec:
             subPath: cache
           - path: /generated
             subPath: generated
+          - path: /metadata
+            subPath: metadata
       media:
         type: nfs
         server: nas.internal
