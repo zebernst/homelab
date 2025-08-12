@@ -60,6 +60,24 @@ spec:
               limits:
                 memory: 12Gi
                 gpu.intel.com/i915: 1
+          chrome:
+            image:
+              repository: chromedp/headless-shell
+              tag: 141.0.7340.0
+            probes:
+              liveness: &probe
+                enabled: true
+              readiness: *probe
+              startup: *probe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: [ "ALL" ] }
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
