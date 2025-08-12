@@ -64,6 +64,8 @@ spec:
             image:
               repository: chromedp/headless-shell
               tag: 141.0.7340.0
+            args:
+              - --enable-unsafe-swiftshader
             probes:
               liveness: &probe
                 enabled: true
@@ -77,6 +79,7 @@ spec:
                 cpu: 10m
               limits:
                 memory: 512Mi
+
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
