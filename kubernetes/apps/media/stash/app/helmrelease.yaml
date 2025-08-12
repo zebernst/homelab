@@ -71,7 +71,6 @@ spec:
               startup: *probe
             securityContext:
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
               capabilities: { drop: [ "ALL" ] }
             resources:
               requests:
