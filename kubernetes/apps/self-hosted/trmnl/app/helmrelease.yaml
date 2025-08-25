@@ -43,7 +43,7 @@ spec:
             envFrom: *envFrom
             image:
               repository: ghcr.io/usetrmnl/terminus
-              tag: 0.22.0
+              tag: 0.23.1
             probes:
               liveness:
                 enabled: true
