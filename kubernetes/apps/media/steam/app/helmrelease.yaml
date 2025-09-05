@@ -82,11 +82,26 @@ spec:
         ports:
           http:
             port: *port
-          sunshine:
+          s-t1:
+            port: 47984
+            protocol: TCP
+          s-t2:
             port: 47989
             protocol: TCP
           sunshine-ui:
             port: 47990
+          s-t3:
+            port: 48010
+            protocol: TCP
+          s-u1:
+            port: 47998
+            protocol: UDP
+          s-u2:
+            port: 47999
+            protocol: UDP
+          s-u3:
+            port: 48000
+            protocol: UDP
     ingress:
       ts:
         className: tailscale
