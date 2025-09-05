@@ -82,6 +82,11 @@ spec:
         ports:
           http:
             port: *port
+          sunshine:
+            port: 47989
+            protocol: TCP
+          sunshine-ui:
+            port: 47990
     ingress:
       ts:
         className: tailscale
