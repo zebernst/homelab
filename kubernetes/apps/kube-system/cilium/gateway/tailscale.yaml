@@ -42,5 +42,5 @@ spec:
       tls:
         certificateRefs:
           - kind: Secret
-            name: zebernst-tls
+            name: zebernst-dev-tls
             namespace: cert-manager
