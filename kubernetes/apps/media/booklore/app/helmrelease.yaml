@@ -38,8 +38,8 @@ spec:
 
             env:
               TZ: America/Chicago
-              PUID: &puid 1000
-              PGID: &pgid 1000
+              PUID: 1000
+              PGID: 1000
               DATABASE_URL: "jdbc:mariadb://mariadb.database.svc.cluster.local:3306/booklore"
               DATABASE_USERNAME:
                 valueFrom:
@@ -65,12 +65,6 @@ spec:
                   timeoutSeconds: 5
                   failureThreshold: 3
               readiness: *probes
-
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: *puid
-        runAsGroup: *pgid
 
     service:
       app :
