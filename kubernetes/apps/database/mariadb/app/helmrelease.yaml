@@ -1,0 +1,51 @@
+---
+# yaml-language-server: $schema=https://cluster-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app mariadb
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: mariadb
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    auth:
+      usePasswordFiles: false
+      existingSecret: mariadb-secret
+    metrics:
+      enabled: true
+      resourcesPreset: small
+      serviceMonitor:
+        enabled: true
+    primary:
+      resourcesPreset: small
+      persistence:
+        enabled: true
+        existingClaim: *app
+      extraEnvVars:
+        - name: BOOKLORE_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-secret
+              key: BOOKLORE_DB_USERNAME
+        - name: BOOKLORE_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-secret
+              key: BOOKLORE_DB_PASSWORD
+      initdbScripts:
+        init-booklore.sql: |
+          CREATE DATABASE IF NOT EXISTS booklore;
+          CREATE USER IF NOT EXISTS '$BOOKLORE_DB_USERNAME'@'%' IDENTIFIED BY '$BOOKLORE_DB_PASSWORD';
+          GRANT ALL PRIVILEGES ON booklore.* TO '$BOOKLORE_DB_USERNAME'@'%';
+          FLUSH PRIVILEGES;
