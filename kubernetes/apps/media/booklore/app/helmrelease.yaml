@@ -92,14 +92,17 @@ spec:
       config:
         existingClaim: *app
         globalMounts:
-          - path: /home/booklore/data
+          - path: /app/data
 
       media:
         type: nfs
         server: nas.internal
         path: /volume1/media
         globalMounts:
-          - path: /home/booklore/books
+          - path: /books
             subPath: books
-          - path: /home/booklore/bookdrop/openbooks
+          - path: /bookdrop/openbooks
             subPath: downloads/openbooks
+
+      bookdrop:
+        type: emptyDir
