@@ -21,6 +21,8 @@ spec:
       namespace: volsync-system
     - name: cloudnative-pg-cluster
       namespace: database
+    - name: mariadb
+      namespace: database
   postBuild:
     substitute:
       VOLSYNC_CAPACITY: 1Gi

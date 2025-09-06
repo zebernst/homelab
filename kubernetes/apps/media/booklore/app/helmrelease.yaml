@@ -38,8 +38,8 @@ spec:
 
             env:
               TZ: America/Chicago
-              PUID: &puid "1000"
-              PGID: &pgid "1000"
+              PUID: &puid 1000
+              PGID: &pgid 1000
               DATABASE_URL: "jdbc:mariadb://mariadb.database.svc.cluster.local:3306/booklore"
               DATABASE_USERNAME:
                 valueFrom:
