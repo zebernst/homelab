@@ -5,6 +5,7 @@ metadata:
   name: internal
   annotations:
     external-dns.alpha.kubernetes.io/target: &hostname gw-internal.zebernst.dev
+  labels:
     external-dns.alpha.kubernetes.io/registry: unifi
 spec:
   gatewayClassName: cilium

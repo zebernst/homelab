@@ -5,6 +5,7 @@ metadata:
   name: external
   annotations:
     external-dns.alpha.kubernetes.io/target: &hostname gw-external.zebernst.dev
+  labels:
     external-dns.alpha.kubernetes.io/registry: cloudflare
 spec:
   gatewayClassName: cilium
