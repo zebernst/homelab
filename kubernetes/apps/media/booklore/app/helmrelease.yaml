@@ -101,8 +101,6 @@ spec:
         globalMounts:
           - path: /books
             subPath: books
-          - path: /bookdrop/openbooks
-            subPath: downloads/openbooks
 
       bookdrop:
         type: emptyDir
