@@ -35,7 +35,7 @@ spec:
           app:
             image:
               repository: crocodilestick/calibre-web-automated
-              tag: dev@sha256:de3fee5c805bb4c57c4652d45eaebf398e8cd5ee03d8667ee320ddd06e200f71
+              tag: dev@sha256:65b16562bb6322009db3ddef128f8793e3970fbb9d63178c20686472d3634499
             env:
               CACHE_DIR: /cache
               CALIBRE_PORT: &port 8083
