@@ -49,6 +49,8 @@ l2announcements:
 loadBalancer:
   algorithm: maglev
   mode: dsr
+  l7:
+    backend: envoy
 localRedirectPolicy: true
 operator:
   replicas: 2
