@@ -102,7 +102,7 @@ spec:
         rules:
           # Remove the 'Range' header from streaming requests.
           - backendRefs:
-              - identifier: app
+              - identifier: *app
                 port: *port
             filters:
               - type: RequestHeaderModifier
@@ -139,7 +139,7 @@ spec:
 #                  value: /
           # Catch-all for everything else
           - backendRefs:
-              - identifier: app
+              - identifier: *app
                 port: *port
     persistence:
       config:
