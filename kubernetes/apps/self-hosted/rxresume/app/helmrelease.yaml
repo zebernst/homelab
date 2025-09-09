@@ -106,14 +106,6 @@ spec:
           http:
             port: *port
     ingress:
-      app:
-        className: internal
-        hosts:
-          - host: "rxresume.zebernst.dev"
-            paths:
-              - path: /
-                service:
-                  identifier: app
       cv:
         annotations:
           # todo: replace with webapp redirect once https://github.com/AmruthPillai/Reactive-Resume/issues/2115 is fixed
@@ -127,6 +119,14 @@ spec:
               - path: /
                 service:
                   identifier: app
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.zebernst.dev"
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
     persistence:
       tmpfs:
         type: emptyDir
