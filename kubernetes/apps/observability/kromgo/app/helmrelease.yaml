@@ -74,18 +74,14 @@ spec:
             port: *serverPort
           health:
             port: *healthPort
-    ingress:
+    route:
       app:
-        annotations:
-          external-dns.alpha.kubernetes.io/target: external.zebernst.dev
-        className: external
-        hosts:
-          - host: "{{ .Release.Name }}.zebernst.dev"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+        hostnames:
+          - "{{ .Release.Name }}.zebernst.dev"
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
     persistence:
       config-file:
         type: configMap

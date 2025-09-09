@@ -4,7 +4,7 @@ originRequest:
 
 ingress:
   - hostname: "zebernst.dev"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+    service: https://cilium-gateway-external.kube-system.svc.cluster.local
   - hostname: "*.zebernst.dev"
-    service: https://ingress-nginx-external-controller.network.svc.cluster.local:443
+    service: https://cilium-gateway-external.kube-system.svc.cluster.local
   - service: http_status:404
