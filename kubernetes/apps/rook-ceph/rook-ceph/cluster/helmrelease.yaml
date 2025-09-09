@@ -140,19 +140,16 @@ spec:
         volumeBindingMode: Immediate
         parameters:
           region: us-east-1
-      ingress:
+      route:
         enabled: true
-        annotations:
-          external-dns.alpha.kubernetes.io/target: "external.zebernst.dev"
-          nginx.ingress.kubernetes.io/proxy-body-size: "0"
-          nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            proxy_cache off;
         host:
           name: s3.zebernst.dev
           path: /
-          pathType: Prefix
-        ingressClassName: external
+          pathType: PathPrefix
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
   postRenderers:
     - kustomize:
         patches:

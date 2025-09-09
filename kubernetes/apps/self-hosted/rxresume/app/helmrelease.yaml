@@ -105,20 +105,6 @@ spec:
         ports:
           http:
             port: *port
-    ingress:
-      cv:
-        annotations:
-          # todo: replace with webapp redirect once https://github.com/AmruthPillai/Reactive-Resume/issues/2115 is fixed
-          external-dns.alpha.kubernetes.io/target: external.zebernst.dev
-          nginx.ingress.kubernetes.io/server-snippet: |
-            return 302 https://s3.zebernst.dev/rxresume/cmc9yncjy0000qbijs9oqtb4u/resumes/main.pdf;
-        className: external
-        hosts:
-          - host: "cv.zebernst.dev"
-            paths:
-              - path: /
-                service:
-                  identifier: app
     route:
       app:
         hostnames:
@@ -127,6 +113,28 @@ spec:
           - name: external
             namespace: kube-system
             sectionName: https
+      cv:
+        hostnames:
+          - "cv.zebernst.dev"
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+            filters:
+              - type: URLRewrite
+                urlRewrite:
+                  hostname: s3.zebernst.dev
+                  path:
+                    type: ReplaceFullPath
+                    replaceFullPath: /rxresume/cmc9yncjy0000qbijs9oqtb4u/resumes/main.pdf
+            matches:
+              - path:
+                  type: Exact
+                  value: /
     persistence:
       tmpfs:
         type: emptyDir

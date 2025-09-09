@@ -3,17 +3,13 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: plex
+  name: &app plex
 spec:
   interval: 30m
-  chart:
-    spec:
-      chart: app-template
-      version: 3.7.3
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
   install:
     remediation:
       retries: 3
@@ -27,11 +23,11 @@ spec:
       namespace: kube-system
   values:
     controllers:
-      plex:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          app:
+          *app:
             image:
               repository: ghcr.io/home-operations/plex
               tag: 1.42.1.10060
@@ -79,102 +75,71 @@ spec:
       nodeSelector:
         intel.feature.node.kubernetes.io/gpu: "true"
     service:
-      app:
-        controller: plex
-        nameOverride: plex
+      *app:
         type: LoadBalancer
         annotations:
           lbipam.cilium.io/ips: 192.168.20.5, ::ffff:c0a8:1405
         ports:
           http:
-            port: 32400
+            port: &port 32400
       ts:
-        controller: plex
+        controller: *app
         type: LoadBalancer
         loadBalancerClass: tailscale
         annotations:
           tailscale.com/hostname: plex
         ports:
           http:
-            port: 32400
-    ingress:
-      external:
-        annotations:
-          external-dns.alpha.kubernetes.io/target: external.zebernst.dev
-          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            # App root redirect: If a request to / comes in -> 302 redirect to the plex landing page
-            # (but only if it doesn't contain the X-Plex-Device-Name header or query argument)
-            # This retains API endpoint access for official Plex clients and authenticated sessions.
-            set $r "";
-            if ($http_x_plex_device_name = '') { set $r "Y"; }         # for web and tv clients (header)
-            if ($arg_X-Plex-Device-Name = '')  { set $r "$${r}Y"; }    # for iOS clients (query argument)
-            if ($r = YY) {
-              rewrite ^/$ https://$http_host/web/index.html;
-            }
-
-            gzip on;
-            gzip_vary on;
-            gzip_min_length 256;
-            gzip_proxied any;
-            gzip_comp_level 9;
-            gzip_disable "MSIE [1-6]\.";
-            gzip_types
-                text/css
-                text/xml
-                text/plain
-                text/javascript
-                text/cache-manifest
-                text/x-cross-domain-policy
-                application/javascript
-                application/x-javascript
-                application/json
-                application/manifest+json
-                application/xml
-                application/xml+rss
-                application/xhtml+xml
-                application/rss+xml
-                application/rdf+xml
-                application/atom+xml
-                application/atom_xml
-                application/geo+json
-                application/ttf
-                application/x-ttf
-                application/x-font-ttf
-                application/x-font-otf
-                application/x-font-truetype
-                application/x-font-opentype
-                application/x-web-app-manifest+json
-                application/vnd.ms-fontobject
-                font/eot
-                font/otf
-                font/ttf
-                font/opentype
-                image/svg+xml
-                image/x-icon
-                image/bmp;
-
-            send_timeout 3600; # some players don't reopen a socket and playback stops totally instead of resuming after an extended pause (e.g. Chrome)
-
-            proxy_set_header Sec-Websocket-Extensions $http_sec_websocket_extensions;
-            proxy_set_header Sec-Websocket-Key $http_sec_websocket_key;
-            proxy_set_header Sec-Websocket-Protocol $http_sec_websocket_protocol;
-            proxy_set_header Sec-Websocket-Version $http_sec_websocket_version;
-
-            proxy_set_header Accept-Encoding "";
-
-            add_header Referrer-Policy "same-origin" always;
-            add_header X-Content-Type-Options "nosniff" always;
-            add_header X-Frame-Options sameorigin;
-            add_header X-XSS-Protection "1; mode=block" always;
-        className: external
-        hosts:
-          - host: "plex.zebernst.dev"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+            port: *port
+    route:
+      *app:
+        hostnames:
+          - "{{ .Release.Name }}.zebernst.dev"
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          # Remove the 'Range' header from streaming requests.
+          - backendRefs:
+              - identifier: app
+                port: *port
+            filters:
+              - type: RequestHeaderModifier
+                requestHeaderModifier:
+                  remove: [ "Range" ]
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /library/streams
+          # Redirect root requests to the Plex landing page
+          - filters:
+              - type: RequestRedirect
+                requestRedirect:
+                  path:
+                    type: ReplaceFullPath
+                    replaceFullPath: /web
+                  statusCode:
+                    302
+            matches:
+              - headers:
+                  - type: Exact
+                    name: X-Plex-Device-Name
+                    value: ""
+                path:
+                  type: Exact
+                  value: /
+              - queryParams:
+                  - type: Exact
+                    name: X-Plex-Device-Name
+                    value: ""
+                path:
+                  type: Exact
+                  value: /
+          # Catch-all for everything else
+          - backendRefs:
+              - identifier: app
+                port: *port
     persistence:
       config:
         existingClaim: plex
