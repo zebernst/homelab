@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/not-first/glance-schema/master/schema.json
+pages:
+  - name: Home
+    columns:
+      - size: small
+        widgets:
+          - type: calendar
+            first-day-of-week: monday
+
+          - type: rss
+            limit: 10
+            collapse-after: 3
+            cache: 12h
+            feeds:
+              - url: https://selfh.st/rss/
+                title: selfh.st
+                limit: 4
+              - url: https://ciechanow.ski/atom.xml
+              - url: https://samwho.dev/rss.xml
+
+      - size: full
+        widgets:
+          - type: group
+            widgets:
+              - type: hacker-news
+              - type: lobsters
+
+          - type: videos
+            channels:
+              - UCYO_jab_esuFRV4b17AJtAw # 3Blue1Brown
+              - UCIZa-t5ctYtAn6BruNTxxwQ # Clockwork
+
+          - type: group
+            widgets:
+              - type: reddit
+                subreddit: technology
+                show-thumbnails: true
+              - type: reddit
+                subreddit: selfhosted
+                show-thumbnails: true
+              - type: reddit
+                subreddit: homelab
+                show-thumbnails: true
+
+      - size: small
+        widgets:
+          - type: weather
+            location: Chicago, Illinois, United States
+            units: imperial
+            hour-format: 12h # alternatively "24h"
+            hide-location: true
+
+          - type: releases
+            cache: 1d
+            repositories:
+              - glanceapp/glance
+              - kubernetes/kubernetes
+
+#  - name: Homelab
+#    columns:
+#      - size: small
+#        widgets:
+#          - type: bookmarks
+#            groups:
