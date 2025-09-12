@@ -1,6 +1,13 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/not-first/glance-schema/master/schema.json
 pages:
   - name: Home
+    head-widgets:
+      - type: search
+        search-engine: duckduckgo
+        bangs:
+        - title: YouTube
+          shortcut: "!yt"
+          url: https://www.youtube.com/results?search_query={QUERY}
     columns:
       - size: small
         widgets:
