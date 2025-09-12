@@ -75,5 +75,5 @@ spec:
         type: configMap
         name: onboarding-plex-configmap
         globalMounts:
-          - path: /data/wizard_steps/plex/
+          - path: /etc/wizarr/wizard_steps/plex/
             readOnly: true
