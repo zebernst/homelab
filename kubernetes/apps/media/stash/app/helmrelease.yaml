@@ -63,7 +63,7 @@ spec:
           chrome:
             image:
               repository: chromedp/headless-shell
-              tag: 141.0.7340.0
+              tag: 141.0.7390.16
             args:
               - --enable-unsafe-swiftshader
             probes:
