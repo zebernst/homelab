@@ -71,6 +71,10 @@ spec:
         existingClaim: *app
         globalMounts:
           - path: /data/database
+      onboarding:
+        type: emptyDir
+        globalMounts:
+          - path: /etc/wizarr/wizard_steps/
       onboarding-plex:
         type: configMap
         name: onboarding-plex-configmap
