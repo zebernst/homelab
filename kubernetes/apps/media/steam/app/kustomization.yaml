@@ -6,3 +6,9 @@ resources:
   - externalsecret.yaml
   - helmrelease.yaml
   - pvc.yaml
+configMapGenerator:
+  - name: steam-init-scripts
+    files:
+      - udevd.sh=resources/udevd.sh
+configurations:
+  - kustomizeconfig.yaml

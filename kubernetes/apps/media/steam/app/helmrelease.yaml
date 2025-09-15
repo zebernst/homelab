@@ -46,7 +46,7 @@ spec:
               WEB_UI_MODE: vnc
               ENABLE_VNC_AUDIO: false
               PORT_NOVNC_WEB: &port 8083
-              ENABLE_EVDEV_INPUTS: false
+              ENABLE_EVDEV_INPUTS: true
 
               STEAM_ARGS: -silent
               ENABLE_SUNSHINE: true
@@ -129,3 +129,6 @@ spec:
         medium: Memory
         globalMounts:
           - path: /dev/shm
+      dev:
+        type: hostPath
+        hostPath: /dev

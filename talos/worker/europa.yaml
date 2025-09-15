@@ -20,13 +20,14 @@ machine:
     extraKernelArgs:
       - amd_iommu=on            # PCI Passthrough
     # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-    image: factory.talos.dev/installer/ffb0c3521ac24e3d3378c572fa8ec5c38ba93b60404cf06a3291d259dc7c8b10:v1.9.5
+    image: factory.talos.dev/installer/0b97c67c1c2feb9a5ae7c196445e624332c6e381c45ef4c84f9c48debd4fa70c:v1.9.5
   kernel:
     modules:
       - name: nvidia
       - name: nvidia_uvm
       - name: nvidia_drm
       - name: nvidia_modeset
+      - name: uinput
   kubelet:
     extraConfig:
       registerWithTaints:
