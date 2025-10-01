@@ -23,16 +23,11 @@ spec:
       *app:
         annotations:
           reloader.stakater.com/auto: "true"
-        pod:
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 568
-            runAsGroup: 568
         containers:
-          app:
+          *app:
             image:
               repository: glanceapp/glance
-              tag: latest
+              tag: v0.8.4@sha256:6df86a7e8868d1eda21f35205134b1962c422957e42a0c44d4717c8e8f741b1a
             env:
               TZ: America/Chicago
             resources:
@@ -40,7 +35,7 @@ spec:
                 cpu: 10m
                 memory: 64Mi
               limits:
-                memory: 256Mi
+                memory: 96Mi
             securityContext:
               allowPrivilegeEscalation: false
               capabilities: {drop: ["ALL"]}
@@ -52,27 +47,54 @@ spec:
                 spec:
                   httpGet:
                     path: /
-                    port: 8080
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
+                    port: 80
               readiness:
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
                     path: /
+                    port: 80
+          k8s-extension:
+            image:
+              repository: ghcr.io/lukasdietrich/glance-k8s/glance-k8s
+              tag: v0.3.6@sha256:efe2517830e770ecb48f4e7dc7c1d6af9cb69fa5cd0e58ed8995efe6b8c73632
+            env:
+              TZ: America/Los_Angeles
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: [ "ALL" ] }
+            resources: { }
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
                     port: 8080
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 8080
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 568
+            runAsGroup: 568
+        serviceAccount:
+          identifier: *app
     service:
       *app:
         controller: *app
         ports:
           http:
+            port: &port 80
+          ext-k8s:
             port: 8080
     route:
       *app:
@@ -82,6 +104,10 @@ spec:
           - name: internal
             namespace: kube-system
             sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
     persistence:
       config:
         type: configMap
@@ -94,3 +120,35 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+    serviceAccount:
+      *app:
+        enabled: true
+    rbac:
+      roles:
+        list:
+          type: ClusterRole
+          forceRename: *app
+          rules:
+            - apiGroups: ["", "metrics.k8s.io"]
+              resources: ["nodes"]
+              verbs: ["list"]
+            - apiGroups: [""]
+              resources: ["services"]
+              verbs: ["list"]
+            - apiGroups: ["networking.k8s.io"] # networking.k8s.io/v1
+              resources: ["ingresses", "ingressclasses"]
+              verbs: ["list"]
+            - apiGroups: ["apps"]
+              resources: ["deployments", "statefulsets", "daemonsets"]
+              verbs: ["list"]
+      bindings:
+        list:
+          type: ClusterRoleBinding
+          forceRename: *app
+          roleRef:
+            kind: ClusterRole
+            name: *app
+          subjects:
+            - kind: ServiceAccount
+              name: *app
+              namespace: "{{ .Release.Namespace }}"

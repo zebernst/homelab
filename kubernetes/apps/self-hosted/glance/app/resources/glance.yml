@@ -1,4 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/not-first/glance-schema/master/schema.json
+server:
+  port: 80
+  proxied: true
 pages:
   - name: Home
     head-widgets:
@@ -63,9 +66,20 @@ pages:
               - glanceapp/glance
               - kubernetes/kubernetes
 
-#  - name: Homelab
-#    columns:
-#      - size: small
-#        widgets:
-#          - type: bookmarks
-#            groups:
+  - name: Homelab
+    columns:
+      - size: full
+        widgets:
+          - type: extension
+            url: http://localhost:8080/extension/nodes
+            allow-potentially-dangerous-html: true
+            cache: 1s
+
+          - type: extension
+            url: http://localhost:8080/extension/apps
+            allow-potentially-dangerous-html: true
+            cache: 1s
+            parameters:
+              show-if: |
+                namespace != "kube-system" and
+                ("glance/hide" not in annotations || annotations["glance/hide"] != "true")
