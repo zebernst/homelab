@@ -56,7 +56,7 @@ spec:
           app:
             image:
               repository: ghcr.io/amruthpillai/reactive-resume
-              tag: v4.4.5@sha256:d6e56fa0378801f76a082b5c7a612ed9cece731729afc57e5b48f3b9d6823ff4
+              tag: v4.5.0@sha256:46999abe24b0d41fb8b3c32e479f06035fa755db8c3243d03335e74fa6a2e74f
             env:
               TZ: America/Chicago
               PORT: &port 3001
