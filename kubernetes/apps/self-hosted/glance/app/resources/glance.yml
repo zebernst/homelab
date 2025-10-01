@@ -68,14 +68,36 @@ pages:
 
   - name: Homelab
     columns:
-      - size: full
+      - size: small
         widgets:
-          - type: extension
+          - title: Infrastructure
+            type: monitor
+            cache: 1m
+            sites:
+              - title: UniFi Network
+                url: https://unifi
+                allow-insecure: true
+                icon: si:ubiquiti
+              - title: NAS
+                url: https://dsm.zebernst.dev
+                check-url: http://nas.internal:5000
+                icon: mdi:nas
+              - title: Home Assistant
+                url: http://homeassistant.internal:8123
+                icon: si:homeassistant
+              - title: Zigbee Coordinator
+                url: http://zigbee.internal
+                icon: si:zigbee
+
+          - title: Cluster Nodes
+            type: extension
             url: http://localhost:8080/extension/nodes
             allow-potentially-dangerous-html: true
             cache: 1s
-
-          - type: extension
+      - size: full
+        widgets:
+          - title: Apps
+            type: extension
             url: http://localhost:8080/extension/apps
             allow-potentially-dangerous-html: true
             cache: 1s
