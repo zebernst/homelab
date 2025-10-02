@@ -75,13 +75,22 @@ pages:
             cache: 1m
             sites:
               - title: UniFi Network
+                icon: si:ubiquiti
                 url: https://unifi
                 allow-insecure: true
-                icon: si:ubiquiti
               - title: NAS
+                icon: mdi:nas
                 url: https://dsm.zebernst.dev
                 check-url: http://nas.internal:5000
-                icon: mdi:nas
+              - title: UPS
+                icon: mdi:power-plug-battery
+                url: https://ups.internal
+                allow-insecure: true
+
+          - title: Smart Home
+            type: monitor
+            cache: 1m
+            sites:
               - title: Home Assistant
                 url: http://homeassistant.internal:8123
                 icon: si:homeassistant
@@ -89,11 +98,12 @@ pages:
                 url: http://zigbee.internal
                 icon: si:zigbee
 
-          - title: Cluster Nodes
+          - title: Nodes
             type: extension
             url: http://localhost:8080/extension/nodes
             allow-potentially-dangerous-html: true
             cache: 1s
+
       - size: full
         widgets:
           - title: Apps
