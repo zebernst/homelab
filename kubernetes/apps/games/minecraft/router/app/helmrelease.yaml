@@ -1,0 +1,116 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app mc-router
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    serviceAccount:
+      *app:
+        enabled: true
+    rbac:
+      roles:
+        *app:
+          type: ClusterRole
+          rules:
+            - apiGroups: [ "" ]
+              resources: [ "services" ]
+              verbs: [ "watch", "list" ]
+            - apiGroups: [ "apps" ]
+              resources: [ "statefulsets", "statefulsets/scale" ]
+              verbs: [ "watch", "list", "get", "update" ]
+      bindings:
+        *app:
+          type: ClusterRoleBinding
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            identifier: *app
+          subjects:
+            - identifier: *app
+    defaultPodOptions:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    controllers:
+      *app:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          *app:
+            image:
+              repository: ghcr.io/itzg/mc-router
+              tag: 1.36.1@sha256:6495a3e3f9490917b43f3cb299b9e9ba3dfe455a5c4e6e8f2109a8993de35ec6
+            env:
+              TZ: America/Chicago
+              DEBUG: true
+              IN_KUBE_CLUSTER: "true"
+              API_BINDING: ":8080"
+              PORT: &port 25565
+              CONNECTION_RATE_LIMIT: 10
+              METRICS_BACKEND: prometheus
+              SIMPLIFY_SRV: true
+              USE_PROXY_PROTOCOL: true
+              RECORD_LOGINS: true
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 350m
+                memory: 64Mi
+              limits:
+                cpu: 500m
+                memory: 96Mi
+        serviceAccount:
+          identifier: *app
+    service:
+      *app:
+        controller: *app
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: 192.168.20.65
+        ports:
+          java:
+            port: *port
+          api:
+            port: 8080
+    route:
+      api:
+        kind: HTTPRoute
+        hostnames: ["mc.zebernst.dev"]
+        parentRefs:
+          - name: internal
+            namespace: networking
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: 8080
+    serviceMonitor:
+      *app:
+        serviceName: *app
+        endpoints:
+          - port: api
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 30s
