@@ -77,8 +77,7 @@ spec:
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
     service:
-      modded:
-        controller: *app
+      *app:
         annotations:
           mc-router.itzg.me/externalServerName: "dawncraft.zebernst.dev"
         ports:
@@ -89,8 +88,11 @@ spec:
           http:
             port: &web-port 8100
     route:
-      modded:
-        hostnames: ["dawncraft.zebernst.dev"]
+      *app:
+        hostnames: ["{{ .Release.Name }}.zebernst.dev"]
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: dawncraft.zebernst.dev
+          external-dns.alpha.kubernetes.io/target: mc.zebernst.dev
         parentRefs:
           - name: external
             namespace: kube-system
@@ -101,8 +103,8 @@ spec:
                 port: *web-port
             matches:
               - path:
-                 type: PathPrefix
-                 value: /
+                  type: PathPrefix
+                  value: /
     persistence:
       tmp:
         type: emptyDir

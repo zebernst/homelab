@@ -93,13 +93,26 @@ spec:
             port: *port
           api:
             port: 8080
+    ingress:
+      *app:
+        className: external
+        annotations:
+          external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+          external-dns.alpha.kubernetes.io/target: external.zebernst.dev
+        hosts:
+          - host: "mc.zebernst.dev"
+            paths:
+              - path: /
+                service:
+                  identifier: *app
+                  port: java
     route:
       api:
         kind: HTTPRoute
-        hostnames: ["mc.zebernst.dev"]
+        hostnames: ["mc-api.zebernst.dev"]
         parentRefs:
           - name: internal
-            namespace: networking
+            namespace: kube-system
             sectionName: https
         rules:
           - backendRefs:
