@@ -2,26 +2,26 @@
 ---
 version: '3'
 
-vars:
-  SID:
-    sh: >-
-      curl
-      --silent
-      --get
-      --header "Content-Type: application/json"
-      --data-urlencode "api=SYNO.API.Auth"
-      --data-urlencode "version=6"
-      --data-urlencode "method=login"
-      --data-urlencode "account=$(op read -- 'op://Homelab/Synology/username')"
-      --data-urlencode "passwd=$(op read -- 'op://Homelab/Synology/password')"
-      --data-urlencode "enable_syno_token=no"
-      --url "http://nas.internal:5000/webapi/entry.cgi"
-      | jq .data.sid
-
 tasks:
 
   api-call:
     internal: true
+    vars:
+      PARAMS: { ref: .PARAMS | default dict }
+      SID:
+        sh: &sidCmd >-
+          curl
+          --silent
+          --get
+          --header "Content-Type: application/json"
+          --data-urlencode "api=SYNO.API.Auth"
+          --data-urlencode "version=6"
+          --data-urlencode "method=login"
+          --data-urlencode "account=$(op read -- 'op://Homelab/Synology/username')"
+          --data-urlencode "passwd=$(op read -- 'op://Homelab/Synology/password')"
+          --data-urlencode "enable_syno_token=no"
+          --url "http://nas.internal:5000/webapi/entry.cgi"
+          | jq .data.sid
     cmd: >-
       curl
       --silent
@@ -35,8 +35,6 @@ tasks:
       --data-urlencode '{{ $key | lower }}={{ $val }}'
       {{- end }}
       --url "http://nas.internal:5000/webapi/entry.cgi"
-    vars:
-      PARAMS: { ref: .PARAMS | default dict }
     requires:
       vars:
         - API
@@ -76,6 +74,8 @@ tasks:
         vars:
           TARGET_ID: '{{.ITEM}}'
     vars:
+      SID:
+        sh: *sidCmd
       TARGETS:
         sh: >-
           curl
@@ -99,6 +99,8 @@ tasks:
         vars:
           UUID: '{{.ITEM}}'
     vars:
+      SID:
+        sh: *sidCmd
       LUNS:
         sh: >-
           curl
