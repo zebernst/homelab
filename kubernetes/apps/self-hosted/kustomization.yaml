@@ -17,3 +17,4 @@ resources:
   - radicale/ks.yaml
   - rxresume/ks.yaml
   - trmnl/ks.yaml
+  - unwrapped/ks.yaml
