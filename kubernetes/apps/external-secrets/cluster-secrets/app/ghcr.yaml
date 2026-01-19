@@ -1,12 +1,12 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/external-secrets.io/clusterexternalsecret_v1beta1.json
-apiVersion: external-secrets.io/v1beta1
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/external-secrets.io/clusterexternalsecret_v1.json
+apiVersion: external-secrets.io/v1
 kind: ClusterExternalSecret
 metadata:
   name: ghcr-pull-secret
 spec:
-  namespaceSelector:
-    matchLabels: {} # all namespaces
+  namespaceSelectors:
+    - matchLabels: {} # all namespaces
   externalSecretSpec:
     secretStoreRef:
       kind: ClusterSecretStore
@@ -17,7 +17,7 @@ spec:
         type: kubernetes.io/dockerconfigjson
         data:
           .dockerconfigjson: |
-            {"auths":{"ghcr.io":{"auth":"{{ .GITHUB_TOKEN }}"}}}
+            {"auths":{"ghcr.io":{"auth":"{{ printf "%s:%s" .GITHUB_USERNAME .GITHUB_TOKEN | b64enc }}"}}}
     dataFrom:
       - extract:
           key: ghcr.io

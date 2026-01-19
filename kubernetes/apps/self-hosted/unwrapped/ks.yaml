@@ -14,7 +14,7 @@ spec:
     - name: cloudnative-pg-cluster
       namespace: database
     - name: cluster-secrets
-      namespace: flux-system
+      namespace: external-secrets
     - name: onepassword
       namespace: external-secrets
   path: kubernetes/apps/self-hosted/unwrapped/app
