@@ -111,17 +111,14 @@ spec:
             namespace: kube-system
             sectionName: https
         rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
-            filters:
+          - filters:
               - type: RequestRedirect
                 requestRedirect:
                   statusCode: 302
-                  hostname: rxresume.zebernst.dev
+                  hostname: "{{ .Release.Name }}.zebernst.dev"
                   path:
                     type: ReplaceFullPath
-                    replaceFullPath: /resume/main
+                    replaceFullPath: /resume/current
             matches:
               - path:
                   type: Exact
