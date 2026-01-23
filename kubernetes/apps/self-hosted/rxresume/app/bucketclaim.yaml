@@ -32,7 +32,7 @@ spec:
           },
           {
             "ID": "ExpireAfter30Days",
-            "Status": "Enabled",
+            "Status": "False",
             "Prefix": "",
             "Expiration": {
               "Days": 30
