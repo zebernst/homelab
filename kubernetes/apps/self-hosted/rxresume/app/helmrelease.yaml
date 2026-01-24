@@ -49,7 +49,7 @@ spec:
           app:
             image:
               repository: ghcr.io/amruthpillai/reactive-resume
-              tag: v5.0.0@sha256:0ed481b6a4208c25cfb3e27fc77e42ef902b2be5a788519629ee9e88c46ce3dd
+              tag: v5.0.1@sha256:bf6d36fc1212859f01df16eb2e7c893a8da22bf3d7975e2789e355455262185d
             env:
               # Server
               TZ: America/Chicago
