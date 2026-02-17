@@ -23,6 +23,7 @@ spec:
       strategy: rollback
       retries: 3
   values:
+    priorityClassName: database-critical
     crds:
       create: true
     monitoring:

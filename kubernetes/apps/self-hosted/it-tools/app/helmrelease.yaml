@@ -40,6 +40,8 @@ spec:
               allowPrivilegeEscalation: false
               capabilities: {drop: ["ALL"]}
               readOnlyRootFilesystem: true
+    defaultPodOptions:
+      priorityClassName: internal-only
     service:
       app:
         controller: it-tools

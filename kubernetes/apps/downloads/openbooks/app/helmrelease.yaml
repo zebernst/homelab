@@ -47,6 +47,7 @@ spec:
               - secretRef:
                   name: openbooks-secret
     defaultPodOptions:
+      priorityClassName: best-effort
       securityContext:
         runAsNonRoot: true
         runAsUser: 568

@@ -25,6 +25,7 @@ spec:
   values:
     replicas: 2
     kind: Deployment
+    priorityClassName: control-plane-critical
     deschedulerPolicyAPIVersion: descheduler/v1alpha2
     deschedulerPolicy:
       profiles:

@@ -107,6 +107,7 @@ spec:
             securityContext: *securityContext
             resources: *resources
     defaultPodOptions:
+      priorityClassName: control-plane-critical
       securityContext:
         runAsNonRoot: true
         runAsUser: 999

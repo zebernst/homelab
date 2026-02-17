@@ -38,6 +38,8 @@ spec:
               requests:
                 cpu: 15m
                 memory: 150Mi
+    defaultPodOptions:
+      priorityClassName: background
     service:
       app:
         controller: *app

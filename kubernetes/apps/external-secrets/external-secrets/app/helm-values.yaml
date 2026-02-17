@@ -1,4 +1,5 @@
 ---
+priorityClassName: control-plane-critical
 installCRDs: true
 replicaCount: 1
 leaderElect: true

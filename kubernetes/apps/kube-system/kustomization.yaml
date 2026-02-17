@@ -20,6 +20,7 @@ resources:
   - node-problem-detector/ks.yaml
   - self-node-remediation/ks.yaml
   - nvidia-device-plugin/ks.yaml
+  - priority-class/ks.yaml
   - reloader/ks.yaml
   - snapshot-controller/ks.yaml
   - spegel/ks.yaml

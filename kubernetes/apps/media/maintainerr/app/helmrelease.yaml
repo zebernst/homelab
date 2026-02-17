@@ -43,6 +43,7 @@ spec:
                 memory: 512Mi
 
     defaultPodOptions:
+      priorityClassName: media-core
       securityContext:
         runAsNonRoot: true
         runAsUser: 568

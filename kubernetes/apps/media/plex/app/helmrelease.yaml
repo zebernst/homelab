@@ -65,6 +65,7 @@ spec:
                 gpu.intel.com/i915: 1
                 memory: 16Gi
     defaultPodOptions:
+      priorityClassName: external-facing
       securityContext:
         runAsNonRoot: true
         runAsUser: 568

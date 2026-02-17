@@ -66,6 +66,7 @@ spec:
                 cpu: 6
                 nvidia.com/gpu: 3
     defaultPodOptions:
+      priorityClassName: best-effort
       hostNetwork: true
       securityContext:
         fsGroup: 1000

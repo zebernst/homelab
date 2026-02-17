@@ -1,0 +1,9 @@
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: best-effort
+value: 0
+globalDefault: false
+preemptionPolicy: PreemptLowerPriority
+description: "Preemptable workloads"

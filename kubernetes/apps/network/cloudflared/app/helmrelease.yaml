@@ -73,6 +73,7 @@ spec:
               limits:
                 memory: 128Mi
     defaultPodOptions:
+      priorityClassName: network-critical
       securityContext:
         runAsNonRoot: true
         runAsUser: 568

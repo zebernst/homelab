@@ -73,6 +73,7 @@ spec:
         tls:
           - hosts: [*promHost]
       prometheusSpec:
+        priorityClassName: control-plane-critical
         podMonitorSelectorNilUsesHelmValues: false
         probeSelectorNilUsesHelmValues: false
         ruleSelectorNilUsesHelmValues: false

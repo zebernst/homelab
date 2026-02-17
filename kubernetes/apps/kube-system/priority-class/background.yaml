@@ -1,0 +1,9 @@
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: background
+value: 50
+globalDefault: false
+preemptionPolicy: PreemptLowerPriority
+description: "Batch processing and background tasks"

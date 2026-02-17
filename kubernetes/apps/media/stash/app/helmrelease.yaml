@@ -81,6 +81,7 @@ spec:
                 memory: 512Mi
 
     defaultPodOptions:
+      priorityClassName: background
       securityContext:
         runAsNonRoot: true
         runAsUser: 568

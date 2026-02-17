@@ -118,6 +118,7 @@ spec:
               - "--chromium-allow-list=file:///tmp/.*"
 
     defaultPodOptions:
+      priorityClassName: internal-only
       securityContext:
         runAsNonRoot: false
         runAsUser: 1000

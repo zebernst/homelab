@@ -74,6 +74,7 @@ spec:
               limits:
                 memory: 256Mi
     defaultPodOptions:
+      priorityClassName: internal-only
       securityContext:
         runAsNonRoot: true
         runAsUser: 568

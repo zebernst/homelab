@@ -58,6 +58,8 @@ spec:
               limits:
                 memory: 1024Mi
 
+    defaultPodOptions:
+      priorityClassName: internal-only
     service:
       app:
         controller: radicale

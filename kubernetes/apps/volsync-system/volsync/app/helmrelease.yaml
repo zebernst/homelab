@@ -27,5 +27,6 @@ spec:
       namespace: kube-system
   values:
     manageCRDs: true
+    priorityClassName: storage-critical
     metrics:
       disableAuth: true

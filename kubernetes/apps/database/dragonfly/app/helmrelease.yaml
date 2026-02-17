@@ -69,6 +69,7 @@ spec:
                 drop:
                   - ALL
     defaultPodOptions:
+      priorityClassName: database-critical
       securityContext:
         runAsNonRoot: true
         runAsUser: 568

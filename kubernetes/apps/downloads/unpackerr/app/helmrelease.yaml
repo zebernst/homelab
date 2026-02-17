@@ -67,6 +67,7 @@ spec:
               limits:
                 memory: 8Gi
     defaultPodOptions:
+      priorityClassName: background
       securityContext:
         runAsNonRoot: true
         runAsUser: 568

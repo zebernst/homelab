@@ -28,6 +28,7 @@ spec:
       serviceMonitor:
         enabled: true
     primary:
+      priorityClassName: database-critical
       resourcesPreset: small
       persistence:
         enabled: true

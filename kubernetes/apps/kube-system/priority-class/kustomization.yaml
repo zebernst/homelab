@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - storage-critical.yaml
+  - network-critical.yaml
+  - control-plane-critical.yaml
+  - database-critical.yaml
+  - external-facing.yaml
+  - media-core.yaml
+  - internal-only.yaml
+  - background.yaml
+  - best-effort.yaml

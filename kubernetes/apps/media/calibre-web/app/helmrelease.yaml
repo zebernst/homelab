@@ -17,6 +17,7 @@ spec:
   interval: 30m
   values:
     defaultPodOptions:
+      priorityClassName: media-core
       automountServiceAccountToken: false
       enableServiceLinks: false
 #      securityContext:

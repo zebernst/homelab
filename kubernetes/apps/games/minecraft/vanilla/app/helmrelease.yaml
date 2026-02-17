@@ -99,6 +99,7 @@ spec:
               limits:
                 memory: 1Gi
         pod:
+          priorityClassName: best-effort
           securityContext:
             runAsUser: 568
             runAsGroup: 568

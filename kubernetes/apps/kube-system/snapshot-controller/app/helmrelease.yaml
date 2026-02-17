@@ -26,6 +26,7 @@ spec:
       retries: 3
   values:
     controller:
+      priorityClassName: storage-critical
       serviceMonitor:
         create: true
     webhook:

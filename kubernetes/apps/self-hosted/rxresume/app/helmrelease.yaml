@@ -89,6 +89,8 @@ spec:
               limits:
                 cpu: 3000m
                 memory: 600Mi
+    defaultPodOptions:
+      priorityClassName: external-facing
     service:
       app:
         controller: *app

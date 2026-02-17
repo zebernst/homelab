@@ -32,6 +32,7 @@ spec:
       valuesKey: clientSecret
       targetPath: oauth.clientSecret
   values:
+    priorityClassName: network-critical
     operatorConfig:
       defaultTags:
         - "tag:k8s-operator"

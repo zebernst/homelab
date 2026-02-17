@@ -1,4 +1,6 @@
 ---
+global:
+  priorityClassName: control-plane-critical
 crds:
   enabled: true
 replicaCount: 1

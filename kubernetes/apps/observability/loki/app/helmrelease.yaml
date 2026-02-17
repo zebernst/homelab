@@ -64,6 +64,7 @@ spec:
         - loki.zebernst.dev
     singleBinary:
       replicas: 1
+      priorityClassName: control-plane-critical
       persistence:
         enabled: true
         storageClass: ceph-block

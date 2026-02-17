@@ -62,6 +62,8 @@ spec:
               limits:
                 memory: 256Mi
 
+    defaultPodOptions:
+      priorityClassName: internal-only
     service:
       app:
         controller: *app

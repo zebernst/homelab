@@ -103,6 +103,7 @@ spec:
               capabilities: { drop: [ "ALL" ] }
 
     defaultPodOptions:
+      priorityClassName: media-core
       securityContext:
         runAsNonRoot: true
         runAsUser: 568

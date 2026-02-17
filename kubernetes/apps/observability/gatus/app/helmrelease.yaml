@@ -79,6 +79,7 @@ spec:
               capabilities: { drop: ["ALL"] }
             resources: *resources
     defaultPodOptions:
+      priorityClassName: external-facing
       dnsConfig:
         options:
           - { name: ndots, value: "1" }

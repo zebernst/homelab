@@ -45,6 +45,7 @@ spec:
               limits:
                 memory: 2G
     defaultPodOptions:
+      priorityClassName: internal-only
       securityContext:
         runAsNonRoot: true
         runAsUser: 568

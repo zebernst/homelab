@@ -1,0 +1,9 @@
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: control-plane-critical
+value: 1500
+globalDefault: false
+preemptionPolicy: PreemptLowerPriority
+description: "GitOps and observability control plane"

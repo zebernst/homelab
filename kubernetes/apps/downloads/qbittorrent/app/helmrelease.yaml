@@ -73,6 +73,7 @@ spec:
 #              limits:
 #                memory: 8Gi
     defaultPodOptions:
+      priorityClassName: media-core
       securityContext:
         runAsNonRoot: true
         runAsUser: 568

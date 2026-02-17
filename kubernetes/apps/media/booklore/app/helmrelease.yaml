@@ -66,6 +66,8 @@ spec:
                   failureThreshold: 3
               readiness: *probes
 
+    defaultPodOptions:
+      priorityClassName: media-core
     service:
       app :
         controller: *app

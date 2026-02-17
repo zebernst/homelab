@@ -38,6 +38,7 @@ spec:
         - name: SEND_SAME_HTTP_CODE # Optional: when false, HTTP status code will always be '200'
           value: 'true'
     controller:
+      priorityClassName: network-critical
       service:
         annotations:
           external-dns.alpha.kubernetes.io/hostname: external.zebernst.dev

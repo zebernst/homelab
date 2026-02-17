@@ -42,6 +42,7 @@ spec:
               limits:
                 memory: 1Gi
     defaultPodOptions:
+      priorityClassName: external-facing
       securityContext:
         runAsNonRoot: true
         runAsUser: 568
