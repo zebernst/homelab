@@ -1,0 +1,29 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maddy-configmap
+data:
+  maddy.conf: |
+    ## Maddy — outbound-only SMTP relay
+
+    hostname {env:HOSTNAME}
+
+    tls off
+
+    smtp tcp://0.0.0.0:25 {
+        deliver_to &remote_queue
+    }
+
+    submission tcp://0.0.0.0:587 {
+        deliver_to &remote_queue
+    }
+
+    target.queue remote_queue {
+        target &remote_smtp
+    }
+
+    target.smtp remote_smtp {
+        attempt_starttls yes
+        require_tls no
+    }

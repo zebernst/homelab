@@ -1,0 +1,81 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app maddy
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.7.3
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      maddy:
+        replicas: 1
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          maddy:
+            image:
+              repository: docker.io/foxcpp/maddy
+              tag: 0.8
+            ports:
+              - containerPort: 25
+                name: smtp
+                protocol: TCP
+              - containerPort: 587
+                name: submission
+                protocol: TCP
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                cpu: 200m
+                memory: 256Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+    service:
+      maddy:
+        controller: *app
+        ports:
+          smtp:
+            port: 25
+          submission:
+            port: 587
+    persistence:
+      config:
+        type: configMap
+        name: maddy-configmap
+        globalMounts:
+          - path: /data/maddy.conf
+            subPath: maddy.conf
+            readOnly: true
+      dkim-key:
+        type: secret
+        name: maddy-secret
+        globalMounts:
+          - path: /data/dkim_key.pem
+            subPath: dkim_key.pem
+            readOnly: true
