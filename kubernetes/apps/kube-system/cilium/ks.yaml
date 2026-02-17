@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -48,7 +49,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app cilium-gateway
-  namespace: &namespace kube-system
+  namespace: &ns kube-system
 spec:
   commonMetadata:
     labels:
@@ -57,9 +58,9 @@ spec:
     - name: cert-manager-issuers
       namespace: cert-manager
     - name: cilium
-      namespace: *namespace
+      namespace: *ns
     - name: cilium-config
-      namespace: *namespace
+      namespace: *ns
   interval: 1h
   path: kubernetes/apps/kube-system/cilium/gateway
   prune: true
@@ -68,6 +69,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
+  targetNamespace: *ns
   timeout: 5m
   wait: true
