@@ -1,5 +1,5 @@
----
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -11,6 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   interval: 30m
+  retryInterval: 1m
   timeout: 5m
   path: kubernetes/apps/self-hosted/it-tools/app
   prune: true

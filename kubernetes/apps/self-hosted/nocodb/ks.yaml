@@ -1,16 +1,17 @@
----
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app nocodb
-  namespace: &namespace self-hosted
+  namespace: &ns self-hosted
 spec:
-  targetNamespace: *namespace
+  targetNamespace: *ns
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   interval: 30m
+  retryInterval: 1m
   timeout: 5m
   path: kubernetes/apps/self-hosted/nocodb/app
   prune: true

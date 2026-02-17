@@ -1,9 +1,10 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app karma
-  namespace: &namespace observability
+  namespace: &ns observability
 spec:
   commonMetadata:
     labels:
@@ -16,6 +17,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *namespace
+  targetNamespace: *ns
   timeout: 5m
   wait: true
