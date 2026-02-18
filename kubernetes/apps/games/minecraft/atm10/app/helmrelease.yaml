@@ -41,11 +41,7 @@ spec:
               ALLOW_FLIGHT: true
               INIT_MEMORY: 2G
               MAX_MEMORY: &max-memory 14G
-              # Auto-pause: pauses JVM when no players connected (MC 1.21.1 doesn't have native pause)
-              ENABLE_AUTOPAUSE: "true"
-              AUTOPAUSE_TIMEOUT_EST: "300"  # 5 min after last disconnect
-              AUTOPAUSE_TIMEOUT_INIT: "600" # 10 min after startup if nobody connects
-              MAX_TICK_TIME: "-1"           # REQUIRED: disable watchdog for auto-pause
+              MAX_TICK_TIME: "-1"
               MODRINTH_PROJECTS: |
                 bluemap
             envFrom:
