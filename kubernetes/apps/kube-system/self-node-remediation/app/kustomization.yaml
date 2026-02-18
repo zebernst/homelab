@@ -1,0 +1,49 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kube-system
+resources:
+  # renovate: datasource=github-releases depName=medik8s/self-node-remediation
+  - https://github.com/medik8s/self-node-remediation/config/default?ref=v0.11.0
+  - template.yaml
+images:
+  - name: quay.io/medik8s/self-node-remediation-operator
+    newTag: v0.11.0
+patches:
+  # Fix unresolved ${IMG} env var used to create the agent DaemonSet
+  - target:
+      kind: Deployment
+      name: self-node-remediation-controller-manager
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: self-node-remediation-controller-manager
+      spec:
+        template:
+          spec:
+            containers:
+              - name: manager
+                env:
+                  - name: SELF_NODE_REMEDIATION_IMAGE
+                    # renovate: datasource=docker depName=quay.io/medik8s/self-node-remediation-operator
+                    value: quay.io/medik8s/self-node-remediation-operator:v0.11.0
+  # Disable webhooks — no OLM/cert-manager wiring for admission certs
+  - target:
+      kind: ValidatingWebhookConfiguration
+    patch: |-
+      - op: replace
+        path: /webhooks/0/failurePolicy
+        value: Ignore
+      - op: replace
+        path: /webhooks/1/failurePolicy
+        value: Ignore
+      - op: replace
+        path: /webhooks/2/failurePolicy
+        value: Ignore
+  - target:
+      kind: MutatingWebhookConfiguration
+    patch: |-
+      - op: replace
+        path: /webhooks/0/failurePolicy
+        value: Ignore

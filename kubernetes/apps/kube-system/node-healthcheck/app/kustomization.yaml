@@ -1,0 +1,22 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kube-system
+resources:
+  # renovate: datasource=github-releases depName=medik8s/node-healthcheck-operator
+  - https://github.com/medik8s/node-healthcheck-operator/config/default?ref=v0.10.0
+images:
+  - name: controller
+    newName: quay.io/medik8s/node-healthcheck-operator
+    newTag: v0.10.0
+  - name: kube-rbac-proxy
+    newName: quay.io/brancz/kube-rbac-proxy
+    newTag: v0.18.1
+patches:
+  # Disable webhook — no OLM/cert-manager wiring for admission certs
+  - target:
+      kind: ValidatingWebhookConfiguration
+    patch: |-
+      - op: replace
+        path: /webhooks/0/failurePolicy
+        value: Ignore

@@ -16,7 +16,9 @@ resources:
   - metrics-server/ks.yaml
   - nfs-subdir-external-provisioner/ks.yaml
   - node-feature-discovery/ks.yaml
+  - node-healthcheck/ks.yaml
   - node-problem-detector/ks.yaml
+  - self-node-remediation/ks.yaml
   - nvidia-device-plugin/ks.yaml
   - reloader/ks.yaml
   - snapshot-controller/ks.yaml

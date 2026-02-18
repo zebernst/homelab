@@ -46,5 +46,23 @@
         commitMessageTopic: "{{{groupName}}} group",
       },
     },
+    {
+      description: ["Medik8s Self Node Remediation Group"],
+      groupName: "Self Node Remediation",
+      matchPackagePatterns: ["medik8s/self-node-remediation"],
+      matchDatasources: ["docker", "github-releases"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
+      description: ["Medik8s Node Healthcheck Operator Group"],
+      groupName: "Node Healthcheck Operator",
+      matchPackagePatterns: ["medik8s/node-healthcheck-operator"],
+      matchDatasources: ["docker", "github-releases"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
   ],
 }
