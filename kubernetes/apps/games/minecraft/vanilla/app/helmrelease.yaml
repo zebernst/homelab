@@ -85,7 +85,7 @@ spec:
     service:
       *app:
         annotations:
-          mc-router.itzg.me/externalServerName: "minecraft.zebernst.dev"
+          mc-router.itzg.me/defaultServer: "true"
           mc-router.itzg.me/autoScaleUp: "true"
           mc-router.itzg.me/autoScaleDown: "true"
         ports:
@@ -93,6 +93,8 @@ spec:
             port: 25565
           rcon:
             port: 25578
+          http:
+            port: &web-port 8100
     persistence:
       tmp:
         type: emptyDir

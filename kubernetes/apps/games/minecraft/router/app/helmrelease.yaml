@@ -60,7 +60,6 @@ spec:
               tag: 1.36.1@sha256:6495a3e3f9490917b43f3cb299b9e9ba3dfe455a5c4e6e8f2109a8993de35ec6
             env:
               TZ: America/Chicago
-              DEBUG: true
               IN_KUBE_CLUSTER: "true"
               API_BINDING: ":8080"
               PORT: &port 25565
@@ -104,7 +103,7 @@ spec:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
           external-dns.alpha.kubernetes.io/target: ipv4.zebernst.dev
         hosts:
-          - host: "mc.zebernst.dev"
+          - host: "minecraft.zebernst.dev"
             paths:
               - path: /
                 service:
