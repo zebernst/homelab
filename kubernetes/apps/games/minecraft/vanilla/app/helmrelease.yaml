@@ -57,15 +57,15 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  periodSeconds: 60
+                  periodSeconds: 15
                   exec: &probeexec { command: [ "mc-health" ] }
               readiness: *probe
               startup:
                 <<: *probe
                 spec:
-                  initialDelaySeconds: 30
+                  initialDelaySeconds: 10
                   periodSeconds: 1
-                  failureThreshold: 300
+                  failureThreshold: 60
                   exec: *probeexec
             securityContext:
               allowPrivilegeEscalation: false
