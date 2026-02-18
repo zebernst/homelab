@@ -10,9 +10,9 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   interval: 1h
-  path: ./kubernetes/apps/observability/karma/app
+  path: kubernetes/apps/observability/karma/app
   prune: true
-  retryInterval: 2m
+  retryInterval: 1m
   sourceRef:
     kind: GitRepository
     name: flux-system

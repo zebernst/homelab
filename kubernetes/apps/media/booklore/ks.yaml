@@ -28,7 +28,7 @@ spec:
       VOLSYNC_CAPACITY: 1Gi
       APP: *app
   prune: true
-  retryInterval: 2m
+  retryInterval: 1m
   sourceRef:
     kind: GitRepository
     name: flux-system

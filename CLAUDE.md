@@ -148,6 +148,8 @@ Flux monitors the `kubernetes/` directory and applies changes automatically:
 
 3. **Dependencies**: Apps declare dependencies via `spec.dependsOn` in their Kustomizations
 
+4. **Cluster-level HelmRelease defaults**: `cluster-apps` includes a nested patch that injects install/upgrade/uninstall/maxHistory defaults into every child Kustomization's HelmReleases. Individual HelmReleases should only contain `interval`, `chart`/`chartRef`, `values`/`valuesFrom`, and `dependsOn` — override install/upgrade only when chart-specific (CRDs, disableHooks, extended timeout).
+
 ### Bootstrap Process
 
 Initial cluster setup installs core components via helmfile in this order:
@@ -196,6 +198,28 @@ Useful kubectl plugins (via krew/aqua):
 - `kubectl-view-secret`: Secret inspection
 - `kubectl-browse-pvc`: PVC mounting
 - `kubectl-rook-ceph`: Rook management
+
+## YAML Conventions
+
+### ks.yaml (Flux Kustomization)
+- Schema comment (`kubernetes-schemas.pages.dev`) above `---` as first line
+- YAML anchors `&app` and `&ns` on metadata name/namespace
+- `retryInterval: 1m`, `timeout: 5m` always present
+- Paths without `./` prefix: `path: kubernetes/apps/...`
+- Use `healthCheckExprs` with CEL status expressions, not deprecated `healthChecks`
+
+### helmrelease.yaml
+- Schema comment above `---` (use `bjw-s/helm-charts` schema for app-template, `kubernetes-schemas.pages.dev` for standard charts)
+- **No install/upgrade/uninstall/maxHistory blocks** unless chart-specific override needed (CRDs, disableHooks, extended timeout)
+- Blank line before `values:` to visually separate spec from helm values
+
+### kustomization.yaml
+- Schema comment (`json.schemastore.org/kustomization`) above `---`
+- `resources:` before generators/configurations
+
+### Gotchas
+- Flux cluster-level strategic merge patches override local HelmRelease values. If a local file has `retries: -1` but the cluster patch sets `retries: 3`, the patch wins. Don't leave dead config in local files.
+- Schema URL must use `kubernetes-schemas.pages.dev` (not `cluster-schemas`, `datreeio`, or `fluxcd-community` variants)
 
 ## Cloud Dependencies
 
