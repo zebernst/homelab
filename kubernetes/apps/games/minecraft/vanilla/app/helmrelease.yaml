@@ -34,6 +34,10 @@ spec:
               TZ: America/Chicago
               TYPE: "VANILLA"
               VERSION: "LATEST"
+              ICON: https://media.forgecdn.net/avatars/thumbnails/1382/76/64/64/638896474054932351.png
+              MOTD: |
+                A Minecraft server on %VERSION%.
+                §oHosted on §dJupiter§r
               SERVER_NAME: *app
               DIFFICULTY: normal
               ALLOW_FLIGHT: true

@@ -71,7 +71,7 @@ spec:
               RECORD_LOGINS: true
               AUTO_SCALE_UP: "true"
               AUTO_SCALE_DOWN: "true"
-              AUTO_SCALE_DOWN_AFTER: "12h"
+              AUTO_SCALE_DOWN_AFTER: "2h"
               AUTO_SCALE_ASLEEP_MOTD: "Server is sleeping. Connecting will wake it -- please wait a few minutes."
             securityContext:
               allowPrivilegeEscalation: false
