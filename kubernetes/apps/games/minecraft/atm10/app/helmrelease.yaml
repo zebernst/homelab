@@ -1,0 +1,121 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app atm10
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      *app:
+        type: statefulset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          *app:
+            image:
+              repository: ghcr.io/itzg/minecraft-server
+              tag: 2026.2.1-java21
+            env:
+              EULA: "true"
+              TZ: America/Chicago
+              TYPE: "AUTO_CURSEFORGE"
+              CF_SLUG: "all-the-mods-10"
+              SERVER_NAME: *app
+              DIFFICULTY: normal
+              OPS: "zebernst,Snorlocke"
+              ENABLE_ROLLING_LOGS: true
+              ALLOW_FLIGHT: true
+              INIT_MEMORY: 2G
+              MAX_MEMORY: &max-memory 14G
+              # Auto-pause: pauses JVM when no players connected (MC 1.21.1 doesn't have native pause)
+              ENABLE_AUTOPAUSE: "true"
+              AUTOPAUSE_TIMEOUT_EST: "300"  # 5 min after last disconnect
+              AUTOPAUSE_TIMEOUT_INIT: "600" # 10 min after startup if nobody connects
+              MAX_TICK_TIME: "-1"           # REQUIRED: disable watchdog for auto-pause
+              MODRINTH_PROJECTS: |
+                bluemap
+            envFrom:
+              - secretRef:
+                  name: atm10-secret
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  periodSeconds: 60
+                  exec: &probeexec { command: [ "mc-health" ] }
+              readiness: *probe
+              startup:
+                <<: *probe
+                spec:
+                  initialDelaySeconds: 30
+                  periodSeconds: 1
+                  failureThreshold: 300
+                  exec: *probeexec
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 3
+                memory: *max-memory
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            runAsNonRoot: true
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+    service:
+      *app:
+        annotations:
+          mc-router.itzg.me/externalServerName: "atm10.zebernst.dev"
+          mc-router.itzg.me/autoScaleUp: "true"
+          mc-router.itzg.me/autoScaleDown: "true"
+        ports:
+          game:
+           port: &game-port 25565
+          rcon:
+           port: &rcon-port 25578
+          http:
+            port: &web-port 8100
+    route:
+      *app:
+        hostnames: ["{{ .Release.Name }}.zebernst.dev"]
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: atm10.zebernst.dev
+          external-dns.alpha.kubernetes.io/target: mc.zebernst.dev
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *web-port
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+    persistence:
+      tmp:
+        type: emptyDir
+      data:
+        existingClaim: *app
+        globalMounts:
+          - path: /data
