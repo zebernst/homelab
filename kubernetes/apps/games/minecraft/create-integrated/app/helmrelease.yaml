@@ -91,6 +91,7 @@ spec:
       *app:
         hostnames: ["{{ .Release.Name }}.zebernst.dev"]
         annotations:
+          external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
           external-dns.alpha.kubernetes.io/hostname: create-integrated.zebernst.dev
           external-dns.alpha.kubernetes.io/target: mc.zebernst.dev
         parentRefs:

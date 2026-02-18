@@ -102,7 +102,7 @@ spec:
         className: external
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
-          external-dns.alpha.kubernetes.io/target: external.zebernst.dev
+          external-dns.alpha.kubernetes.io/target: ipv4.zebernst.dev
         hosts:
           - host: "mc.zebernst.dev"
             paths:
