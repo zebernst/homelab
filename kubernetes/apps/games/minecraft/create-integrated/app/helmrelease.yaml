@@ -82,30 +82,9 @@ spec:
           mc-router.itzg.me/externalServerName: "create-integrated.zebernst.dev"
         ports:
           game:
-           port: &game-port 25565
+            port: 25565
           rcon:
-           port: &rcon-port 25578
-          http:
-            port: &web-port 8100
-    route:
-      *app:
-        hostnames: ["{{ .Release.Name }}.zebernst.dev"]
-        annotations:
-          external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
-          external-dns.alpha.kubernetes.io/hostname: create-integrated.zebernst.dev
-          external-dns.alpha.kubernetes.io/target: mc.zebernst.dev
-        parentRefs:
-          - name: external
-            namespace: kube-system
-            sectionName: https
-        rules:
-          - backendRefs:
-              - name: *app
-                port: *web-port
-            matches:
-              - path:
-                  type: PathPrefix
-                  value: /
+            port: 25578
     persistence:
       tmp:
         type: emptyDir
