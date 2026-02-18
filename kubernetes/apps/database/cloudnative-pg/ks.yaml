@@ -15,7 +15,7 @@ spec:
   interval: 1h
   path: kubernetes/apps/database/cloudnative-pg/app
   prune: true
-  retryInterval: 2m
+  retryInterval: 1m
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -50,7 +50,7 @@ spec:
       # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
       POSTGRESQL_VERSION: 17.2-27
   prune: true
-  retryInterval: 2m
+  retryInterval: 1m
   sourceRef:
     kind: GitRepository
     name: flux-system

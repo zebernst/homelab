@@ -35,7 +35,7 @@ spec:
       namespace: *ns
   interval: 1h
   retryInterval: 1m
-  path: ./kubernetes/apps/observability/blackbox-exporter/probes
+  path: kubernetes/apps/observability/blackbox-exporter/probes
   prune: true
   sourceRef:
     kind: GitRepository

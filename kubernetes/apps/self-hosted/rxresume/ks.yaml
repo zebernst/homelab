@@ -20,7 +20,7 @@ spec:
   interval: 1h
   path: kubernetes/apps/self-hosted/rxresume/app
   prune: true
-  retryInterval: 2m
+  retryInterval: 1m
   sourceRef:
     kind: GitRepository
     name: flux-system

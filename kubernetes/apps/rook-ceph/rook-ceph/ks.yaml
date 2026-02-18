@@ -36,18 +36,16 @@ spec:
   dependsOn:
     - name: rook-ceph
       namespace: *ns
-  healthChecks:
+  healthCheckExprs:
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
       name: rook-ceph-cluster
       namespace: *ns
+      status: "status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')"
     - apiVersion: ceph.rook.io/v1
       kind: CephCluster
       name: rook-ceph
       namespace: *ns
-  healthCheckExprs:
-    - apiVersion: ceph.rook.io/v1
-      kind: CephCluster
       failed: status.ceph.health == 'HEALTH_ERR'
       current: status.ceph.health in ['HEALTH_OK', 'HEALTH_WARN']
   interval: 30m

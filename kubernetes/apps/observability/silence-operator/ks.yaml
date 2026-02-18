@@ -10,9 +10,9 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   interval: 1h
-  path: ./kubernetes/apps/observability/silence-operator/app
+  path: kubernetes/apps/observability/silence-operator/app
   prune: true
-  retryInterval: 2m
+  retryInterval: 1m
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -34,9 +34,9 @@ spec:
     - name: silence-operator
       namespace: *ns
   interval: 1h
-  path: ./kubernetes/apps/observability/silence-operator/silences
+  path: kubernetes/apps/observability/silence-operator/silences
   prune: true
-  retryInterval: 2m
+  retryInterval: 1m
   sourceRef:
     kind: GitRepository
     name: flux-system

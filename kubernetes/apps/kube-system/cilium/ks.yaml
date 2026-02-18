@@ -64,7 +64,7 @@ spec:
   interval: 1h
   path: kubernetes/apps/kube-system/cilium/gateway
   prune: true
-  retryInterval: 2m
+  retryInterval: 1m
   sourceRef:
     kind: GitRepository
     name: flux-system
