@@ -24,6 +24,17 @@ spec:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          init-bluemap-config:
+            image:
+              repository: busybox
+              tag: latest
+            command: ["sh", "-c"]
+            args:
+              - |
+                cp /config-source/*.conf /app/config/
+                mkdir -p /app/config/maps
+                cp /maps-source/*.conf /app/config/maps/
         containers:
           *app:
             image:
@@ -49,8 +60,6 @@ spec:
               INIT_MEMORY: 2G
               MAX_MEMORY: &max-memory 14G
               MAX_TICK_TIME: "-1"
-              MODRINTH_PROJECTS: |
-                bluemap
             envFrom:
               - secretRef:
                   name: atm10-secret
@@ -77,6 +86,23 @@ spec:
               requests:
                 cpu: 3
                 memory: *max-memory
+          bluemap:
+            image:
+              repository: ghcr.io/bluemap-minecraft/bluemap
+              tag: v5.13
+            args: ["-r", "-u", "-w", "-n", "/app/mods"]
+            env:
+              JAVA_TOOL_OPTIONS: "-Xmx3G"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 250m
+                memory: 1Gi
+              limits:
+                memory: 4Gi
         pod:
           securityContext:
             runAsUser: 568
@@ -93,20 +119,109 @@ spec:
         ports:
           game:
             port: 25565
+      map:
+        controller: *app
+        ports:
+          http:
+            port: 8100
+      rcon:
+        controller: *app
+        type: LoadBalancer
+        loadBalancerClass: tailscale
+        annotations:
+          tailscale.com/hostname: atm10-rcon
+        ports:
           rcon:
             port: 25578
-          http:
-            port: &web-port 8100
+    route:
+      map:
+        hostnames: ["worldmap.zebernst.dev"]
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - matches:
+              - path:
+                  type: Exact
+                  value: /atm10
+            filters:
+              - type: RequestRedirect
+                requestRedirect:
+                  path:
+                    type: ReplaceFullPath
+                    replaceFullPath: /atm10/
+                  statusCode: 301
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /atm10/
+            filters:
+              - type: URLRewrite
+                urlRewrite:
+                  path:
+                    type: ReplacePrefixMatch
+                    replacePrefixMatch: /
+            backendRefs:
+              - name: atm10-map
+                port: 8100
     persistence:
       tmp:
         type: emptyDir
+        advancedMounts:
+          *app:
+            *app:
+              - path: /tmp
       config:
         type: configMap
         name: atm10-config
-        globalMounts:
-          - path: /config
-            readOnly: true
+        advancedMounts:
+          *app:
+            *app:
+              - path: /config
+                readOnly: true
       data:
         existingClaim: *app
-        globalMounts:
-          - path: /data
+        advancedMounts:
+          *app:
+            *app:
+              - path: /data
+            bluemap:
+              - path: /app/world
+                subPath: world
+                readOnly: true
+              - path: /app/mods
+                subPath: mods
+                readOnly: true
+      bluemap-config-source:
+        type: configMap
+        name: atm10-bluemap-config
+        advancedMounts:
+          *app:
+            init-bluemap-config:
+              - path: /config-source
+                readOnly: true
+      bluemap-maps-source:
+        type: configMap
+        name: atm10-bluemap-maps
+        advancedMounts:
+          *app:
+            init-bluemap-config:
+              - path: /maps-source
+                readOnly: true
+      bluemap-config:
+        type: emptyDir
+        advancedMounts:
+          *app:
+            init-bluemap-config:
+              - path: /app/config
+            bluemap:
+              - path: /app/config
+      bluemap-cache:
+        type: emptyDir
+        advancedMounts:
+          *app:
+            bluemap:
+              - path: /app/bluemap
+              - path: /app/web
+              - path: /app/data

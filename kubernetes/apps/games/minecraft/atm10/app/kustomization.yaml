@@ -3,7 +3,33 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - configmap.yaml
   - dnsendpoint.yaml
   - externalsecret.yaml
   - helmrelease.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: atm10-config
+    files:
+      - configs/ops.json
+      - configs/whitelist.json
+  - name: atm10-bluemap-config
+    files:
+      - bluemap/core.conf
+      - bluemap/webapp.conf
+      - bluemap/webserver.conf
+  - name: atm10-bluemap-maps
+    files:
+      - bluemap/maps/overworld.conf
+      - bluemap/maps/nether.conf
+      - bluemap/maps/end.conf
+      - bluemap/maps/aether.conf
+      - bluemap/maps/twilight-forest.conf
+      - bluemap/maps/undergarden.conf
+      - bluemap/maps/bumblezone.conf
+      - bluemap/maps/eternal-starlight.conf
+      - bluemap/maps/deeper-darker.conf
+      - bluemap/maps/ice-and-fire.conf
+      - bluemap/maps/allthemodium-mining.conf
+      - bluemap/maps/allthemodium-other.conf
+      - bluemap/maps/allthemodium-beyond.conf

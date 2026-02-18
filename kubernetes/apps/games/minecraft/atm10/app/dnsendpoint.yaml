@@ -7,7 +7,7 @@ spec:
   endpoints:
     - dnsName: "${APP}.zebernst.dev"
       recordType: CNAME
-      targets: ["mc.zebernst.dev"]
+      targets: ["minecraft.zebernst.dev"]
       providerSpecific:
         - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
           value: "false"
