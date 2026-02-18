@@ -5,5 +5,4 @@ kind: Kustomization
 namespace: ai
 components:
   - ../../components/common
-resources:
-  - local-ai/ks.yaml
+resources: []
