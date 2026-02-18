@@ -32,7 +32,7 @@ spec:
               verbs: [ "watch", "list" ]
             - apiGroups: [ "apps" ]
               resources: [ "statefulsets", "statefulsets/scale" ]
-              verbs: [ "watch", "list", "get", "update" ]
+              verbs: [ "watch", "list", "get", "update", "patch" ]
       bindings:
         *app:
           type: ClusterRoleBinding
@@ -69,6 +69,10 @@ spec:
               SIMPLIFY_SRV: true
               USE_PROXY_PROTOCOL: true
               RECORD_LOGINS: true
+              AUTO_SCALE_UP: "true"
+              AUTO_SCALE_DOWN: "true"
+              AUTO_SCALE_DOWN_AFTER: "12h"
+              AUTO_SCALE_ASLEEP_MOTD: "Server is sleeping. Connecting will wake it -- please wait a few minutes."
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
