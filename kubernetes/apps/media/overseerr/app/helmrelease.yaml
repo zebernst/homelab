@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: overseerr
+  name: &app overseerr
 spec:
   interval: 30m
   chartRef:
@@ -13,11 +13,11 @@ spec:
 
   values:
     controllers:
-      overseerr:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          app:
+          *app:
             image:
               repository: ghcr.io/sct/overseerr
               tag: 1.34.0@sha256:4f38f58d68555004d3f487a4c5cbe2823e6a0942d946a25a2d9391d8492240a4
@@ -26,7 +26,7 @@ spec:
               LOG_LEVEL: "info"
               PORT: &port 80
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
@@ -37,7 +37,7 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
-              readiness: *probes
+              readiness: *probe
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -56,8 +56,8 @@ spec:
         fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
     service:
-      app:
-        controller: overseerr
+      *app:
+        controller: *app
         ports:
           http:
             port: *port

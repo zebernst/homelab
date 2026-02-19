@@ -20,11 +20,11 @@ spec:
 
   values:
     controllers:
-      omegabrr:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          app:
+          *app:
             image:
               repository: ghcr.io/autobrr/omegabrr
               tag: v1.16.0@sha256:fe529c331217e0624c505a1aa47d2a089314e8a284d38a621135b848eeef64ad
@@ -49,7 +49,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
 
     service:
-      app:
+      *app:
         controller: *app
         ports:
           http:

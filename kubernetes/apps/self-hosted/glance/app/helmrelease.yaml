@@ -31,8 +31,8 @@ spec:
                 memory: 96Mi
             securityContext:
               allowPrivilegeEscalation: false
-              capabilities: {drop: ["ALL"]}
               readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
             probes:
               liveness:
                 enabled: true
@@ -57,7 +57,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: [ "ALL" ] }
+              capabilities: { drop: ["ALL"] }
             resources: { }
             probes:
               liveness:
@@ -74,15 +74,14 @@ spec:
                   httpGet:
                     path: /healthz
                     port: 8080
-        pod:
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 568
-            runAsGroup: 568
         serviceAccount:
           identifier: *app
     defaultPodOptions:
       priorityClassName: internal-only
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
     service:
       *app:
         controller: *app

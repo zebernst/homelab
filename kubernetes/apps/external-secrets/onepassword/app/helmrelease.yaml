@@ -17,12 +17,12 @@ spec:
 
   values:
     controllers:
-      onepassword:
+      *app:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          api:
+          *app:
             image:
               repository: docker.io/1password/connect-api
               tag: 1.8.0@sha256:1695b2fdc6897e49fdfd80e64bdb78f4c64f7691a8d46957c0372e47f776430e
@@ -111,7 +111,7 @@ spec:
         globalMounts:
           - path: *configDir
     service:
-      app:
+      *app:
         controller: *app
         ports:
           http:

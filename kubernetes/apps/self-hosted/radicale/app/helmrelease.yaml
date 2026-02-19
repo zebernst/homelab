@@ -17,19 +17,12 @@ spec:
 
   values:
     controllers:
-      radicale:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
 
-        pod:
-          securityContext:
-            runAsUser: 568
-            runAsGroup: 568
-            fsGroup: 568
-            fsGroupChangePolicy: "OnRootMismatch"
-
         containers:
-          radicale:
+          *app:
             image:
               repository: ghcr.io/bjw-s-labs/radicale
               tag: 3.5.2
@@ -52,26 +45,31 @@ spec:
 
     defaultPodOptions:
       priorityClassName: internal-only
+      securityContext:
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
     service:
-      app:
-        controller: radicale
+      *app:
+        controller: *app
         ports:
           http:
             port: 5232
 
     ingress:
-      app:
+      tailscale:
         className: tailscale
         hosts:
-          - host: &host radicale.kite-harmonic.ts.net
+          - host: &tsHost radicale.kite-harmonic.ts.net
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:
-              - *host
+              - *tsHost
     persistence:
       config:
         type: configMap

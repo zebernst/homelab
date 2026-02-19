@@ -17,11 +17,11 @@ spec:
 
   values:
     controllers:
-      tautulli:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          tautulli:
+          *app:
             image:
               repository: ghcr.io/tautulli/tautulli
               tag: v2.16.0@sha256:7e6ede32f7923e01899db906aa6a96d978a4a8df8e2ef0dcf44c92b2d0206221
@@ -34,7 +34,7 @@ spec:
               "--port", "80"
             ]
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
@@ -45,7 +45,7 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
-              readiness: *probes
+              readiness: *probe
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -64,13 +64,13 @@ spec:
         fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
     service:
-      tautulli:
+      *app:
         controller: *app
         ports:
           http:
             port: *port
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
           - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"

@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: qbtools
+  name: &app qbtools
 spec:
   interval: 30m
   chart:
@@ -82,7 +82,7 @@ spec:
           <<: *cronJobSpec
           schedule: "@daily"
         containers:
-          app:
+          *app:
             <<: *container
             args:
             - orphaned
@@ -93,7 +93,7 @@ spec:
           restartPolicy: OnFailure
       reannounce:
         containers:
-          app:
+          *app:
             <<: *container
             args:
               - reannounce
@@ -120,6 +120,6 @@ spec:
         path: /volume1/media
         advancedMounts:
           orphaned:
-            app:
+            *app:
               - path: /media/downloads/qbittorrent
                 subPath: downloads/qbittorrent

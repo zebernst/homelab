@@ -17,16 +17,16 @@ spec:
 
   values:
     controllers:
-      unwrapped:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          app:
+          *app:
             image:
               repository: ghcr.io/zebernst/unwrapped
               tag: 5e9d6fb  # short SHA from main branch
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
@@ -37,7 +37,7 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 3
-              readiness: *probes
+              readiness: *probe
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false  # Streamlit needs to write temp files
@@ -58,7 +58,7 @@ spec:
       imagePullSecrets:
         - name: ghcr-pull-secret
     service:
-      app:
+      *app:
         controller: *app
         ports:
           http:

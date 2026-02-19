@@ -16,11 +16,11 @@ spec:
 
   values:
     controllers:
-      wizarr:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          app:
+          *app:
             image:
               repository:  ghcr.io/wizarrrr/wizarr
               tag: v2025.12.0@sha256:83fc0b50985d196226b7c28a27062a1c4e63124a5d6d2448710aee222637b79e
@@ -43,7 +43,7 @@ spec:
         fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
     service:
-      app:
+      *app:
         controller: *app
         ports:
           http:
