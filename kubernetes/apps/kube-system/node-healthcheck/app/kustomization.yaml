@@ -6,6 +6,7 @@ namespace: kube-system
 resources:
   # renovate: datasource=github-releases depName=medik8s/node-healthcheck-operator
   - https://github.com/medik8s/node-healthcheck-operator/config/default?ref=v0.10.0
+  - certificate.yaml
 images:
   - name: controller
     newName: quay.io/medik8s/node-healthcheck-operator
@@ -14,10 +15,35 @@ images:
     newName: quay.io/brancz/kube-rbac-proxy
     newTag: v0.18.1
 patches:
-  # Disable webhook — no OLM/cert-manager wiring for admission certs
+  # Mount webhook TLS cert from cert-manager
+  - target:
+      kind: Deployment
+      name: node-healthcheck-controller-manager
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: node-healthcheck-controller-manager
+      spec:
+        template:
+          spec:
+            containers:
+              - name: manager
+                volumeMounts:
+                  - name: webhook-cert
+                    mountPath: /tmp/k8s-webhook-server/serving-certs
+                    readOnly: true
+            volumes:
+              - name: webhook-cert
+                secret:
+                  secretName: node-healthcheck-webhook-cert
+  # Inject caBundle from cert-manager into webhook configuration
   - target:
       kind: ValidatingWebhookConfiguration
     patch: |-
-      - op: replace
-        path: /webhooks/0/failurePolicy
-        value: Ignore
+      apiVersion: admissionregistration.k8s.io/v1
+      kind: ValidatingWebhookConfiguration
+      metadata:
+        name: node-healthcheck-validating-webhook-configuration
+        annotations:
+          cert-manager.io/inject-ca-from: kube-system/node-healthcheck-webhook-cert
