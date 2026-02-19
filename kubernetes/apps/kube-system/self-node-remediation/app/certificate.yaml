@@ -1,0 +1,20 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: self-node-remediation-selfsigned
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: self-node-remediation-webhook-cert
+spec:
+  secretName: self-node-remediation-webhook-cert
+  issuerRef:
+    kind: Issuer
+    name: self-node-remediation-selfsigned
+  dnsNames:
+    - self-node-remediation-webhook-service.kube-system.svc
+    - self-node-remediation-webhook-service.kube-system.svc.cluster.local

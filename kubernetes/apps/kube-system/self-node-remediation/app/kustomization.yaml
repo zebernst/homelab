@@ -7,11 +7,13 @@ resources:
   # renovate: datasource=github-releases depName=medik8s/self-node-remediation
   - https://github.com/medik8s/self-node-remediation/config/default?ref=v0.11.0
   - template.yaml
+  - certificate.yaml
 images:
   - name: quay.io/medik8s/self-node-remediation-operator
     newTag: v0.11.0
 patches:
   # Fix unresolved ${IMG} env var used to create the agent DaemonSet
+  # Mount webhook TLS cert from cert-manager
   - target:
       kind: Deployment
       name: self-node-remediation-controller-manager
@@ -29,22 +31,30 @@ patches:
                   - name: SELF_NODE_REMEDIATION_IMAGE
                     # renovate: datasource=docker depName=quay.io/medik8s/self-node-remediation-operator
                     value: quay.io/medik8s/self-node-remediation-operator:v0.11.0
-  # Disable webhooks — no OLM/cert-manager wiring for admission certs
+                volumeMounts:
+                  - name: webhook-cert
+                    mountPath: /tmp/k8s-webhook-server/serving-certs
+                    readOnly: true
+            volumes:
+              - name: webhook-cert
+                secret:
+                  secretName: self-node-remediation-webhook-cert
+  # Inject caBundle from cert-manager into webhook configurations
   - target:
       kind: ValidatingWebhookConfiguration
     patch: |-
-      - op: replace
-        path: /webhooks/0/failurePolicy
-        value: Ignore
-      - op: replace
-        path: /webhooks/1/failurePolicy
-        value: Ignore
-      - op: replace
-        path: /webhooks/2/failurePolicy
-        value: Ignore
+      apiVersion: admissionregistration.k8s.io/v1
+      kind: ValidatingWebhookConfiguration
+      metadata:
+        name: self-node-remediation-validating-webhook-configuration
+        annotations:
+          cert-manager.io/inject-ca-from: kube-system/self-node-remediation-webhook-cert
   - target:
       kind: MutatingWebhookConfiguration
     patch: |-
-      - op: replace
-        path: /webhooks/0/failurePolicy
-        value: Ignore
+      apiVersion: admissionregistration.k8s.io/v1
+      kind: MutatingWebhookConfiguration
+      metadata:
+        name: self-node-remediation-mutating-webhook-configuration
+        annotations:
+          cert-manager.io/inject-ca-from: kube-system/self-node-remediation-webhook-cert
