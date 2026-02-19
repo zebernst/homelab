@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: calibre-web-automated
+  name: &app calibre-web-automated
 spec:
   chart:
     spec:
@@ -30,11 +30,11 @@ spec:
 #        supplementalGroups: [ 65568 ]
 
     controllers:
-      calibre-web:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          app:
+          *app:
             image:
               repository: crocodilestick/calibre-web-automated
               tag: dev@sha256:2aa370df1cb0e224cfdc804aa207f9920942acced473997b3169732e0564f758
@@ -76,8 +76,8 @@ spec:
                 memory: 768Mi
 
     service:
-      app:
-        controller: calibre-web
+      *app:
+        controller: *app
         primary: true
         ports:
           http:
@@ -88,7 +88,7 @@ spec:
       # Tailscale doesn't allow injecting custom ingress headers (X-Scheme: https).
       # Workaround: expose http for API access
       api:
-        controller: calibre-web
+        controller: *app
         type: LoadBalancer
         loadBalancerClass: tailscale
         annotations:
@@ -99,14 +99,14 @@ spec:
             targetPort: *port
 
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
           - host: &tsHost calibre.kite-harmonic.ts.net
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:
@@ -116,8 +116,8 @@ spec:
       config:
         existingClaim: calibre-web
         advancedMounts:
-          calibre-web:
-            app:
+          *app:
+            *app:
               - path: /config
       media:
         type: nfs
