@@ -74,6 +74,11 @@ spec:
               tag: v2.3.0
             args: [ "bazarr" ]
             env:
+              API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: bazarr-secret
+                    key: BAZARR_API_KEY
               PORT: &metricsPort 9707
               URL: "http://{{ .Release.Name }}:6767"
               ENABLE_ADDITIONAL_METRICS: "true"
