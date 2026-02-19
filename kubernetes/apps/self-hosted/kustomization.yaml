@@ -16,5 +16,4 @@ resources:
   - paperless/ks.yaml
   - radicale/ks.yaml
   - rxresume/ks.yaml
-  - trmnl/ks.yaml
   - unwrapped/ks.yaml
