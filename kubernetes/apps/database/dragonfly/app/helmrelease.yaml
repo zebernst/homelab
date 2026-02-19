@@ -17,9 +17,9 @@ spec:
 
   values:
     controllers:
-      dragonfly-operator:
+      *app:
         containers:
-          app:
+          *app:
             image:
               repository: ghcr.io/dragonflydb/operator
               tag: v1.1.11@sha256:11cef45ec1079b9d97930fc99ecd08ba29d4eca55cdb45887cb0ac40ee4e4d24
@@ -59,9 +59,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
+              capabilities: { drop: ["ALL"] }
     defaultPodOptions:
       priorityClassName: database-critical
       securityContext:
@@ -69,7 +67,7 @@ spec:
         runAsUser: 568
         runAsGroup: 568
     service:
-      app:
+      *app:
         controller: *app
         ports:
           http:

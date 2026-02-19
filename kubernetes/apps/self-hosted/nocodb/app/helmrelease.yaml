@@ -18,7 +18,7 @@ spec:
 
   values:
     controllers:
-      nocodb:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -30,7 +30,7 @@ spec:
               - secretRef:
                   name: nocodb-secret
         containers:
-          app:
+          *app:
             image:
               repository: docker.io/nocodb/nocodb
               tag: 0.301.2@sha256:d3aba4f7e89bd18fc01d6853eea0fa82476b161a678f7f0ff52380f4c52bb87f
@@ -55,20 +55,20 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [ 65568 ]
     service:
-      app:
-        controller: nocodb
+      *app:
+        controller: *app
         ports:
           http:
             port: *port
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
           - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:
@@ -77,6 +77,6 @@ spec:
       data:
         existingClaim: *app
         advancedMounts:
-          nocodb:
-            app:
+          *app:
+            *app:
               - path: /usr/app/data

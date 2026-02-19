@@ -20,12 +20,12 @@ spec:
 
   values:
     controllers:
-      cross-seed:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
 
         containers:
-          cross-seed:
+          *app:
             image:
               repository: ghcr.io/cross-seed/cross-seed
               tag: 6.13.3@sha256:81afafdd96a5dd2c8e485a03e9d61ec07ceb051c4c950071497c44f8ceb5169f
@@ -37,7 +37,7 @@ spec:
                   name: cross-seed-secret
             args: [ "daemon" ]
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
@@ -48,12 +48,12 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 3
-              readiness: *probes
+              readiness: *probe
 
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: [ "ALL" ] }
+              capabilities: { drop: ["ALL"] }
 
             resources:
               requests:
@@ -72,8 +72,8 @@ spec:
         supplementalGroups: [65568]
 
     service:
-      cross-seed:
-        controller: cross-seed
+      *app:
+        controller: *app
         ports:
           http:
             port: *port

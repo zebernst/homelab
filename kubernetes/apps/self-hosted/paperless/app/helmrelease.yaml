@@ -18,7 +18,7 @@ spec:
 
   values:
     controllers:
-      paperless:
+      *app:
 
         annotations:
           reloader.stakater.com/auto: "true"
@@ -33,7 +33,7 @@ spec:
                   name: paperless-secret
 
         containers:
-          paperless:
+          *app:
             image:
               repository: ghcr.io/paperless-ngx/paperless-ngx
               tag: 2.17.1
@@ -119,8 +119,8 @@ spec:
         supplementalGroups: [ 65568 ]
 
     service:
-      app:
-        controller: paperless
+      *app:
+        controller: *app
         ports:
           http:
             port: *port
@@ -128,14 +128,14 @@ spec:
             port: *metricsPort
 
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
           - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:

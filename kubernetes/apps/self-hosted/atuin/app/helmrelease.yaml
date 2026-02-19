@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: atuin
+  name: &app atuin
 spec:
   interval: 30m
   chart:
@@ -17,7 +17,7 @@ spec:
 
   values:
     controllers:
-      app:
+      *app:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -30,7 +30,7 @@ spec:
               - secretRef:
                   name: atuin-secret
         containers:
-          atuin:
+          *app:
             image:
               repository: ghcr.io/atuinsh/atuin
               tag: v18.8.0@sha256:8a8a8ef4eb5865656072bace5cc49390b56caa81360f9f0869054777155b6ef1
@@ -45,7 +45,7 @@ spec:
             envFrom: *envFrom
             args: ["server", "start"]
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
@@ -56,7 +56,7 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
-              readiness: *probes
+              readiness: *probe
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -73,8 +73,8 @@ spec:
         runAsUser: 568
         runAsGroup: 568
     service:
-      app:
-        controller: app
+      *app:
+        controller: *app
         ports:
           http:
             primary: true
@@ -83,7 +83,7 @@ spec:
             port: *metricsPort
     serviceMonitor:
       app:
-        serviceName: atuin
+        serviceName: *app
         endpoints:
           - port: metrics
             scheme: http
@@ -91,14 +91,14 @@ spec:
             interval: 1m
             scrapeTimeout: 10s
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
           - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:
