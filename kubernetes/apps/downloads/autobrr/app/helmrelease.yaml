@@ -17,7 +17,7 @@ spec:
 
   values:
     controllers:
-      autobrr:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -29,7 +29,7 @@ spec:
               - secretRef:
                   name: autobrr-secret
         containers:
-          app:
+          *app:
             image:
               repository: ghcr.io/autobrr/autobrr
               tag: v1.66.1@sha256:bf25c5c66cb1b8aa60b83932a1b59d2eb88c45edfeb8714e58e4bd1abeee01d1
@@ -43,7 +43,7 @@ spec:
               AUTOBRR__METRICS_PORT: &promPort 9074
             envFrom: *envFrom
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
@@ -54,7 +54,7 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
-              readiness: *probes
+              readiness: *probe
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -71,7 +71,7 @@ spec:
         runAsUser: 568
         runAsGroup: 568
     service:
-      app:
+      *app:
         controller: *app
         ports:
           http:
@@ -79,18 +79,18 @@ spec:
           metrics:
             port: *promPort
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
-          - host: &host "{{ .Release.Name }}.kite-harmonic.ts.net"
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:
-              - *host
+              - *tsHost
     serviceMonitor:
       app:
         serviceName: *app

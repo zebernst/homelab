@@ -20,9 +20,9 @@ spec:
 
   values:
     controllers:
-      unpoller:
+      *app:
         containers:
-          unpoller:
+          *app:
             image:
               repository: ghcr.io/unpoller/unpoller
               tag: v2.15.4@sha256:788a890f2dc5aef3e99ce430917221c43b4e084464d38bc6537a8c7294ef8770
@@ -60,7 +60,7 @@ spec:
         runAsUser: 568
         runAsGroup: 568
     service:
-      app:
+      *app:
         controller: *app
         ports:
           http:

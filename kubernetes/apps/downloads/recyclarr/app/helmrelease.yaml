@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: recyclarr
+  name: &app recyclarr
 spec:
   interval: 30m
   chart:
@@ -17,7 +17,7 @@ spec:
 
   values:
     controllers:
-      recyclarr:
+      *app:
         type: cronjob
         annotations:
           reloader.stakater.com/auto: "true"
@@ -26,7 +26,7 @@ spec:
           successfulJobsHistory: 1
           failedJobsHistory: 1
         containers:
-          app:
+          *app:
             image:
               repository: ghcr.io/recyclarr/recyclarr
               tag: 7.4.1@sha256:759540877f95453eca8a26c1a93593e783a7a824c324fbd57523deffb67f48e1

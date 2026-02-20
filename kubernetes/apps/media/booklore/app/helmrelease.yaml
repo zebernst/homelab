@@ -38,7 +38,7 @@ spec:
               SWAGGER_ENABLED: "false"
 
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
@@ -48,7 +48,7 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 3
-              readiness: *probes
+              readiness: *probe
 
     defaultPodOptions:
       priorityClassName: media-core

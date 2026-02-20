@@ -17,12 +17,11 @@ spec:
 
   values:
     controllers:
-      qbittorrent:
+      *app:
         annotations:
-          configmap.reloader.stakater.com/reload: qbittorrent-scripts
-          secret.reloader.stakater.com/reload: qbittorrent-secret
+          reloader.stakater.com/auto: "true"
         containers:
-          qbittorrent:
+          *app:
             image:
               repository: ghcr.io/home-operations/qbittorrent
               tag: 5.1.4@sha256:56ecd30a7f5e1357daf5eea2a6935134d329b7b268a3a9b9c67041b65fb87fc6
@@ -39,7 +38,7 @@ spec:
               - secretRef:
                   name: qbittorrent-secret
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
@@ -50,7 +49,7 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
-              readiness: *probes
+              readiness: *probe
               startup:
                 enabled: true
                 spec:
@@ -59,7 +58,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: [ "ALL" ] }
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 100m
@@ -75,7 +74,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [ 65568 ]
     service:
-      app:
+      *app:
         controller: *app
         nameOverride: *app
         ports:
@@ -91,14 +90,14 @@ spec:
             port: *bittorrentPort
             protocol: TCP
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
           - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:
@@ -111,15 +110,15 @@ spec:
         name: qbittorrent-scripts
         defaultMode: 0775
         advancedMounts:
-          qbittorrent:
-            qbittorrent:
+          *app:
+            *app:
               - path: /scripts
       downloads:
         type: nfs
         server: nas.internal
         path: /volume1/media
         advancedMounts:
-          qbittorrent:
-            qbittorrent:
+          *app:
+            *app:
               - path: /media/downloads/qbittorrent
                 subPath: downloads/qbittorrent

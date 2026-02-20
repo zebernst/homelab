@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: stash
+  name: &app stash
 spec:
   interval: 30m
   chart:
@@ -17,11 +17,11 @@ spec:
 
   values:
     controllers:
-      app:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          stash:
+          *app:
             image:
               repository: ghcr.io/feederbox826/stash-s6
               tag: hwaccel-alpine-2025-08-08@sha256:75a0223e158ad76e245361e549d53dc6dacffa17ed1bf396a477c4b9b70e9ea2
@@ -66,7 +66,7 @@ spec:
               startup: *probe
             securityContext:
               allowPrivilegeEscalation: false
-              capabilities: { drop: [ "ALL" ] }
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 10m
@@ -83,24 +83,24 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [65568]
     service:
-      app:
-        controller: app
+      *app:
+        controller: *app
         ports:
           http:
             port: *port
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
-          - host: &host "{{ .Release.Name }}.kite-harmonic.ts.net"
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:
-              - *host
+              - *tsHost
     persistence:
       config:
         existingClaim: stash
@@ -110,7 +110,6 @@ spec:
           - path: /blobs
             subPath: blobs
       cache:
-        enabled: true
         existingClaim: stash-cache
         globalMounts:
           - path: /cache

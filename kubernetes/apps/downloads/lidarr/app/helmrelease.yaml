@@ -17,7 +17,7 @@ spec:
 
   values:
     controllers:
-      lidarr:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -29,7 +29,7 @@ spec:
               - secretRef:
                   name: lidarr-secret
         containers:
-          app:
+          *app:
             image:
               repository: ghcr.io/home-operations/lidarr
               tag: 2.13.2.4685@sha256:af72fba52ef9e438a8c010f77a43bb3910da7c31cbf30d90cbcf0b351a82d4d6
@@ -44,7 +44,7 @@ spec:
               TZ: America/Chicago
             envFrom: *envFrom
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
@@ -55,7 +55,7 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
-              readiness: *probes
+              readiness: *probe
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -67,7 +67,7 @@ spec:
                 memory: 2Gi
 
           exporter:
-            dependsOn: app
+            dependsOn: *app
             image:
               repository: ghcr.io/onedr0p/exportarr
               tag: v2.3.0
@@ -84,7 +84,7 @@ spec:
                     key: LIDARR__AUTH__APIKEY
             probes:
               liveness: &metricsProbes
-                <<: *probes
+                <<: *probe
                 spec:
                   httpGet:
                     path: /healthz
@@ -93,7 +93,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: [ "ALL" ] }
+              capabilities: { drop: ["ALL"] }
 
     defaultPodOptions:
       priorityClassName: media-core
@@ -105,8 +105,8 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [65568]
     service:
-      app:
-        controller: lidarr
+      *app:
+        controller: *app
         nameOverride: *app
         ports:
           http:
@@ -114,22 +114,21 @@ spec:
           metrics:
             port: *metricsPort
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
           - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:
-            - *tsHost
+              - *tsHost
 
     serviceMonitor:
       app:
-        enabled: true
         serviceName: *app
         endpoints:
           - port: metrics

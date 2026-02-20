@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      rxresume:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -39,9 +39,9 @@ spec:
               runAsUser: 999
               runAsGroup: 999
               allowPrivilegeEscalation: false
-              capabilities: { drop: [ALL] }
+              capabilities: { drop: ["ALL"] }
 
-          app:
+          *app:
             image:
               repository: ghcr.io/amruthpillai/reactive-resume
               tag: v5.0.9@sha256:6dc11d67a4d4b086c4abf149973c97bea26d54cdbb0cf73eb4e2feb0ff780491
@@ -87,7 +87,7 @@ spec:
     defaultPodOptions:
       priorityClassName: external-facing
     service:
-      app:
+      *app:
         controller: *app
         ports:
           http:
@@ -124,13 +124,13 @@ spec:
       cache:
         type: emptyDir
         advancedMounts:
-          rxresume:
-            app:
+          *app:
+            *app:
               - path: /.cache
       tmpfs:
         type: emptyDir
         advancedMounts:
-          rxresume:
-            app:
+          *app:
+            *app:
               - path: /tmp
                 subPath: tmp
