@@ -46,10 +46,13 @@ spec:
               DIFFICULTY: normal
               ALLOW_FLIGHT: true
               ENFORCE_WHITELIST: "true"
-              WHITELIST_FILE: /config/whitelist.json
-              OPS_FILE: /config/ops.json
-              EXISTING_WHITELIST_FILE: SYNC_FILE_MERGE_LIST
-              EXISTING_OPS_FILE: SYNC_FILE_MERGE_LIST
+              EXISTING_WHITELIST_FILE: SYNCHRONIZE
+              WHITELIST: |
+                zebernst
+                Snorlocke
+                Travler34__
+              OPS: |
+                zebernst
               INIT_MEMORY: 2G
               MAX_MEMORY: &max-memory 14G
               MAX_TICK_TIME: "-1"
@@ -165,14 +168,6 @@ spec:
           *app:
             *app:
               - path: /tmp
-      config:
-        type: configMap
-        name: atm10-config
-        advancedMounts:
-          *app:
-            *app:
-              - path: /config
-                readOnly: true
       data:
         existingClaim: *app
         advancedMounts:

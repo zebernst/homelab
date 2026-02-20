@@ -43,10 +43,13 @@ spec:
               DIFFICULTY: normal
               ALLOW_FLIGHT: true
               ENFORCE_WHITELIST: "true"
-              WHITELIST_FILE: /config/whitelist.json
-              OPS_FILE: /config/ops.json
-              EXISTING_WHITELIST_FILE: SYNC_FILE_MERGE_LIST
-              EXISTING_OPS_FILE: SYNC_FILE_MERGE_LIST
+              EXISTING_WHITELIST_FILE: SYNCHRONIZE
+              WHITELIST: |
+                zebernst
+                Snorlocke
+                Travler34__
+              OPS: |
+                zebernst
               PAUSE_WHEN_EMPTY_SECONDS: "60"
               INIT_MEMORY: 1G
               MAX_MEMORY: &max-memory 4G
@@ -161,14 +164,6 @@ spec:
           *app:
             *app:
               - path: /tmp
-      config:
-        type: configMap
-        name: vanilla-config
-        advancedMounts:
-          *app:
-            *app:
-              - path: /config
-                readOnly: true
       data:
         existingClaim: *app
         advancedMounts:

@@ -9,10 +9,6 @@ resources:
 generatorOptions:
   disableNameSuffixHash: true
 configMapGenerator:
-  - name: atm10-config
-    files:
-      - configs/ops.json
-      - configs/whitelist.json
   - name: atm10-bluemap-config
     files:
       - bluemap/core.conf
