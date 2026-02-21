@@ -29,7 +29,7 @@ spec:
           app:
             image:
               repository: ghcr.io/recyclarr/recyclarr
-              tag: 7.4.1@sha256:759540877f95453eca8a26c1a93593e783a7a824c324fbd57523deffb67f48e1
+              tag: 8.1.0@sha256:1039bcecc98f4d3f4d9c8bb29cbfd1829c2b06d44d8802e392e7c2b42dfb2f40
             env:
               TZ: America/Chicago
             envFrom:
