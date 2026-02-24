@@ -7,7 +7,6 @@ components:
   - ../../components/common
 resources:
   - booklore/ks.yaml
-  - calibre-web/ks.yaml
   - maintainerr/ks.yaml
   - overseerr/ks.yaml
   - plex/ks.yaml
