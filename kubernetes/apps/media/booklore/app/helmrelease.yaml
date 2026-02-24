@@ -18,12 +18,12 @@ spec:
           *app :
             image:
               repository: ghcr.io/booklore-app/booklore
-              tag: v1.18.5
+              tag: v2.0.0
 
             env:
               TZ: America/Chicago
-              PUID: 1000
-              PGID: 1000
+              USER_ID: 1000
+              GROUP_ID: 1000
               DATABASE_URL: "jdbc:mariadb://mariadb.database.svc.cluster.local:3306/booklore"
               DATABASE_USERNAME:
                 valueFrom:
@@ -52,6 +52,7 @@ spec:
 
     defaultPodOptions:
       priorityClassName: media-core
+
     service:
       app :
         controller: *app
