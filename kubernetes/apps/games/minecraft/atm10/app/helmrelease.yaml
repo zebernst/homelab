@@ -82,6 +82,24 @@ spec:
               requests:
                 cpu: 3
                 memory: *max-memory
+          mc-monitor:
+            image:
+              repository: itzg/mc-monitor
+              tag: 0.16.1@sha256:e8847581e7af9e5a3993f1a3cbb5bff0823435e38edcb382049c91de1a83edba
+            args: ["export-for-prometheus"]
+            env:
+              EXPORT_SERVERS: atm10
+              DEBUG: "false"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
           bluemap:
             image:
               repository: ghcr.io/bluemap-minecraft/bluemap
@@ -115,6 +133,8 @@ spec:
         ports:
           game:
             port: 25565
+          metrics:
+            port: 8080
       map:
         controller: *app
         ports:
@@ -213,3 +233,12 @@ spec:
               - path: /app/bluemap
               - path: /app/web
               - path: /app/data
+    serviceMonitor:
+      *app:
+        serviceName: *app
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 30s
