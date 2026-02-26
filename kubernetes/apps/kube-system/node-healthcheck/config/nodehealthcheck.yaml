@@ -5,7 +5,10 @@ metadata:
   name: nhc-all-nodes
 spec:
   # Select all nodes (4-node cluster: 3 CP + 1 GPU worker)
-  selector: {}
+  selector:
+    matchExpressions:
+      - key: kubernetes.io/os
+        operator: Exists
   # At least 3 of 4 nodes must be healthy before remediating — prevents cascading failures
   minHealthy: "51%"
   unhealthyConditions:

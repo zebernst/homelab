@@ -12,9 +12,7 @@ spec:
   healthCheckExprs:
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
-      name: *app
-      namespace: *ns
-      status: "status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')"
+      current: "status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')"
   interval: 1h
   path: kubernetes/apps/observability/keda/app
   prune: true
