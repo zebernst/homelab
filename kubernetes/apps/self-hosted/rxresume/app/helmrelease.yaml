@@ -112,7 +112,7 @@ spec:
               - type: RequestRedirect
                 requestRedirect:
                   statusCode: 302
-                  hostname: "{{ .Release.Name }}.zebernst.dev"
+                  hostname: rxresume.zebernst.dev
                   path:
                     type: ReplaceFullPath
                     replaceFullPath: /resume/current
