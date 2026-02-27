@@ -37,3 +37,22 @@ spec:
           - kind: Secret
             name: zebernst-dev-tls
             namespace: cert-manager
+    - name: http-internal
+      protocol: HTTP
+      port: 80
+      hostname: "*.internal"
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-internal
+      protocol: HTTPS
+      port: 443
+      hostname: "*.internal"
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: internal-tls
+            namespace: cert-manager

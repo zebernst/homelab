@@ -13,6 +13,9 @@ spec:
     - name: internal
       namespace: kube-system
       sectionName: http
+    - name: internal
+      namespace: kube-system
+      sectionName: http-internal
   rules:
     - filters:
         - requestRedirect:

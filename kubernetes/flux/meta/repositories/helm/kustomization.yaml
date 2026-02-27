@@ -26,6 +26,7 @@ resources:
   - node-feature-discovery.yaml
   - nvidia.yaml
   - ollama.yaml
+  - open-webui.yaml
   - openebs.yaml
   - piraeus.yaml
   - postfinance.yaml
