@@ -17,14 +17,13 @@ spec:
 
   values:
     replicaCount: 1
+    updateStrategy:
+      type: Recreate
     ollama:
       gpu:
         enabled: true
         type: nvidia
         number: 1
-      models:
-        pull:
-          - qwen3:4b
     service:
       type: ClusterIP
       port: 11434

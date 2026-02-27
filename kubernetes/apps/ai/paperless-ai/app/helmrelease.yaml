@@ -24,7 +24,7 @@ spec:
             env:
               AI_PROVIDER: ollama
               OLLAMA_API_URL: http://ollama.ai.svc.cluster.local:11434
-              OLLAMA_MODEL: qwen3:4b
+              OLLAMA_MODEL: qwen3:8b
               PAPERLESS_API_URL: http://paperless.self-hosted.svc.cluster.local:8000/api
             envFrom:
               - secretRef:
