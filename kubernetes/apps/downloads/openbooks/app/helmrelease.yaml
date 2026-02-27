@@ -17,11 +17,11 @@ spec:
 
   values:
     controllers:
-      openbooks:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          app:
+          *app:
             image:
               repository: evanbuss/openbooks
               tag: 4.5.0
@@ -47,24 +47,24 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [ 65568 ]
     service:
-      app:
-        controller: openbooks
+      *app:
+        controller: *app
         ports:
           http:
             port: *port
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
-          - host: &host "{{ .Release.Name }}.kite-harmonic.ts.net"
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:
-              - *host
+              - *tsHost
     persistence:
       books:
         type: nfs

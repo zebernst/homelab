@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: prowlarr
+  name: &app prowlarr
 spec:
   interval: 30m
   chart:
@@ -17,7 +17,7 @@ spec:
 
   values:
     controllers:
-      prowlarr:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -29,7 +29,7 @@ spec:
               - secretRef:
                   name: prowlarr-secret
         containers:
-          app:
+          *app:
             image:
               repository: ghcr.io/home-operations/prowlarr
               tag: 2.3.2.5245@sha256:e2459e199564ab852c6e677e951cef36c172a8e71a0e1c90665631b5a0c57438
@@ -45,7 +45,7 @@ spec:
               TZ: America/Chicago
             envFrom: *envFrom
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
@@ -56,7 +56,7 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
-              readiness: *probes
+              readiness: *probe
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -67,7 +67,7 @@ spec:
               limits:
                 memory: 1Gi
           exporter:
-            dependsOn: app
+            dependsOn: *app
             image:
               repository: ghcr.io/onedr0p/exportarr
               tag: v2.3.0
@@ -84,7 +84,7 @@ spec:
                     key: PROWLARR__AUTH__APIKEY
             probes:
               liveness: &metricsProbes
-                <<: *probes
+                <<: *probe
                 spec:
                   httpGet:
                     path: /healthz
@@ -93,7 +93,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: [ "ALL" ] }
+              capabilities: { drop: ["ALL"] }
     defaultPodOptions:
       priorityClassName: media-core
       securityContext:
@@ -103,24 +103,27 @@ spec:
         fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
     service:
-      app:
-        controller: prowlarr
+      *app:
+        controller: *app
+        nameOverride: *app
         ports:
           http:
             port: *port
+          metrics:
+            port: *metricsPort
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
-          - host: &host "{{ .Release.Name }}.kite-harmonic.ts.net"
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:
-              - *host
+              - *tsHost
     persistence:
       config:
         type: emptyDir

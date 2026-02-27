@@ -17,11 +17,11 @@ spec:
 
   values:
     controllers:
-      app:
+      *app:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          steam:
+          *app:
             image:
               repository: josh5/steam-headless
               tag: latest@sha256:fc2c681b46cec608411dbed0a879c5084a372aec91c16885c050bea9bd355f92
@@ -68,8 +68,8 @@ spec:
           operator: Exists
           effect: NoSchedule
     service:
-      app:
-        controller: app
+      *app:
+        controller: *app
         type: LoadBalancer
         annotations:
           lbipam.cilium.io/ips: 192.168.20.16, ::ffff:c0a8:1410
@@ -97,18 +97,18 @@ spec:
             port: 48000
             protocol: UDP
     ingress:
-      ts:
+      tailscale:
         className: tailscale
         hosts:
-          - host: &host "{{ .Release.Name }}.kite-harmonic.ts.net"
+          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
             paths:
               - path: /
                 service:
-                  identifier: app
+                  identifier: *app
                   port: http
         tls:
           - hosts:
-              - *host
+              - *tsHost
     persistence:
       home:
         existingClaim: *app
