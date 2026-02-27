@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - name: atm10
+  - name: all the mods 10
     group: minecraft
     url: "tcp://atm10.games.svc.cluster.local:25565"
     interval: 1m
