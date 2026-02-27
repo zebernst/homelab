@@ -25,6 +25,7 @@ resources:
   - nfs-subdir-external-provisioner.yaml
   - node-feature-discovery.yaml
   - nvidia.yaml
+  - ollama.yaml
   - openebs.yaml
   - piraeus.yaml
   - postfinance.yaml
