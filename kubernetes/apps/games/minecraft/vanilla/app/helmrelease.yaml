@@ -125,7 +125,7 @@ spec:
         annotations:
           mc-router.itzg.me/defaultServer: "true"
           mc-router.itzg.me/autoScaleUp: "true"
-          mc-router.itzg.me/autoScaleDown: "true"
+          mc-router.itzg.me/autoScaleDown: "false"
         ports:
           game:
             port: 25565
