@@ -1,0 +1,14 @@
+---
+endpoints:
+  - name: atm10
+    group: minecraft
+    url: "tcp://atm10.games.svc.cluster.local:25565"
+    interval: 1m
+    conditions:
+      - "[CONNECTED] == true"
+    ui:
+      hide-url: true
+      hide-hostname: true
+      hide-port: true
+    alerts:
+      - type: pushover

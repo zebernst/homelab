@@ -1,0 +1,15 @@
+---
+endpoints:
+  - name: minecraft
+    group: minecraft
+    url: "tcp://minecraft.zebernst.dev:25565"
+    interval: 1m
+    conditions:
+      - "[CONNECTED] == true"
+    ui:
+      hide-url: true
+      hide-hostname: false
+      hide-port: true
+    alerts:
+      - type: pushover
+

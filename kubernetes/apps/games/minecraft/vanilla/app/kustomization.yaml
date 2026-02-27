@@ -13,3 +13,9 @@ configMapGenerator:
       - bluemap/core.conf
       - bluemap/webapp.conf
       - bluemap/webserver.conf
+  - name: vanilla-gatus-ep
+    files:
+      - config.yaml=gatus-config.yaml
+    options:
+      labels:
+        gatus.io/enabled: "true"
