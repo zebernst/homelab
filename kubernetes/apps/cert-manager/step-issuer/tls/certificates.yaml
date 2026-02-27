@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: internal-wildcard
+spec:
+  secretName: internal-tls
+  issuerRef:
+    group: certmanager.step.sm
+    kind: StepClusterIssuer
+    name: tinyca-internal
+  commonName: "*.internal"
+  dnsNames:
+    - "*.local"
+    - "*.internal"
+  duration: 24h
+  renewBefore: 8h
