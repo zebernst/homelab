@@ -51,10 +51,3 @@ backup:
 # - linear.api-key
 # - github.org
 # - github.repo
-
-sync:
-  branch: "beads"
-
-dolt:
-  auto-push: true         # Auto-enable when origin remote exists (default)
-  auto-push-interval: 5m  # Minimum time between auto-pushes
