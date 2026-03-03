@@ -23,10 +23,24 @@ spec:
         - alert: CertManagerCertExpirySoon
           expr: |
             avg by (exported_namespace, namespace, name) (certmanager_certificate_expiration_timestamp_seconds - time()) < (21 * 24 * 3600)
+            and on (exported_namespace, namespace, name)
+            certmanager_certificate_expiration_timestamp_seconds - certmanager_certificate_renewal_timestamp_seconds > (7 * 24 * 3600)
           for: 5m
           annotations:
             summary: >-
               The cert {{ $labels.name }} is {{ $value | humanizeDuration }} from expiry, it should have renewed over a week ago
+          labels:
+            severity: critical
+
+        - alert: CertManagerShortLivedCertExpirySoon
+          expr: |
+            avg by (exported_namespace, namespace, name) (certmanager_certificate_expiration_timestamp_seconds - time()) < (1 * 3600)
+            and on (exported_namespace, namespace, name)
+            certmanager_certificate_expiration_timestamp_seconds - certmanager_certificate_renewal_timestamp_seconds <= (7 * 24 * 3600)
+          for: 5m
+          annotations:
+            summary: >-
+              The short-lived cert {{ $labels.name }} is {{ $value | humanizeDuration }} from expiry and has not renewed
           labels:
             severity: critical
 
