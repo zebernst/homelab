@@ -6,18 +6,16 @@ metadata:
   name: &app dragonfly-operator
 spec:
   interval: 30m
-  chart:
-    spec:
-      chart: app-template
-      version: 3.7.3
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
 
   values:
     controllers:
       *app:
+        serviceAccount:
+          identifier: *app
         containers:
           *app:
             image:
@@ -75,8 +73,7 @@ spec:
           metrics:
             port: 8080
     serviceAccount:
-      create: true
-      name: *app
+      *app: {}
     serviceMonitor:
       app:
         serviceName: *app
