@@ -72,7 +72,7 @@ spec:
     service:
       *app:
         controller: *app
-        nameOverride: *app
+        forceRename: *app
         ports:
           http:
             port: *port
