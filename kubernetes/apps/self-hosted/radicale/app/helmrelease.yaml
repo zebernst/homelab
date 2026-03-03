@@ -32,7 +32,7 @@ spec:
           radicale:
             image:
               repository: ghcr.io/bjw-s-labs/radicale
-              tag: 3.5.2
+              tag: 3.6.1
             probes:
               liveness:
                 enabled: true
