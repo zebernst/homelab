@@ -65,10 +65,7 @@ spec:
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"
         parentRefs:
-          - name: internal
-            namespace: kube-system
-            sectionName: https
-          - name: tailscale
+          - name: external
             namespace: kube-system
             sectionName: https
 
