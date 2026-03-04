@@ -119,8 +119,5 @@ spec:
         type: nfs
         server: nas.internal
         path: /volume1/media
-        advancedMounts:
-          *app:
-            *app:
-              - path: /media/downloads/qbittorrent
-                subPath: downloads/qbittorrent
+        globalMounts:
+          - path: /media
