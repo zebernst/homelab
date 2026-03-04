@@ -13,7 +13,7 @@ images:
     newTag: v0.10.0
   - name: kube-rbac-proxy
     newName: quay.io/brancz/kube-rbac-proxy
-    newTag: v0.18.1
+    newTag: v0.21.0
 patches:
   # Mount webhook TLS cert from cert-manager
   - target:
