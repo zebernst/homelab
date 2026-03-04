@@ -1,0 +1,244 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app atmons
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      *app:
+        type: statefulset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-bluemap-config:
+            image:
+              repository: busybox
+              tag: latest
+            command: ["sh", "-c"]
+            args:
+              - |
+                cp /config-source/*.conf /app/config/
+                mkdir -p /app/config/maps
+                cp /maps-source/*.conf /app/config/maps/
+        containers:
+          *app:
+            image:
+              repository: ghcr.io/itzg/minecraft-server
+              tag: 2026.2.1-java21
+            env:
+              EULA: "true"
+              TZ: America/Chicago
+              TYPE: "AUTO_CURSEFORGE"
+              CF_SLUG: "all-the-mons"
+              ICON: https://media.forgecdn.net/avatars/thumbnails/1567/555/64/64/639016249214580144.png
+              MOTD: |
+                A server on %VERSION% running %MODPACK_NAME% v%MODPACK_VERSION%.
+                §oHosted on §dJupiter§r
+              SERVER_NAME: *app
+              DIFFICULTY: normal
+              ALLOW_FLIGHT: true
+              ENFORCE_WHITELIST: "true"
+              EXISTING_WHITELIST_FILE: SYNCHRONIZE
+              WHITELIST: |
+                zebernst
+                Snorlocke
+                Travler34__
+              OPS: |
+                zebernst
+              INIT_MEMORY: 2G
+              MAX_MEMORY: &max-memory 14G
+              MAX_TICK_TIME: "-1"
+            envFrom:
+              - secretRef:
+                  name: atmons-secret
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  periodSeconds: 60
+                  exec: &probeexec { command: [ "mc-health" ] }
+              readiness: *probe
+              startup:
+                <<: *probe
+                spec:
+                  initialDelaySeconds: 30
+                  periodSeconds: 1
+                  failureThreshold: 300
+                  exec: *probeexec
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 3
+                memory: *max-memory
+          mc-monitor:
+            image:
+              repository: itzg/mc-monitor
+              tag: 0.16.1@sha256:e8847581e7af9e5a3993f1a3cbb5bff0823435e38edcb382049c91de1a83edba
+            args: ["export-for-prometheus"]
+            env:
+              EXPORT_SERVERS: atmons
+              DEBUG: "false"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
+          bluemap:
+            image:
+              repository: ghcr.io/bluemap-minecraft/bluemap
+              tag: v5.13
+            args: ["-r", "-u", "-w", "-n", "/app/mods"]
+            env:
+              JAVA_TOOL_OPTIONS: "-Xmx3G"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 250m
+                memory: 1Gi
+              limits:
+                memory: 4Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      *app:
+        annotations:
+          mc-router.itzg.me/externalServerName: "atmons.zebernst.dev"
+          mc-router.itzg.me/autoScaleUp: "true"
+          mc-router.itzg.me/autoScaleDown: "false"
+        ports:
+          game:
+            port: 25565
+          metrics:
+            port: 8080
+      map:
+        controller: *app
+        ports:
+          http:
+            port: 8100
+      rcon:
+        controller: *app
+        type: LoadBalancer
+        loadBalancerClass: tailscale
+        annotations:
+          tailscale.com/hostname: atmons-rcon
+        ports:
+          rcon:
+            port: 25578
+    route:
+      map:
+        hostnames: ["worldmap.zebernst.dev"]
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - matches:
+              - path:
+                  type: Exact
+                  value: /atmons
+            filters:
+              - type: RequestRedirect
+                requestRedirect:
+                  path:
+                    type: ReplaceFullPath
+                    replaceFullPath: /atmons/
+                  statusCode: 301
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /atmons/
+            filters:
+              - type: URLRewrite
+                urlRewrite:
+                  path:
+                    type: ReplacePrefixMatch
+                    replacePrefixMatch: /
+            backendRefs:
+              - name: atmons-map
+                port: 8100
+    persistence:
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          *app:
+            *app:
+              - path: /tmp
+      data:
+        existingClaim: *app
+        advancedMounts:
+          *app:
+            *app:
+              - path: /data
+            bluemap:
+              - path: /app/world
+                subPath: world
+                readOnly: true
+              - path: /app/mods
+                subPath: mods
+                readOnly: true
+      bluemap-config-source:
+        type: configMap
+        name: atmons-bluemap-config
+        advancedMounts:
+          *app:
+            init-bluemap-config:
+              - path: /config-source
+                readOnly: true
+      bluemap-maps-source:
+        type: configMap
+        name: atmons-bluemap-maps
+        advancedMounts:
+          *app:
+            init-bluemap-config:
+              - path: /maps-source
+                readOnly: true
+      bluemap-config:
+        type: emptyDir
+        advancedMounts:
+          *app:
+            init-bluemap-config:
+              - path: /app/config
+            bluemap:
+              - path: /app/config
+      bluemap-cache:
+        type: emptyDir
+        advancedMounts:
+          *app:
+            bluemap:
+              - path: /app/bluemap
+              - path: /app/web
+              - path: /app/data
+    serviceMonitor:
+      *app:
+        serviceName: *app
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 30s

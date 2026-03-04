@@ -4,5 +4,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - atm10/ks.yaml
+  - atmons/ks.yaml
   - router/ks.yaml
   - vanilla/ks.yaml
