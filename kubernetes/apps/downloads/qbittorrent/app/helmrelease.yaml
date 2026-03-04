@@ -30,6 +30,8 @@ spec:
               CROSS_SEED_PORT: 80
               CROSS_SEED_SLEEP_INTERVAL: 0
               PUSHOVER_ENABLED: true
+              BOOKLORE_ENABLED: true
+              BOOKLORE_DROP_DIR: /media/bookdrop
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
@@ -118,3 +120,5 @@ spec:
             *app:
               - path: /media/downloads/qbittorrent
                 subPath: downloads/qbittorrent
+              - path: /media/bookdrop
+                subPath: bookdrop

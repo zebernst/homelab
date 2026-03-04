@@ -61,6 +61,7 @@ spec:
               - --exclude-category=cross-seed
               - --exclude-category=manual
               - --exclude-tag=activity:1d
+              - --exclude-tag=site:mam
               - --include-tag=expired
               - --with-data
           prune-unregistered:
@@ -68,6 +69,7 @@ spec:
             args:
               - prune
               - --exclude-tag=added:1d
+              - --exclude-tag=site:mam
               - --include-tag=unregistered
               - --with-data
         pod:

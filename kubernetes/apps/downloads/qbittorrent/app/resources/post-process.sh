@@ -12,6 +12,8 @@ CROSS_SEED_SLEEP_INTERVAL="${CROSS_SEED_SLEEP_INTERVAL:-30}"
 PUSHOVER_ENABLED="${PUSHOVER_ENABLED:-false}"
 PUSHOVER_USER_KEY="${PUSHOVER_USER_KEY:-required}"
 PUSHOVER_TOKEN="${PUSHOVER_TOKEN:-required}"
+BOOKLORE_ENABLED="${BOOKLORE_ENABLED:-false}"
+BOOKLORE_DROP_DIR="${BOOKLORE_DROP_DIR:-required}"
 
 # Function to set release variables from SABnzbd
 set_sab_vars() {
@@ -69,6 +71,14 @@ send_pushover_notification() {
         "$(echo "${json_data}" | jq --compact-output)" >&2
 }
 
+# Function to copy books to BookLore drop folder
+copy_to_booklore() {
+    if [[ "${RELEASE_CAT,,}" == "books" ]]; then
+        cp -r "${RELEASE_DIR}" "${BOOKLORE_DROP_DIR}/"
+        printf "copied %s to booklore drop folder\n" "${RELEASE_DIR}" >&2
+    fi
+}
+
 # Function to search for cross-seed
 search_cross_seed() {
     local status_code
@@ -110,6 +120,11 @@ main() {
     # Send pushover notification
     if [[ "${PUSHOVER_ENABLED}" == "true" ]]; then
         send_pushover_notification
+    fi
+
+    # Copy books to BookLore drop folder
+    if [[ "${BOOKLORE_ENABLED}" == "true" ]]; then
+        copy_to_booklore
     fi
 
     # Search for cross-seed

@@ -84,4 +84,9 @@ spec:
             subPath: books
 
       bookdrop:
-        type: emptyDir
+        type: nfs
+        server: nas.internal
+        path: /volume1/media
+        globalMounts:
+          - path: /bookdrop
+            subPath: bookdrop
