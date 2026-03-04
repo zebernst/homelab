@@ -89,13 +89,6 @@ spec:
             - --dry-run
         pod:
           restartPolicy: OnFailure
-      reannounce:
-        containers:
-          *app:
-            <<: *container
-            args:
-              - reannounce
-              - --process-seeding
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
