@@ -119,7 +119,7 @@ main() {
 
     # Send pushover notification
     if [[ "${PUSHOVER_ENABLED}" == "true" ]]; then
-        send_pushover_notification
+        send_pushover_notification || printf "pushover notification failed\n" >&2
     fi
 
     # Copy books to BookLore drop folder
