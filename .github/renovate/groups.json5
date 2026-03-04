@@ -56,6 +56,33 @@
       },
     },
     {
+      description: ["Dragonfly Group"],
+      groupName: "Dragonfly",
+      matchPackagePatterns: ["dragonflydb/dragonfly"],
+      matchDatasources: ["docker", "github-releases"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
+      description: ["External-Secrets Group"],
+      groupName: "External-Secrets",
+      matchPackagePatterns: ["external-secrets"],
+      matchDatasources: ["docker", "helm"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
+      description: ["Minecraft Group"],
+      groupName: "Minecraft",
+      matchPackagePatterns: ["itzg/minecraft-server", "itzg/mc-monitor", "itzg/mc-router", "bluemap-minecraft/bluemap"],
+      matchDatasources: ["docker"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
       description: ["Medik8s Node Healthcheck Operator Group"],
       groupName: "Node Healthcheck Operator",
       matchPackagePatterns: ["medik8s/node-healthcheck-operator"],
