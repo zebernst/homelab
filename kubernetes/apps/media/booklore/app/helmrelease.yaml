@@ -22,8 +22,8 @@ spec:
 
             env:
               TZ: America/Chicago
-              USER_ID: 1000
-              GROUP_ID: 1000
+              USER_ID: 1568
+              GROUP_ID: 65568
               DATABASE_URL: "jdbc:mariadb://mariadb.database.svc.cluster.local:3306/booklore"
               DATABASE_USERNAME:
                 valueFrom:
@@ -66,11 +66,13 @@ spec:
                   sleep 10
                 done
             securityContext:
-              runAsUser: 1000
-              runAsGroup: 1000
+              runAsUser: 1568
+              runAsGroup: 65568
 
     defaultPodOptions:
       priorityClassName: media-core
+      securityContext:
+        supplementalGroups: [65568]
 
     service:
       app :
