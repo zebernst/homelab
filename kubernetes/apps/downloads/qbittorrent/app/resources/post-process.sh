@@ -39,28 +39,27 @@ set_qb_vars() {
 
 # Function to send pushover notification
 send_pushover_notification() {
-    local pushover_message status_code json_data
+    local pushover_message status_code json_data indexer_host
+    indexer_host=$(printf '%s' "${RELEASE_INDEXER}" | awk -F/ '{print $3}')
     printf -v pushover_message \
         "<b>%s</b><small>\n<b>Category:</b> %s</small><small>\n<b>Indexer:</b> %s</small><small>\n<b>Size:</b> %s</small>" \
             "${RELEASE_NAME%.*}" \
             "${RELEASE_CAT}" \
-            "$(trurl --url "${RELEASE_INDEXER}" --get '{idn:host}')" \
+            "${indexer_host}" \
             "$(numfmt --to iec --format "%8.2f" "${RELEASE_SIZE}")"
 
-    json_data=$(jo \
-        token="${PUSHOVER_TOKEN}" \
-        user="${PUSHOVER_USER_KEY}" \
-        title="${RELEASE_TYPE} Downloaded" \
-        message="${pushover_message}" \
-        priority="-2" \
-        html="1"
-    )
+    json_data=$(jq -n \
+        --arg token "${PUSHOVER_TOKEN}" \
+        --arg user "${PUSHOVER_USER_KEY}" \
+        --arg title "${RELEASE_TYPE} Downloaded" \
+        --arg message "${pushover_message}" \
+        '{token: $token, user: $user, title: $title, message: $message, priority: -2, html: 1}')
 
     status_code=$(curl \
         --silent \
         --write-out "%{http_code}" \
         --output /dev/null \
-        --request POST  \
+        --request POST \
         --header "Content-Type: application/json" \
         --data-binary "${json_data}" \
         "https://api.pushover.net/1/messages.json"
@@ -68,14 +67,15 @@ send_pushover_notification() {
 
     printf "pushover notification returned with HTTP status code %s and payload: %s\n" \
         "${status_code}" \
-        "$(echo "${json_data}" | jq --compact-output)" >&2
+        "$(printf '%s' "${json_data}" | jq --compact-output)" >&2
 }
 
 # Function to copy books to BookLore drop folder
 copy_to_booklore() {
     if [[ "${RELEASE_CAT,,}" == "books" ]]; then
-        cp -r "${RELEASE_DIR}" "${BOOKLORE_DROP_DIR}/"
-        printf "copied %s to booklore drop folder\n" "${RELEASE_DIR}" >&2
+        find "${RELEASE_DIR}" -maxdepth 2 \( -name "*.epub" -o -name "*.pdf" -o -name "*.mobi" -o -name "*.cbz" -o -name "*.cbr" \) | while read -r f; do
+            cp "$f" "${BOOKLORE_DROP_DIR}/" && printf "copied %s to booklore drop folder\n" "$f" >&2
+        done
     fi
 }
 

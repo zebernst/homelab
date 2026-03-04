@@ -50,25 +50,6 @@ spec:
                   failureThreshold: 3
               readiness: *probe
 
-          bookdrop-sync:
-            image:
-              repository: busybox
-              tag: latest
-            command: [sh, -c]
-            args:
-              - |
-                touch /tmp/last_sync
-                while true; do
-                  find /media/bookdrop -maxdepth 2 -newer /tmp/last_sync \( -name "*.epub" -o -name "*.pdf" -o -name "*.mobi" -o -name "*.cbz" -o -name "*.cbr" \) | while read f; do
-                    mv "$f" /bookdrop/ && printf "moved %s to bookdrop\n" "$f"
-                  done
-                  touch /tmp/last_sync
-                  sleep 10
-                done
-            securityContext:
-              runAsUser: 1568
-              runAsGroup: 65568
-
     defaultPodOptions:
       priorityClassName: media-core
       securityContext:
@@ -100,16 +81,8 @@ spec:
         type: nfs
         server: nas.internal
         path: /volume1/media
-        advancedMounts:
-          *app :
-            *app :
-              - path: /books
-                subPath: books
-            bookdrop-sync:
-              - path: /media/bookdrop
-                subPath: bookdrop
-
-      bookdrop:
-        type: emptyDir
         globalMounts:
+          - path: /books
+            subPath: books
           - path: /bookdrop
+            subPath: bookdrop
