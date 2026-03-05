@@ -21,7 +21,7 @@ spec:
       namespace: rook-ceph
     - name: volsync
       namespace: volsync-system
-    - name: maddy
+    - name: smtp-relay
       namespace: network
   path: kubernetes/apps/auth/pocket-id/app
   prune: true

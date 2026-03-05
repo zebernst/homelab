@@ -34,6 +34,8 @@ spec:
             env:
               # Enable env-var driven config
               UI_CONFIG_DISABLED: "true"
+              # Sign-up
+              ALLOW_USER_SIGNUPS: withToken
               # Metrics
               METRICS_ENABLED: "true"
               OTEL_METRICS_EXPORTER: prometheus
