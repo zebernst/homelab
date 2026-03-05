@@ -96,3 +96,7 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /var/lib/maddy
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
