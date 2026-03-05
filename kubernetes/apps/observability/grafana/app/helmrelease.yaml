@@ -64,7 +64,7 @@ spec:
             type: loki
             uid: loki
             access: proxy
-            url: http://loki-headless.observability.svc.cluster.local:3100
+            url: http://victoria-logs-server.observability.svc.cluster.local:9428
             jsonData:
               maxLines: 250
           - name: Alertmanager
