@@ -5,12 +5,17 @@ metadata:
   name: maddy-configmap
 data:
   maddy.conf: |
-    ## Maddy — outbound-only SMTP relay
+    ## Maddy — outbound-only SMTP relay via Fastmail
 
     hostname {env:HOSTNAME}
+    state_dir /var/lib/maddy
 
     tls off
 
+    ## Prometheus metrics
+    openmetrics tcp://0.0.0.0:9749 { }
+
+    ## Accept mail from cluster pods — no auth required (ClusterIP only)
     smtp tcp://0.0.0.0:25 {
         deliver_to &remote_queue
     }
@@ -23,7 +28,9 @@ data:
         target &remote_smtp
     }
 
+    ## Relay outbound mail through Fastmail
     target.smtp remote_smtp {
-        attempt_starttls yes
-        require_tls no
+        targets tcp://smtp.fastmail.com:587
+        starttls yes
+        auth plain {env:SMTP_USER} {env:SMTP_PASS}
     }
