@@ -49,6 +49,7 @@ spec:
               S3_ENDPOINT: http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc.cluster.local
               S3_REGION: us-east-1
               S3_FORCE_PATH_STYLE: "true"
+              S3_DISABLE_DEFAULT_INTEGRITY_CHECKS: "true"
               S3_BUCKET:
                 valueFrom:
                   configMapKeyRef:
