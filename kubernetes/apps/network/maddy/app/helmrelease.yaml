@@ -68,9 +68,7 @@ spec:
         controller: *app
         ports:
           smtp:
-            port: &smtpPort 25
-          submission:
-            port: &submissionPort 587
+            port: 25
           metrics:
             port: &metricsPort 9749
 

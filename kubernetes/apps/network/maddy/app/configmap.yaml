@@ -20,10 +20,6 @@ data:
         deliver_to &remote_queue
     }
 
-    submission tcp://0.0.0.0:587 {
-        deliver_to &remote_queue
-    }
-
     target.queue remote_queue {
         target &remote_smtp
     }
