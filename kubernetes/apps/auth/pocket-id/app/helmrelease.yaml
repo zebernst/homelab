@@ -40,7 +40,7 @@ spec:
               OTEL_EXPORTER_PROMETHEUS_HOST: 0.0.0.0
               OTEL_EXPORTER_PROMETHEUS_PORT: &metricsPort 9464
               # SMTP via maddy
-              SMTP_HOST: maddy.network.svc.cluster.local
+              SMTP_HOST: smtp-relay.network.svc.cluster.local
               SMTP_PORT: "25"
               SMTP_FROM: noreply@zebernst.dev
               SMTP_TLS: none
