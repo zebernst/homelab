@@ -21,6 +21,8 @@ spec:
       namespace: rook-ceph
     - name: volsync
       namespace: volsync-system
+    - name: maddy
+      namespace: network
   path: kubernetes/apps/auth/pocket-id/app
   prune: true
   sourceRef:

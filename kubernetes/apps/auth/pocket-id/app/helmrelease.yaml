@@ -31,6 +31,19 @@ spec:
             image:
               repository: ghcr.io/pocket-id/pocket-id
               tag: v2
+            env:
+              # Enable env-var driven config
+              UI_CONFIG_DISABLED: "true"
+              # Metrics
+              METRICS_ENABLED: "true"
+              OTEL_METRICS_EXPORTER: prometheus
+              OTEL_EXPORTER_PROMETHEUS_HOST: 0.0.0.0
+              OTEL_EXPORTER_PROMETHEUS_PORT: &metricsPort 9464
+              # SMTP via maddy
+              SMTP_HOST: maddy.network.svc.cluster.local
+              SMTP_PORT: "25"
+              SMTP_FROM: noreply@zebernst.dev
+              SMTP_TLS: none
             envFrom: *envFrom
             probes:
               liveness:
@@ -64,6 +77,8 @@ spec:
         ports:
           http:
             port: &port 1411
+          metrics:
+            port: *metricsPort
 
     ingress:
       tailscale:
@@ -102,6 +117,16 @@ spec:
           - backendRefs:
               - name: *app
                 port: *port
+
+    serviceMonitor:
+      app:
+        serviceName: *app
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
 
     persistence:
       data:
