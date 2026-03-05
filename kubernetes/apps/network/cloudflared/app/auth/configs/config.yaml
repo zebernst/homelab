@@ -1,0 +1,8 @@
+---
+originRequest:
+  originServerName: "external-auth.zebernst.dev"
+
+ingress:
+  - hostname: "*.zebernst.dev"
+    service: https://cilium-gateway-external-auth.kube-system.svc.cluster.local
+  - service: http_status:404

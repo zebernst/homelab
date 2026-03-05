@@ -1,0 +1,10 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: cloudflared-auth
+spec:
+  endpoints:
+    - dnsName: "external-auth.zebernst.dev"
+      recordType: CNAME
+      targets: ["6827866d-5fbf-434e-89ca-c0d8e718534f.cfargotunnel.com"]

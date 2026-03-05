@@ -4,6 +4,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - external.yaml
+  - external-auth.yaml
   - internal.yaml
   - redirect.yaml
   - tailscale.yaml
