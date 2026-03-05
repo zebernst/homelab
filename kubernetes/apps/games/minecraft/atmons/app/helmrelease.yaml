@@ -40,7 +40,7 @@ spec:
               CF_SLUG: "all-the-mons"
               ICON: https://media.forgecdn.net/avatars/thumbnails/1567/555/64/64/639016249214580144.png
               MOTD: |
-                A server on %VERSION% running %MODPACK_NAME% v%MODPACK_VERSION%.
+                A %MODPACK_NAME% server running %MODPACK_VERSION%.
                 §oHosted on §dJupiter§r
               SERVER_NAME: *app
               DIFFICULTY: normal

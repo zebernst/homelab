@@ -40,7 +40,7 @@ spec:
               CF_SLUG: "all-the-mods-10"
               ICON: https://media.forgecdn.net/avatars/thumbnails/1182/438/64/64/638755918649288941.png
               MOTD: |
-                A server on %VERSION% running %MODPACK_NAME% v%MODPACK_VERSION%.
+                A %MODPACK_NAME% server running %MODPACK_VERSION%.
                 §oHosted on §dJupiter§r
               SERVER_NAME: *app
               DIFFICULTY: normal
