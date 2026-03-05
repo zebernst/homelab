@@ -44,6 +44,26 @@ spec:
               SMTP_PORT: "25"
               SMTP_FROM: noreply@zebernst.dev
               SMTP_TLS: none
+              # S3 file storage via Rook/Ceph
+              FILE_BACKEND: s3
+              S3_ENDPOINT: http://rook-ceph-rgw-ceph-objectstore.rook-ceph.svc.cluster.local
+              S3_REGION: us-east-1
+              S3_FORCE_PATH_STYLE: "true"
+              S3_BUCKET:
+                valueFrom:
+                  configMapKeyRef:
+                    name: pocket-id-bucket
+                    key: BUCKET_NAME
+              S3_ACCESS_KEY_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: pocket-id-bucket
+                    key: AWS_ACCESS_KEY_ID
+              S3_SECRET_ACCESS_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: pocket-id-bucket
+                    key: AWS_SECRET_ACCESS_KEY
               # Email notifications
               EMAIL_VERIFICATION_ENABLED: "true"
               EMAIL_ONE_TIME_ACCESS_AS_ADMIN_ENABLED: "true"
