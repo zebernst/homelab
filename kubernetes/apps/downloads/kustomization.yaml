@@ -18,6 +18,7 @@ resources:
   - qui/ks.yaml
   - radarr/ks.yaml
   - recyclarr/ks.yaml
+  - seasonpackerr/ks.yaml
   - sonarr/ks.yaml
   - unpackerr/ks.yaml
   - whisparr/ks.yaml
