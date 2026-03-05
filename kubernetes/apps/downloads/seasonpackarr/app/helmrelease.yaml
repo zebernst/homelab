@@ -30,7 +30,7 @@ spec:
               SEASONPACKARR__FUZZY_MATCHING_SKIP_REPACK_COMPARE: "true"
               SEASONPACKARR__CLIENTS_DEFAULT_HOST: qbittorrent.downloads.svc.cluster.local
               SEASONPACKARR__CLIENTS_DEFAULT_PORT: "80"
-              SEASONPACKARR__CLIENTS_DEFAULT_PREIMPORTPATH: /media/downloads/qbittorrent/complete/sonarr
+              SEASONPACKARR__CLIENTS_DEFAULT_PREIMPORTPATH: /media/downloads/qbittorrent/seeding/sonarr
               TZ: America/Chicago
             probes:
               liveness: &probes
