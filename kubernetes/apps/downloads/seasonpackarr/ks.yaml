@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app seasonpackerr
+  name: &app seasonpackarr
   namespace: &ns downloads
 spec:
   targetNamespace: *ns
@@ -15,7 +15,7 @@ spec:
       namespace: downloads
     - name: sonarr
       namespace: downloads
-  path: kubernetes/apps/downloads/seasonpackerr/app
+  path: kubernetes/apps/downloads/seasonpackarr/app
   prune: true
   sourceRef:
     kind: GitRepository
