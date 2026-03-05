@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app maddy
+  name: &app smtp-relay
 spec:
   interval: 30m
   chartRef:
@@ -14,41 +14,32 @@ spec:
   values:
     controllers:
       *app:
-        replicas: 1
+        replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           *app:
             image:
-              repository: docker.io/foxcpp/maddy
-              tag: 0.8
+              repository: ghcr.io/foxcpp/maddy
+              tag: 0.8.2
+            env:
+              SMTP_RELAY_METRICS_PORT: &metricsPort 8080
+              SMTP_RELAY_SMTP_PORT: &smtpPort 25
+              SMTP_RELAY_SERVER_PORT: 587
             envFrom:
               - secretRef:
-                  name: maddy-secret
+                  name: smtp-relay-secret
             probes:
               liveness:
                 enabled: true
-                custom: true
-                spec:
-                  tcpSocket:
-                    port: 25
-                  initialDelaySeconds: 10
-                  periodSeconds: 30
               readiness:
                 enabled: true
-                custom: true
-                spec:
-                  tcpSocket:
-                    port: 25
-                  initialDelaySeconds: 5
-                  periodSeconds: 10
             resources:
               requests:
-                cpu: 50m
-                memory: 128Mi
+                cpu: 10m
               limits:
-                memory: 256Mi
+                memory: 64Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -57,26 +48,24 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 568
-        runAsGroup: 568
-        fsGroup: 568
-        fsGroupChangePolicy: OnRootMismatch
+        runAsUser: 1000
+        runAsGroup: 1000
         seccompProfile: { type: RuntimeDefault }
 
     service:
       *app:
         controller: *app
         ports:
+          http:
+            port: *metricsPort
           smtp:
-            port: 25
-          metrics:
-            port: &metricsPort 9749
+            port: *smtpPort
 
     serviceMonitor:
       app:
         serviceName: *app
         endpoints:
-          - port: metrics
+          - port: http
             scheme: http
             path: /metrics
             interval: 1m
@@ -85,16 +74,13 @@ spec:
     persistence:
       config:
         type: configMap
-        name: maddy-configmap
+        name: smtp-relay-configmap
         globalMounts:
           - path: /data/maddy.conf
             subPath: maddy.conf
             readOnly: true
-      state:
+      cache:
         type: emptyDir
+        medium: Memory
         globalMounts:
-          - path: /var/lib/maddy
-      tmp:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
+          - path: /cache
