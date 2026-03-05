@@ -6,6 +6,7 @@ namespace: media
 components:
   - ../../components/common
 resources:
+  - agregarr/ks.yaml
   - booklore/ks.yaml
   - maintainerr/ks.yaml
   - overseerr/ks.yaml
