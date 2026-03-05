@@ -1,0 +1,45 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumEnvoyConfig
+metadata:
+  name: tinyauth-extauthz
+  namespace: auth
+spec:
+  services:
+    - name: cilium-gateway-external-auth
+      namespace: kube-system
+  resources:
+    - "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+      name: tinyauth_extauthz
+      connect_timeout: 1s
+      type: STRICT_DNS
+      load_assignment:
+        cluster_name: tinyauth_extauthz
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: tinyauth.auth.svc.cluster.local
+                      port_value: 3000
+    - "@type": type.googleapis.com/envoy.config.listener.v3.Listener
+      name: listener
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                http_filters:
+                  - name: envoy.filters.http.ext_authz
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
+                      http_service:
+                        server_uri:
+                          uri: http://tinyauth.auth.svc.cluster.local:3000
+                          cluster: tinyauth_extauthz
+                          timeout: 10s
+                        path_prefix: /api/auth/envoy?path=
+                      failure_mode_allow: false
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
