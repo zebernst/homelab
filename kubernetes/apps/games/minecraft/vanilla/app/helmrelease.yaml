@@ -172,6 +172,14 @@ spec:
               - path: /app/web
             bluemap:
               - path: /app/web
+              - path: /app/bluemap
+                subPath: vanilla-state
+      bluemap-cache:
+        type: emptyDir
+        advancedMounts:
+          *app:
+            bluemap:
+              - path: /app/data
       bluemap-configs-source:
         type: configMap
         name: vanilla-bluemap-configs

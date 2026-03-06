@@ -18,3 +18,24 @@ configMapGenerator:
   - name: bluemap-settings
     files:
       - settings.json
+  - name: bluemap-maps
+    files:
+      - ../../atm10/app/bluemap/maps/atm10-overworld.conf
+      - ../../atm10/app/bluemap/maps/atm10-nether.conf
+      - ../../atm10/app/bluemap/maps/atm10-end.conf
+      - ../../atm10/app/bluemap/maps/atm10-aether.conf
+      - ../../atm10/app/bluemap/maps/atm10-twilight-forest.conf
+      - ../../atm10/app/bluemap/maps/atm10-undergarden.conf
+      - ../../atm10/app/bluemap/maps/atm10-bumblezone.conf
+      - ../../atm10/app/bluemap/maps/atm10-eternal-starlight.conf
+      - ../../atm10/app/bluemap/maps/atm10-deeper-darker.conf
+      - ../../atm10/app/bluemap/maps/atm10-ice-and-fire.conf
+      - ../../atm10/app/bluemap/maps/atm10-allthemodium-mining.conf
+      - ../../atm10/app/bluemap/maps/atm10-allthemodium-other.conf
+      - ../../atm10/app/bluemap/maps/atm10-allthemodium-beyond.conf
+      - ../../atmons/app/bluemap/maps/atmons-overworld.conf
+      - ../../atmons/app/bluemap/maps/atmons-nether.conf
+      - ../../atmons/app/bluemap/maps/atmons-end.conf
+      - ../../vanilla/app/bluemap/maps/vanilla-overworld.conf
+      - ../../vanilla/app/bluemap/maps/vanilla-nether.conf
+      - ../../vanilla/app/bluemap/maps/vanilla-end.conf

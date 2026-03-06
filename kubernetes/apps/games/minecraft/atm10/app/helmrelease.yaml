@@ -171,6 +171,14 @@ spec:
               - path: /app/web
             bluemap:
               - path: /app/web
+              - path: /app/bluemap
+                subPath: atm10-state
+      bluemap-cache:
+        type: emptyDir
+        advancedMounts:
+          *app:
+            bluemap:
+              - path: /app/data
       bluemap-configs-source:
         type: configMap
         name: atm10-bluemap-configs

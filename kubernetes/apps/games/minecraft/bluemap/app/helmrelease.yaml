@@ -25,6 +25,8 @@ spec:
             args:
               - |
                 cp /configs-source/*.conf /app/config/
+                mkdir -p /app/config/maps
+                cp /maps-source/*.conf /app/config/maps/
                 cp /settings-source/settings.json /app/web/settings.json
         containers:
           *app:
@@ -42,8 +44,8 @@ spec:
                   httpGet:
                     path: /
                     port: 8100
-                  initialDelaySeconds: 30
-                  periodSeconds: 30
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
                   failureThreshold: 5
               readiness:
                 enabled: true
@@ -52,7 +54,7 @@ spec:
                   httpGet:
                     path: /
                     port: 8100
-                  initialDelaySeconds: 30
+                  initialDelaySeconds: 5
                   periodSeconds: 10
                   failureThreshold: 3
             securityContext:
@@ -117,6 +119,14 @@ spec:
           *app:
             init-config:
               - path: /settings-source
+                readOnly: true
+      maps-source:
+        type: configMap
+        name: bluemap-maps
+        advancedMounts:
+          *app:
+            init-config:
+              - path: /maps-source
                 readOnly: true
       config:
         type: emptyDir
