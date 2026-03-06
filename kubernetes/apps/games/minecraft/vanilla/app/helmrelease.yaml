@@ -17,14 +17,6 @@ spec:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-bluemap-config:
-            image:
-              repository: busybox
-              tag: latest
-            command: ["sh", "-c"]
-            args:
-              - cp /config-source/*.conf /app/config/
         containers:
           *app:
             image:
@@ -97,21 +89,39 @@ spec:
                 memory: 32Mi
               limits:
                 memory: 64Mi
+      bluemap:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-config:
+            image:
+              repository: busybox
+              tag: latest
+            command: ["sh", "-c"]
+            args:
+              - |
+                cp /configs-source/*.conf /app/config/
+                mkdir -p /app/config/maps
+                cp /maps-source/*.conf /app/config/maps/
+        containers:
           bluemap:
             image:
               repository: ghcr.io/bluemap-minecraft/bluemap
               tag: v5.13
             args: ["-r", "-u", "-w"]
+            env:
+              JAVA_TOOL_OPTIONS: "-Xmx1G"
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
               capabilities: { drop: ["ALL"] }
             resources:
               requests:
-                cpu: 250m
+                cpu: 100m
                 memory: 512Mi
               limits:
-                memory: 1Gi
+                memory: 1536Mi
+
     defaultPodOptions:
       priorityClassName: best-effort
       securityContext:
@@ -120,8 +130,10 @@ spec:
         runAsGroup: 568
         fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
+
     service:
       *app:
+        controller: *app
         annotations:
           mc-router.itzg.me/defaultServer: "true"
           mc-router.itzg.me/autoScaleUp: "true"
@@ -131,11 +143,6 @@ spec:
             port: 25565
           metrics:
             port: 8080
-      map:
-        controller: *app
-        ports:
-          http:
-            port: 8100
       rcon:
         controller: *app
         type: LoadBalancer
@@ -145,38 +152,7 @@ spec:
         ports:
           rcon:
             port: 25578
-    route:
-      map:
-        hostnames: ["worldmap.zebernst.dev"]
-        parentRefs:
-          - name: external
-            namespace: kube-system
-            sectionName: https
-        rules:
-          - matches:
-              - path:
-                  type: Exact
-                  value: /vanilla
-            filters:
-              - type: RequestRedirect
-                requestRedirect:
-                  path:
-                    type: ReplaceFullPath
-                    replaceFullPath: /vanilla/
-                  statusCode: 301
-          - matches:
-              - path:
-                  type: PathPrefix
-                  value: /vanilla/
-            filters:
-              - type: URLRewrite
-                urlRewrite:
-                  path:
-                    type: ReplacePrefixMatch
-                    replacePrefixMatch: /
-            backendRefs:
-              - name: vanilla-map
-                port: 8100
+
     persistence:
       tmp:
         type: emptyDir
@@ -190,34 +166,48 @@ spec:
           *app:
             *app:
               - path: /data
+          bluemap:
             bluemap:
-              - path: /app/world
+              - path: /worlds/world
                 subPath: world
                 readOnly: true
-      bluemap-config-source:
-        type: configMap
-        name: vanilla-bluemap-config
+      bluemap-shared:
+        existingClaim: bluemap-shared
         advancedMounts:
-          *app:
-            init-bluemap-config:
-              - path: /config-source
+          bluemap:
+            bluemap:
+              - path: /app/web
+      bluemap-configs-source:
+        type: configMap
+        name: vanilla-bluemap-configs
+        advancedMounts:
+          bluemap:
+            init-config:
+              - path: /configs-source
+                readOnly: true
+      bluemap-maps-source:
+        type: configMap
+        name: vanilla-bluemap-maps
+        advancedMounts:
+          bluemap:
+            init-config:
+              - path: /maps-source
                 readOnly: true
       bluemap-config:
         type: emptyDir
         advancedMounts:
-          *app:
-            init-bluemap-config:
+          bluemap:
+            init-config:
               - path: /app/config
             bluemap:
               - path: /app/config
-      bluemap-cache:
+      bluemap-tmp:
         type: emptyDir
         advancedMounts:
-          *app:
+          bluemap:
             bluemap:
-              - path: /app/bluemap
-              - path: /app/web
-              - path: /app/data
+              - path: /tmp
+
     serviceMonitor:
       *app:
         serviceName: *app

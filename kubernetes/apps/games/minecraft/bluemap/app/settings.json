@@ -1,0 +1,25 @@
+{
+  "maps": [
+    "atm10-overworld",
+    "atm10-nether",
+    "atm10-end",
+    "atm10-aether",
+    "atm10-twilight-forest",
+    "atm10-undergarden",
+    "atm10-bumblezone",
+    "atm10-eternal-starlight",
+    "atm10-deeper-darker",
+    "atm10-ice-and-fire",
+    "atm10-allthemodium-mining",
+    "atm10-allthemodium-other",
+    "atm10-allthemodium-beyond",
+    "atmons-overworld",
+    "atmons-nether",
+    "atmons-end",
+    "vanilla-overworld",
+    "vanilla-nether",
+    "vanilla-end"
+  ],
+  "scripts": [],
+  "styles": []
+}

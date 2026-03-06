@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - pvc.yaml
+  - helmrelease.yaml
+components:
+  - ../../../../../components/gatus
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: bluemap-configs
+    files:
+      - configs/core.conf
+      - configs/webapp.conf
+      - configs/webserver.conf
+  - name: bluemap-settings
+    files:
+      - settings.json

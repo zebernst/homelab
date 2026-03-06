@@ -13,6 +13,8 @@ spec:
   components:
     - ../../../../../components/volsync
   dependsOn:
+    - name: bluemap
+      namespace: games
     - name: onepassword
       namespace: external-secrets
     - name: rook-ceph-cluster

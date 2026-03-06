@@ -9,26 +9,26 @@ resources:
 generatorOptions:
   disableNameSuffixHash: true
 configMapGenerator:
-  - name: atm10-bluemap-config
+  - name: atm10-bluemap-configs
     files:
       - bluemap/core.conf
       - bluemap/webapp.conf
       - bluemap/webserver.conf
   - name: atm10-bluemap-maps
     files:
-      - bluemap/maps/overworld.conf
-      - bluemap/maps/nether.conf
-      - bluemap/maps/end.conf
-      - bluemap/maps/aether.conf
-      - bluemap/maps/twilight-forest.conf
-      - bluemap/maps/undergarden.conf
-      - bluemap/maps/bumblezone.conf
-      - bluemap/maps/eternal-starlight.conf
-      - bluemap/maps/deeper-darker.conf
-      - bluemap/maps/ice-and-fire.conf
-      - bluemap/maps/allthemodium-mining.conf
-      - bluemap/maps/allthemodium-other.conf
-      - bluemap/maps/allthemodium-beyond.conf
+      - bluemap/maps/atm10-overworld.conf
+      - bluemap/maps/atm10-nether.conf
+      - bluemap/maps/atm10-end.conf
+      - bluemap/maps/atm10-aether.conf
+      - bluemap/maps/atm10-twilight-forest.conf
+      - bluemap/maps/atm10-undergarden.conf
+      - bluemap/maps/atm10-bumblezone.conf
+      - bluemap/maps/atm10-eternal-starlight.conf
+      - bluemap/maps/atm10-deeper-darker.conf
+      - bluemap/maps/atm10-ice-and-fire.conf
+      - bluemap/maps/atm10-allthemodium-mining.conf
+      - bluemap/maps/atm10-allthemodium-other.conf
+      - bluemap/maps/atm10-allthemodium-beyond.conf
   - name: atm10-gatus-ep
     files:
       - config.yaml=gatus-config.yaml

@@ -8,11 +8,16 @@ resources:
 generatorOptions:
   disableNameSuffixHash: true
 configMapGenerator:
-  - name: vanilla-bluemap-config
+  - name: vanilla-bluemap-configs
     files:
       - bluemap/core.conf
       - bluemap/webapp.conf
       - bluemap/webserver.conf
+  - name: vanilla-bluemap-maps
+    files:
+      - bluemap/maps/vanilla-overworld.conf
+      - bluemap/maps/vanilla-nether.conf
+      - bluemap/maps/vanilla-end.conf
   - name: vanilla-gatus-ep
     files:
       - config.yaml=gatus-config.yaml

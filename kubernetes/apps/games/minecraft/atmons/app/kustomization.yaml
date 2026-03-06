@@ -9,16 +9,16 @@ resources:
 generatorOptions:
   disableNameSuffixHash: true
 configMapGenerator:
-  - name: atmons-bluemap-config
+  - name: atmons-bluemap-configs
     files:
       - bluemap/core.conf
       - bluemap/webapp.conf
       - bluemap/webserver.conf
   - name: atmons-bluemap-maps
     files:
-      - bluemap/maps/overworld.conf
-      - bluemap/maps/nether.conf
-      - bluemap/maps/end.conf
+      - bluemap/maps/atmons-overworld.conf
+      - bluemap/maps/atmons-nether.conf
+      - bluemap/maps/atmons-end.conf
   - name: atmons-gatus-ep
     files:
       - config.yaml=gatus-config.yaml

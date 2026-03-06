@@ -5,5 +5,6 @@ kind: Kustomization
 resources:
   - atm10/ks.yaml
   - atmons/ks.yaml
+  - bluemap/ks.yaml
   - router/ks.yaml
   - vanilla/ks.yaml
