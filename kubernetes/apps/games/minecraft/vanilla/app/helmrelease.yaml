@@ -17,6 +17,17 @@ spec:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          init-bluemap-config:
+            image:
+              repository: busybox
+              tag: latest
+            command: ["sh", "-c"]
+            args:
+              - |
+                cp /configs-source/*.conf /app/config/
+                mkdir -p /app/config/maps
+                cp /maps-source/*.conf /app/config/maps/
         containers:
           *app:
             image:
@@ -89,21 +100,6 @@ spec:
                 memory: 32Mi
               limits:
                 memory: 64Mi
-      bluemap:
-        annotations:
-          reloader.stakater.com/auto: "true"
-        initContainers:
-          init-config:
-            image:
-              repository: busybox
-              tag: latest
-            command: ["sh", "-c"]
-            args:
-              - |
-                cp /configs-source/*.conf /app/config/
-                mkdir -p /app/config/maps
-                cp /maps-source/*.conf /app/config/maps/
-        containers:
           bluemap:
             image:
               repository: ghcr.io/bluemap-minecraft/bluemap
@@ -133,7 +129,6 @@ spec:
 
     service:
       *app:
-        controller: *app
         annotations:
           mc-router.itzg.me/defaultServer: "true"
           mc-router.itzg.me/autoScaleUp: "true"
@@ -166,47 +161,41 @@ spec:
           *app:
             *app:
               - path: /data
-          bluemap:
             bluemap:
-              - path: /worlds/world
-                subPath: world
+              - path: /data
                 readOnly: true
       bluemap-shared:
         existingClaim: bluemap-shared
         advancedMounts:
-          bluemap:
+          *app:
+            init-bluemap-config:
+              - path: /app/web
             bluemap:
               - path: /app/web
       bluemap-configs-source:
         type: configMap
         name: vanilla-bluemap-configs
         advancedMounts:
-          bluemap:
-            init-config:
+          *app:
+            init-bluemap-config:
               - path: /configs-source
                 readOnly: true
       bluemap-maps-source:
         type: configMap
         name: vanilla-bluemap-maps
         advancedMounts:
-          bluemap:
-            init-config:
+          *app:
+            init-bluemap-config:
               - path: /maps-source
                 readOnly: true
       bluemap-config:
         type: emptyDir
         advancedMounts:
-          bluemap:
-            init-config:
+          *app:
+            init-bluemap-config:
               - path: /app/config
             bluemap:
               - path: /app/config
-      bluemap-tmp:
-        type: emptyDir
-        advancedMounts:
-          bluemap:
-            bluemap:
-              - path: /tmp
 
     serviceMonitor:
       *app:
