@@ -10,7 +10,7 @@ resources:
   - certificate.yaml
 images:
   - name: quay.io/medik8s/self-node-remediation-operator
-    newTag: v0.11.0
+    newTag: v0.12.0
 patches:
   # Fix unresolved ${IMG} env var used to create the agent DaemonSet
   # Mount webhook TLS cert from cert-manager
@@ -30,7 +30,7 @@ patches:
                 env:
                   - name: SELF_NODE_REMEDIATION_IMAGE
                     # renovate: datasource=docker depName=quay.io/medik8s/self-node-remediation-operator
-                    value: quay.io/medik8s/self-node-remediation-operator:v0.11.0
+                    value: quay.io/medik8s/self-node-remediation-operator:v0.12.0
                 volumeMounts:
                   - name: webhook-cert
                     mountPath: /tmp/k8s-webhook-server/serving-certs
