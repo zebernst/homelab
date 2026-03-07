@@ -3,11 +3,6 @@ KUBECONFIG = "{{config_root}}/kubernetes/kubeconfig"
 MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 TALOSCONFIG = "{{config_root}}/talos/talosconfig"
 
-# Included file paths
-_.file = [
-  "{{config_root}}/kubernetes/apps/system-upgrade/versions.env"
-]
-
 [tools]
 1password-cli = "latest"
 age = "latest"
