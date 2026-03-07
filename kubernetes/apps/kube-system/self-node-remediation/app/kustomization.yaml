@@ -5,7 +5,7 @@ kind: Kustomization
 namespace: kube-system
 resources:
   # renovate: datasource=github-releases depName=medik8s/self-node-remediation
-  - https://github.com/medik8s/self-node-remediation/config/default?ref=v0.11.0
+  - https://github.com/medik8s/self-node-remediation/config/default?ref=v0.12.0
   - template.yaml
   - certificate.yaml
 images:
