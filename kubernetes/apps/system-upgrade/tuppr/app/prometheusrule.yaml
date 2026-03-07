@@ -1,0 +1,38 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: tuppr-rules
+  labels:
+    prometheus: k8s
+    role: alert-rules
+spec:
+  groups:
+    - name: tuppr.rules
+      rules:
+        - alert: TupprUpgradeFailed
+          annotations:
+            description: Tuppr upgrade {{ $labels.name }} is in a failed state.
+            summary: Tuppr upgrade failed
+          expr: tuppr_talos_upgrade_phase{phase="Failed"} == 3
+          labels:
+            severity: critical
+        - alert: TupprUpgradeStuck
+          annotations:
+            description: Tuppr upgrade {{ $labels.name }} has been in progress for 30m with no node completions.
+            summary: Tuppr upgrade appears stuck
+          expr: |
+            tuppr_talos_upgrade_phase{phase="InProgress"} == 1
+            and increase(tuppr_talos_upgrade_nodes_completed[30m]) == 0
+          for: 30m
+          labels:
+            severity: warning
+        - alert: TupprHealthCheckFailing
+          annotations:
+            description: Tuppr health checks are failing at a high rate, blocking upgrades.
+            summary: Tuppr health checks failing
+          expr: rate(tuppr_health_check_failures_total[5m]) > 0.1
+          for: 2m
+          labels:
+            severity: warning
