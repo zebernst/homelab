@@ -12,6 +12,8 @@ spec:
   healthChecks:
     - apiVersion: ceph.rook.io/v1
       kind: CephCluster
+      name: rook-ceph
+      namespace: rook-ceph
       expr: status.ceph.health in ['HEALTH_OK']
     - apiVersion: volsync.backube/v1alpha1
       kind: ReplicationSource

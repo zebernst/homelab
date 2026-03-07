@@ -14,5 +14,12 @@
       matchUpdateTypes: ["digest"],
       schedule: ["every 3 months on the first day of the month"],
     },
+    {
+      description: ["Separate minor and patch updates for Talos to enforce safe upgrade paths"],
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/siderolabs/installer", "ghcr.io/siderolabs/kubelet"],
+      separateMajorMinor: true,
+      separateMinorPatch: true,
+    },
   ],
 }
