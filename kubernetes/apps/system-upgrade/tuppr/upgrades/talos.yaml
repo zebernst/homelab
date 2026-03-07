@@ -15,6 +15,11 @@ spec:
       name: rook-ceph
       namespace: rook-ceph
       expr: status.ceph.health in ['HEALTH_OK']
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      name: redspot
+      namespace: database
+      expr: status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
     - apiVersion: v1
       kind: Node
       expr: |
