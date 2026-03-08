@@ -145,7 +145,7 @@ cluster:
   allowSchedulingOnControlPlanes: true
   apiServer:
     # renovate: datasource=docker depName=registry.k8s.io/kube-apiserver
-    image: registry.k8s.io/kube-apiserver:v1.34.5
+    image: registry.k8s.io/kube-apiserver:v1.35.2
     extraArgs:
       enable-aggregator-routing: true
       feature-gates: UserNamespacesSupport=true,UserNamespacesPodSecurityStandards=true
@@ -153,7 +153,7 @@ cluster:
     disablePodSecurityPolicy: true
   controllerManager:
     # renovate: datasource=docker depName=registry.k8s.io/kube-controller-manager
-    image: registry.k8s.io/kube-controller-manager:v1.34.5
+    image: registry.k8s.io/kube-controller-manager:v1.35.2
     extraArgs:
       bind-address: 0.0.0.0
   coreDNS:
@@ -168,11 +168,11 @@ cluster:
   proxy:
     disabled: true
     # renovate: datasource=docker depName=registry.k8s.io/kube-proxy
-    image: registry.k8s.io/kube-proxy:v1.34.5
+    image: registry.k8s.io/kube-proxy:v1.35.2
   secretboxEncryptionSecret: op://Secrets/talos/CLUSTER_SECRETBOX_ENCRYPTION_SECRET
   scheduler:
     # renovate: datasource=docker depName=registry.k8s.io/kube-scheduler
-    image: registry.k8s.io/kube-scheduler:v1.34.5
+    image: registry.k8s.io/kube-scheduler:v1.35.2
     extraArgs:
       bind-address: 0.0.0.0
     config:
