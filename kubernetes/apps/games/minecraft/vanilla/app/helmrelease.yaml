@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      vanilla:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
@@ -29,7 +29,7 @@ spec:
                 mkdir -p /app/config/maps
                 cp /maps-source/*.conf /app/config/maps/
         containers:
-          *app:
+          vanilla:
             image:
               repository: ghcr.io/itzg/minecraft-server
               tag: 2026.2.1-java21
@@ -128,7 +128,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
 
     service:
-      *app:
+      vanilla:
         annotations:
           mc-router.itzg.me/defaultServer: "true"
           mc-router.itzg.me/autoScaleUp: "true"
@@ -152,14 +152,14 @@ spec:
       tmp:
         type: emptyDir
         advancedMounts:
-          *app:
-            *app:
+          vanilla:
+            vanilla:
               - path: /tmp
       data:
         existingClaim: *app
         advancedMounts:
-          *app:
-            *app:
+          vanilla:
+            vanilla:
               - path: /data
             bluemap:
               - path: /data
@@ -167,7 +167,7 @@ spec:
       bluemap-shared:
         existingClaim: bluemap-shared
         advancedMounts:
-          *app:
+          vanilla:
             init-bluemap-config:
               - path: /app/web
             bluemap:
@@ -177,14 +177,14 @@ spec:
       bluemap-cache:
         type: emptyDir
         advancedMounts:
-          *app:
+          vanilla:
             bluemap:
               - path: /app/data
       bluemap-configs-source:
         type: configMap
         name: vanilla-bluemap-configs
         advancedMounts:
-          *app:
+          vanilla:
             init-bluemap-config:
               - path: /configs-source
                 readOnly: true
@@ -192,21 +192,21 @@ spec:
         type: configMap
         name: vanilla-bluemap-maps
         advancedMounts:
-          *app:
+          vanilla:
             init-bluemap-config:
               - path: /maps-source
                 readOnly: true
       bluemap-config:
         type: emptyDir
         advancedMounts:
-          *app:
+          vanilla:
             init-bluemap-config:
               - path: /app/config
             bluemap:
               - path: /app/config
 
     serviceMonitor:
-      *app:
+      vanilla:
         serviceName: *app
         endpoints:
           - port: metrics

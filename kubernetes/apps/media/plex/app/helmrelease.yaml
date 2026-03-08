@@ -16,11 +16,11 @@ spec:
 
   values:
     controllers:
-      *app:
+      plex:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          plex:
             image:
               repository: ghcr.io/home-operations/plex
               tag: 1.43@sha256:8cb062f2b0660bd7811387e6c799da0ce5f18112078fe21485c11adcc83a9c1c
@@ -69,7 +69,7 @@ spec:
       nodeSelector:
         intel.feature.node.kubernetes.io/gpu: "true"
     service:
-      *app:
+      plex:
         type: LoadBalancer
         annotations:
           lbipam.cilium.io/ips: 192.168.20.5, ::ffff:c0a8:1405
@@ -86,7 +86,7 @@ spec:
           http:
             port: *port
     route:
-      *app:
+      plex:
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"
         parentRefs:

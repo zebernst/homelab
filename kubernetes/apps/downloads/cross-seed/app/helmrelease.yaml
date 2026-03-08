@@ -16,12 +16,12 @@ spec:
 
   values:
     controllers:
-      *app:
+      cross-seed:
         annotations:
           reloader.stakater.com/auto: "true"
 
         containers:
-          *app:
+          cross-seed:
             image:
               repository: ghcr.io/cross-seed/cross-seed
               tag: 6.13.3@sha256:81afafdd96a5dd2c8e485a03e9d61ec07ceb051c4c950071497c44f8ceb5169f
@@ -68,7 +68,7 @@ spec:
         supplementalGroups: [65568]
 
     service:
-      *app:
+      cross-seed:
         controller: *app
         ports:
           http:

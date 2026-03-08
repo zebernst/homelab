@@ -13,11 +13,11 @@ spec:
 
   values:
     controllers:
-      *app:
+      tautulli:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          tautulli:
             image:
               repository: ghcr.io/tautulli/tautulli
               tag: v2.16.0@sha256:7e6ede32f7923e01899db906aa6a96d978a4a8df8e2ef0dcf44c92b2d0206221
@@ -60,7 +60,7 @@ spec:
         fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
     service:
-      *app:
+      tautulli:
         controller: *app
         ports:
           http:
@@ -79,7 +79,7 @@ spec:
           - hosts:
               - *tsHost
     route:
-      *app:
+      tautulli:
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"
         parentRefs:

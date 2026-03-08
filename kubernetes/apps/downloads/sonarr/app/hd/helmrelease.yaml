@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      sonarr:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -25,7 +25,7 @@ spec:
               - secretRef:
                   name: sonarr-secret
         containers:
-          *app:
+          sonarr:
             image:
               repository: ghcr.io/home-operations/sonarr
               tag: 4.0.16.2946@sha256:22651c750eedb091f6d76ade95dbecae0eeafe2b55432c3b8d8b042e8745f344
@@ -100,7 +100,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [65568]
     service:
-      *app:
+      sonarr:
         controller: *app
         forceRename: *app
         ports:

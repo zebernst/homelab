@@ -13,12 +13,12 @@ spec:
 
   values:
     controllers:
-      *app:
+      tinyauth:
         annotations:
           reloader.stakater.com/auto: "true"
 
         containers:
-          *app:
+          tinyauth:
             image:
               repository: ghcr.io/steveiliop56/tinyauth
               tag: v5
@@ -55,7 +55,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
 
     service:
-      *app:
+      tinyauth:
         controller: *app
         ports:
           http:

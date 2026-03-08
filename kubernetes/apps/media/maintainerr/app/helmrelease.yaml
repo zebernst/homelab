@@ -13,11 +13,11 @@ spec:
 
   values:
     controllers:
-      *app:
+      maintainerr:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          maintainerr:
             image:
               repository: ghcr.io/jorenn92/maintainerr
               tag: 2.18.1
@@ -48,7 +48,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
 
     service:
-      *app:
+      maintainerr:
         controller: *app
         ports:
           http:

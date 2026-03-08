@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      bluemap:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -29,7 +29,7 @@ spec:
                 cp /maps-source/*.conf /app/config/maps/
                 cp /settings-source/settings.json /app/web/settings.json
         containers:
-          *app:
+          bluemap:
             image:
               repository: ghcr.io/bluemap-minecraft/bluemap
               tag: v5.13
@@ -77,7 +77,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
 
     service:
-      *app:
+      bluemap:
         controller: *app
         ports:
           http:
@@ -99,16 +99,16 @@ spec:
       web:
         existingClaim: bluemap-shared
         advancedMounts:
-          *app:
+          bluemap:
             init-config:
               - path: /app/web
-            *app:
+            bluemap:
               - path: /app/web
       configs-source:
         type: configMap
         name: bluemap-configs
         advancedMounts:
-          *app:
+          bluemap:
             init-config:
               - path: /configs-source
                 readOnly: true
@@ -116,7 +116,7 @@ spec:
         type: configMap
         name: bluemap-settings
         advancedMounts:
-          *app:
+          bluemap:
             init-config:
               - path: /settings-source
                 readOnly: true
@@ -124,17 +124,17 @@ spec:
         type: configMap
         name: bluemap-maps
         advancedMounts:
-          *app:
+          bluemap:
             init-config:
               - path: /maps-source
                 readOnly: true
       config:
         type: emptyDir
         advancedMounts:
-          *app:
+          bluemap:
             init-config:
               - path: /app/config
-            *app:
+            bluemap:
               - path: /app/config
       tmp:
         type: emptyDir

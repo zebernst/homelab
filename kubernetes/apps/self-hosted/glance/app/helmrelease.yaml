@@ -13,11 +13,11 @@ spec:
 
   values:
     controllers:
-      *app:
+      glance:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          glance:
             image:
               repository: glanceapp/glance
               tag: v0.8.4@sha256:6df86a7e8868d1eda21f35205134b1962c422957e42a0c44d4717c8e8f741b1a
@@ -83,7 +83,7 @@ spec:
         runAsUser: 568
         runAsGroup: 568
     service:
-      *app:
+      glance:
         controller: *app
         ports:
           http:
@@ -91,7 +91,7 @@ spec:
           ext-k8s:
             port: 8080
     route:
-      *app:
+      glance:
         hostnames:
           - glance.zebernst.dev
         parentRefs:
@@ -115,7 +115,7 @@ spec:
         globalMounts:
           - path: /tmp
     serviceAccount:
-      *app:
+      glance:
         enabled: true
     rbac:
       roles:

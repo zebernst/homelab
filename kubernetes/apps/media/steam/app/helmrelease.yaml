@@ -13,11 +13,11 @@ spec:
 
   values:
     controllers:
-      *app:
+      steam:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          steam:
             image:
               repository: josh5/steam-headless
               tag: latest@sha256:fc2c681b46cec608411dbed0a879c5084a372aec91c16885c050bea9bd355f92
@@ -64,7 +64,7 @@ spec:
           operator: Exists
           effect: NoSchedule
     service:
-      *app:
+      steam:
         controller: *app
         type: LoadBalancer
         annotations:

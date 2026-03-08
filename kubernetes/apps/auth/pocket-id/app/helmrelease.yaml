@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      pocket-id:
         annotations:
           reloader.stakater.com/auto: "true"
 
@@ -27,7 +27,7 @@ spec:
                   name: pocket-id-secret
 
         containers:
-          *app:
+          pocket-id:
             image:
               repository: ghcr.io/pocket-id/pocket-id
               tag: v2
@@ -99,7 +99,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
 
     service:
-      *app:
+      pocket-id:
         controller: *app
         ports:
           http:

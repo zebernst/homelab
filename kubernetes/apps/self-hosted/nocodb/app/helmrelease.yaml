@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      nocodb:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -25,7 +25,7 @@ spec:
               - secretRef:
                   name: nocodb-secret
         containers:
-          *app:
+          nocodb:
             image:
               repository: docker.io/nocodb/nocodb
               tag: 0.301.2@sha256:d3aba4f7e89bd18fc01d6853eea0fa82476b161a678f7f0ff52380f4c52bb87f
@@ -50,7 +50,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [ 65568 ]
     service:
-      *app:
+      nocodb:
         controller: *app
         ports:
           http:
@@ -72,6 +72,6 @@ spec:
       data:
         existingClaim: *app
         advancedMounts:
-          *app:
-            *app:
+          nocodb:
+            nocodb:
               - path: /usr/app/data

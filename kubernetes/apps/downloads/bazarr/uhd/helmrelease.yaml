@@ -13,11 +13,11 @@ spec:
 
   values:
     controllers:
-      *app:
+      bazarr-uhd:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          bazarr-uhd:
             image:
               repository: ghcr.io/home-operations/bazarr
               tag: 1.5.6@sha256:281a0199110fc02f6a28f32f6b3b1e306126bd2cc9626f9be84b67766d958706
@@ -101,7 +101,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [65568]
     service:
-      *app:
+      bazarr-uhd:
         controller: *app
         forceRename: *app
         ports:

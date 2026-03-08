@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      radarr-uhd:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -25,7 +25,7 @@ spec:
               - secretRef:
                   name: &secretName radarr-uhd-secret
         containers:
-          *app:
+          radarr-uhd:
             image:
               repository: ghcr.io/home-operations/radarr
               tag: 5.28.0.10205@sha256:80dec94f1eea0715471853011efdf2c49cf92f8fe3b17b722ad8f8a637e3fead
@@ -102,7 +102,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [65568]
     service:
-      *app:
+      radarr-uhd:
         controller: *app
         forceRename: *app
         ports:

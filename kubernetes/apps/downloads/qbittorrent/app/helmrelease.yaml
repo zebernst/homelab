@@ -13,11 +13,11 @@ spec:
 
   values:
     controllers:
-      *app:
+      qbittorrent:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          qbittorrent:
             image:
               repository: ghcr.io/home-operations/qbittorrent
               tag: 5.1.4@sha256:56ecd30a7f5e1357daf5eea2a6935134d329b7b268a3a9b9c67041b65fb87fc6
@@ -72,7 +72,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [ 65568 ]
     service:
-      *app:
+      qbittorrent:
         controller: *app
         forceRename: *app
         ports:
@@ -108,16 +108,16 @@ spec:
         name: qbittorrent-scripts
         defaultMode: 0775
         advancedMounts:
-          *app:
-            *app:
+          qbittorrent:
+            qbittorrent:
               - path: /scripts
       downloads:
         type: nfs
         server: nas.internal
         path: /volume1/media
         advancedMounts:
-          *app:
-            *app:
+          qbittorrent:
+            qbittorrent:
               - path: /media/downloads/qbittorrent
                 subPath: downloads/qbittorrent
               - path: /media/bookdrop

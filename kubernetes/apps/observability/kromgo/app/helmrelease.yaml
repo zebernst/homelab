@@ -13,13 +13,13 @@ spec:
 
   values:
     controllers:
-      *app:
+      kromgo:
         replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          kromgo:
             image:
               repository: ghcr.io/kashalls/kromgo
               tag: v0.7.1@sha256:d8fca4ff9b696abc4ca019c76fa629c39e844e4d9435f4afac87a97b1eeae152
@@ -56,7 +56,7 @@ spec:
         runAsUser: 568
         runAsGroup: 568
     service:
-      *app:
+      kromgo:
         controller: *app
         ports:
           http:

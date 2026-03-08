@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      paperless:
 
         annotations:
           reloader.stakater.com/auto: "true"
@@ -28,7 +28,7 @@ spec:
                   name: paperless-secret
 
         containers:
-          *app:
+          paperless:
             image:
               repository: ghcr.io/paperless-ngx/paperless-ngx
               tag: 2.17.1
@@ -114,7 +114,7 @@ spec:
         supplementalGroups: [ 65568 ]
 
     service:
-      *app:
+      paperless:
         controller: *app
         ports:
           http:

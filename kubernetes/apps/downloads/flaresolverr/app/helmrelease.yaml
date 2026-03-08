@@ -13,13 +13,13 @@ spec:
 
   values:
     controllers:
-      *app:
+      flaresolverr:
         replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          flaresolverr:
             image:
               repository: ghcr.io/flaresolverr/flaresolverr
               tag: v3.3.25
@@ -30,7 +30,7 @@ spec:
     defaultPodOptions:
       priorityClassName: background
     service:
-      *app:
+      flaresolverr:
         controller: *app
         type: ClusterIP
         ports:

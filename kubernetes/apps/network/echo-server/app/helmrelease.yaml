@@ -13,10 +13,10 @@ spec:
 
   values:
     controllers:
-      *app:
+      echo-server:
         strategy: RollingUpdate
         containers:
-          *app:
+          echo-server:
             image:
               repository: ghcr.io/mendhak/http-https-echo
               tag: 37
@@ -53,7 +53,7 @@ spec:
         runAsUser: 568
         runAsGroup: 568
     service:
-      *app:
+      echo-server:
         controller: *app
         ports:
           http:

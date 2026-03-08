@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      atmons:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
@@ -29,7 +29,7 @@ spec:
                 mkdir -p /app/config/maps
                 cp /maps-source/*.conf /app/config/maps/
         containers:
-          *app:
+          atmons:
             image:
               repository: ghcr.io/itzg/minecraft-server
               tag: 2026.2.1-java21
@@ -128,7 +128,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
 
     service:
-      *app:
+      atmons:
         annotations:
           mc-router.itzg.me/externalServerName: "atmons.zebernst.dev"
           mc-router.itzg.me/autoScaleUp: "true"
@@ -152,14 +152,14 @@ spec:
       tmp:
         type: emptyDir
         advancedMounts:
-          *app:
-            *app:
+          atmons:
+            atmons:
               - path: /tmp
       data:
         existingClaim: *app
         advancedMounts:
-          *app:
-            *app:
+          atmons:
+            atmons:
               - path: /data
             bluemap:
               - path: /data
@@ -167,7 +167,7 @@ spec:
       bluemap-shared:
         existingClaim: bluemap-shared
         advancedMounts:
-          *app:
+          atmons:
             init-bluemap-config:
               - path: /app/web
             bluemap:
@@ -177,14 +177,14 @@ spec:
       bluemap-cache:
         type: emptyDir
         advancedMounts:
-          *app:
+          atmons:
             bluemap:
               - path: /app/data
       bluemap-configs-source:
         type: configMap
         name: atmons-bluemap-configs
         advancedMounts:
-          *app:
+          atmons:
             init-bluemap-config:
               - path: /configs-source
                 readOnly: true
@@ -192,21 +192,21 @@ spec:
         type: configMap
         name: atmons-bluemap-maps
         advancedMounts:
-          *app:
+          atmons:
             init-bluemap-config:
               - path: /maps-source
                 readOnly: true
       bluemap-config:
         type: emptyDir
         advancedMounts:
-          *app:
+          atmons:
             init-bluemap-config:
               - path: /app/config
             bluemap:
               - path: /app/config
 
     serviceMonitor:
-      *app:
+      atmons:
         serviceName: *app
         endpoints:
           - port: metrics

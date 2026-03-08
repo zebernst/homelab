@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      gatus:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -43,7 +43,7 @@ spec:
               limits:
                 memory: 256Mi
         containers:
-          *app:
+          gatus:
             image:
               repository: ghcr.io/twin/gatus
               tag: v5.18.1@sha256:97525568fdef34539b1b4d015aef2d1cf6f58f1bc087443387b349940544394d
@@ -81,12 +81,12 @@ spec:
         runAsUser: 568
         runAsGroup: 568
     service:
-      *app:
+      gatus:
         ports:
           http:
             port: *port
     serviceMonitor:
-      *app:
+      gatus:
         serviceName: *app
         endpoints:
           - port: http
@@ -95,7 +95,7 @@ spec:
             interval: 1m
             scrapeTimeout: 10s
     route:
-      *app:
+      gatus:
         hostnames:
           - status.zebernst.dev
         parentRefs:
@@ -103,7 +103,7 @@ spec:
             namespace: kube-system
             sectionName: https
     serviceAccount:
-      *app:
+      gatus:
         enabled: true
     persistence:
       config:

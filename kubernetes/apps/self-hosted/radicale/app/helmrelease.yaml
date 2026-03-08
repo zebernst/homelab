@@ -13,12 +13,12 @@ spec:
 
   values:
     controllers:
-      *app:
+      radicale:
         annotations:
           reloader.stakater.com/auto: "true"
 
         containers:
-          *app:
+          radicale:
             image:
               repository: ghcr.io/bjw-s-labs/radicale
               tag: 3.5.2
@@ -47,7 +47,7 @@ spec:
         fsGroup: 568
         fsGroupChangePolicy: OnRootMismatch
     service:
-      *app:
+      radicale:
         controller: *app
         ports:
           http:

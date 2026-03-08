@@ -13,11 +13,11 @@ spec:
 
   values:
     controllers:
-      *app:
+      openbooks:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          openbooks:
             image:
               repository: evanbuss/openbooks
               tag: 4.5.0
@@ -43,7 +43,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [ 65568 ]
     service:
-      *app:
+      openbooks:
         controller: *app
         ports:
           http:

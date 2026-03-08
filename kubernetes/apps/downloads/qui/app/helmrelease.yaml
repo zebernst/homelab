@@ -13,11 +13,11 @@ spec:
 
   values:
     controllers:
-      *app:
+      qui:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          qui:
             image:
               repository: ghcr.io/autobrr/qui
               tag: v1.14.1@sha256:10b7945d4f0978f56a7cb939a011e1aeef3b8d500e825f409599ae754f95601b
@@ -74,7 +74,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [65568]
     service:
-      *app:
+      qui:
         controller: *app
         forceRename: *app
         ports:
@@ -96,7 +96,7 @@ spec:
           - hosts:
               - *tsHost
     serviceMonitor:
-      *app:
+      qui:
         serviceName: *app
         endpoints:
           - port: metrics
@@ -105,7 +105,7 @@ spec:
             interval: 1m
             scrapeTimeout: 10s
     route:
-      *app:
+      qui:
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"
         parentRefs:
