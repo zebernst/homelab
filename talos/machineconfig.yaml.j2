@@ -52,7 +52,8 @@ machine:
       - mitigations=off         # Less security, faster puter
       - security=none           # Less security, faster puter
       - talos.auditd.disabled=1 # Less security, faster puter
-    image: factory.talos.dev/installer/5c030c38dbb790ca3298ec86a336ea4e6d287256dd5c5bbc7c56c347b0df5f3f:{{ ENV.TALOS_VERSION }}
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+    image: factory.talos.dev/installer/5c030c38dbb790ca3298ec86a336ea4e6d287256dd5c5bbc7c56c347b0df5f3f:v1.12.4
     wipe: false
   kernel:
     modules:
@@ -60,7 +61,8 @@ machine:
       - name: thunderbolt
       - name: thunderbolt_net
   kubelet:
-    image: ghcr.io/siderolabs/kubelet:{{ ENV.KUBERNETES_VERSION }}
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+    image: ghcr.io/siderolabs/kubelet:v1.34.5
     extraConfig:
       featureGates:
         UserNamespacesSupport: true
@@ -142,14 +144,16 @@ cluster:
     key: op://Secrets/talos/CLUSTER_AGGREGATOR_CA_KEY
   allowSchedulingOnControlPlanes: true
   apiServer:
-    image: registry.k8s.io/kube-apiserver:{{ ENV.KUBERNETES_VERSION }}
+    # renovate: datasource=docker depName=registry.k8s.io/kube-apiserver
+    image: registry.k8s.io/kube-apiserver:v1.34.5
     extraArgs:
       enable-aggregator-routing: true
       feature-gates: UserNamespacesSupport=true,UserNamespacesPodSecurityStandards=true
     certSANs: ["k8s.internal"]
     disablePodSecurityPolicy: true
   controllerManager:
-    image: registry.k8s.io/kube-controller-manager:{{ ENV.KUBERNETES_VERSION }}
+    # renovate: datasource=docker depName=registry.k8s.io/kube-controller-manager
+    image: registry.k8s.io/kube-controller-manager:v1.34.5
     extraArgs:
       bind-address: 0.0.0.0
   coreDNS:
@@ -163,10 +167,12 @@ cluster:
       listen-metrics-urls: http://0.0.0.0:2381
   proxy:
     disabled: true
-    image: registry.k8s.io/kube-proxy:{{ ENV.KUBERNETES_VERSION }}
+    # renovate: datasource=docker depName=registry.k8s.io/kube-proxy
+    image: registry.k8s.io/kube-proxy:v1.34.5
   secretboxEncryptionSecret: op://Secrets/talos/CLUSTER_SECRETBOX_ENCRYPTION_SECRET
   scheduler:
-    image: registry.k8s.io/kube-scheduler:{{ ENV.KUBERNETES_VERSION }}
+    # renovate: datasource=docker depName=registry.k8s.io/kube-scheduler
+    image: registry.k8s.io/kube-scheduler:v1.34.5
     extraArgs:
       bind-address: 0.0.0.0
     config:
