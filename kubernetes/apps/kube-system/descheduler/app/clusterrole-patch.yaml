@@ -1,0 +1,25 @@
+---
+# Supplement the Helm-managed descheduler ClusterRole with PVC list permissions.
+# Required by newer descheduler plugin functionality; not yet in chart 0.35.0.
+# Remove once descheduler chart includes this rule upstream.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: descheduler-pvc
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: descheduler-pvc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: descheduler-pvc
+subjects:
+  - kind: ServiceAccount
+    name: descheduler
+    namespace: kube-system
