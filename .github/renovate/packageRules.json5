@@ -21,18 +21,5 @@
       separateMajorMinor: true,
       separateMinorPatch: true,
     },
-    {
-      description: ["Group Kubernetes control plane component images into a single PR"],
-      matchDatasources: ["docker"],
-      matchPackageNames: [
-        "registry.k8s.io/kube-apiserver",
-        "registry.k8s.io/kube-controller-manager",
-        "registry.k8s.io/kube-proxy",
-        "registry.k8s.io/kube-scheduler",
-      ],
-      groupName: "kubernetes control plane",
-      separateMajorMinor: true,
-      separateMinorPatch: true,
-    },
   ],
 }
