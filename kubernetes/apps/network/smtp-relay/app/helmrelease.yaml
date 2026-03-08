@@ -13,13 +13,13 @@ spec:
 
   values:
     controllers:
-      *app:
+      smtp-relay:
         replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          smtp-relay:
             image:
               repository: ghcr.io/foxcpp/maddy
               tag: 0.8.2
@@ -53,7 +53,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
 
     service:
-      *app:
+      smtp-relay:
         controller: *app
         ports:
           http:

@@ -13,11 +13,11 @@ spec:
 
   values:
     serviceAccount:
-      *app:
+      mc-router:
         enabled: true
     rbac:
       roles:
-        *app:
+        mc-router:
           type: ClusterRole
           rules:
             - apiGroups: [ "" ]
@@ -27,7 +27,7 @@ spec:
               resources: [ "statefulsets", "statefulsets/scale" ]
               verbs: [ "watch", "list", "get", "update", "patch" ]
       bindings:
-        *app:
+        mc-router:
           type: ClusterRoleBinding
           roleRef:
             apiGroup: rbac.authorization.k8s.io
@@ -44,11 +44,11 @@ spec:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
     controllers:
-      *app:
+      mc-router:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          mc-router:
             image:
               repository: ghcr.io/itzg/mc-router
               tag: 1.36.1@sha256:6495a3e3f9490917b43f3cb299b9e9ba3dfe455a5c4e6e8f2109a8993de35ec6
@@ -80,7 +80,7 @@ spec:
         serviceAccount:
           identifier: *app
     service:
-      *app:
+      mc-router:
         controller: *app
         type: LoadBalancer
         annotations:
@@ -91,7 +91,7 @@ spec:
           api:
             port: 8080
     ingress:
-      *app:
+      mc-router:
         className: external
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
@@ -116,7 +116,7 @@ spec:
               - name: *app
                 port: 8080
     serviceMonitor:
-      *app:
+      mc-router:
         serviceName: *app
         endpoints:
           - port: api

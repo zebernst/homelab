@@ -13,9 +13,9 @@ spec:
 
   values:
     controllers:
-      *app :
+      booklore:
         containers:
-          *app :
+          booklore:
             image:
               repository: ghcr.io/booklore-app/booklore
               tag: v2.0.6

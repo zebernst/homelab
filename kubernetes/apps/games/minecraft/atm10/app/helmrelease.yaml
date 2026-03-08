@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      atm10:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
@@ -29,7 +29,7 @@ spec:
                 mkdir -p /app/config/maps
                 cp /maps-source/*.conf /app/config/maps/
         containers:
-          *app:
+          atm10:
             image:
               repository: ghcr.io/itzg/minecraft-server
               tag: 2026.2.1-java21
@@ -127,7 +127,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
 
     service:
-      *app:
+      atm10:
         annotations:
           mc-router.itzg.me/externalServerName: "atm10.zebernst.dev"
           mc-router.itzg.me/autoScaleUp: "true"
@@ -151,14 +151,14 @@ spec:
       tmp:
         type: emptyDir
         advancedMounts:
-          *app:
-            *app:
+          atm10:
+            atm10:
               - path: /tmp
       data:
         existingClaim: *app
         advancedMounts:
-          *app:
-            *app:
+          atm10:
+            atm10:
               - path: /data
             bluemap:
               - path: /data
@@ -166,7 +166,7 @@ spec:
       bluemap-shared:
         existingClaim: bluemap-shared
         advancedMounts:
-          *app:
+          atm10:
             init-bluemap-config:
               - path: /app/web
             bluemap:
@@ -176,14 +176,14 @@ spec:
       bluemap-cache:
         type: emptyDir
         advancedMounts:
-          *app:
+          atm10:
             bluemap:
               - path: /app/data
       bluemap-configs-source:
         type: configMap
         name: atm10-bluemap-configs
         advancedMounts:
-          *app:
+          atm10:
             init-bluemap-config:
               - path: /configs-source
                 readOnly: true
@@ -191,21 +191,21 @@ spec:
         type: configMap
         name: atm10-bluemap-maps
         advancedMounts:
-          *app:
+          atm10:
             init-bluemap-config:
               - path: /maps-source
                 readOnly: true
       bluemap-config:
         type: emptyDir
         advancedMounts:
-          *app:
+          atm10:
             init-bluemap-config:
               - path: /app/config
             bluemap:
               - path: /app/config
 
     serviceMonitor:
-      *app:
+      atm10:
         serviceName: *app
         endpoints:
           - port: metrics

@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      mealie:
         annotations:
           reloader.stakater.com/auto: "true"
 
@@ -27,7 +27,7 @@ spec:
                   name: mealie-secret
 
         containers:
-          *app:
+          mealie:
             image:
               repository: ghcr.io/mealie-recipes/mealie
               tag: v3.1.2@sha256:d872fb529097df2d77b3c6f5e469b047f99d0d1c9f793a84ae27aa106e1f5d7e
@@ -57,7 +57,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
     service:
-      *app:
+      mealie:
         annotations:
           external-dns.alpha.kubernetes.io/hostname: mealie.internal
         controller: *app

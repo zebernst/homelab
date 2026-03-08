@@ -13,11 +13,11 @@ spec:
 
   values:
     controllers:
-      *app:
+      karma:
         replicas: 2
         strategy: RollingUpdate
         containers:
-          *app:
+          karma:
             image:
               repository: ghcr.io/prymitive/karma
               tag: v0.121@sha256:9f0ad820df1b1d0af562de3b3c545a52ddfce8d7492f434a2276e45f3a1f7e28
@@ -64,7 +64,7 @@ spec:
           - hosts:
               - *tsHost
     service:
-      *app:
+      karma:
         controller: *app
         ports:
           http:

@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      whisparr:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -25,7 +25,7 @@ spec:
               - secretRef:
                   name: whisparr-secret
         containers:
-          *app:
+          whisparr:
             image:
               repository: ghcr.io/jfroy/whisparr-nightly
               tag: 2.0.0.987@sha256:fb192831a387029676fa25de3a304542a6c19ae0bd50b0d1ba51bb959d5e540a
@@ -68,7 +68,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [65568]
     service:
-      *app:
+      whisparr:
         controller: *app
         ports:
           http:

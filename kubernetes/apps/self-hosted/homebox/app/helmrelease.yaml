@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      *app:
+      homebox:
         annotations:
           reloader.stakater.com/auto: "true"
 
@@ -27,7 +27,7 @@ spec:
                   name: homebox-secret
 
         containers:
-          *app:
+          homebox:
             image:
               repository: ghcr.io/sysadminsmedia/homebox
               # todo: upgrade to v0.22, using main until sysadminsmedia/homebox#986 is officially released
@@ -50,7 +50,7 @@ spec:
     defaultPodOptions:
       priorityClassName: internal-only
     service:
-      *app:
+      homebox:
         controller: *app
         ports:
           http:

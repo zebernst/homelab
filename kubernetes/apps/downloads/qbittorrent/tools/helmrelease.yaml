@@ -80,7 +80,7 @@ spec:
           <<: *cronJobSpec
           schedule: "@daily"
         containers:
-          *app:
+          qbtools:
             <<: *container
             args:
             - orphaned
@@ -111,6 +111,6 @@ spec:
         path: /volume1/media
         advancedMounts:
           orphaned:
-            *app:
+            qbtools:
               - path: /media/downloads/qbittorrent
                 subPath: downloads/qbittorrent

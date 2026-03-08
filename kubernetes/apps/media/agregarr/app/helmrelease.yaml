@@ -13,9 +13,9 @@ spec:
 
   values:
     controllers:
-      *app:
+      agregarr:
         containers:
-          *app:
+          agregarr:
             image:
               repository: ghcr.io/agregarr/agregarr
               tag: v2.4.1
@@ -56,7 +56,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
 
     service:
-      *app:
+      agregarr:
         controller: *app
         ports:
           http:
@@ -79,8 +79,8 @@ spec:
       tmpfs:
         type: emptyDir
         advancedMounts:
-          *app:
-            *app:
+          agregarr:
+            agregarr:
               - path: /app/config/logs
                 subPath: logs
               - path: /tmp

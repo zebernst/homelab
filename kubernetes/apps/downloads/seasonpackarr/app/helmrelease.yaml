@@ -13,9 +13,9 @@ spec:
 
   values:
     controllers:
-      *app:
+      seasonpackarr:
         containers:
-          *app:
+          seasonpackarr:
             image:
               repository: ghcr.io/nuxencs/seasonpackarr
               tag: v0.14.0
@@ -66,7 +66,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
 
     service:
-      *app:
+      seasonpackarr:
         controller: *app
         ports:
           http:

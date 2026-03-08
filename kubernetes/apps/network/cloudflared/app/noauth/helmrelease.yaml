@@ -13,13 +13,13 @@ spec:
 
   values:
     controllers:
-      *app:
+      cloudflared:
         replicas: 2
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          cloudflared:
             image:
               repository: docker.io/cloudflare/cloudflared
               tag: 2026.1.1
@@ -69,13 +69,13 @@ spec:
         runAsUser: 568
         runAsGroup: 568
     service:
-      *app:
+      cloudflared:
         controller: *app
         ports:
           http:
             port: *port
     serviceMonitor:
-      *app:
+      cloudflared:
         serviceName: *app
         endpoints:
           - port: http

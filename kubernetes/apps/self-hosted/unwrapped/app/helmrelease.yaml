@@ -13,11 +13,11 @@ spec:
 
   values:
     controllers:
-      *app:
+      unwrapped:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          *app:
+          unwrapped:
             image:
               repository: ghcr.io/zebernst/unwrapped
               tag: 5e9d6fb  # short SHA from main branch
@@ -54,7 +54,7 @@ spec:
       imagePullSecrets:
         - name: ghcr-pull-secret
     service:
-      *app:
+      unwrapped:
         controller: *app
         ports:
           http:
