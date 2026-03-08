@@ -3,20 +3,19 @@
   customManagers: [
     {
       customType: "regex",
-      description: ["Process annotated dependencies"],
-      managerFilePatterns: ["/\\.ya?ml(?:\\.j2)?$/"],
+      description: "Process annotated dependencies",
+      managerFilePatterns: ["/\\.yaml(?:\\.j2)?$/"],
       matchStrings: [
-        // # renovate: datasource=github-releases depName=kubernetes/kubernetes
-        // version: 1.29.1
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+ (?<currentValue>[v|\\d]\\S+)",
-        // # renovate: datasource=github-releases depName=rancher/system-upgrade-controller
-        // https://github.com/rancher/system-upgrade-controller/releases/download/v0.13.2/crd.yaml
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+/(?<currentValue>[v|\\d][^/]+)",
-        // # renovate: datasource=docker depName=quay.io/medik8s/self-node-remediation-operator
-        // value: quay.io/medik8s/self-node-remediation-operator:v0.11.0
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+:(?<currentValue>[v|\\d]\\S+)",
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+ (?<currentValue>[v|\\d]\\S+)"
       ],
       datasourceTemplate: "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
+    },
+    {
+      customType: "regex",
+      description: "Process OCI dependencies",
+      managerFilePatterns: ["/\\.yaml(?:\\.j2)?$/"],
+      matchStrings: ["oci://(?<depName>[^:]+):(?<currentValue>\\S+)"],
+      datasourceTemplate: "docker",
     },
   ],
 }
