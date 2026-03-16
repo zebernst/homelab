@@ -31,7 +31,7 @@ spec:
               CROSS_SEED_SLEEP_INTERVAL: 0
               PUSHOVER_ENABLED: true
               BOOKLORE_ENABLED: true
-              BOOKLORE_DROP_DIR: /media/bookdrop
+              BOOKLORE_DROP_DIR: /media/books/inbox
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
@@ -120,5 +120,5 @@ spec:
             qbittorrent:
               - path: /media/downloads/qbittorrent
                 subPath: downloads/qbittorrent
-              - path: /media/bookdrop
-                subPath: bookdrop
+              - path: /media/books/inbox
+                subPath: books/inbox

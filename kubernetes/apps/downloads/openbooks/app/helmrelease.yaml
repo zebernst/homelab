@@ -68,7 +68,7 @@ spec:
         path: /volume1/media
         globalMounts:
           - path: /openbooks/books
-            subPath: bookdrop
+            subPath: books/inbox
       logs:
         type: emptyDir
         globalMounts:

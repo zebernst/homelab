@@ -85,4 +85,4 @@ spec:
           - path: /books
             subPath: books
           - path: /bookdrop
-            subPath: bookdrop
+            subPath: books/inbox
