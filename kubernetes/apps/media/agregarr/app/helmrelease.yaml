@@ -18,7 +18,7 @@ spec:
           agregarr:
             image:
               repository: ghcr.io/agregarr/agregarr
-              tag: v2.4.1
+              tag: v2.4.2
             env:
               PORT: &port 80
               TZ: America/Chicago
