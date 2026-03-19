@@ -26,7 +26,7 @@
   ],
   rebaseWhen: 'conflicted',
   schedule: [
-    'every weekend',
+    'saturday 9am',
   ],
   flux: {
     managerFilePatterns: [
