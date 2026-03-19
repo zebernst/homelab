@@ -27,6 +27,7 @@ pages:
                 limit: 4
               - url: https://ciechanow.ski/atom.xml
               - url: https://samwho.dev/rss.xml
+              - url: https://thatshubham.com/rss.xml
 
       - size: full
         widgets:
