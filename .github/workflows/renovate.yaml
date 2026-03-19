@@ -19,7 +19,7 @@ on:
         default: latest
         required: false
   schedule:
-    - cron: "0 9 * * *" # Every day at 9am
+    - cron: "30 14 * * *" # Every day at 9:30am CT (14:30 UTC)
   push:
     branches: ["main"]
     paths: [".github/renovate.json5", ".github/renovate/**.json5"]
