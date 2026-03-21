@@ -23,9 +23,10 @@ spec:
             env:
               TZ: America/Chicago
               DOCKERMODE: "true"
-              PUID: "568"
-              PGID: "568"
+              PUID: "1568"
+              PGID: "65568"
               FLASK_PORT: &port 8084
+              LIBRARY_URL: "https://booklore.zebernst.dev"
               INGEST_DIR: "/media/downloads/shelfmark/{User}"
 
             probes:
