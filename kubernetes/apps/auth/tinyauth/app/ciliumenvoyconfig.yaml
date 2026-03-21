@@ -30,6 +30,15 @@ spec:
               typed_config:
                 "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                 stat_prefix: tinyauth_extauthz
+                route_config:
+                  virtual_hosts:
+                    - name: local
+                      domains: ["*"]
+                      routes:
+                        - match:
+                            prefix: "/"
+                          route:
+                            cluster: tinyauth_extauthz
                 http_filters:
                   - name: envoy.filters.http.ext_authz
                     typed_config:
