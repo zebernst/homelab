@@ -12,6 +12,7 @@ resources:
   - maintainerr/ks.yaml
   - overseerr/ks.yaml
   - plex/ks.yaml
+  - shelfmark/ks.yaml
   - stash/ks.yaml
   - steam/ks.yaml
   - tautulli/ks.yaml
