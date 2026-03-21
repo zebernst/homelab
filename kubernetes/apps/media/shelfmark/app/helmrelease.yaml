@@ -74,3 +74,6 @@ spec:
         path: /volume1/media
         globalMounts:
           - path: /media
+
+      tmp:
+        type: emptyDir
