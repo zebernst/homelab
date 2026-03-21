@@ -32,9 +32,9 @@ spec:
               repository: ghcr.io/pocket-id/pocket-id
               tag: v2
             env:
-              # Enable env-var driven config
+              # General
               UI_CONFIG_DISABLED: "true"
-              # Sign-up
+              HOME_PAGE_URL: /settings/apps
               ALLOW_USER_SIGNUPS: withToken
               # Metrics
               METRICS_ENABLED: "true"
