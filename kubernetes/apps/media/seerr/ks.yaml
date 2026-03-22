@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app overseerr
+  name: &app seerr
   namespace: &ns media
 spec:
   targetNamespace: *ns
@@ -18,7 +18,7 @@ spec:
       namespace: rook-ceph
     - name: volsync
       namespace: volsync-system
-  path: kubernetes/apps/media/overseerr/app
+  path: kubernetes/apps/media/seerr/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -34,3 +34,5 @@ spec:
       GATUS_SUBDOMAIN: requests
       GATUS_PATH: /api/v1/status
       VOLSYNC_CAPACITY: 10Gi
+      VOLSYNC_PUID: "1000"
+      VOLSYNC_PGID: "1000"

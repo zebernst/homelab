@@ -10,7 +10,7 @@ resources:
   - booklore/ks.yaml
   - capacitarr/ks.yaml
   - maintainerr/ks.yaml
-  - overseerr/ks.yaml
+  - seerr/ks.yaml
   - plex/ks.yaml
   - shelfmark/ks.yaml
   - stash/ks.yaml
