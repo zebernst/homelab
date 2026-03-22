@@ -25,9 +25,10 @@ spec:
               TZ: America/Chicago
               QUI__HOST: 0.0.0.0
               QUI__PORT: &port 80
-              QUI__AUTH_DISABLED: true
-              QUI__I_ACKNOWLEDGE_THIS_IS_A_BAD_IDEA: true
-              QUI__AUTH_DISABLED_ALLOWED_CIDRS: 0.0.0.0/0
+              QUI__OIDC_ENABLED: true
+              QUI__OIDC_ISSUER: https://id.zebernst.dev/
+              QUI__OIDC_REDIRECT_URL: https://qui.zebernst.dev/api/auth/oidc/callback
+              QUI__OIDC_DISABLE_BUILT_IN_LOGIN: true
               QUI__METRICS_ENABLED: true
               QUI__METRICS_HOST: 0.0.0.0
               QUI__METRICS_PORT: &metricsPort 9074
