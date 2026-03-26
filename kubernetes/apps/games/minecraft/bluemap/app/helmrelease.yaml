@@ -32,7 +32,7 @@ spec:
           bluemap:
             image:
               repository: ghcr.io/bluemap-minecraft/bluemap
-              tag: v5.16
+              tag: v5.18
             args: ["-w", "-g"]
             env:
               JAVA_TOOL_OPTIONS: "-Xmx1G"
