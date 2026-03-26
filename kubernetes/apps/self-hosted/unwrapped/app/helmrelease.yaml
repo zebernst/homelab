@@ -20,7 +20,7 @@ spec:
           unwrapped:
             image:
               repository: ghcr.io/zebernst/unwrapped
-              tag: 5e9d6fb  # short SHA from main branch
+              tag: 83f210c  # short SHA from main branch
             probes:
               liveness: &probe
                 enabled: true
