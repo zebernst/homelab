@@ -31,7 +31,7 @@ spec:
             image:
               repository: ghcr.io/sysadminsmedia/homebox
               # todo: upgrade to v0.22, using main until sysadminsmedia/homebox#986 is officially released
-              tag: main@sha256:c70e6466ec80f0a6e8b06d1ab9da9cb6d1aff1f0f72de3ab3c2b14552a42b203
+              tag: main@sha256:329a4fa7b87744bc2c769780b26db0efbed9315e9a4a6af68c20dc51ff5a7de6
             env:
               TZ: America/Chicago
               HBOX_LOG_LEVEL: info
