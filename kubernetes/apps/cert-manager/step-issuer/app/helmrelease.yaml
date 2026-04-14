@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: step-issuer
-      version: 1.9.11
+      version: 1.10.2
       sourceRef:
         kind: HelmRepository
         name: smallstep
