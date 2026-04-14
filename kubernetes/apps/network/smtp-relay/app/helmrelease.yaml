@@ -22,7 +22,7 @@ spec:
           smtp-relay:
             image:
               repository: ghcr.io/foxcpp/maddy
-              tag: 0.8.2
+              tag: 0.9.3
             env:
               SMTP_RELAY_METRICS_PORT: &metricsPort 8080
               SMTP_RELAY_SMTP_PORT: &smtpPort 25
