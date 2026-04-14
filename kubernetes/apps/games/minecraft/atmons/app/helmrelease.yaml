@@ -32,7 +32,7 @@ spec:
           atmons:
             image:
               repository: ghcr.io/itzg/minecraft-server
-              tag: 2026.3.1-java21
+              tag: 2026.4.1-java21
             env:
               EULA: "true"
               TZ: America/Chicago
@@ -104,7 +104,7 @@ spec:
           bluemap:
             image:
               repository: ghcr.io/bluemap-minecraft/bluemap
-              tag: v5.16
+              tag: v5.20
             args: ["-r", "-u", "-w", "-n", "/data/mods"]
             env:
               JAVA_TOOL_OPTIONS: "-Xmx3G"
