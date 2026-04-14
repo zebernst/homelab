@@ -5,7 +5,7 @@ metadata:
   name: &cluster hindwing
 spec:
   # renovate: datasource=docker depName=ghcr.io/dragonflydb/dragonfly
-  image: ghcr.io/dragonflydb/dragonfly:v1.37.0
+  image: ghcr.io/dragonflydb/dragonfly:v1.38.0
   replicas: 3
   args:
     - --maxmemory=$(MAX_MEMORY)Mi
