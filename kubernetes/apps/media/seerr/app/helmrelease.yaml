@@ -20,7 +20,7 @@ spec:
           seerr:
             image:
               repository: ghcr.io/seerr-team/seerr
-              tag: v3.1.0
+              tag: v3.2.0
             env:
               TZ: America/Chicago
               LOG_LEVEL: "info"
