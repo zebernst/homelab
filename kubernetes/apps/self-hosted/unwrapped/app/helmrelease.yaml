@@ -21,6 +21,12 @@ spec:
             image:
               repository: ghcr.io/zebernst/unwrapped
               tag: 83f210c  # short SHA from main branch
+            env:
+              - name: USER_BIRTHDAY
+                valueFrom:
+                  secretKeyRef:
+                    name: unwrapped-secret
+                    key: USER_BIRTHDAY
             probes:
               liveness: &probe
                 enabled: true
