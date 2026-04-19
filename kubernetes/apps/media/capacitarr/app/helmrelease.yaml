@@ -20,7 +20,7 @@ spec:
           capacitarr:
             image:
               repository: ghentstarshadow/capacitarr
-              tag: 1.9.0
+              tag: 3.3.1
             env:
               TZ: America/Chicago
               PUID: 568
