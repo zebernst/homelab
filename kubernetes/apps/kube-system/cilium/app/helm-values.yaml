@@ -6,7 +6,7 @@ authentication:
       enabled: true
       install:
         enabled: true
-        namespace: cilium-spire
+        namespace: spire
         server:
           dataStorage:
             enabled: true
