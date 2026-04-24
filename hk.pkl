@@ -4,7 +4,7 @@ hooks = new {
   ["pre-commit"] {
     steps = new {
       ["fission-sync"] = new Step {
-        glob = "kubernetes/apps/fission-system/functions/**/*.py"
+        glob = "kubernetes/apps/fission/functions/**/*.py"
         check = "task fission:sync-packages"
       }
     }
