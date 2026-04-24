@@ -34,7 +34,7 @@ tasks:
       - which zip
 
   sync-packages:
-    desc: Sync Package CRDs for the given code files and stage changes (called by hk) [files...]
+    internal: true
     vars:
       NAMES:
         sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {}
@@ -46,6 +46,45 @@ tasks:
           STAGE: "true"
     preconditions:
       - which yq
+
+  check-package:
+    internal: true
+    vars:
+      FUNC_DIR: '{{.FUNCTIONS_DIR}}/{{.NAME}}'
+      PKG: '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml'
+    requires:
+      vars: [NAME]
+    cmds:
+      - |
+        cd '{{.FUNC_DIR}}'
+        if [ -f pyproject.toml ] || [ -f requirements.txt ]; then
+          deps=$([ -f pyproject.toml ] && echo pyproject.toml || echo requirements.txt)
+          expected=$(zip -j - code.py "$deps" | base64 -w0)
+          actual=$(yq '.spec.source.literal' '{{.PKG}}')
+        else
+          expected=$(base64 -w0 code.py)
+          actual=$(yq '.spec.deployment.literal' '{{.PKG}}')
+        fi
+        [ "$expected" = "$actual" ]
+    preconditions:
+      - test -f '{{.FUNC_DIR}}/code.py'
+      - test -f '{{.PKG}}'
+      - which yq
+      - which zip
+
+  check-packages:
+    internal: true
+    vars:
+      NAMES:
+        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {}
+    cmds:
+      - for: { var: NAMES, split: "\n" }
+        task: check-package
+        vars:
+          NAME: '{{.ITEM}}'
+    preconditions:
+      - which yq
+      - which zip
 
   sync-all:
     desc: Sync all Package CRDs from function source code
@@ -67,6 +106,14 @@ tasks:
     cmds:
       - mkdir -p '{{.FUNCTIONS_DIR}}/{{.NAME}}'
       - |
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/pyproject.toml' << EOF
+        [project]
+        name = "{{.NAME}}"
+        version = "0.1.0"
+        requires-python = ">=3.11"
+        dependencies = []
+        EOF
+      - |
         cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/code.py' << 'PYEOF'
         def main():
             return "hello from new function", 200, {}
@@ -83,7 +130,7 @@ tasks:
           environment:
             name: python
             namespace: fission
-          deployment:
+          source:
             type: literal
             literal: ""
         EOF
