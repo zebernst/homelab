@@ -17,7 +17,7 @@ spec:
       namespace: external-secrets
   interval: 30m
   retryInterval: 1m
-  path: kubernetes/apps/fission/functions/app
+  path: kubernetes/apps/fission/functions
   prune: true
   sourceRef:
     kind: GitRepository
