@@ -7,58 +7,62 @@ vars:
 
 tasks:
 
-  sync-packages:
-    desc: Regenerate Package CRDs for any staged function code changes
+  sync-package:
+    desc: Sync Package CRD literal from function source [NAME=required] [STAGE=false]
+    vars:
+      STAGE: '{{.STAGE | default "false"}}'
+      PY: '{{.FUNCTIONS_DIR}}/{{.NAME}}/code.py'
+      PKG: '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml'
+    requires:
+      vars: [NAME]
     cmds:
-      - |
-        staged=$(git diff --cached --name-only --diff-filter=ACM | grep -E 'kubernetes/apps/fission/functions/app/.+/code\.py$' || true)
-        if [ -z "$staged" ]; then
-          exit 0
-        fi
-        for py in $staged; do
-          pkg="$(dirname "$py")/package.yaml"
-          if [ ! -f "$pkg" ]; then
-            echo "warning: no package.yaml found alongside $py, skipping"
-            continue
-          fi
-          b64=$(base64 -w0 "$py")
-          yq -i ".spec.deployment.literal = \"$b64\"" "$pkg"
-          git add "$pkg"
-          echo "updated $pkg"
-        done
+      - b64=$(base64 -w0 '{{.PY}}') && yq -i ".spec.deployment.literal = \"$b64\"" '{{.PKG}}'
+      - '[ "{{.STAGE}}" != "true" ] || git add {{.PKG}}'
+    preconditions:
+      - test -f '{{.PY}}'
+      - test -f '{{.PKG}}'
+      - which yq
+
+  sync-packages:
+    desc: Sync Package CRDs for the given code files and stage changes (called by hk) [files...]
+    vars:
+      NAMES:
+        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {}
+    cmds:
+      - for: { var: NAMES, split: "\n" }
+        task: sync-package
+        vars:
+          NAME: '{{.ITEM}}'
+          STAGE: "true"
     preconditions:
       - which yq
 
-  sync-all-packages:
-    desc: Regenerate all Package CRDs from function source code
+  sync-all:
+    desc: Sync all Package CRDs from function source code
+    vars:
+      NAMES:
+        sh: find '{{.FUNCTIONS_DIR}}' -name "code.py" -exec dirname {} \; | xargs -I{} basename {}
     cmds:
-      - |
-        for py in $(find {{.FUNCTIONS_DIR}} -name "code.py"); do
-          pkg="$(dirname "$py")/package.yaml"
-          if [ ! -f "$pkg" ]; then
-            echo "warning: no package.yaml found alongside $py, skipping"
-            continue
-          fi
-          b64=$(base64 -w0 "$py")
-          yq -i ".spec.deployment.literal = \"$b64\"" "$pkg"
-          echo "updated $pkg"
-        done
+      - for: { var: NAMES, split: "\n" }
+        task: sync-package
+        vars:
+          NAME: '{{.ITEM}}'
     preconditions:
       - which yq
 
   new-function:
-    desc: Scaffold a new Fission function directory
+    desc: Scaffold a new Fission function [NAME=required]
     requires:
       vars: [NAME]
     cmds:
-      - mkdir -p {{.FUNCTIONS_DIR}}/{{.NAME}}
+      - mkdir -p '{{.FUNCTIONS_DIR}}/{{.NAME}}'
       - |
-        cat > {{.FUNCTIONS_DIR}}/{{.NAME}}/code.py << 'EOF'
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/code.py' << 'PYEOF'
         def main():
-            return "hello from {{.NAME}}", 200, {}
-        EOF
+            return "hello from new function", 200, {}
+        PYEOF
       - |
-        cat > {{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml << 'EOF'
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml' << EOF
         ---
         apiVersion: fission.io/v1
         kind: Package
@@ -74,7 +78,7 @@ tasks:
             literal: ""
         EOF
       - |
-        cat > {{.FUNCTIONS_DIR}}/{{.NAME}}/function.yaml << 'EOF'
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/function.yaml' << EOF
         ---
         apiVersion: fission.io/v1
         kind: Function
@@ -97,7 +101,7 @@ tasks:
           idleTimeout: 120
         EOF
       - |
-        cat > {{.FUNCTIONS_DIR}}/{{.NAME}}/trigger.yaml << 'EOF'
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/trigger.yaml' << EOF
         ---
         apiVersion: fission.io/v1
         kind: HTTPTrigger
@@ -114,7 +118,7 @@ tasks:
             annotations: {}
         EOF
       - |
-        cat > {{.FUNCTIONS_DIR}}/{{.NAME}}/kustomization.yaml << 'EOF'
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/kustomization.yaml' << 'EOF'
         # yaml-language-server: $schema=https://json.schemastore.org/kustomization
         ---
         apiVersion: kustomize.config.k8s.io/v1beta1
@@ -124,5 +128,8 @@ tasks:
           - function.yaml
           - trigger.yaml
         EOF
-      - task: sync-all-packages
-      - echo "scaffolded {{.FUNCTIONS_DIR}}/{{.NAME}} — add it to functions/app/kustomization.yaml"
+      - task: sync-package
+        vars: { NAME: '{{.NAME}}' }
+      - echo "scaffolded — add '- {{.NAME}}' to functions/app/kustomization.yaml"
+    preconditions:
+      - which yq
