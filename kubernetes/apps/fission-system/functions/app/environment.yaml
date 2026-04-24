@@ -1,0 +1,11 @@
+---
+apiVersion: fission.io/v1
+kind: Environment
+metadata:
+  name: python
+  namespace: fission
+spec:
+  version: 2
+  runtime:
+    image: ghcr.io/fission/python-env:v1.22.0
+  poolsize: 1
