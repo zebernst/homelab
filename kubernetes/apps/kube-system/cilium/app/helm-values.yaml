@@ -1,5 +1,23 @@
 ---
 autoDirectNodeRoutes: true
+authentication:
+  mutual:
+    spire:
+      enabled: true
+      trustDomain: jupiter.cluster.local
+      install:
+        enabled: true
+        namespace: spire
+        server:
+          priorityClassName: system-cluster-critical
+          dataStorage:
+            enabled: true
+            size: 1Gi
+            storageClass: ""
+          ca:
+            keyType: ec-p384
+        agent:
+          priorityClassName: system-node-critical
 bandwidthManager:
   enabled: true
   bbr: true
