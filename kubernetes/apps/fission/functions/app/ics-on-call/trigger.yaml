@@ -2,13 +2,13 @@
 apiVersion: fission.io/v1
 kind: HTTPTrigger
 metadata:
-  name: ics-proxy
+  name: ics-on-call
   namespace: fission
 spec:
   relativeurl: /ics/oncall
   method: GET
   functionref:
     type: name
-    name: ics-proxy
+    name: ics-on-call
   ingressconfig:
     annotations: {}
