@@ -1,5 +1,17 @@
 ---
 autoDirectNodeRoutes: true
+authentication:
+  mutual:
+    spire:
+      enabled: true
+      install:
+        enabled: true
+        namespace: cilium-spire
+        server:
+          dataStorage:
+            enabled: true
+            size: 1Gi
+            storageClass: ""
 bandwidthManager:
   enabled: true
   bbr: true
