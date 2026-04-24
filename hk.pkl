@@ -2,10 +2,12 @@ amends "package://github.com/jdx/hk/releases/download/v1.44.0/hk@1.44.0#/Config.
 
 hooks = new {
   ["pre-commit"] {
+    fix = true
+    stash = "git"
     steps = new {
       ["fission-sync"] = new Step {
         glob = "kubernetes/apps/fission/functions/**/*.py"
-        check = "task fission:sync-packages"
+        fix = "task fission:sync-packages -- {{files}}"
       }
     }
   }
