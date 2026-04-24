@@ -11,4 +11,4 @@ spec:
   builder:
     image: ghcr.io/zebernst/fission-python-builder:latest
     command: build
-  poolsize: 1
+  poolsize: 3
