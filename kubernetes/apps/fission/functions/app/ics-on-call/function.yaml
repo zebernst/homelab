@@ -16,6 +16,9 @@ spec:
   secrets:
     - name: ics-on-call-secret
       namespace: fission
+  configmaps:
+    - name: ics-on-call-config
+      namespace: fission
   executor:
     executortype: poolmgr
     requestsPerPod: 1

@@ -1,20 +1,16 @@
-import os
+from pathlib import Path
 import re
 
 import httpx
 
 
-def main():
-    secrets_dir = "/secrets/fission"
-    secret_name = next(iter(os.listdir(secrets_dir)))
-    secret_path = os.path.join(secrets_dir, secret_name)
+def main() -> tuple[str, int, dict[str, str]]:
+    secret_dir = next(Path("/secrets/fission").iterdir())
+    config_dir = next(Path("/configs/fission").iterdir())
 
-    with open(os.path.join(secret_path, "upstream-url")) as f:
-        url = f.read().strip()
-    with open(os.path.join(secret_path, "summary-pattern")) as f:
-        pattern = f.read().strip()
-    with open(os.path.join(secret_path, "summary-replacement")) as f:
-        replacement = f.read().strip()
+    url = (secret_dir / "upstream-url").read_text().strip()
+    pattern = (config_dir / "summary-pattern").read_text().strip()
+    replacement = (config_dir / "summary-replacement").read_text().strip()
 
     content = httpx.get(url).text
 
