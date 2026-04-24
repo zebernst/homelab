@@ -5,4 +5,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - environment.yaml
-  - ics-proxy
+  - ics-on-call

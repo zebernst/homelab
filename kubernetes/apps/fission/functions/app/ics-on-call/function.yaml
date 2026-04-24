@@ -2,7 +2,7 @@
 apiVersion: fission.io/v1
 kind: Function
 metadata:
-  name: ics-proxy
+  name: ics-on-call
   namespace: fission
 spec:
   environment:
@@ -10,11 +10,11 @@ spec:
     namespace: fission
   package:
     packageref:
-      name: ics-proxy
+      name: ics-on-call
       namespace: fission
     functionName: main
   secrets:
-    - name: ics-proxy-secret
+    - name: ics-on-call-secret
       namespace: fission
   executor:
     executortype: poolmgr
