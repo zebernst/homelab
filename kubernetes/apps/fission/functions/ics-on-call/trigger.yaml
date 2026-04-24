@@ -10,5 +10,3 @@ spec:
   functionref:
     type: name
     name: ics-on-call
-  ingressconfig:
-    annotations: {}
