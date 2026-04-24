@@ -86,8 +86,9 @@ jobs:
         id: meta
         with:
           images: ghcr.io/zebernst/${{ matrix.container }}
-          flavor: latest=auto
-          tags: type=sha
+          tags: |
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push
         uses: docker/build-push-action@v6
