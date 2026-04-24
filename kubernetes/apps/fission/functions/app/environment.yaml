@@ -8,4 +8,7 @@ spec:
   version: 2
   runtime:
     image: ghcr.io/fission/python-env:v1.22.0
+  builder:
+    image: ghcr.io/zebernst/fission-python-builder:latest
+    command: build
   poolsize: 1
