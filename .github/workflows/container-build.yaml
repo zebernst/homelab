@@ -31,27 +31,12 @@ jobs:
       - name: Determine containers to build
         id: set
         run: |
-          all() {
-            find containers -mindepth 1 -maxdepth 1 -type d | sed 's|.*/||' | sort
-          }
-          changed() {
-            git diff --name-only "$1" "$2" -- containers/ \
-              | sed 's|containers/||;s|/.*||' | sort -u | awk 'NF'
-          }
-
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            readarray -t names < <(all)
-          elif [ "${{ github.event_name }}" = "pull_request" ]; then
-            readarray -t names < <(changed "origin/${{ github.base_ref }}" HEAD)
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            readarray -t names < <(find containers -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort)
           else
-            before="${{ github.event.before }}"
-            if [ "$before" = "0000000000000000000000000000000000000000" ]; then
-              readarray -t names < <(all)
-            else
-              readarray -t names < <(changed "$before" "${{ github.sha }}")
-            fi
+            readarray -t names < <(git diff --name-only "$base" "${{ github.sha }}" -- containers/ | cut -d/ -f2 | sort -u | awk 'NF')
           fi
-
           echo "matrix=$(jq -cn '{container: $ARGS.positional}' --args "${names[@]}")" >> "$GITHUB_OUTPUT"
           echo "has_containers=$([ ${#names[@]} -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
