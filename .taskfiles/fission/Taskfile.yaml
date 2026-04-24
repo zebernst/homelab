@@ -3,7 +3,7 @@
 version: '3'
 
 vars:
-  FUNCTIONS_DIR: '{{.ROOT_DIR}}/kubernetes/apps/fission/functions/app'
+  FUNCTIONS_DIR: '{{.ROOT_DIR}}/kubernetes/apps/fission/functions'
 
 tasks:
 
@@ -187,7 +187,7 @@ tasks:
         EOF
       - task: sync-package
         vars: { NAME: '{{.NAME}}' }
-      - echo "scaffolded — add '- {{.NAME}}' to functions/app/kustomization.yaml"
+      - echo "scaffolded — add '- {{.NAME}}' to functions/kustomization.yaml"
     preconditions:
       - which yq
       - which zip
