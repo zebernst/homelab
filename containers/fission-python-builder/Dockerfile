@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM ghcr.io/fission/python-builder:v1.22.0
+FROM ghcr.io/fission/python-builder:1.34.2
 COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /usr/local/bin/uv
 COPY --chmod=755 <<'EOF' /build
 #!/bin/sh
