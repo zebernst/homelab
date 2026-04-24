@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ics-on-call-config
+  namespace: fission
+data:
+  summary-pattern: "^SUMMARY:.*$"
+  summary-replacement: "SUMMARY:SmarterDx: On Call"

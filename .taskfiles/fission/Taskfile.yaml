@@ -1,0 +1,193 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: '3'
+
+vars:
+  FUNCTIONS_DIR: '{{.ROOT_DIR}}/kubernetes/apps/fission/functions'
+
+tasks:
+
+  sync-package:
+    desc: Sync Package CRD literal from function source [NAME=required] [STAGE=false]
+    vars:
+      STAGE: '{{.STAGE | default "false"}}'
+      FUNC_DIR: '{{.FUNCTIONS_DIR}}/{{.NAME}}'
+      PKG: '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml'
+    requires:
+      vars: [NAME]
+    cmds:
+      - |
+        cd '{{.FUNC_DIR}}'
+        if [ -f pyproject.toml ] || [ -f requirements.txt ]; then
+          deps=$([ -f pyproject.toml ] && echo pyproject.toml || echo requirements.txt)
+          b64=$(zip -j - code.py "$deps" | base64 -w0)
+          yq -i ".spec.source.type = \"literal\" | .spec.source.literal = \"$b64\" | del(.spec.deployment)" '{{.PKG}}'
+        else
+          b64=$(base64 -w0 code.py)
+          yq -i ".spec.deployment.type = \"literal\" | .spec.deployment.literal = \"$b64\" | del(.spec.source)" '{{.PKG}}'
+        fi
+      - '[ "{{.STAGE}}" != "true" ] || git add {{.PKG}}'
+    preconditions:
+      - test -f '{{.FUNC_DIR}}/code.py'
+      - test -f '{{.PKG}}'
+      - which yq
+      - which zip
+
+  sync-packages:
+    internal: true
+    vars:
+      NAMES:
+        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {}
+    cmds:
+      - for: { var: NAMES, split: "\n" }
+        task: sync-package
+        vars:
+          NAME: '{{.ITEM}}'
+          STAGE: "true"
+    preconditions:
+      - which yq
+
+  check-package:
+    internal: true
+    vars:
+      FUNC_DIR: '{{.FUNCTIONS_DIR}}/{{.NAME}}'
+      PKG: '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml'
+    requires:
+      vars: [NAME]
+    cmds:
+      - |
+        cd '{{.FUNC_DIR}}'
+        if [ -f pyproject.toml ] || [ -f requirements.txt ]; then
+          deps=$([ -f pyproject.toml ] && echo pyproject.toml || echo requirements.txt)
+          expected=$(zip -j - code.py "$deps" | base64 -w0)
+          actual=$(yq '.spec.source.literal' '{{.PKG}}')
+        else
+          expected=$(base64 -w0 code.py)
+          actual=$(yq '.spec.deployment.literal' '{{.PKG}}')
+        fi
+        [ "$expected" = "$actual" ]
+    preconditions:
+      - test -f '{{.FUNC_DIR}}/code.py'
+      - test -f '{{.PKG}}'
+      - which yq
+      - which zip
+
+  check-packages:
+    internal: true
+    vars:
+      NAMES:
+        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {}
+    cmds:
+      - for: { var: NAMES, split: "\n" }
+        task: check-package
+        vars:
+          NAME: '{{.ITEM}}'
+    preconditions:
+      - which yq
+      - which zip
+
+  sync-all:
+    desc: Sync all Package CRDs from function source code
+    vars:
+      NAMES:
+        sh: find '{{.FUNCTIONS_DIR}}' -name "code.py" -exec dirname {} \; | xargs -I{} basename {}
+    cmds:
+      - for: { var: NAMES, split: "\n" }
+        task: sync-package
+        vars:
+          NAME: '{{.ITEM}}'
+    preconditions:
+      - which yq
+
+  new-function:
+    desc: Scaffold a new Fission function [NAME=required]
+    requires:
+      vars: [NAME]
+    cmds:
+      - mkdir -p '{{.FUNCTIONS_DIR}}/{{.NAME}}'
+      - |
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/pyproject.toml' << EOF
+        [project]
+        name = "{{.NAME}}"
+        version = "0.1.0"
+        requires-python = ">=3.11"
+        dependencies = []
+        EOF
+      - |
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/code.py' << 'PYEOF'
+        def main():
+            return "hello from new function", 200, {}
+        PYEOF
+      - |
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml' << EOF
+        ---
+        apiVersion: fission.io/v1
+        kind: Package
+        metadata:
+          name: {{.NAME}}
+          namespace: fission
+        spec:
+          environment:
+            name: python
+            namespace: fission
+          source:
+            type: literal
+            literal: ""
+        EOF
+      - |
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/function.yaml' << EOF
+        ---
+        apiVersion: fission.io/v1
+        kind: Function
+        metadata:
+          name: {{.NAME}}
+          namespace: fission
+        spec:
+          environment:
+            name: python
+            namespace: fission
+          package:
+            packageref:
+              name: {{.NAME}}
+              namespace: fission
+            functionName: main
+          executor:
+            executortype: poolmgr
+            requestsPerPod: 1
+          functionTimeout: 60
+          idleTimeout: 120
+        EOF
+      - |
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/trigger.yaml' << EOF
+        ---
+        apiVersion: fission.io/v1
+        kind: HTTPTrigger
+        metadata:
+          name: {{.NAME}}
+          namespace: fission
+        spec:
+          relativeurl: /{{.NAME}}
+          method: GET
+          functionref:
+            type: name
+            name: {{.NAME}}
+          ingressconfig:
+            annotations: {}
+        EOF
+      - |
+        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/kustomization.yaml' << 'EOF'
+        # yaml-language-server: $schema=https://json.schemastore.org/kustomization
+        ---
+        apiVersion: kustomize.config.k8s.io/v1beta1
+        kind: Kustomization
+        resources:
+          - package.yaml
+          - function.yaml
+          - trigger.yaml
+        EOF
+      - task: sync-package
+        vars: { NAME: '{{.NAME}}' }
+      - echo "scaffolded — add '- {{.NAME}}' to functions/kustomization.yaml"
+    preconditions:
+      - which yq
+      - which zip

@@ -19,6 +19,7 @@ env:
 
 includes:
   bootstrap: .taskfiles/bootstrap
+  fission: .taskfiles/fission
   kubernetes: .taskfiles/kubernetes
   synology: .taskfiles/synology
   talos: .taskfiles/talos

@@ -1,0 +1,18 @@
+amends "package://github.com/jdx/hk/releases/download/v1.44.0/hk@1.44.0#/Config.pkl"
+
+hooks = new {
+  ["pre-commit"] {
+    fix = true
+    stash = "git"
+    steps = new {
+      ["fission-sync"] = new Step {
+        glob = new Listing<String> {
+          "kubernetes/apps/fission/functions/**/*.py"
+          "kubernetes/apps/fission/functions/**/pyproject.toml"
+        }
+        check = "task fission:check-packages -- {{files}}"
+        fix = "task fission:sync-packages -- {{files}}"
+      }
+    }
+  }
+}
