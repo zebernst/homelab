@@ -5,8 +5,14 @@ hooks = new {
     fix = true
     stash = "git"
     steps = new {
-      ["fission-sync"] = new Step {
+      ["fission-py"] = new Step {
         glob = "kubernetes/apps/fission/functions/**/*.py"
+        check = "task fission:check-packages -- {{files}}"
+        fix = "task fission:sync-packages -- {{files}}"
+      }
+      ["fission-toml"] = new Step {
+        glob = "kubernetes/apps/fission/functions/**/pyproject.toml"
+        check = "task fission:check-packages -- {{files}}"
         fix = "task fission:sync-packages -- {{files}}"
       }
     }
