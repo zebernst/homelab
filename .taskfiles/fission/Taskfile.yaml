@@ -3,7 +3,7 @@
 version: '3'
 
 vars:
-  FUNCTIONS_DIR: '{{.ROOT_DIR}}/kubernetes/apps/fission-system/functions/app'
+  FUNCTIONS_DIR: '{{.ROOT_DIR}}/kubernetes/apps/fission/functions/app'
 
 tasks:
 
@@ -11,7 +11,7 @@ tasks:
     desc: Regenerate Package CRDs for any staged function code changes
     cmds:
       - |
-        staged=$(git diff --cached --name-only --diff-filter=ACM | grep -E 'kubernetes/apps/fission-system/functions/app/.+/code\.py$' || true)
+        staged=$(git diff --cached --name-only --diff-filter=ACM | grep -E 'kubernetes/apps/fission/functions/app/.+/code\.py$' || true)
         if [ -z "$staged" ]; then
           exit 0
         fi
