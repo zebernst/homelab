@@ -1,0 +1,104 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+---
+name: Build Containers
+
+on:
+  push:
+    branches: [main]
+    paths: [containers/**]
+  pull_request:
+    branches: [main]
+    paths: [containers/**]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    name: Prepare Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+      has_containers: ${{ steps.set.outputs.has_containers }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Determine containers to build
+        id: set
+        run: |
+          all() {
+            find containers -mindepth 1 -maxdepth 1 -type d | sed 's|.*/||' | sort | awk 'NF' | jq -R . | jq -sc .
+          }
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            names=$(all)
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            names=$(git diff --name-only "origin/${{ github.base_ref }}" HEAD -- containers/ \
+              | sed 's|containers/||;s|/.*||' | sort -u | awk 'NF' | jq -R . | jq -sc .)
+          else
+            before="${{ github.event.before }}"
+            if [ "$before" = "0000000000000000000000000000000000000000" ]; then
+              names=$(all)
+            else
+              names=$(git diff --name-only "$before" "${{ github.sha }}" -- containers/ \
+                | sed 's|containers/||;s|/.*||' | sort -u | awk 'NF' | jq -R . | jq -sc .)
+            fi
+          fi
+          echo "matrix={\"container\":$names}" >> "$GITHUB_OUTPUT"
+          [ "$names" != "[]" ] && echo "has_containers=true" >> "$GITHUB_OUTPUT" || echo "has_containers=false" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.container }}
+    needs: prepare
+    if: needs.prepare.outputs.has_containers == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Generate Token
+        uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: "${{ secrets.BOT_APP_ID }}"
+          private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/zebernst/${{ matrix.container }}
+          tags: |
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: containers/${{ matrix.container }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.container }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.container }}

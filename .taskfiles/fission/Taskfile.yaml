@@ -11,17 +11,27 @@ tasks:
     desc: Sync Package CRD literal from function source [NAME=required] [STAGE=false]
     vars:
       STAGE: '{{.STAGE | default "false"}}'
-      PY: '{{.FUNCTIONS_DIR}}/{{.NAME}}/code.py'
+      FUNC_DIR: '{{.FUNCTIONS_DIR}}/{{.NAME}}'
       PKG: '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml'
     requires:
       vars: [NAME]
     cmds:
-      - b64=$(base64 -w0 '{{.PY}}') && yq -i ".spec.deployment.literal = \"$b64\"" '{{.PKG}}'
+      - |
+        cd '{{.FUNC_DIR}}'
+        if [ -f pyproject.toml ] || [ -f requirements.txt ]; then
+          deps=$([ -f pyproject.toml ] && echo pyproject.toml || echo requirements.txt)
+          b64=$(zip -j - code.py "$deps" | base64 -w0)
+          yq -i ".spec.source.type = \"literal\" | .spec.source.literal = \"$b64\" | del(.spec.deployment)" '{{.PKG}}'
+        else
+          b64=$(base64 -w0 code.py)
+          yq -i ".spec.deployment.type = \"literal\" | .spec.deployment.literal = \"$b64\" | del(.spec.source)" '{{.PKG}}'
+        fi
       - '[ "{{.STAGE}}" != "true" ] || git add {{.PKG}}'
     preconditions:
-      - test -f '{{.PY}}'
+      - test -f '{{.FUNC_DIR}}/code.py'
       - test -f '{{.PKG}}'
       - which yq
+      - which zip
 
   sync-packages:
     desc: Sync Package CRDs for the given code files and stage changes (called by hk) [files...]
@@ -133,3 +143,4 @@ tasks:
       - echo "scaffolded — add '- {{.NAME}}' to functions/app/kustomization.yaml"
     preconditions:
       - which yq
+      - which zip
