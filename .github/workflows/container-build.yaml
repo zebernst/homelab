@@ -10,6 +10,11 @@ on:
     branches: [main]
     paths: [containers/**]
   workflow_dispatch:
+    inputs:
+      container:
+        description: Container image to build (leave empty to build all)
+        required: false
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -31,8 +36,11 @@ jobs:
       - name: Determine containers to build
         id: set
         run: |
+          input="${{ inputs.container }}"
           base="${{ github.event.pull_request.base.sha || github.event.before }}"
-          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+          if [ -n "$input" ]; then
+            names=("$input")
+          elif [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
             readarray -t names < <(find containers -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort)
           else
             readarray -t names < <(git diff --name-only "$base" "${{ github.sha }}" -- containers/ | cut -d/ -f2 | sort -u | awk 'NF')
@@ -78,9 +86,8 @@ jobs:
         id: meta
         with:
           images: ghcr.io/zebernst/${{ matrix.container }}
-          tags: |
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
+          flavor: latest=auto
+          tags: type=sha
 
       - name: Build and push
         uses: docker/build-push-action@v6
