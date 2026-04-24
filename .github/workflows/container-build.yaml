@@ -30,26 +30,41 @@ jobs:
 
       - name: Determine containers to build
         id: set
-        run: |
-          all() {
-            find containers -mindepth 1 -maxdepth 1 -type d | sed 's|.*/||' | sort | awk 'NF' | jq -R . | jq -sc .
-          }
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            names=$(all)
-          elif [ "${{ github.event_name }}" = "pull_request" ]; then
-            names=$(git diff --name-only "origin/${{ github.base_ref }}" HEAD -- containers/ \
-              | sed 's|containers/||;s|/.*||' | sort -u | awk 'NF' | jq -R . | jq -sc .)
-          else
-            before="${{ github.event.before }}"
-            if [ "$before" = "0000000000000000000000000000000000000000" ]; then
-              names=$(all)
-            else
-              names=$(git diff --name-only "$before" "${{ github.sha }}" -- containers/ \
-                | sed 's|containers/||;s|/.*||' | sort -u | awk 'NF' | jq -R . | jq -sc .)
-            fi
-          fi
-          echo "matrix={\"container\":$names}" >> "$GITHUB_OUTPUT"
-          [ "$names" != "[]" ] && echo "has_containers=true" >> "$GITHUB_OUTPUT" || echo "has_containers=false" >> "$GITHUB_OUTPUT"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const { execSync } = require('child_process');
+
+            const allContainers = () =>
+              fs.readdirSync('containers')
+                .filter(d => fs.statSync(`containers/${d}`).isDirectory())
+                .sort();
+
+            const changedContainers = (base, head) => {
+              const out = execSync(`git diff --name-only ${base} ${head} -- containers/`).toString();
+              return [...new Set(
+                out.split('\n')
+                  .filter(Boolean)
+                  .map(p => p.split('/')[1])
+                  .filter(Boolean)
+              )].sort();
+            };
+
+            let names;
+            if (context.eventName === 'workflow_dispatch') {
+              names = allContainers();
+            } else if (context.eventName === 'pull_request') {
+              names = changedContainers(`origin/${context.payload.pull_request.base.ref}`, 'HEAD');
+            } else {
+              const before = context.payload.before ?? '';
+              names = before && before !== '0'.repeat(40)
+                ? changedContainers(before, context.sha)
+                : allContainers();
+            }
+
+            core.setOutput('matrix', JSON.stringify({ container: names }));
+            core.setOutput('has_containers', String(names.length > 0));
 
   build:
     name: Build ${{ matrix.container }}
