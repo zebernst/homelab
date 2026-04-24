@@ -15,9 +15,6 @@ spec:
         name: fission-charts
         namespace: flux-system
 
-  install:
-    createNamespace: true
-
   values:
     defaultNamespace: fission
     routerServiceType: LoadBalancer
