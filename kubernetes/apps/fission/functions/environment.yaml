@@ -2,7 +2,7 @@
 apiVersion: fission.io/v1
 kind: Environment
 metadata:
-  name: python
+  name: python-fastapi
   namespace: fission
 spec:
   version: 2

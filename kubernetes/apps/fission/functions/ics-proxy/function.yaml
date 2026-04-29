@@ -6,7 +6,7 @@ metadata:
   namespace: fission
 spec:
   environment:
-    name: python
+    name: python-fastapi
     namespace: fission
   package:
     packageref:
