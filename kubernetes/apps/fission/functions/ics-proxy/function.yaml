@@ -16,9 +16,6 @@ spec:
   secrets:
     - name: ics-proxy-secret
       namespace: fission
-  configmaps:
-    - name: ics-proxy-config
-      namespace: fission
   InvokeStrategy:
     StrategyType: execution
     ExecutionStrategy:

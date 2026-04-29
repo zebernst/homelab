@@ -1,9 +1,0 @@
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ics-proxy-config
-  namespace: fission
-data:
-  on-call.pattern: "^SUMMARY:.*$"
-  on-call.replacement: "SUMMARY:SmarterDx: On Call"
