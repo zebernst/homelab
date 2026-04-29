@@ -9,4 +9,5 @@ if [ -f "${SRC_PKG}/pyproject.toml" ]; then
 elif [ -f "${SRC_PKG}/requirements.txt" ]; then
     uv pip install --no-cache -r "${SRC_PKG}/requirements.txt" -t "${SRC_PKG}"
 fi
+cp -r "${SRC_PKG}" "${DEPLOY_PKG}"
 EOF
