@@ -8,7 +8,7 @@ spec:
   hostnames:
     - fn.zebernst.dev
   parentRefs:
-    - name: internal
+    - name: tailscale
       namespace: kube-system
       sectionName: https
   rules:
