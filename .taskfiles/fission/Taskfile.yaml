@@ -150,7 +150,7 @@ tasks:
             packageref:
               name: {{.NAME}}
               namespace: fission
-            functionName: main
+            functionName: code.main
           executor:
             executortype: poolmgr
             requestsPerPod: 1
