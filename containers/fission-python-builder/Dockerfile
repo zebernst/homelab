@@ -11,4 +11,5 @@ elif [ -f "${SRC_PKG}/requirements.txt" ]; then
     uv pip install --no-cache -r "${SRC_PKG}/requirements.txt" -t "${SRC_PKG}"
 fi
 cp -r "${SRC_PKG}" "${DEPLOY_PKG}"
+chmod -R a+rw "${DEPLOY_PKG}"
 EOF
