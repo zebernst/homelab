@@ -14,8 +14,8 @@ def main() -> tuple[str, int, dict[str, str]]:
 
     content = httpx.get(url).text
 
-    # Unfold ICS line continuations (RFC 5545: CRLF + space/tab)
     unfolded = re.sub(r"\r\n[ \t]", "", content)
     renamed = re.sub(pattern, replacement, unfolded, flags=re.MULTILINE)
+    all_day = re.sub(r"^(DTSTART|DTEND)[^:]*:(\d{8})T[\dZ]+$", r"\1;VALUE=DATE:\2", renamed, flags=re.MULTILINE)
 
-    return renamed, 200, {"Content-Type": "text/calendar; charset=utf-8"}
+    return all_day, 200, {"Content-Type": "text/calendar; charset=utf-8"}
