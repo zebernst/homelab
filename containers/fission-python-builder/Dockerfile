@@ -4,7 +4,10 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /usr/local/bin/uv
 COPY --chmod=755 <<'EOF' /usr/local/bin/build
 #!/bin/sh
 set -e
-if [ -f "${SRC_PKG}/pyproject.toml" ]; then
+if [ -f "${SRC_PKG}/uv.lock" ]; then
+    uv export --frozen --no-dev --project "${SRC_PKG}" -o /tmp/requirements.txt
+    uv pip install --no-cache --link-mode=copy -r /tmp/requirements.txt -t "${SRC_PKG}"
+elif [ -f "${SRC_PKG}/pyproject.toml" ]; then
     uv pip compile "${SRC_PKG}/pyproject.toml" -o /tmp/requirements.txt
     uv pip install --no-cache --link-mode=copy -r /tmp/requirements.txt -t "${SRC_PKG}"
 elif [ -f "${SRC_PKG}/requirements.txt" ]; then
