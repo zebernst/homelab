@@ -1,5 +1,5 @@
 [project]
-name = "ics-on-call"
+name = "ics-proxy"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [

@@ -2,7 +2,7 @@
 apiVersion: fission.io/v1
 kind: Function
 metadata:
-  name: ics-on-call
+  name: ics-proxy
   namespace: fission
 spec:
   environment:
@@ -10,14 +10,14 @@ spec:
     namespace: fission
   package:
     packageref:
-      name: ics-on-call
+      name: ics-proxy
       namespace: fission
     functionName: main.main
   secrets:
-    - name: ics-on-call-secret
+    - name: ics-proxy-secret
       namespace: fission
   configmaps:
-    - name: ics-on-call-config
+    - name: ics-proxy-config
       namespace: fission
   InvokeStrategy:
     StrategyType: execution
