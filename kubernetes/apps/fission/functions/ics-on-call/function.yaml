@@ -19,5 +19,9 @@ spec:
   configmaps:
     - name: ics-on-call-config
       namespace: fission
+  InvokeStrategy:
+    StrategyType: execution
+    ExecutionStrategy:
+      ExecutorType: poolmgr
   functionTimeout: 60
   idletimeout: 120
