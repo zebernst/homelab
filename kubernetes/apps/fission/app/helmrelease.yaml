@@ -17,6 +17,7 @@ spec:
 
   values:
     defaultNamespace: fission
+    pullPolicy: Always
     routerServiceType: LoadBalancer
     analytics: false
     persistence:
