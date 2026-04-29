@@ -7,8 +7,153 @@ vars:
 
 tasks:
 
-  sync-package:
-    desc: Sync Package CRD literal from function source [NAME=required] [STAGE=false]
+  # ── Public CLI ──────────────────────────────────────────────────
+
+  sync:
+    desc: Sync package literal from source and rebuild on cluster [NAME=required]
+    requires:
+      vars: [NAME]
+    cmds:
+      - task: _update-literal
+        vars: { NAME: '{{.NAME}}' }
+      - task: rebuild
+        vars: { NAME: '{{.NAME}}' }
+
+  sync-all:
+    desc: Sync all packages from source and rebuild on cluster
+    vars:
+      NAMES:
+        sh: find '{{.FUNCTIONS_DIR}}' -name "main.py" -exec dirname {} \; | xargs -I{} basename {}
+    cmds:
+      - for: { var: NAMES, split: "\n" }
+        task: sync
+        vars:
+          NAME: '{{.ITEM}}'
+
+  check:
+    desc: Check if package literal matches source [NAME=required]
+    requires:
+      vars: [NAME]
+    cmds:
+      - task: _check-literal
+        vars: { NAME: '{{.NAME}}' }
+
+  rebuild:
+    desc: Force rebuild package on cluster without resyncing source [NAME=required]
+    vars:
+      PKG: '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml'
+    requires:
+      vars: [NAME]
+    cmds:
+      - fission package delete --name '{{.NAME}}' --namespace fission --force
+      - kubectl apply -f '{{.PKG}}'
+    preconditions:
+      - test -f '{{.PKG}}'
+
+  new-function:
+    desc: Scaffold a new Fission function [NAME=required]
+    requires:
+      vars: [NAME]
+    vars:
+      FUNC_DIR: '{{.FUNCTIONS_DIR}}/{{.NAME}}'
+      PKG: '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml'
+    cmds:
+      - mkdir -p '{{.FUNC_DIR}}'
+      - |
+        cat > '{{.FUNC_DIR}}/pyproject.toml' << EOF
+        [project]
+        name = "{{.NAME}}"
+        version = "0.1.0"
+        requires-python = ">=3.11"
+        dependencies = []
+        EOF
+      - |
+        cat > '{{.FUNC_DIR}}/main.py' << 'PYEOF'
+        def main():
+            return "hello from new function", 200, {}
+        PYEOF
+      - |
+        cat > '{{.PKG}}' << EOF
+        ---
+        apiVersion: fission.io/v1
+        kind: Package
+        metadata:
+          name: {{.NAME}}
+          namespace: fission
+        spec:
+          environment:
+            name: python
+            namespace: fission
+          source:
+            type: literal
+            literal: ""
+        EOF
+      - task: _update-literal
+        vars: { NAME: '{{.NAME}}' }
+      - kubectl apply -f '{{.PKG}}'
+      - fission fn create --name '{{.NAME}}' --env python --pkg '{{.NAME}}' --entrypoint main.main --namespace fission
+      - fission route create --name '{{.NAME}}' --method GET --url '/{{.NAME}}' --function '{{.NAME}}' --namespace fission --fnNamespace fission
+      - |
+        kubectl get function {{.NAME}} -n fission -o yaml \
+          | yq 'del(.metadata.resourceVersion,.metadata.uid,.metadata.creationTimestamp,.metadata.generation,.metadata.managedFields,.metadata.annotations,.status)' \
+          > '{{.FUNC_DIR}}/function.yaml'
+      - |
+        kubectl get httptrigger {{.NAME}} -n fission -o yaml \
+          | yq 'del(.metadata.resourceVersion,.metadata.uid,.metadata.creationTimestamp,.metadata.generation,.metadata.managedFields,.metadata.annotations,.status)' \
+          > '{{.FUNC_DIR}}/trigger.yaml'
+      - |
+        cat > '{{.FUNC_DIR}}/kustomization.yaml' << 'EOF'
+        # yaml-language-server: $schema=https://json.schemastore.org/kustomization
+        ---
+        apiVersion: kustomize.config.k8s.io/v1beta1
+        kind: Kustomization
+        resources:
+          - package.yaml
+          - function.yaml
+          - trigger.yaml
+        EOF
+      - echo "scaffolded — add '- {{.NAME}}' to functions/kustomization.yaml"
+    preconditions:
+      - which yq
+      - which zip
+      - which fission
+      - which kubectl
+
+  # ── hk hook entry points ────────────────────────────────────────
+  # Called by hk pre-commit; update literals and stage, no cluster ops.
+
+  hook-fix:
+    vars:
+      NAMES:
+        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {} | sort -u
+    cmds:
+      - for: { var: NAMES, split: "\n" }
+        task: _update-literal
+        vars:
+          NAME: '{{.ITEM}}'
+          STAGE: "true"
+    preconditions:
+      - which yq
+      - which zip
+
+  hook-check:
+    vars:
+      NAMES:
+        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {} | sort -u
+    cmds:
+      - for: { var: NAMES, split: "\n" }
+        task: _check-literal
+        vars:
+          NAME: '{{.ITEM}}'
+    preconditions:
+      - which yq
+      - which zip
+
+  # ── Internal ────────────────────────────────────────────────────
+
+  _update-literal:
+    internal: true
+    silent: true
     vars:
       STAGE: '{{.STAGE | default "false"}}'
       FUNC_DIR: '{{.FUNCTIONS_DIR}}/{{.NAME}}'
@@ -34,21 +179,9 @@ tasks:
       - which yq
       - which zip
 
-  sync-packages:
-    vars:
-      NAMES:
-        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {} | sort -u
-    cmds:
-      - for: { var: NAMES, split: "\n" }
-        task: sync-package
-        vars:
-          NAME: '{{.ITEM}}'
-          STAGE: "true"
-    preconditions:
-      - which yq
-
-  check-package:
+  _check-literal:
     internal: true
+    silent: true
     vars:
       FUNC_DIR: '{{.FUNCTIONS_DIR}}/{{.NAME}}'
       PKG: '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml'
@@ -70,123 +203,5 @@ tasks:
     preconditions:
       - test -f '{{.FUNC_DIR}}/main.py'
       - test -f '{{.PKG}}'
-      - which yq
-      - which zip
-
-  check-packages:
-    vars:
-      NAMES:
-        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {} | sort -u
-    cmds:
-      - for: { var: NAMES, split: "\n" }
-        task: check-package
-        vars:
-          NAME: '{{.ITEM}}'
-    preconditions:
-      - which yq
-      - which zip
-
-  sync-all:
-    desc: Sync all Package CRDs from function source code
-    vars:
-      NAMES:
-        sh: find '{{.FUNCTIONS_DIR}}' -name "main.py" -exec dirname {} \; | xargs -I{} basename {}
-    cmds:
-      - for: { var: NAMES, split: "\n" }
-        task: sync-package
-        vars:
-          NAME: '{{.ITEM}}'
-    preconditions:
-      - which yq
-
-  new-function:
-    desc: Scaffold a new Fission function [NAME=required]
-    requires:
-      vars: [NAME]
-    cmds:
-      - mkdir -p '{{.FUNCTIONS_DIR}}/{{.NAME}}'
-      - |
-        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/pyproject.toml' << EOF
-        [project]
-        name = "{{.NAME}}"
-        version = "0.1.0"
-        requires-python = ">=3.11"
-        dependencies = []
-        EOF
-      - |
-        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/main.py' << 'PYEOF'
-        def main():
-            return "hello from new function", 200, {}
-        PYEOF
-      - |
-        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml' << EOF
-        ---
-        apiVersion: fission.io/v1
-        kind: Package
-        metadata:
-          name: {{.NAME}}
-          namespace: fission
-        spec:
-          environment:
-            name: python
-            namespace: fission
-          source:
-            type: literal
-            literal: ""
-        EOF
-      - |
-        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/function.yaml' << EOF
-        ---
-        apiVersion: fission.io/v1
-        kind: Function
-        metadata:
-          name: {{.NAME}}
-          namespace: fission
-        spec:
-          environment:
-            name: python
-            namespace: fission
-          package:
-            packageref:
-              name: {{.NAME}}
-              namespace: fission
-            functionName: main.main
-          InvokeStrategy:
-            StrategyType: execution
-            ExecutionStrategy:
-              ExecutorType: poolmgr
-          functionTimeout: 60
-          idletimeout: 120
-        EOF
-      - |
-        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/trigger.yaml' << EOF
-        ---
-        apiVersion: fission.io/v1
-        kind: HTTPTrigger
-        metadata:
-          name: {{.NAME}}
-          namespace: fission
-        spec:
-          relativeurl: /{{.NAME}}
-          method: GET
-          functionref:
-            type: name
-            name: {{.NAME}}
-        EOF
-      - |
-        cat > '{{.FUNCTIONS_DIR}}/{{.NAME}}/kustomization.yaml' << 'EOF'
-        # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-        ---
-        apiVersion: kustomize.config.k8s.io/v1beta1
-        kind: Kustomization
-        resources:
-          - package.yaml
-          - function.yaml
-          - trigger.yaml
-        EOF
-      - task: sync-package
-        vars: { NAME: '{{.NAME}}' }
-      - echo "scaffolded — add '- {{.NAME}}' to functions/kustomization.yaml"
-    preconditions:
       - which yq
       - which zip
