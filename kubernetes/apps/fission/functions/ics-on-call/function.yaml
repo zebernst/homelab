@@ -12,7 +12,7 @@ spec:
     packageref:
       name: ics-on-call
       namespace: fission
-    functionName: code.main
+    functionName: main.main
   secrets:
     - name: ics-on-call-secret
       namespace: fission
