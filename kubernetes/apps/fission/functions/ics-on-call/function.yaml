@@ -19,8 +19,5 @@ spec:
   configmaps:
     - name: ics-on-call-config
       namespace: fission
-  executor:
-    executortype: poolmgr
-    requestsPerPod: 1
   functionTimeout: 60
   idleTimeout: 120
