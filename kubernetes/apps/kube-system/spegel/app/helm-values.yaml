@@ -4,9 +4,12 @@ spegel:
   containerdRegistryConfigPath: /etc/cri/conf.d/hosts
   mirroredRegistries:
     - https://docker.io
+    - https://ghcr.io
     - https://registry.k8s.io
     - https://quay.io
     - https://public.ecr.aws
+  registryFilters:
+    - ghcr\.io/zebernst/
 service:
   registry:
     hostPort: 29999
