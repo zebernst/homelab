@@ -20,4 +20,4 @@ spec:
     - name: ics-on-call-config
       namespace: fission
   functionTimeout: 60
-  idleTimeout: 120
+  idletimeout: 120
