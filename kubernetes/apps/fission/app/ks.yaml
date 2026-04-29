@@ -11,6 +11,8 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
+    - name: fission-crds
+      namespace: fission
     - name: onepassword
       namespace: external-secrets
     - name: rook-ceph-cluster

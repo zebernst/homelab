@@ -6,5 +6,6 @@ namespace: fission
 components:
   - ../../components/common
 resources:
+  - crds/ks.yaml
   - app/ks.yaml
   - functions/ks.yaml
