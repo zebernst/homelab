@@ -18,9 +18,6 @@ spec:
   values:
     defaultNamespace: fission
     routerServiceType: LoadBalancer
-    router:
-      svcAnnotations:
-        external-dns.alpha.kubernetes.io/hostname: fn.zebernst.dev
     analytics: false
     persistence:
       enabled: true
