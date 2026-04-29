@@ -19,6 +19,6 @@ def _to_all_day_inclusive(m: re.Match) -> str:
 
 def jsm_on_call(url: str) -> str:
     ical = _fetch(url)
-    ical = re.sub(r"^SUMMARY:.*$", "SUMMARY:SmarterDx: On Call", ical, flags=re.MULTILINE)
+    ical = re.sub(r"^SUMMARY:.*$", "SUMMARY:Platform: On Call", ical, flags=re.MULTILINE)
     ical = re.sub(r"^(DTSTART|DTEND)[^:]*:(\d{8})T[\dZ]+$", _to_all_day_inclusive, ical, flags=re.MULTILINE)
     return ical
