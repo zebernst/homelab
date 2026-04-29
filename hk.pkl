@@ -6,12 +6,12 @@ hooks = new {
     stash = "git"
     steps = new {
       ["fission-sync"] = new Step {
-        glob = new Listing<String> {
-          "kubernetes/apps/fission/functions/**/*.py"
+        glob = List(
+          "kubernetes/apps/fission/functions/**/*.py",
           "kubernetes/apps/fission/functions/**/pyproject.toml"
-        }
-        check = "task fission:check-packages -- {{files}}"
-        fix = "task fission:sync-packages -- {{files}}"
+        )
+        check = "task --silent fission:check-packages -- {{files}}"
+        fix = "task --silent fission:sync-packages -- {{files}}"
       }
     }
   }

@@ -21,7 +21,7 @@ tasks:
         if [ -f pyproject.toml ] || [ -f requirements.txt ]; then
           deps=$([ -f pyproject.toml ] && echo pyproject.toml || echo requirements.txt)
           lock=$([ -f uv.lock ] && echo uv.lock || echo "")
-          b64=$(zip -j - *.py "$deps" $lock | base64 -w0)
+          b64=$(zip -jq - *.py "$deps" $lock | base64 -w0)
           yq -i ".spec.source.type = \"literal\" | .spec.source.literal = \"$b64\" | del(.spec.deployment)" '{{.PKG}}'
         else
           b64=$(base64 -w0 main.py)
@@ -35,10 +35,9 @@ tasks:
       - which zip
 
   sync-packages:
-    internal: true
     vars:
       NAMES:
-        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {}
+        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {} | sort -u
     cmds:
       - for: { var: NAMES, split: "\n" }
         task: sync-package
@@ -61,7 +60,7 @@ tasks:
         if [ -f pyproject.toml ] || [ -f requirements.txt ]; then
           deps=$([ -f pyproject.toml ] && echo pyproject.toml || echo requirements.txt)
           lock=$([ -f uv.lock ] && echo uv.lock || echo "")
-          expected=$(zip -j - *.py "$deps" $lock | base64 -w0)
+          expected=$(zip -jq - *.py "$deps" $lock | base64 -w0)
           actual=$(yq '.spec.source.literal' '{{.PKG}}')
         else
           expected=$(base64 -w0 main.py)
@@ -75,10 +74,9 @@ tasks:
       - which zip
 
   check-packages:
-    internal: true
     vars:
       NAMES:
-        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {}
+        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {} | sort -u
     cmds:
       - for: { var: NAMES, split: "\n" }
         task: check-package
