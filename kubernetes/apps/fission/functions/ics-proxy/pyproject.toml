@@ -3,6 +3,19 @@ name = "ics-proxy"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi",
     "httpx",
+]
+
+[dependency-groups]
+dev = [
+    "fastapi",
+]
+
+# Constrains dev deps to match the versions bundled in the fission python-fastapi-env image.
+# Source: https://github.com/fission/environments/blob/master/python-fastapi/requirements.txt
+# Update these when bumping the image version in environment.yaml.
+[tool.uv]
+constraint-dependencies = [
+    "fastapi==0.114.0",
+    "uvicorn==0.30.6",
 ]
