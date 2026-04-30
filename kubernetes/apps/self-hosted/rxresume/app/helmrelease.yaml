@@ -44,7 +44,7 @@ spec:
           rxresume:
             image:
               repository: ghcr.io/amruthpillai/reactive-resume
-              tag: v5.0.11@sha256:343deeeb05b3c844026bbd6f37fbcb41dac64e9185a0f0eecc199748ad724a4f
+              tag: v5.0.20@sha256:1e0cce61586d1a10018e346bf5a839169eb86467303eef6c9b53e0994efdf7b3
             env:
               # Server
               TZ: America/Chicago
