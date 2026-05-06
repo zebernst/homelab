@@ -6,11 +6,11 @@ metadata:
   name: dawarich
 spec:
   hostnames:
-    - dawarich.internal
+    - dawarich.zebernst.dev
   parentRefs:
     - name: internal
       namespace: kube-system
-      sectionName: https-internal
+      sectionName: https
   rules:
     - backendRefs:
         - name: dawarich
