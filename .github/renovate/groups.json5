@@ -74,10 +74,22 @@
       },
     },
     {
-      description: "CloudNativePG Group",
-      groupName: "cloudnative-pg",
+      description: "CloudNativePG Operator",
+      groupName: "cloudnative-pg-operator",
+      matchDatasources: ["helm"],
+      matchPackageNames: ["cloudnative-pg"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
+      description: "CloudNativePG Postgres Images",
+      groupName: "cloudnative-pg-postgres",
       matchDatasources: ["docker"],
-      matchPackageNames: ["/cloudnative-pg/"],
+      matchPackageNames: [
+        "ghcr.io/cloudnative-pg/postgresql",
+        "ghcr.io/cloudnative-pg/postgis",
+      ],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
