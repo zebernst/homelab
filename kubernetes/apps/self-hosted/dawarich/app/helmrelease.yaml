@@ -117,6 +117,19 @@ spec:
           metrics:
             port: 9394
 
+    route:
+      app:
+        hostnames:
+          - dawarich.zebernst.dev
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: 3000
+
     serviceMonitor:
       app:
         serviceName: *app
