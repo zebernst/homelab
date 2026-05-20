@@ -21,6 +21,30 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
+  wait: true
+  interval: 1h
+  retryInterval: 1m
+  timeout: 5m
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: holmesgpt-checks
+  namespace: ai
+spec:
+  targetNamespace: ai
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: holmesgpt
+  dependsOn:
+    - name: holmesgpt
+      namespace: ai
+  path: kubernetes/apps/ai/holmesgpt/checks
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
   wait: false
   interval: 1h
   retryInterval: 1m
