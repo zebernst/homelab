@@ -106,11 +106,11 @@ spec:
   timeout: 120
   mode: monitor
   query: >-
-    Check Cilium and network health across the cluster. Verify all Cilium agents
-    are running and healthy, check for recent policy drops in Hubble that indicate
-    unexpected traffic blocks, look for DNS resolution failures, and check for
-    any pods failing connectivity checks. Query Victoria Logs for cilium or
-    coredns error messages.
+    Check Cilium and network health across the cluster. Verify all Cilium agent
+    pods are running and healthy via the Kubernetes API. Use Prometheus metrics
+    (cilium_*, hubble_*) to check for policy drops, DNS resolution failures,
+    and endpoint health. Check for any pods failing connectivity checks. Query
+    Victoria Logs for cilium or coredns error messages.
 
     If a persistent network issue requires a config change: first search the
     zebernst/homelab repository for any open pull requests whose branch name

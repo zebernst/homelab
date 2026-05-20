@@ -53,9 +53,9 @@ spec:
         config:
           api_url: "http://victoria-logs-server.observability.svc.cluster.local:9428"
       cilium/core:
-        enabled: true
+        enabled: false
       hubble/observability:
-        enabled: true
+        enabled: false
       connectivity_check:
         enabled: true
       bash:
