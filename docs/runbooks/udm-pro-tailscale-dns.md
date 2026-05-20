@@ -1,8 +1,17 @@
 # UDM Pro: DNS over Tailscale stops working
 
-**Symptoms:** DNS queries from tailnet clients time out when routed through the UDM Pro. Tailscale connectivity itself is fine, but name resolution fails.
+## Context
 
-**Cause:** dnsmasq on UniFi OS only listens on traditional bridge interfaces (br0, br32, etc.) as defined in the auto-generated `/run/dnsmasq.dns.conf.d/main.conf`. The `tailscale0` interface is not included, so DNS requests arriving on it are silently dropped.
+Tailscale split DNS is configured to resolve `zebernst.dev` and `.internal` domains using the UDM Pro as the nameserver. This allows tailnet clients (phones, laptops off-site, etc.) to reach internally-hosted apps by name — DNS records for those apps are synced to the UDM Pro's dnsmasq via ExternalDNS.
+
+When this is working correctly, a query for e.g. `myapp.zebernst.dev` from a tailnet client:
+1. Tailscale MagicDNS routes the query to the UDM Pro's IP (per the split DNS nameserver config)
+2. The query arrives on the `tailscale0` interface of the UDM Pro
+3. dnsmasq resolves it from the records ExternalDNS has synced
+
+**Symptoms:** DNS queries for internal apps time out from tailnet clients (off-LAN). Apps are unreachable by hostname even though Tailscale connectivity itself is up. Devices on the local LAN are unaffected.
+
+**Cause:** dnsmasq on UniFi OS only listens on traditional bridge interfaces (br0, br32, etc.) as defined in the auto-generated `/run/dnsmasq.dns.conf.d/main.conf`. The `tailscale0` interface is not included, so DNS requests arriving from tailnet clients are silently dropped.
 
 ## Immediate fix
 
