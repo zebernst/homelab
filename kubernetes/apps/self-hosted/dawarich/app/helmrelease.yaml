@@ -97,7 +97,9 @@ spec:
               SELF_HOSTED: "true"
               STORE_GEODATA: "true"
               BACKGROUND_PROCESSING_CONCURRENCY: "5"
-              PROMETHEUS_EXPORTER_ENABLED: "false"
+              PROMETHEUS_EXPORTER_ENABLED: "true"
+              PROMETHEUS_EXPORTER_HOST: "127.0.0.1"
+              PROMETHEUS_EXPORTER_PORT: *metricsPort
             envFrom: *envFrom
             resources:
               requests:
