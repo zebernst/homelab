@@ -51,8 +51,6 @@ spec:
               SMTP_DOMAIN: zebernst.dev
               SMTP_FROM: noreply@zebernst.dev
               SMTP_STARTTLS: "false"
-              PHOTON_API_HOST: photon.self-hosted.svc.cluster.local
-              PHOTON_API_USE_HTTPS: "false"
             envFrom: &envFrom
               - secretRef:
                   name: dawarich-secret

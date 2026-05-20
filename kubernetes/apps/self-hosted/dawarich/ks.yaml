@@ -17,8 +17,6 @@ spec:
       namespace: database
     - name: onepassword
       namespace: external-secrets
-    - name: photon
-      namespace: self-hosted
     - name: rook-ceph-cluster
       namespace: rook-ceph
     - name: volsync
