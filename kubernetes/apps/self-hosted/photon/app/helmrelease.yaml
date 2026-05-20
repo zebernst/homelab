@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app photon
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      photon:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          seed-data:
+            image:
+              repository: docker.io/alpine
+              tag: "3"
+            command:
+              - /bin/sh
+              - -c
+              - |
+                if [ -d /photon/photon_data ] && [ "$(ls -A /photon/photon_data 2>/dev/null)" ]; then
+                  echo "Photon data already present, skipping download"
+                  exit 0
+                fi
+                apk add --no-cache wget
+                echo "Downloading Photon world data (~30GB compressed). This will take a while..."
+                wget -qO- https://download1.graphhopper.com/public/photon-db-latest.tar.bz2 | tar -xjf - -C /photon
+                echo "Download and extraction complete"
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                memory: 512Mi
+        containers:
+          photon:
+            image:
+              # renovate: datasource=docker
+              repository: komoot/photon
+              tag: "0.6.2"
+            args:
+              - -data-dir
+              - /photon/photon_data
+              - -listen-ip
+              - "0.0.0.0"
+              - -listen-port
+              - "2322"
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/?q=test
+                    port: 2322
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/?q=test
+                    port: 2322
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/?q=test
+                    port: 2322
+                  initialDelaySeconds: 60
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  # allow up to 30 min for index load after data download completes
+                  failureThreshold: 60
+            resources:
+              requests:
+                cpu: 100m
+                memory: 4Gi
+              limits:
+                memory: 8Gi
+
+    defaultPodOptions:
+      priorityClassName: internal-only
+
+    service:
+      photon:
+        controller: *app
+        ports:
+          http:
+            port: 80
+            targetPort: 2322
+
+    persistence:
+      data:
+        existingClaim: *app
+        globalMounts:
+          - path: /photon

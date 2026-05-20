@@ -15,10 +15,10 @@ spec:
   dependsOn:
     - name: cloudnative-pg
       namespace: database
-    - name: dragonfly-cluster
-      namespace: database
     - name: onepassword
       namespace: external-secrets
+    - name: photon
+      namespace: self-hosted
     - name: rook-ceph-cluster
       namespace: rook-ceph
     - name: volsync

@@ -33,7 +33,7 @@ spec:
               RAILS_ENV: production
               RAILS_LOG_TO_STDOUT: "true"
               RAILS_SERVE_STATIC_FILES: "true"
-              APPLICATION_HOSTS: "dawarich.zebernst.dev,localhost,127.0.0.1"
+              APPLICATION_HOSTS: "timeline.zebernst.dev,localhost,127.0.0.1"
               APPLICATION_PROTOCOL: https
               TIME_ZONE: America/Chicago
               SELF_HOSTED: "true"
@@ -43,9 +43,16 @@ spec:
               PROMETHEUS_EXPORTER_PORT: &metricsPort "9394"
               OIDC_ISSUER: https://id.zebernst.dev
               OIDC_PROVIDER_NAME: Pocket ID
-              OIDC_REDIRECT_URI: https://dawarich.zebernst.dev/users/auth/openid_connect/callback
+              OIDC_REDIRECT_URI: https://timeline.zebernst.dev/users/auth/openid_connect/callback
               OIDC_AUTO_REGISTER: "true"
               ALLOW_EMAIL_PASSWORD_REGISTRATION: "false"
+              SMTP_SERVER: smtp-relay.network.svc.cluster.local
+              SMTP_PORT: "25"
+              SMTP_DOMAIN: zebernst.dev
+              SMTP_FROM: noreply@zebernst.dev
+              SMTP_STARTTLS: "false"
+              PHOTON_API_HOST: photon.self-hosted.svc.cluster.local
+              PHOTON_API_USE_HTTPS: "false"
             envFrom: &envFrom
               - secretRef:
                   name: dawarich-secret
@@ -137,7 +144,7 @@ spec:
     route:
       app:
         hostnames:
-          - dawarich.zebernst.dev
+          - timeline.zebernst.dev
         parentRefs:
           - name: internal
             namespace: kube-system

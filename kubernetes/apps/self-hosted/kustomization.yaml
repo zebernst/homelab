@@ -15,6 +15,7 @@ resources:
   - mealie/ks.yaml
   - nocodb/ks.yaml
   - paperless/ks.yaml
+  - photon/ks.yaml
   - radicale/ks.yaml
   - rxresume/ks.yaml
   - unwrapped/ks.yaml
