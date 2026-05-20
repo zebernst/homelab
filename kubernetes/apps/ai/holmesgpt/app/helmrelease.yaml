@@ -93,4 +93,4 @@ spec:
           # Restrict to the minimum tools needed for PR proposals — no issue/action access
           tools: "get_file_contents,create_branch,create_or_update_file,create_pull_request,list_commits,get_me,get_pull_request"
         networkPolicy:
-          enabled: true
+          enabled: false

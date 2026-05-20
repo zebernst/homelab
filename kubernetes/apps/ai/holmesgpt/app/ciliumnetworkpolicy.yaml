@@ -60,17 +60,17 @@ spec:
         - ports:
             - port: "9428"
               protocol: TCP
-    # GitHub MCP sidecar (in-namespace, chart-managed port 8000)
+    # GitHub MCP server (separate pod in ai namespace)
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: ai
-            app.kubernetes.io/component: github-mcp
+            app.kubernetes.io/name: github-mcp-server
       toPorts:
         - ports:
             - port: "8000"
               protocol: TCP
 ---
-# GitHub MCP sidecar: only allowed to reach api.github.com.
+# GitHub MCP server: only allowed to reach api.github.com.
 # All other internet egress is denied.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -79,7 +79,7 @@ metadata:
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/component: github-mcp
+      app.kubernetes.io/name: github-mcp-server
   egress:
     # DNS (required to resolve api.github.com)
     - toEndpoints:
