@@ -57,6 +57,9 @@ spec:
                   httpGet:
                     path: /up
                     port: 3000
+                    httpHeaders:
+                      - name: Host
+                        value: localhost
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 5
@@ -69,6 +72,9 @@ spec:
                   httpGet:
                     path: /up
                     port: 3000
+                    httpHeaders:
+                      - name: Host
+                        value: localhost
                   initialDelaySeconds: 30
                   periodSeconds: 10
                   timeoutSeconds: 5
@@ -91,9 +97,7 @@ spec:
               SELF_HOSTED: "true"
               STORE_GEODATA: "true"
               BACKGROUND_PROCESSING_CONCURRENCY: "5"
-              PROMETHEUS_EXPORTER_ENABLED: "true"
-              PROMETHEUS_EXPORTER_HOST: "127.0.0.1"
-              PROMETHEUS_EXPORTER_PORT: *metricsPort
+              PROMETHEUS_EXPORTER_ENABLED: "false"
             envFrom: *envFrom
             resources:
               requests:
@@ -101,6 +105,17 @@ spec:
                 memory: 256Mi
               limits:
                 memory: 1Gi
+          redis:
+            image:
+              repository: docker.io/redis
+              tag: "7-alpine"
+            command: ["redis-server", "--save", "", "--loglevel", "warning"]
+            resources:
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
 
     defaultPodOptions:
       priorityClassName: internal-only
