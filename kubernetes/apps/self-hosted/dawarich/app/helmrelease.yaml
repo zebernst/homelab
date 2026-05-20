@@ -108,7 +108,7 @@ spec:
           redis:
             image:
               repository: docker.io/redis
-              tag: "7-alpine"
+              tag: "7.4-alpine"
             command: ["redis-server", "--save", "", "--loglevel", "warning"]
             resources:
               requests:
