@@ -14,13 +14,16 @@ spec:
     containers, OOMKilled pods in the last hour (cross-reference Prometheus
     kube_pod_container_status_last_terminated_reason), pods stuck in Pending
     for more than 10 minutes, and high restart counts. Query Victoria Logs for
-    related error messages from affected workloads. If you find issues that
-    require a configuration change to fix (e.g. resource limits too low, bad
-    image tag, missing secret), create a pull request in the zebernst/homelab
-    GitHub repository with the minimal GitOps patch needed, following the
-    existing Kustomize/Flux conventions in the repo. The PR branch should be
-    named fix/holmes-<issue-slug>. Do not apply any changes directly to the
-    cluster.
+    related error messages from affected workloads.
+
+    If you find issues that require a configuration change to fix (e.g. resource
+    limits too low, bad image tag, missing secret): first search the
+    zebernst/homelab repository for any open pull requests whose branch name
+    starts with fix/holmes- that address the same problem. If one already exists,
+    reference it in your analysis and do not open another. Only open a new pull
+    request if no existing one covers the issue. New PR branch names must follow
+    the pattern fix/holmes-<issue-slug>. Do not apply any changes directly to
+    the cluster.
 ---
 # Observability stack: Prometheus, AlertManager, Victoria Logs
 apiVersion: holmesgpt.dev/v1alpha1
@@ -36,9 +39,15 @@ spec:
     Check: Prometheus retention and storage usage (alert if >80% of retentionSize),
     whether AlertManager is receiving and routing alerts correctly, Victoria Logs
     ingestion rate and retention, and that all ServiceMonitors have active scrape
-    targets. Use Prometheus metrics to validate. Report any degradation or
-    misconfiguration, and propose a PR to zebernst/homelab if a config change
-    is needed to fix it.
+    targets. Use Prometheus metrics to validate.
+
+    If a configuration change is needed to fix a problem: first search the
+    zebernst/homelab repository for any open pull requests whose branch name
+    starts with fix/holmes- that address the same problem. If one already exists,
+    reference it in your analysis and do not open another. Only open a new pull
+    request if no existing one covers the issue. New PR branch names must follow
+    the pattern fix/holmes-<issue-slug>. Do not apply any changes directly to
+    the cluster.
 ---
 # Storage: Rook/Ceph cluster health and PVC status
 apiVersion: holmesgpt.dev/v1alpha1
@@ -54,8 +63,15 @@ spec:
     health status (ceph_health_status), OSD status, pool usage, and any
     degraded PGs. Check for PersistentVolumeClaims in a Pending or Lost state
     across all namespaces. Check for any Rook/Ceph operator warnings in Victoria
-    Logs. Report findings and propose a PR to zebernst/homelab if remediation
-    is needed.
+    Logs.
+
+    If remediation requires a configuration change: first search the
+    zebernst/homelab repository for any open pull requests whose branch name
+    starts with fix/holmes- that address the same problem. If one already exists,
+    reference it in your analysis and do not open another. Only open a new pull
+    request if no existing one covers the issue. New PR branch names must follow
+    the pattern fix/holmes-<issue-slug>. Do not apply any changes directly to
+    the cluster.
 ---
 # GitOps: Flux Kustomizations and HelmReleases
 apiVersion: holmesgpt.dev/v1alpha1
@@ -71,8 +87,14 @@ spec:
     Look for resources that are not Ready, have failed reconciliation, or are
     stuck in a retry loop. For any HelmRelease in a failed state, check Victoria
     Logs for the helm controller error messages to understand the root cause.
-    If the fix requires a values change or chart version bump in the GitOps repo,
-    propose a PR to zebernst/homelab with the fix.
+
+    If the fix requires a values change or chart version bump: first search the
+    zebernst/homelab repository for any open pull requests whose branch name
+    starts with fix/holmes- that address the same problem. If one already exists,
+    reference it in your analysis and do not open another. Only open a new pull
+    request if no existing one covers the issue. New PR branch names must follow
+    the pattern fix/holmes-<issue-slug>. Do not apply any changes directly to
+    the cluster.
 ---
 # Network: Cilium agent health and Hubble flow anomalies
 apiVersion: holmesgpt.dev/v1alpha1
@@ -88,6 +110,12 @@ spec:
     are running and healthy, check for recent policy drops in Hubble that indicate
     unexpected traffic blocks, look for DNS resolution failures, and check for
     any pods failing connectivity checks. Query Victoria Logs for cilium or
-    coredns error messages. Report any persistent network issues and propose a
-    PR to zebernst/homelab if a CiliumNetworkPolicy or Gateway config change
-    is needed.
+    coredns error messages.
+
+    If a persistent network issue requires a config change: first search the
+    zebernst/homelab repository for any open pull requests whose branch name
+    starts with fix/holmes- that address the same problem. If one already exists,
+    reference it in your analysis and do not open another. Only open a new pull
+    request if no existing one covers the issue. New PR branch names must follow
+    the pattern fix/holmes-<issue-slug>. Do not apply any changes directly to
+    the cluster.

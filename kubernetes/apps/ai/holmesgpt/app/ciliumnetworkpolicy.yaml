@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumnetworkpolicy_v2.json
 ---
-# Holmes core pod (server + operator): cluster-internal + Pushover for LLM-formulated alerts.
+# Holmes core pod (server + operator): cluster-internal only, no internet.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -68,13 +68,6 @@ spec:
       toPorts:
         - ports:
             - port: "8000"
-              protocol: TCP
-    # Pushover API — LLM sends rich notifications via bash/curl at end of each check
-    - toFQDNs:
-        - matchName: "api.pushover.net"
-      toPorts:
-        - ports:
-            - port: "443"
               protocol: TCP
 ---
 # GitHub MCP sidecar: only allowed to reach api.github.com.
