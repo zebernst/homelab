@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../components/volsync
   dependsOn:
-    - name: cloudnative-pg-cluster
+    - name: cloudnative-pg
       namespace: database
     - name: dragonfly-cluster
       namespace: database

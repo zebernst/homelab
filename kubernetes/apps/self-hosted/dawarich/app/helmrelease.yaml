@@ -39,9 +39,9 @@ spec:
               SELF_HOSTED: "true"
               STORE_GEODATA: "true"
               PROMETHEUS_EXPORTER_ENABLED: "true"
-              PROMETHEUS_EXPORTER_HOST: 0.0.0.0
+              PROMETHEUS_EXPORTER_HOST: "0.0.0.0"
               PROMETHEUS_EXPORTER_PORT: &metricsPort "9394"
-              OIDC_ISSUER: https://id.zebernst.dev
+              OIDC_ISSUER: https://id.zebernst.dev/
               OIDC_PROVIDER_NAME: Pocket ID
               OIDC_REDIRECT_URI: https://dawarich.zebernst.dev/users/auth/openid_connect/callback
               OIDC_AUTO_REGISTER: "true"
