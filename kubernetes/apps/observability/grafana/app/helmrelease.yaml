@@ -24,7 +24,7 @@ spec:
     env:
       GF_DATE_FORMATS_USE_BROWSER_LOCALE: true
       GF_EXPLORE_ENABLED: true
-      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: natel-discrete-panel,pr0ps-trackmap-panel,panodata-map-panel
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: natel-discrete-panel,pr0ps-trackmap-panel,panodata-map-panel,victoriametrics-logs-datasource
       GF_SECURITY_ANGULAR_SUPPORT_ENABLED: true
       GF_SERVER_ROOT_URL: https://grafana.kite-harmonic.ts.net
     grafana.ini:
@@ -53,6 +53,7 @@ spec:
           - { name: Alertmanager, orgId: 1 }
           - { name: Loki, orgId: 1 }
           - { name: Prometheus, orgId: 1 }
+          - { name: VictoriaLogs, orgId: 1 }
         datasources:
           - name: Prometheus
             type: prometheus
@@ -60,9 +61,9 @@ spec:
             access: proxy
             url: http://prometheus-operated.observability.svc.cluster.local:9090
             isDefault: true
-          - name: Loki
-            type: loki
-            uid: loki
+          - name: VictoriaLogs
+            type: victoriametrics-logs-datasource
+            uid: victorialogs
             access: proxy
             url: http://victoria-logs-server.observability.svc.cluster.local:9428
             jsonData:
@@ -361,6 +362,7 @@ spec:
       - natel-discrete-panel
       - pr0ps-trackmap-panel
       - vonage-status-panel
+      - victoriametrics-logs-datasource
     serviceMonitor:
       enabled: true
     ingress:
