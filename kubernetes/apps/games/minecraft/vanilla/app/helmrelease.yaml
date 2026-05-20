@@ -32,7 +32,7 @@ spec:
           vanilla:
             image:
               repository: ghcr.io/itzg/minecraft-server
-              tag: 2026.5.2-java21
+              tag: 2026.5.2
             env:
               EULA: "true"
               TZ: America/Chicago
