@@ -3,29 +3,19 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app dawarich
+  name: &app nominatim
   namespace: &ns self-hosted
 spec:
   targetNamespace: *ns
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../components/volsync
   dependsOn:
-    - name: cloudnative-pg
-      namespace: database
-    - name: dragonfly-cluster
-      namespace: database
-    - name: nominatim
-      namespace: self-hosted
     - name: onepassword
       namespace: external-secrets
-    - name: rook-ceph-cluster
-      namespace: rook-ceph
-    - name: volsync
-      namespace: volsync-system
-  path: kubernetes/apps/self-hosted/dawarich/app
+    - name: openebs
+      namespace: openebs-system
+  path: kubernetes/apps/self-hosted/nominatim/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -35,9 +25,3 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
-  postBuild:
-    substitute:
-      APP: *app
-      VOLSYNC_CAPACITY: 15Gi
-      VOLSYNC_PUID: "1000"
-      VOLSYNC_PGID: "1000"

@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app nominatim
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      nominatim:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          nominatim:
+            image:
+              # renovate: datasource=docker
+              repository: mediagis/nominatim
+              tag: "4.4"
+            env:
+              # Initial import region. To add a country later:
+              #   kubectl cp <country>.osm.pbf self-hosted/<pod>:/tmp/
+              #   kubectl exec -n self-hosted <pod> -- nominatim add-data --file /tmp/<country>.osm.pbf
+              PBF_URL: https://download.geofabrik.de/north-america/us-latest.osm.pbf
+              # Replication covers the initial import region only; pause before running add-data
+              REPLICATION_URL: https://download.geofabrik.de/north-america/us-updates/
+            envFrom:
+              - secretRef:
+                  name: nominatim-secret
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: 8080
+                  initialDelaySeconds: 30
+                  periodSeconds: 60
+                  timeoutSeconds: 10
+                  # US import + index build takes 6-24h; allow 30h
+                  failureThreshold: 1800
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: 8080
+                  initialDelaySeconds: 0
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: 8080
+                  initialDelaySeconds: 0
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+            resources:
+              requests:
+                cpu: 500m
+                memory: 4Gi
+              limits:
+                memory: 32Gi
+
+    defaultPodOptions:
+      priorityClassName: internal-only
+
+    service:
+      nominatim:
+        controller: *app
+        ports:
+          http:
+            port: 80
+            targetPort: 8080
+
+    persistence:
+      data:
+        existingClaim: *app
+        globalMounts:
+          - path: /var/lib/postgresql/14/main

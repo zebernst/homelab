@@ -46,6 +46,8 @@ spec:
               OIDC_REDIRECT_URI: https://dawarich.zebernst.dev/users/auth/openid_connect/callback
               OIDC_AUTO_REGISTER: "true"
               ALLOW_EMAIL_PASSWORD_REGISTRATION: "false"
+              NOMINATIM_API_HOST: nominatim.self-hosted.svc.cluster.local
+              NOMINATIM_API_USE_HTTPS: "false"
             envFrom: &envFrom
               - secretRef:
                   name: dawarich-secret
