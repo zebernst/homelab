@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: holmesgpt
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: holmesgpt
+      rules:
+        - alert: HolmesHealthCheckFailed
+          expr: |
+            kube_customresource_scheduled_health_check_last_result_info{result="fail"} == 1
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: "HolmesGPT health check failed: {{ $labels.name }}"
+            description: >-
+              Scheduled health check {{ $labels.namespace }}/{{ $labels.name }}
+              last result was failure. Check kubectl get shc -n {{ $labels.namespace }}
+              or look for a new PR in zebernst/homelab with proposed fixes.
+        - alert: HolmesHealthCheckError
+          expr: |
+            kube_customresource_scheduled_health_check_last_result_info{result="error"} == 1
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: "HolmesGPT health check errored: {{ $labels.name }}"
+            description: >-
+              Scheduled health check {{ $labels.namespace }}/{{ $labels.name }}
+              encountered an error (LLM or tooling failure). Check Holmes logs
+              with kubectl logs -l app.kubernetes.io/name=holmes -n ai.

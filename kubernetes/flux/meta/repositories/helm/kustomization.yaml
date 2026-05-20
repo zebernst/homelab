@@ -18,6 +18,7 @@ resources:
   - go-skynet.yaml
   - grafana.yaml
   - hajimari-charts.yaml
+  - holmesgpt.yaml
   - ingress-nginx.yaml
   - intel.yaml
   - jetstack.yaml

@@ -127,6 +127,28 @@ spec:
               replacement: $1
               sourceLabels: ["__meta_kubernetes_pod_node_name"]
               targetLabel: kubernetes_node
+      rbac:
+        extraRules:
+          - apiGroups: ["holmesgpt.dev"]
+            resources: ["healthchecks", "scheduledhealthchecks"]
+            verbs: ["list", "watch"]
+      customResourceState:
+        enabled: true
+        config:
+          spec:
+            resources:
+              - groupVersionKind:
+                  group: holmesgpt.dev
+                  version: v1alpha1
+                  kind: ScheduledHealthCheck
+                metrics:
+                  - name: scheduled_health_check_last_result_info
+                    help: "Last result of a HolmesGPT scheduled health check"
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          result: [status, lastResult]
     grafana:
       enabled: false
       forceDeployDashboards: true

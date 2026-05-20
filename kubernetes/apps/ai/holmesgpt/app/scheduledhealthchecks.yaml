@@ -1,0 +1,93 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/holmesgpt.dev/scheduledhealthcheck_v1alpha1.json
+---
+# Cluster-wide pod health: catches crashloops, OOMKills, pending pods
+apiVersion: holmesgpt.dev/v1alpha1
+kind: ScheduledHealthCheck
+metadata:
+  name: cluster-pod-health
+spec:
+  schedule: "0 * * * *"
+  timeout: 120
+  mode: monitor
+  query: >-
+    Check the health of all pods across every namespace. Look for: crashlooping
+    containers, OOMKilled pods in the last hour (cross-reference Prometheus
+    kube_pod_container_status_last_terminated_reason), pods stuck in Pending
+    for more than 10 minutes, and high restart counts. Query Victoria Logs for
+    related error messages from affected workloads. If you find issues that
+    require a configuration change to fix (e.g. resource limits too low, bad
+    image tag, missing secret), create a pull request in the zebernst/homelab
+    GitHub repository with the minimal GitOps patch needed, following the
+    existing Kustomize/Flux conventions in the repo. The PR branch should be
+    named fix/holmes-<issue-slug>. Do not apply any changes directly to the
+    cluster.
+---
+# Observability stack: Prometheus, AlertManager, Victoria Logs
+apiVersion: holmesgpt.dev/v1alpha1
+kind: ScheduledHealthCheck
+metadata:
+  name: observability-stack-health
+spec:
+  schedule: "0 6 * * *"
+  timeout: 120
+  mode: monitor
+  query: >-
+    Verify the health of the observability stack in the observability namespace.
+    Check: Prometheus retention and storage usage (alert if >80% of retentionSize),
+    whether AlertManager is receiving and routing alerts correctly, Victoria Logs
+    ingestion rate and retention, and that all ServiceMonitors have active scrape
+    targets. Use Prometheus metrics to validate. Report any degradation or
+    misconfiguration, and propose a PR to zebernst/homelab if a config change
+    is needed to fix it.
+---
+# Storage: Rook/Ceph cluster health and PVC status
+apiVersion: holmesgpt.dev/v1alpha1
+kind: ScheduledHealthCheck
+metadata:
+  name: storage-health
+spec:
+  schedule: "0 7 * * *"
+  timeout: 120
+  mode: monitor
+  query: >-
+    Check the health of cluster storage. Query Prometheus for Ceph cluster
+    health status (ceph_health_status), OSD status, pool usage, and any
+    degraded PGs. Check for PersistentVolumeClaims in a Pending or Lost state
+    across all namespaces. Check for any Rook/Ceph operator warnings in Victoria
+    Logs. Report findings and propose a PR to zebernst/homelab if remediation
+    is needed.
+---
+# GitOps: Flux Kustomizations and HelmReleases
+apiVersion: holmesgpt.dev/v1alpha1
+kind: ScheduledHealthCheck
+metadata:
+  name: flux-gitops-health
+spec:
+  schedule: "30 6 * * *"
+  timeout: 120
+  mode: monitor
+  query: >-
+    Check the health of all Flux Kustomizations and HelmReleases in the cluster.
+    Look for resources that are not Ready, have failed reconciliation, or are
+    stuck in a retry loop. For any HelmRelease in a failed state, check Victoria
+    Logs for the helm controller error messages to understand the root cause.
+    If the fix requires a values change or chart version bump in the GitOps repo,
+    propose a PR to zebernst/homelab with the fix.
+---
+# Network: Cilium agent health and Hubble flow anomalies
+apiVersion: holmesgpt.dev/v1alpha1
+kind: ScheduledHealthCheck
+metadata:
+  name: network-health
+spec:
+  schedule: "0 8 * * *"
+  timeout: 120
+  mode: monitor
+  query: >-
+    Check Cilium and network health across the cluster. Verify all Cilium agents
+    are running and healthy, check for recent policy drops in Hubble that indicate
+    unexpected traffic blocks, look for DNS resolution failures, and check for
+    any pods failing connectivity checks. Query Victoria Logs for cilium or
+    coredns error messages. Report any persistent network issues and propose a
+    PR to zebernst/homelab if a CiliumNetworkPolicy or Gateway config change
+    is needed.
