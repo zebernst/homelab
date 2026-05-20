@@ -11,18 +11,11 @@ spec:
   groups:
     - name: holmesgpt
       rules:
-        - alert: HolmesHealthCheckFailed
-          expr: |
-            kube_customresource_scheduled_health_check_last_result_info{result="fail"} == 1
-          for: 0m
-          labels:
-            severity: warning
-          annotations:
-            summary: "HolmesGPT health check failed: {{ $labels.name }}"
-            description: >-
-              Scheduled health check {{ $labels.namespace }}/{{ $labels.name }}
-              last result was failure. Check kubectl get shc -n {{ $labels.namespace }}
-              or look for a new PR in zebernst/homelab with proposed fixes.
+        # Fired when Holmes itself errors (LLM/tooling failure) — Holmes can't
+        # self-notify in this state so AlertManager → Pushover is the fallback.
+        # HolmesHealthCheckFailed is intentionally absent: when a check finds
+        # real issues, the LLM sends a richer Pushover notification directly via
+        # bash/curl (including PR link and LLM-formulated summary).
         - alert: HolmesHealthCheckError
           expr: |
             kube_customresource_scheduled_health_check_last_result_info{result="error"} == 1
@@ -30,8 +23,9 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "HolmesGPT health check errored: {{ $labels.name }}"
+            summary: "HolmesGPT check errored: {{ $labels.name }}"
             description: >-
               Scheduled health check {{ $labels.namespace }}/{{ $labels.name }}
-              encountered an error (LLM or tooling failure). Check Holmes logs
-              with kubectl logs -l app.kubernetes.io/name=holmes -n ai.
+              encountered an execution error (LLM or tooling failure). Holmes
+              could not complete the investigation. Check logs:
+              kubectl logs -l app.kubernetes.io/name=holmes -n ai

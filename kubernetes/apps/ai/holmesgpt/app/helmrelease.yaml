@@ -25,6 +25,10 @@ spec:
       - name: ALERTMANAGER_URL
         value: "http://alertmanager-operated.observability.svc.cluster.local:9093"
 
+    additional_env_froms:
+      - secretRef:
+          name: holmesgpt-pushover
+
     k8sRBAC: true
 
     crdPermissions:
