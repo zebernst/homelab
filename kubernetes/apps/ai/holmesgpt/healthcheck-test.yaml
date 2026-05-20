@@ -1,0 +1,53 @@
+# One-off comprehensive health check to verify Holmes operator is working.
+# Apply with: kubectl apply -f healthcheck-test.yaml
+# Watch with:  kubectl get hc -n ai -w
+# Inspect:     kubectl describe hc comprehensive-test -n ai
+# Clean up:    kubectl delete hc comprehensive-test -n ai
+---
+apiVersion: holmesgpt.dev/v1alpha1
+kind: HealthCheck
+metadata:
+  name: comprehensive-test
+  namespace: ai
+spec:
+  timeout: 300
+  mode: monitor
+  query: >-
+    Run a comprehensive health check of the entire cluster covering all major
+    subsystems. For each area, report a clear PASS / WARN / FAIL status and a
+    one-line summary. Investigate any failures in depth using the available
+    toolsets.
+
+    1. POD HEALTH — Check all pods across every namespace. Look for:
+    crashlooping containers, OOMKilled pods (cross-reference Prometheus
+    kube_pod_container_status_last_terminated_reason), pods stuck in Pending
+    for more than 10 minutes, and high restart counts. Query Victoria Logs
+    for related error messages from affected workloads.
+
+    2. OBSERVABILITY STACK — Verify health of the observability namespace.
+    Check: Prometheus retention and storage usage (alert if >80% of
+    retentionSize), whether AlertManager is receiving and routing alerts
+    correctly, Victoria Logs ingestion rate and retention, and that all
+    ServiceMonitors have active scrape targets. Use Prometheus metrics to
+    validate.
+
+    3. STORAGE — Query Prometheus for Ceph cluster health status
+    (ceph_health_status), OSD status, pool usage, and any degraded PGs.
+    Check for PersistentVolumeClaims in a Pending or Lost state across all
+    namespaces. Check for any Rook/Ceph operator warnings in Victoria Logs.
+
+    4. GITOPS — Check the health of all Flux Kustomizations and HelmReleases
+    in the cluster. Look for resources that are not Ready, have failed
+    reconciliation, or are stuck in a retry loop. For any HelmRelease in a
+    failed state, check Victoria Logs for the helm controller error messages
+    to understand the root cause.
+
+    5. NETWORK — Check Cilium and network health across the cluster. Verify
+    all Cilium agents are running and healthy, check for recent policy drops
+    in Hubble that indicate unexpected traffic blocks, look for DNS resolution
+    failures, and check for any pods failing connectivity checks. Query
+    Victoria Logs for cilium or coredns error messages.
+
+    At the end, provide a summary table of all five areas with their status.
+    This is a test run to verify the Holmes operator is functioning — do NOT
+    open any pull requests or propose changes.
