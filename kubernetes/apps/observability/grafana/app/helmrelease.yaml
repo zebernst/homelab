@@ -53,6 +53,7 @@ spec:
           - { name: Alertmanager, orgId: 1 }
           - { name: Loki, orgId: 1 }
           - { name: Prometheus, orgId: 1 }
+          - { name: VictoriaLogs, orgId: 1 }
         datasources:
           - name: Prometheus
             type: prometheus
@@ -60,9 +61,9 @@ spec:
             access: proxy
             url: http://prometheus-operated.observability.svc.cluster.local:9090
             isDefault: true
-          - name: Loki
-            type: loki
-            uid: loki
+          - name: VictoriaLogs
+            type: victoriametrics-logs-datasource
+            uid: victorialogs
             access: proxy
             url: http://victoria-logs-server.observability.svc.cluster.local:9428
             jsonData:
@@ -361,6 +362,7 @@ spec:
       - natel-discrete-panel
       - pr0ps-trackmap-panel
       - vonage-status-panel
+      - victoriametrics-logs-datasource
     serviceMonitor:
       enabled: true
     ingress:
