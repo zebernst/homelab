@@ -8,17 +8,3 @@ resource "tailscale_tailnet_settings" "main" {
   # Devices don't auto-expire keys; control expiry manually
   devices_key_duration_days = 180
 }
-
-resource "tailscale_contacts" "main" {
-  account {
-    email = "zach.bernstein@fastmail.com"
-  }
-
-  support {
-    email = "zach.bernstein@fastmail.com"
-  }
-
-  security {
-    email = "zach.bernstein@fastmail.com"
-  }
-}
