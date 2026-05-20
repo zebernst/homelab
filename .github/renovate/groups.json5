@@ -74,6 +74,28 @@
       },
     },
     {
+      description: "CloudNativePG Operator",
+      groupName: "cloudnative-pg-operator",
+      matchDatasources: ["helm"],
+      matchPackageNames: ["cloudnative-pg"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
+      description: "CloudNativePG Postgres Images",
+      groupName: "cloudnative-pg-postgres",
+      matchDatasources: ["docker"],
+      matchPackageNames: [
+        "ghcr.io/cloudnative-pg/postgresql",
+        "ghcr.io/cloudnative-pg/postgis",
+      ],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+    },
+    {
       description: "Rook-Ceph Group",
       groupName: "rook-ceph",
       matchDatasources: ["docker"],
