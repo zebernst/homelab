@@ -25,11 +25,6 @@ spec:
       - name: ALERTMANAGER_URL
         value: "http://alertmanager-operated.observability.svc.cluster.local:9093"
 
-    # Pull GitHub PAT from 1Password (item: holmesgpt, field: GITHUB_TOKEN)
-    additional_env_froms:
-      - secretRef:
-          name: holmesgpt-secret
-
     k8sRBAC: true
 
     crdPermissions:
@@ -92,8 +87,8 @@ spec:
       github:
         enabled: true
         auth:
-          secretName: holmesgpt-secret
-          secretKey: GITHUB_TOKEN
+          githubApp:
+            secretName: holmesgpt-github-app
         config:
           # Restrict to the minimum tools needed for PR proposals — no issue/action access
           tools: "get_file_contents,create_branch,create_or_update_file,create_pull_request,list_commits,get_me,get_pull_request"
