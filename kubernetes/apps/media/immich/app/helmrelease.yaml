@@ -22,7 +22,7 @@ spec:
     immich:
       persistence:
         library:
-          existingClaim: immich-library
+          existingClaim: immich-data
 
     valkey:
       enabled: false
@@ -72,10 +72,12 @@ spec:
           seccompProfile:
             type: RuntimeDefault
       persistence:
-        thumbs:
-          existingClaim: immich-thumbs
+        media:
+          type: nfs
+          server: nas.internal
+          path: /volume1/photos
           globalMounts:
-            - path: /usr/src/app/upload/thumbs
+            - path: /usr/src/app/upload/library
       route:
         app:
           hostnames:
@@ -112,6 +114,13 @@ spec:
           seccompProfile:
             type: RuntimeDefault
       persistence:
+        media:
+          type: nfs
+          server: nas.internal
+          path: /volume1/photos
+          globalMounts:
+            - path: /usr/src/app/upload/library
         cache:
-          type: persistentVolumeClaim
-          existingClaim: immich-ml-cache
+          type: emptyDir
+          globalMounts:
+            - path: /cache
