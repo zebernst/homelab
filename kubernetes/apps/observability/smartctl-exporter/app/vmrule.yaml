@@ -1,6 +1,7 @@
 ---
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmrule_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
 metadata:
   name: smartctl-exporter
 spec:

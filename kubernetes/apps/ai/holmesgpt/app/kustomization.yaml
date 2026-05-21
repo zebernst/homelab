@@ -6,4 +6,4 @@ resources:
   - externalsecret.yaml
   - helmrelease.yaml
   - ciliumnetworkpolicy.yaml
-  - prometheusrule.yaml
+  - vmrule.yaml
