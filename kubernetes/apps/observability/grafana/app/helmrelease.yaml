@@ -59,7 +59,7 @@ spec:
             type: prometheus
             uid: prometheus
             access: proxy
-            url: http://vmsingle-victoria-metrics.observability.svc.cluster.local:8428
+            url: http://vmsingle-vmks.observability.svc.cluster.local:8428
             isDefault: true
           - name: VictoriaLogs
             type: victoriametrics-logs-datasource
@@ -72,7 +72,7 @@ spec:
             type: alertmanager
             uid: alertmanager
             access: proxy
-            url: http://vmalertmanager-victoria-metrics.observability.svc.cluster.local:9093
+            url: http://vmalertmanager-vmks.observability.svc.cluster.local:9093
             jsonData:
               implementation: prometheus
     dashboardProviders:

@@ -33,7 +33,7 @@ spec:
     cephClusterSpec:
       cephConfig:
         mgr:
-          mgr/dashboard/ALERTMANAGER_API_HOST: http://vmalertmanager-victoria-metrics.observability.svc.cluster.local:9093
+          mgr/dashboard/ALERTMANAGER_API_HOST: http://vmalertmanager-vmks.observability.svc.cluster.local:9093
           mgr/dashboard/GRAFANA_API_URL: http://grafana.observability.svc.cluster.local
       crashCollector:
         disable: false
@@ -44,7 +44,7 @@ spec:
         enabled: true
         urlPrefix: /
         ssl: false
-        prometheusEndpoint: http://vmsingle-victoria-metrics.observability.svc.cluster.local:8428
+        prometheusEndpoint: http://vmsingle-vmks.observability.svc.cluster.local:8428
       mgr:
         modules:
           - name: insights

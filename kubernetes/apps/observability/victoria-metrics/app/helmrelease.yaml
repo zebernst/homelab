@@ -30,7 +30,8 @@ spec:
   interval: 30m
 
   values:
-    fullnameOverride: victoria-metrics
+    nameOverride: vmks
+    fullnameOverride: vmks
     tenant: "0"
 
     victoria-metrics-operator:
