@@ -71,19 +71,11 @@ spec:
           fsGroupChangePolicy: OnRootMismatch
           seccompProfile:
             type: RuntimeDefault
-      ingress:
-        tailscale:
-          className: tailscale
-          hosts:
-            - host: &tsHost "immich.kite-harmonic.ts.net"
-              paths:
-                - path: /
-                  service:
-                    identifier: main
-                    port: http
-          tls:
-            - hosts:
-                - *tsHost
+      persistence:
+        thumbs:
+          existingClaim: immich-thumbs
+          globalMounts:
+            - path: /usr/src/app/upload/thumbs
       route:
         app:
           hostnames:
