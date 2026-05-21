@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/cluster_v1.json
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: immich-db
+spec:
+  instances: 1
+  # renovate: datasource=docker depName=ghcr.io/tensorchord/cloudnative-vectorchord
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:16.9-0.4.3
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 10Gi
+    storageClass: openebs-hostpath
+  superuserSecret:
+    name: immich-db-secret
+  enableSuperuserAccess: true
+  postgresql:
+    shared_preload_libraries:
+      - vchord
+    parameters:
+      max_connections: "100"
+      shared_buffers: 128MB
+  bootstrap:
+    initdb:
+      database: immich
+      postInitApplicationSQL:
+        - CREATE EXTENSION IF NOT EXISTS vchord
+        - CREATE EXTENSION IF NOT EXISTS cube
+        - CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+  monitoring:
+    enablePodMonitor: true

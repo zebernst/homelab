@@ -9,6 +9,7 @@ resources:
   - agregarr/ks.yaml
   - booklore/ks.yaml
   - capacitarr/ks.yaml
+  - immich/ks.yaml
   - maintainerr/ks.yaml
   - seerr/ks.yaml
   - plex/ks.yaml

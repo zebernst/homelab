@@ -1,0 +1,125 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app immich
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: immich
+    namespace: flux-system
+
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            env:
+              REDIS_HOSTNAME: hindwing.database.svc.cluster.local
+
+    immich:
+      persistence:
+        library:
+          existingClaim: immich-library
+
+    valkey:
+      enabled: false
+
+    server:
+      enabled: true
+      controllers:
+        main:
+          annotations:
+            reloader.stakater.com/auto: "true"
+          containers:
+            main:
+              envFrom:
+                - secretRef:
+                    name: immich-secret
+              probes:
+                liveness: &probe
+                  enabled: true
+                  custom: true
+                  spec:
+                    httpGet:
+                      path: /api/server/ping
+                      port: 2283
+                    initialDelaySeconds: 0
+                    periodSeconds: 10
+                    timeoutSeconds: 1
+                    failureThreshold: 3
+                readiness: *probe
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 512Mi
+                limits:
+                  memory: 2Gi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: false
+                capabilities: { drop: ["ALL"] }
+      defaultPodOptions:
+        priorityClassName: media-core
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+          fsGroupChangePolicy: OnRootMismatch
+          seccompProfile:
+            type: RuntimeDefault
+      ingress:
+        tailscale:
+          className: tailscale
+          hosts:
+            - host: &tsHost "immich.kite-harmonic.ts.net"
+              paths:
+                - path: /
+                  service:
+                    identifier: main
+                    port: http
+          tls:
+            - hosts:
+                - *tsHost
+      route:
+        app:
+          hostnames:
+            - photos.zebernst.dev
+          parentRefs:
+            - name: internal
+              namespace: kube-system
+              sectionName: https
+
+    machine-learning:
+      enabled: true
+      controllers:
+        main:
+          containers:
+            main:
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 1Gi
+                limits:
+                  memory: 4Gi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: false
+                capabilities: { drop: ["ALL"] }
+      defaultPodOptions:
+        priorityClassName: media-core
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+          fsGroupChangePolicy: OnRootMismatch
+          seccompProfile:
+            type: RuntimeDefault
+      persistence:
+        cache:
+          type: persistentVolumeClaim
+          existingClaim: immich-ml-cache
