@@ -27,3 +27,21 @@ spec:
       memory: 1Gi
   monitoring:
     enablePodMonitor: true
+  backup:
+    retentionPolicy: 30d
+    barmanObjectStore:
+      data:
+        compression: bzip2
+      wal:
+        compression: bzip2
+        maxParallel: 8
+      destinationPath: s3://cluster-db-backup/
+      endpointURL: https://s3.us-west-001.backblazeb2.com
+      serverName: dawarich-db-v1
+      s3Credentials:
+        accessKeyId:
+          name: dawarich-db-secret
+          key: aws-access-key-id
+        secretAccessKey:
+          name: dawarich-db-secret
+          key: aws-secret-access-key
