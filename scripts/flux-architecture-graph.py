@@ -40,6 +40,32 @@ COMPONENT_EDGES = {
     "keda/nfs-scaler": ("scale", "kube-system/nfs-subdir-external-provisioner"),
 }
 
+METRICS_PLATFORM = "observability/victoria-metrics-operator"
+
+MONITOR_BLOCK_KEYS = frozenset(
+    {"serviceMonitor", "podMonitor", "ServiceMonitor", "PodMonitor"}
+)
+MONITOR_BOOL_KEYS = frozenset({"enablePodMonitor", "podMonitorEnabled"})
+VM_SCRAPE_KINDS = frozenset({"VMServiceScrape", "VMPodScrape", "VMProbe"})
+MONITOR_SUBSTANTIVE_KEYS = frozenset(
+    {
+        "endpoints",
+        "endpoint",
+        "labels",
+        "interval",
+        "selector",
+        "namespaceSelector",
+        "vm",
+        "serviceName",
+        "port",
+        "path",
+        "scheme",
+        "relabelings",
+        "metricRelabelings",
+    }
+)
+APPS_GLOB = "kubernetes/apps/**/*"
+
 DOMAIN_LABELS = {
     "ai": "AI",
     "auth": "Auth",
@@ -151,7 +177,109 @@ def deploy_edges(nodes: dict[str, Kustomization]) -> list[Edge]:
     return edges
 
 
-def operational_edges(nodes: dict[str, Kustomization]) -> list[Edge]:
+def build_path_index(nodes: dict[str, Kustomization]) -> list[tuple[str, str]]:
+    return sorted(
+        ((ks.path.rstrip("/"), ks.node_id) for ks in nodes.values() if ks.path),
+        key=lambda item: len(item[0]),
+        reverse=True,
+    )
+
+
+def match_node_id(
+    file_path: Path,
+    root: Path,
+    path_index: list[tuple[str, str]],
+) -> str | None:
+    rel = file_path.relative_to(root).as_posix()
+    for ks_path, node_id in path_index:
+        if rel == ks_path or rel.startswith(f"{ks_path}/"):
+            return node_id
+    return None
+
+
+def monitor_block_enabled(key: str, value: object) -> bool:
+    if value is None:
+        return False
+    if key in MONITOR_BOOL_KEYS:
+        return value is True
+    if isinstance(value, bool):
+        return value
+    if not isinstance(value, dict):
+        return False
+    if value.get("enabled") is False or value.get("create") is False:
+        return False
+    if value.get("enabled") is True or value.get("create") is True:
+        return True
+    if key.lower() in {"servicemonitor", "podmonitor"}:
+        if MONITOR_SUBSTANTIVE_KEYS & value.keys():
+            return True
+        return any(
+            isinstance(item, dict) and ("endpoints" in item or "endpoint" in item)
+            for item in value.values()
+        )
+    if key == "monitoring" and value.get("enabled") is True:
+        return True
+    return False
+
+
+def monitoring_signals(document: object) -> list[str]:
+    signals: list[str] = []
+
+    def walk(obj: object) -> None:
+        if isinstance(obj, dict):
+            kind = obj.get("kind")
+            if kind in VM_SCRAPE_KINDS:
+                signals.append(str(kind))
+
+            for key, value in obj.items():
+                if key in MONITOR_BOOL_KEYS and value is True:
+                    signals.append(key)
+                elif key in MONITOR_BLOCK_KEYS or key == "monitoring":
+                    if monitor_block_enabled(key, value):
+                        signals.append(key)
+                else:
+                    walk(value)
+        elif isinstance(obj, list):
+            for item in obj:
+                walk(item)
+
+    walk(document)
+    return signals
+
+
+def discover_metrics_targets(
+    root: Path,
+    nodes: dict[str, Kustomization],
+) -> dict[str, set[str]]:
+    path_index = build_path_index(nodes)
+    targets: dict[str, set[str]] = defaultdict(set)
+
+    for path in sorted(root.glob(APPS_GLOB)):
+        if not path.is_file() or path.suffix not in {".yaml", ".yml"}:
+            continue
+
+        with path.open() as handle:
+            try:
+                documents = list(yaml.safe_load_all(handle))
+            except yaml.YAMLError:
+                continue
+
+        for document in documents:
+            if not document:
+                continue
+            signals = monitoring_signals(document)
+            if not signals:
+                continue
+
+            node_id = match_node_id(path, root, path_index)
+            if node_id is None:
+                continue
+            targets[node_id].update(signals)
+
+    return targets
+
+
+def component_edges(nodes: dict[str, Kustomization]) -> list[Edge]:
     edges: list[Edge] = []
     for ks in nodes.values():
         for component in ks.components:
@@ -163,6 +291,30 @@ def operational_edges(nodes: dict[str, Kustomization]) -> list[Edge]:
             else:
                 edges.append(Edge(source=ks.node_id, target=platform, kind=kind))
     return edges
+
+
+def metrics_edges(metrics_targets: dict[str, set[str]]) -> list[Edge]:
+    edges: list[Edge] = []
+    for node_id in sorted(metrics_targets):
+        edges.append(
+            Edge(
+                source=METRICS_PLATFORM,
+                target=node_id,
+                kind="metrics",
+            )
+        )
+    return edges
+
+
+def operational_edges(
+    nodes: dict[str, Kustomization],
+    metrics_targets: dict[str, set[str]],
+) -> list[Edge]:
+    combined = component_edges(nodes) + metrics_edges(metrics_targets)
+    deduped: dict[tuple[str, str, str], Edge] = {}
+    for edge in combined:
+        deduped[edge.key()] = edge
+    return list(deduped.values())
 
 
 def reverse_counts(edges: Iterable[Edge]) -> Counter[str]:
@@ -251,6 +403,7 @@ def render_markdown(
     tiers: dict[str, int],
     deploy: list[Edge],
     operational: list[Edge],
+    metrics_targets: dict[str, set[str]],
     platforms: set[str],
     out_dir: Path,
 ) -> str:
@@ -262,8 +415,9 @@ def render_markdown(
     lines = [
         "# Cluster Platform Architecture",
         "",
-        "Generated from Flux `Kustomization.spec.dependsOn` and declared Kustomize components.",
-        "Deploy edges define reconcile ordering; operational edges are optional and separate.",
+        "Generated from Flux `Kustomization.spec.dependsOn`, declared Kustomize components,",
+        "and Helm/manifest monitoring configuration (ServiceMonitor, PodMonitor, VMServiceScrape).",
+        "Deploy edges define reconcile ordering; operational edges are separate edge kinds.",
         "",
         "## Load-bearing platforms",
         "",
@@ -305,10 +459,10 @@ def render_markdown(
     if monitor_counts:
         lines.extend(
             [
-                "## Declarative monitoring (Gatus component)",
+                "## Synthetic monitoring (Gatus component)",
                 "",
-                "These workloads expose synthetic checks via the shared Gatus component.",
-                "Monitoring depends on the target, not the other way around.",
+                "These workloads expose HTTP checks via the shared Gatus component.",
+                "Edge direction: `observability/gatus` → workload.",
                 "",
             ]
         )
@@ -316,12 +470,45 @@ def render_markdown(
             lines.append(f"- `{node_id}`")
         lines.append("")
 
+    if metrics_targets:
+        lines.extend(
+            [
+                "## Metrics scraping (Prometheus / Victoria Metrics)",
+                "",
+                "Detected from Helm chart values (`serviceMonitor`, `podMonitor`, `monitoring.enabled`)",
+                "and raw Victoria Metrics scrape CRs in Git. These are first-class cluster relationships",
+                "even when the chart renders the monitor object instead of a checked-in manifest.",
+                "",
+                "Edge direction: `observability/victoria-metrics-operator` → workload.",
+                "",
+            ]
+        )
+        for node_id in sorted(metrics_targets):
+            signals = ", ".join(sorted(metrics_targets[node_id]))
+            lines.append(f"- `{node_id}` ({signals})")
+        lines.append("")
+
+    metrics_count = sum(1 for edge in operational if edge.kind == "metrics")
+    backup_count = sum(1 for edge in operational if edge.kind == "backup")
+    scale_count = sum(1 for edge in operational if edge.kind == "scale")
+    lines.extend(
+        [
+            "## Operational edge summary",
+            "",
+            f"- `metrics`: {metrics_count}",
+            f"- `monitor`: {len(monitor_counts)}",
+            f"- `backup`: {backup_count}",
+            f"- `scale`: {scale_count}",
+            "",
+        ]
+    )
+
     lines.extend(
         [
             "## Artifacts",
             "",
             f"- `{out_dir.name}/platform-deploy.json` — collapsed deploy graph for Stacktower",
-            f"- `{out_dir.name}/platform-operational.json` — monitor/backup/scale edges only",
+            f"- `{out_dir.name}/platform-operational.json` — metrics/monitor/backup/scale edges",
             f"- `{out_dir.name}/full-deploy.json` — all Kustomizations and deploy edges",
             "",
             "```bash",
@@ -350,7 +537,8 @@ def main() -> int:
     nodes = load_kustomizations(args.root, args.pattern)
     tiers = compute_tiers(nodes)
     deploy = deploy_edges(nodes)
-    operational = operational_edges(nodes)
+    metrics_targets = discover_metrics_targets(args.root, nodes)
+    operational = operational_edges(nodes, metrics_targets)
     dependents = reverse_counts(deploy)
     platforms = {node_id for node_id in nodes if is_platform(node_id, dependents)}
 
@@ -401,13 +589,14 @@ def main() -> int:
         ),
     )
     (out_dir / "README.md").write_text(
-        render_markdown(nodes, tiers, deploy, operational, platforms, out_dir)
+        render_markdown(nodes, tiers, deploy, operational, metrics_targets, platforms, out_dir)
     )
 
     print(f"Wrote architecture artifacts to {out_dir}")
     print(f"  Kustomizations: {len(nodes)}")
     print(f"  Deploy edges: {len(deploy)}")
     print(f"  Operational edges: {len(operational)}")
+    print(f"  Metrics targets: {len(metrics_targets)}")
     print(f"  Platform nodes: {len(platforms)}")
     return 0
 

@@ -1,7 +1,8 @@
 # Cluster Platform Architecture
 
-Generated from Flux `Kustomization.spec.dependsOn` and declared Kustomize components.
-Deploy edges define reconcile ordering; operational edges are optional and separate.
+Generated from Flux `Kustomization.spec.dependsOn`, declared Kustomize components,
+and Helm/manifest monitoring configuration (ServiceMonitor, PodMonitor, VMServiceScrape).
+Deploy edges define reconcile ordering; operational edges are separate edge kinds.
 
 ## Load-bearing platforms
 
@@ -84,10 +85,10 @@ Tier 0 sits at the bottom of the reconcile stack; higher tiers rest on lower one
 - `auth/pocket-id` (1 dependents)
 - `downloads/sonarr` (1 dependents)
 
-## Declarative monitoring (Gatus component)
+## Synthetic monitoring (Gatus component)
 
-These workloads expose synthetic checks via the shared Gatus component.
-Monitoring depends on the target, not the other way around.
+These workloads expose HTTP checks via the shared Gatus component.
+Edge direction: `observability/gatus` → workload.
 
 - `downloads/qbittorrent`
 - `media/plex`
@@ -98,10 +99,110 @@ Monitoring depends on the target, not the other way around.
 - `self-hosted/atuin`
 - `self-hosted/rxresume`
 
+## Metrics scraping (Prometheus / Victoria Metrics)
+
+Detected from Helm chart values (`serviceMonitor`, `podMonitor`, `monitoring.enabled`)
+and raw Victoria Metrics scrape CRs in Git. These are first-class cluster relationships
+even when the chart renders the monitor object instead of a checked-in manifest.
+
+Edge direction: `observability/victoria-metrics-operator` → workload.
+
+- `ai/ollama` (VMProbe)
+- `ai/open-webui` (VMProbe)
+- `auth/pocket-id` (serviceMonitor)
+- `auth/tinyauth` (VMProbe)
+- `database/dragonfly` (serviceMonitor)
+- `database/dragonfly-cluster` (VMPodScrape)
+- `database/mariadb` (serviceMonitor)
+- `downloads/autobrr` (serviceMonitor)
+- `downloads/bazarr` (serviceMonitor)
+- `downloads/bazarr-uhd` (serviceMonitor)
+- `downloads/cross-seed` (VMProbe)
+- `downloads/flaresolverr` (VMProbe)
+- `downloads/lidarr` (serviceMonitor)
+- `downloads/omegabrr` (VMProbe)
+- `downloads/openbooks` (VMProbe)
+- `downloads/prowlarr` (serviceMonitor)
+- `downloads/qbittorrent` (VMProbe)
+- `downloads/qui` (serviceMonitor)
+- `downloads/radarr` (serviceMonitor)
+- `downloads/radarr-uhd` (serviceMonitor)
+- `downloads/seasonpackarr` (VMProbe)
+- `downloads/sonarr` (serviceMonitor)
+- `downloads/sonarr-uhd` (serviceMonitor)
+- `downloads/unpackerr` (serviceMonitor)
+- `downloads/whisparr` (VMProbe)
+- `external-secrets/external-secrets` (serviceMonitor)
+- `external-secrets/onepassword` (VMProbe)
+- `fission/fission` (serviceMonitor)
+- `flux-system/flux-operator` (serviceMonitor)
+- `games/atm10` (serviceMonitor)
+- `games/atmons` (serviceMonitor)
+- `games/mc-router` (serviceMonitor)
+- `games/vanilla` (serviceMonitor)
+- `kube-system/cilium` (serviceMonitor)
+- `kube-system/descheduler` (serviceMonitor)
+- `kube-system/kubelet-csr-approver` (serviceMonitor)
+- `kube-system/metrics-server` (serviceMonitor)
+- `kube-system/node-feature-discovery` (serviceMonitor)
+- `kube-system/node-problem-detector` (serviceMonitor)
+- `kube-system/reloader` (podMonitor)
+- `kube-system/snapshot-controller` (serviceMonitor)
+- `kube-system/spegel` (serviceMonitor)
+- `media/agregarr` (VMProbe)
+- `media/booklore` (VMProbe)
+- `media/capacitarr` (VMProbe)
+- `media/maintainerr` (VMProbe)
+- `media/shelfmark` (VMProbe)
+- `media/stash` (VMProbe)
+- `media/steam` (VMProbe)
+- `media/tautulli` (VMProbe)
+- `network/cloudflared` (serviceMonitor)
+- `network/echo-server` (serviceMonitor)
+- `network/external-dns-cloudflare` (serviceMonitor)
+- `network/ingress-nginx-external` (serviceMonitor)
+- `network/ingress-nginx-internal` (serviceMonitor)
+- `network/smtp-relay` (serviceMonitor)
+- `observability/blackbox-exporter` (serviceMonitor)
+- `observability/blackbox-exporter-probes` (VMProbe)
+- `observability/fluent-bit` (serviceMonitor)
+- `observability/gatus` (serviceMonitor)
+- `observability/grafana` (serviceMonitor)
+- `observability/karma` (serviceMonitor)
+- `observability/keda` (serviceMonitor)
+- `observability/smartctl-exporter` (serviceMonitor)
+- `observability/snmp-exporter` (serviceMonitor)
+- `observability/unpoller` (serviceMonitor)
+- `observability/victoria-logs` (serviceMonitor)
+- `observability/victoria-metrics-operator` (serviceMonitor)
+- `observability/vmalert` (serviceMonitor)
+- `rook-ceph/rook-ceph` (monitoring, serviceMonitor)
+- `rook-ceph/rook-ceph-cluster` (monitoring)
+- `self-hosted/atuin` (serviceMonitor)
+- `self-hosted/dawarich` (serviceMonitor)
+- `self-hosted/glance` (VMProbe)
+- `self-hosted/hajimari` (VMProbe)
+- `self-hosted/homebox` (VMProbe)
+- `self-hosted/it-tools` (VMProbe)
+- `self-hosted/mealie` (VMProbe)
+- `self-hosted/nocodb` (VMProbe)
+- `self-hosted/nominatim` (VMProbe)
+- `self-hosted/paperless` (serviceMonitor)
+- `self-hosted/radicale` (VMProbe)
+- `self-hosted/unwrapped` (VMProbe)
+- `volsync-system/volsync` (VMServiceScrape)
+
+## Operational edge summary
+
+- `metrics`: 84
+- `monitor`: 8
+- `backup`: 32
+- `scale`: 17
+
 ## Artifacts
 
 - `architecture/platform-deploy.json` — collapsed deploy graph for Stacktower
-- `architecture/platform-operational.json` — monitor/backup/scale edges only
+- `architecture/platform-operational.json` — metrics/monitor/backup/scale edges
 - `architecture/full-deploy.json` — all Kustomizations and deploy edges
 
 ```bash
