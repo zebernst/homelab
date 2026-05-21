@@ -6,3 +6,4 @@ resources:
   - blackbox-probe.yaml
   - externalsecret.yaml
   - helmrelease.yaml
+  - scripts-configmap.yaml
