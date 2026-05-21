@@ -10,7 +10,7 @@ resources:
   - certificate.yaml
 images:
   - name: quay.io/medik8s/self-node-remediation-operator
-    newTag: v0.12.0
+    newTag: v0.12.1
 patches:
   # Fix unresolved ${IMG} env var used to create the agent DaemonSet
   # Mount webhook TLS cert from cert-manager
