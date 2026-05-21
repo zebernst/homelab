@@ -122,10 +122,10 @@ spec:
             resources:
               requests:
                 cpu: 500m
-                memory: 16Gi
+                memory: 32Gi
               limits:
                 memory: 32Gi
-      nominatim-update-osm-db:
+      update-osm-db:
         type: cronjob
         cronjob:
           schedule: "@daily"
