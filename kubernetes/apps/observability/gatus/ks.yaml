@@ -13,6 +13,8 @@ spec:
   components:
     - ../../../../components/gatus
   dependsOn:
+    - name: victoria-metrics-operator
+      namespace: *ns
     - name: cloudnative-pg-cluster
       namespace: database
     - name: onepassword

@@ -9,6 +9,9 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: victoria-metrics-operator
+      namespace: *ns
   interval: 1h
   retryInterval: 1m
   path: kubernetes/apps/observability/blackbox-exporter/app
@@ -32,6 +35,8 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: blackbox-exporter
+      namespace: *ns
+    - name: victoria-metrics-operator
       namespace: *ns
   interval: 1h
   retryInterval: 1m

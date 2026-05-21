@@ -24,7 +24,7 @@ spec:
               repository: ghcr.io/kashalls/kromgo
               tag: v0.8.2@sha256:bd2213c7e471ada38bfec5600f17ede76177815d560d2d6b9a0f433054c93080
             env:
-              PROMETHEUS_URL: http://vmsingle-victoria-metrics.observability.svc.cluster.local:8428
+              PROMETHEUS_URL: http://vmsingle-vmks.observability.svc.cluster.local:8428
               SERVER_PORT: &serverPort 80
               HEALTH_PORT: &healthPort 8080
             probes:

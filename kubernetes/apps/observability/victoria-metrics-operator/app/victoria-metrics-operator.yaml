@@ -3,32 +3,38 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
-  name: silence-operator
+  name: victoria-metrics-operator
 spec:
-  interval: 5m
+  interval: 15m
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
   ref:
-    tag: 0.19.0
-  url: oci://ghcr.io/home-operations/charts-mirror/silence-operator
+    tag: 0.63.1
+  url: oci://ghcr.io/victoriametrics/helm-charts/victoria-metrics-operator
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: silence-operator
+  name: victoria-metrics-operator
 spec:
-  interval: 1h
+  interval: 30m
   chartRef:
     kind: OCIRepository
-    name: silence-operator
+    name: victoria-metrics-operator
   install:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
   values:
-    alertmanagerAddress: http://vmalertmanager-vmks.observability.svc.cluster.local:9093
-    image:
-      registry: quay.io
-    networkPolicy:
-      enabled: false
+    crds:
+      plain: true
+      cleanup:
+        enabled: true
+    admissionWebhooks:
+      policy: Ignore
+    operator:
+      disable_prometheus_converter: false
+    serviceMonitor:
+      enabled: true
+      vm: true
