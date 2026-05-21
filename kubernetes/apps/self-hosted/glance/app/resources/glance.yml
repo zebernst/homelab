@@ -28,12 +28,8 @@ pages:
               - url: https://ciechanow.ski/atom.xml
               - url: https://samwho.dev/rss.xml
               - url: https://thatshubham.com/rss.xml
-
-          - type: bookmarks
-            groups:
-              - links:
-                  - title: Jepsen
-                    url: https://jepsen.io/
+              - url: https://jepsen.io/blog.atom
+                title: Jepsen
 
       - size: full
         widgets:
