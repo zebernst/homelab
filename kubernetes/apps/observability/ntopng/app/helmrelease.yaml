@@ -22,11 +22,12 @@ spec:
             image:
               repository: docker.io/library/redis
               tag: 7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635
-            args:
-              - --save
-              - ""
-              - --appendonly
-              - "no"
+            command:
+              - /bin/sh
+              - /scripts/redis-entrypoint.sh
+            envFrom:
+              - secretRef:
+                  name: ntopng-secret
             probes:
               liveness: &redisProbe
                 enabled: true
@@ -110,6 +111,16 @@ spec:
             sectionName: https
 
     persistence:
+      redis-init:
+        type: configMap
+        name: ntopng-redis-init
+        defaultMode: 0555
+        advancedMounts:
+          ntopng:
+            redis:
+              - path: /scripts/redis-entrypoint.sh
+                subPath: redis-entrypoint.sh
+                readOnly: true
       data:
         type: persistentVolumeClaim
         storageClass: ceph-block
