@@ -259,7 +259,10 @@ spec:
 
     persistence:
       pgdata:
-        existingClaim: nominatim-pgdata
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 400Gi
+        storageClass: ceph-block
         advancedMounts:
           nominatim:
             nominatim:
