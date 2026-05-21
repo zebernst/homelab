@@ -101,6 +101,7 @@ spec:
               RAILS_LOG_TO_STDOUT: "true"
               SELF_HOSTED: "true"
               STORE_GEODATA: "true"
+              TIME_ZONE: America/Chicago
               BACKGROUND_PROCESSING_CONCURRENCY: "5"
               PROMETHEUS_EXPORTER_ENABLED: "true"
               PROMETHEUS_EXPORTER_HOST: "127.0.0.1"
