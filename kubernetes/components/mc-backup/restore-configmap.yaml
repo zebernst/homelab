@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mc-backup-restore
+data:
+  restore.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    if [[ -f /data/eula.txt ]]; then
+      echo "World data present, skipping restic restore"
+      exit 0
+    fi
+
+    echo "Empty world data, restoring latest restic snapshot..."
+    restic snapshots >/dev/null
+    restic restore latest --target /data

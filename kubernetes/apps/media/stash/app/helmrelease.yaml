@@ -105,6 +105,8 @@ spec:
             subPath: config
           - path: /blobs
             subPath: blobs
+          - path: /metadata
+            subPath: metadata
       cache:
         existingClaim: stash-cache
         globalMounts:
@@ -112,8 +114,6 @@ spec:
             subPath: cache
           - path: /generated
             subPath: generated
-          - path: /metadata
-            subPath: metadata
           - path: /pip-install
             subPath: pip
       media:

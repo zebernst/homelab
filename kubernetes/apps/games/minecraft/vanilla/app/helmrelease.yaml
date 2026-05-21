@@ -18,6 +18,24 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
+          restore-world:
+            image:
+              repository: itzg/mc-backup
+              tag: 2026.5.0
+            command: ["/bin/bash", "/scripts/restore.sh"]
+            envFrom:
+              - secretRef:
+                  name: vanilla-restic-secret
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
           init-bluemap-config:
             image:
               repository: busybox
@@ -117,6 +135,35 @@ spec:
                 memory: 512Mi
               limits:
                 memory: 1536Mi
+          mc-backup:
+            image:
+              repository: itzg/mc-backup
+              tag: 2026.5.0
+            env:
+              BACKUP_METHOD: restic
+              BACKUP_NAME: *app
+              RESTIC_HOSTNAME: *app
+              BACKUP_INTERVAL: 4h
+              PRUNE_RESTIC_RETENTION: "--keep-hourly 24 --keep-daily 7"
+              RCON_HOST: localhost
+              INITIAL_DELAY: 2m
+              BACKUP_ON_STARTUP: "true"
+              EXCLUDES: "*.jar,cache,logs,*.tmp"
+            envFrom:
+              - secretRef:
+                  name: vanilla-restic-secret
+              - secretRef:
+                  name: vanilla-secret
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
 
     defaultPodOptions:
       priorityClassName: best-effort
@@ -164,6 +211,11 @@ spec:
             bluemap:
               - path: /data
                 readOnly: true
+            restore-world:
+              - path: /data
+            mc-backup:
+              - path: /data
+                readOnly: true
       bluemap-shared:
         existingClaim: bluemap-shared
         advancedMounts:
@@ -204,6 +256,15 @@ spec:
               - path: /app/config
             bluemap:
               - path: /app/config
+      mc-backup-restore:
+        type: configMap
+        name: mc-backup-restore
+        defaultMode: 0755
+        advancedMounts:
+          vanilla:
+            restore-world:
+              - path: /scripts/restore.sh
+                subPath: restore.sh
 
     serviceMonitor:
       vanilla:

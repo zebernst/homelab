@@ -11,7 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../../components/volsync
+    - ../../../../../components/mc-backup
   dependsOn:
     - name: bluemap
       namespace: games
@@ -19,8 +19,6 @@ spec:
       namespace: external-secrets
     - name: rook-ceph-cluster
       namespace: rook-ceph
-    - name: volsync
-      namespace: volsync-system
   path: kubernetes/apps/games/minecraft/vanilla/app
   prune: true
   sourceRef:
@@ -34,9 +32,6 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 10Gi
-      VOLSYNC_CACHE_CAPACITY: 10Gi
-      VOLSYNC_STORAGECLASS: ceph-filesystem
-      VOLSYNC_ACCESSMODES: ReadWriteMany
-      VOLSYNC_SNAPSHOTCLASS: csi-ceph-filesystem
-      VOLSYNC_SNAP_ACCESSMODES: ReadWriteMany
+      MC_BACKUP_CAPACITY: 10Gi
+      MC_BACKUP_STORAGECLASS: ceph-filesystem
+      MC_BACKUP_ACCESSMODES: ReadWriteMany

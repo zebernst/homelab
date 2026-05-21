@@ -12,19 +12,32 @@ spec:
     - --proactor_threads=2
     - --cluster_mode=emulated
     - --lock_on_hashtags
+    - --s3_endpoint=https://s3.us-west-001.backblazeb2.com
   env:
     - name: MAX_MEMORY
       valueFrom:
         resourceFieldRef:
           resource: limits.memory
           divisor: 1Mi
+    - name: AWS_ACCESS_KEY_ID
+      valueFrom:
+        secretKeyRef:
+          name: hindwing-s3-secret
+          key: AWS_ACCESS_KEY_ID
+    - name: AWS_SECRET_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: hindwing-s3-secret
+          key: AWS_SECRET_ACCESS_KEY
+  snapshot:
+    cron: "15 */4 * * *"
+    dir: s3://cluster-db-backup/hindwing
+    enableOnMasterOnly: true
   resources:
     requests:
       cpu: 100m
     limits:
       memory: 512Mi
-#  snapshot:
-#    dir: s3://
   serviceSpec:
     type: LoadBalancer
     annotations:
