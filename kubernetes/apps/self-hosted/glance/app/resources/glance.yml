@@ -31,8 +31,8 @@ pages:
                 title: Sam Rose
               - url: https://thatshubham.com/rss.xml
                 title: Shubham Bose
-              - url: https://jepsen.io/blog.atom
-                title: Kyle Kingsbury
+              - url: https://jepsen.io/blog.rss
+                title: Jepsen
 
       - size: full
         widgets:
