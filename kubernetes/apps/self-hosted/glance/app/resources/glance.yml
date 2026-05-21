@@ -29,6 +29,12 @@ pages:
               - url: https://samwho.dev/rss.xml
               - url: https://thatshubham.com/rss.xml
 
+          - type: bookmarks
+            groups:
+              - links:
+                  - title: Jepsen
+                    url: https://jepsen.io/
+
       - size: full
         widgets:
           - type: group
