@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumnetworkpolicy_v2.json
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  endpointSelector: {}
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: external-secrets
+    - fromEntities:
+        - kube-apiserver
+  egress:
+    - toEntities:
+        - kube-apiserver
+    - toEntities:
+        - world
