@@ -20,11 +20,11 @@ spec:
     serviceAccount:
       app:
         enabled: true
-      maintenance:
+      replication:
         enabled: true
     rbac:
       roles:
-        maintenance:
+        replication:
           type: Role
           rules:
             - apiGroups: [""]
@@ -34,14 +34,14 @@ spec:
               resources: ["pods/exec"]
               verbs: ["create"]
       bindings:
-        maintenance:
+        replication:
           type: RoleBinding
           roleRef:
             apiGroup: rbac.authorization.k8s.io
             kind: Role
-            identifier: maintenance
+            identifier: replication
           subjects:
-            - identifier: maintenance
+            - identifier: replication
     controllers:
       nominatim:
         annotations:
@@ -121,7 +121,7 @@ spec:
                 memory: 4Gi
               limits:
                 memory: 32Gi
-      nominatim-maintenance:
+      nominatim-update-osm-db:
         type: cronjob
         cronjob:
           schedule: "@daily"
@@ -151,7 +151,7 @@ spec:
         pod:
           restartPolicy: Never
         serviceAccount:
-          identifier: maintenance
+          identifier: replication
 
     defaultPodOptions:
       priorityClassName: internal-only
