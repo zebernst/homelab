@@ -156,6 +156,7 @@ spec:
 
     configMaps:
       scripts:
+        enabled: true
         data:
           maintain-regions.sh: |
             #!/bin/bash
