@@ -1,5 +1,8 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
+if [ "${DEBUG:-}" = "true" ] || [ "${DEBUG:-}" = "1" ]; then
+  set -e
+fi
 
 DOWNURL="${NOMINATIM_DOWNURL:-https://download.geofabrik.de}"
 PROJECT_DIR="${PROJECT_DIR:-/nominatim}"

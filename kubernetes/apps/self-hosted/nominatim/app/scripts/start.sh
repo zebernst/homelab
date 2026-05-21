@@ -1,5 +1,8 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
+if [ "${DEBUG:-}" = "true" ] || [ "${DEBUG:-}" = "1" ]; then
+  set -e
+fi
 
 FIRST_REGION="$(printf '%s\n' "${NOMINATIM_REGIONS}" | tr ',[:space:]' '\n' | sed '/^[[:space:]]*$/d' | awk 'NR==1 { print; exit }')"
 if [ -z "${FIRST_REGION}" ]; then
