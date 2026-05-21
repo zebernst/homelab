@@ -36,7 +36,6 @@ spec:
                 memory: 128Mi
         containers:
           vmalert:
-            dependsOn: init-rules
             image:
               repository: quay.io/victoriametrics/vmalert
               tag: v1.110.0@sha256:f4054ae50dede7e0c4439484802a26e195802ed300c6e085f682407e946afe46
