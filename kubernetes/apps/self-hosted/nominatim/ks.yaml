@@ -13,8 +13,8 @@ spec:
   dependsOn:
     - name: onepassword
       namespace: external-secrets
-    - name: openebs
-      namespace: openebs-system
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   path: kubernetes/apps/self-hosted/nominatim/app
   prune: true
   sourceRef:
