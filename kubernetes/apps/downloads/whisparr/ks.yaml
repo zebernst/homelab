@@ -13,6 +13,7 @@ spec:
   components:
     - ../../../../components/keda/nfs-scaler
     - ../../../../components/volsync
+    - ../../../../components/vmalert-rules
   dependsOn:
     - name: cloudnative-pg-cluster
       namespace: database

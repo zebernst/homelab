@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmrule_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: vmalert
+spec:
+  groups:
+    - name: vmalert.rules
+      rules:
+        - alert: VmalertDown
+          expr: |
+            absent(up{job=~".*vmalert.*"})
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              vmalert is not running — VictoriaLogs alerting rules are not being evaluated

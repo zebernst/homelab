@@ -1,0 +1,26 @@
+---
+groups:
+  - name: "${APP}"
+    type: vlogs
+    rules:
+      - alert: ${APP}DatabaseIsLocked
+        expr: |
+          sum by (app) (count_over_time({app=~"${APP}"} |~ "(?i)database is locked"[5m])) > 0
+        for: 5m
+        labels:
+          severity: critical
+          category: vlogs
+        annotations:
+          summary: >-
+            {{ $labels.app }} is experiencing database lock errors
+
+      - alert: ${APP}DatabaseIsMalformed
+        expr: |
+          sum by (app) (count_over_time({app=~"${APP}"} |~ "(?i)database disk image is malformed"[5m])) > 0
+        for: 5m
+        labels:
+          severity: critical
+          category: vlogs
+        annotations:
+          summary: >-
+            {{ $labels.app }} is experiencing database corruption errors

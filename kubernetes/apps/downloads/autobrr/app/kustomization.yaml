@@ -8,12 +8,12 @@ resources:
   - vmservicescrape.yaml
   - vmrule.yaml
 configMapGenerator:
-  - name: autobrr-loki-rules
+  - name: autobrr-vmalert-rules
     files:
-      - autobrr.yaml=lokirule.yaml
+      - autobrr.yaml=alert-rules.yaml
     options:
       labels:
-        loki_rule: "true"
+        vmalert.io/rule: "true"
   - name: autobrr-grafana-dashboard
     files:
       - autobrr.json=resources/grafana-dashboard.json
