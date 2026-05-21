@@ -33,9 +33,19 @@ spec:
                 export PBF_URL="${NOMINATIM_DOWNURL:-https://download.geofabrik.de}/${FIRST_REGION}-latest.osm.pbf"
                 exec /app/start.sh
             env:
-              # Space- or comma-separated Geofabrik region paths.
-              # New regions are imported idempotently by the daily maintenance CronJob.
-              NOMINATIM_REGIONS: "north-america/us"
+              # Geofabrik region paths (newline, space, or comma separated).
+              NOMINATIM_REGIONS: |-
+                north-america/us
+                north-america/canada
+                north-america/mexico
+                europe/britain-and-ireland
+                europe/france
+                europe/germany
+                europe/switzerland
+                europe/norway
+                europe/netherlands
+                australia-oceania/new-zealand
+                asia/israel-and-palestine
               NOMINATIM_DOWNURL: "https://download.geofabrik.de"
               # Disable the image's built-in replication loop; updates are managed by CronJob.
               UPDATE_MODE: "none"
