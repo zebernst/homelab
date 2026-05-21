@@ -100,19 +100,14 @@ spec:
             port: 6343
             protocol: UDP
 
-    ingress:
-      tailscale:
-        className: tailscale
-        hosts:
-          - host: &tsHost ntopng.kite-harmonic.ts.net
-            paths:
-              - path: /
-                service:
-                  identifier: *app
-                  port: http
-        tls:
-          - hosts:
-              - *tsHost
+    route:
+      netflow:
+        hostnames:
+          - netflow.zebernst.dev
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
 
     persistence:
       data:
