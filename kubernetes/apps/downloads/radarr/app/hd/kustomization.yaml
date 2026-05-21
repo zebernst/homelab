@@ -5,7 +5,6 @@ kind: Kustomization
 resources:
   - externalsecret.yaml
   - helmrelease.yaml
-  - vmservicescrape.yaml
   - pvc.yaml
 configMapGenerator:
   - name: radarr-configmap

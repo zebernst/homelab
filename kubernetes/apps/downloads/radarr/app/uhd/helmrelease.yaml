@@ -123,7 +123,21 @@ spec:
         tls:
           - hosts:
               - *tsHost
-
+    serviceMonitor:
+      app:
+        serviceName: *app
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 5m
+            scrapeTimeout: 1m
+            relabelings:
+              - action: labeldrop
+                regex: pod
+              - action: replace
+                replacement: *app
+                targetLabel: instance
 
     persistence:
       config:

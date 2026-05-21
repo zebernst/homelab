@@ -96,6 +96,15 @@ spec:
         tls:
           - hosts:
               - *tsHost
+    serviceMonitor:
+      qui:
+        serviceName: *app
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
     route:
       qui:
         hostnames:
