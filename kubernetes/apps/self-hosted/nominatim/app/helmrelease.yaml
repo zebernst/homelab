@@ -154,6 +154,96 @@ spec:
         serviceAccount:
           identifier: maintenance
 
+    configMaps:
+      scripts:
+        enabled: true
+        forceRename: nominatim
+        data:
+          maintain-regions.sh: |
+            #!/bin/bash
+            set -euo pipefail
+
+            DOWNURL="$${NOMINATIM_DOWNURL:-https://download.geofabrik.de}"
+            PROJECT_DIR="$${PROJECT_DIR:-/nominatim}"
+            IMPORTED_LIST="$${PROJECT_DIR}/imported-regions.txt"
+            CURL_USER_AGENT="$${USER_AGENT:-nominatim-maintenance}"
+
+            if [ -z "$${NOMINATIM_REGIONS:-}" ]; then
+              echo "[nominatim-maintenance] NOMINATIM_REGIONS is not set; exiting."
+              exit 1
+            fi
+
+            mapfile -t DESIRED_REGIONS < <(
+              echo "$${NOMINATIM_REGIONS}" | tr ',' ' ' | tr ' ' '\n' | sed '/^[[:space:]]*$/d'
+            )
+
+            if [ "$${#DESIRED_REGIONS[@]}" -eq 0 ]; then
+              echo "[nominatim-maintenance] No regions configured; exiting."
+              exit 0
+            fi
+
+            seed_state() {
+              local region="$1"
+              local state_dir="$${PROJECT_DIR}/update/$${region}"
+              mkdir -p "$${state_dir}"
+              curl -fsSL "$${DOWNURL}/$${region}-updates/state.txt" > "$${state_dir}/sequence.state"
+            }
+
+            if [ ! -f "$${IMPORTED_LIST}" ]; then
+              touch "$${IMPORTED_LIST}"
+              BASE_REGION="$${DESIRED_REGIONS[0]}"
+              echo "[nominatim-maintenance] Seeding imported list with base region $${BASE_REGION}"
+              echo "$${BASE_REGION}" >> "$${IMPORTED_LIST}"
+              seed_state "$${BASE_REGION}"
+            fi
+
+            CHANGED=false
+
+            for region in "$${DESIRED_REGIONS[@]}"; do
+              if grep -qxF "$${region}" "$${IMPORTED_LIST}"; then
+                continue
+              fi
+
+              import_file="/tmp/$(echo "$${region}" | tr '/' '-')-latest.osm.pbf"
+              echo "[nominatim-maintenance] Importing new region $${region}"
+              curl -L -A "$${CURL_USER_AGENT}" --fail-with-body \
+                "$${DOWNURL}/$${region}-latest.osm.pbf" -o "$${import_file}"
+              sudo -E -u nominatim nominatim add-data --project-dir "$${PROJECT_DIR}" --file "$${import_file}"
+              seed_state "$${region}"
+              echo "$${region}" >> "$${IMPORTED_LIST}"
+              rm -f "$${import_file}"
+              CHANGED=true
+            done
+
+            for region in "$${DESIRED_REGIONS[@]}"; do
+              state_file="$${PROJECT_DIR}/update/$${region}/sequence.state"
+              if [ ! -f "$${state_file}" ]; then
+                echo "[nominatim-maintenance] Missing state for $${region}; seeding and continuing."
+                seed_state "$${region}"
+                continue
+              fi
+
+              changes_file="/tmp/changes-$(echo "$${region}" | tr '/' '-').osc.gz"
+              echo "[nominatim-maintenance] Fetching changes for $${region}"
+              if pyosmium-get-changes \
+                  --server "$${DOWNURL}/$${region}-updates/" \
+                  --state-file "$${state_file}" \
+                  -o "$${changes_file}" 2>/dev/null && [ -s "$${changes_file}" ]; then
+                sudo -E -u nominatim nominatim add-data \
+                  --project-dir "$${PROJECT_DIR}" \
+                  --diff "$${changes_file}"
+                CHANGED=true
+              fi
+              rm -f "$${changes_file}"
+            done
+
+            if [ "$${CHANGED}" = "true" ]; then
+              echo "[nominatim-maintenance] Re-indexing after import/update cycle."
+              sudo -E -u nominatim nominatim index --project-dir "$${PROJECT_DIR}"
+            else
+              echo "[nominatim-maintenance] No new data found."
+            fi
+
     defaultPodOptions:
       priorityClassName: internal-only
 
