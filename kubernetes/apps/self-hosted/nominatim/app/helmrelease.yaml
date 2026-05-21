@@ -58,6 +58,15 @@ spec:
                   exit 1
                 fi
                 export PBF_URL="$${NOMINATIM_DOWNURL:-https://download.geofabrik.de}/$${FIRST_REGION}-latest.osm.pbf"
+                OSMFILE="$${PROJECT_DIR:-/nominatim}/data.osm.pbf"
+                if [ -f "$${OSMFILE}" ]; then
+                  REMOTE_SIZE="$(curl -fsIL "$${PBF_URL}" | awk 'tolower($1)==\"content-length:\" {gsub(\"\\r\",\"\",$2); len=$2} END {print len}')"
+                  LOCAL_SIZE="$(stat -c %s "$${OSMFILE}")"
+                  if [ -n "$${REMOTE_SIZE}" ] && [ "$${LOCAL_SIZE}" -gt "$${REMOTE_SIZE}" ]; then
+                    echo "Removing stale OSM extract ($${LOCAL_SIZE} bytes > remote $${REMOTE_SIZE} bytes): $${OSMFILE}"
+                    rm -f "$${OSMFILE}"
+                  fi
+                fi
                 exec /app/start.sh
             env:
               # Geofabrik region paths (newline, space, or comma separated).
@@ -77,6 +86,8 @@ spec:
               # Disable the image's built-in replication loop; updates are managed by CronJob.
               UPDATE_MODE: "none"
               REPLICATION_URL: ""
+              IMPORT_WIKIPEDIA: "true"
+              IMPORT_US_POSTCODES: "true"
               PROJECT_DIR: /nominatim
             envFrom:
               - secretRef:
@@ -288,3 +299,11 @@ spec:
             nominatim:
               - path: /scripts/maintain-regions.sh
                 subPath: maintain-regions.sh
+      dev-shm:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 4Gi
+        advancedMounts:
+          nominatim:
+            nominatim:
+              - path: /dev/shm
