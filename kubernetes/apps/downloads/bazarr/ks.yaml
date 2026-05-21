@@ -13,6 +13,7 @@ spec:
   components:
     - ../../../../components/keda/nfs-scaler
     - ../../../../components/volsync
+    - ../../../../components/lokirule
   dependsOn:
     - name: onepassword
       namespace: external-secrets
@@ -49,6 +50,7 @@ spec:
   components:
     - ../../../../components/keda/nfs-scaler
     - ../../../../components/volsync
+    - ../../../../components/lokirule
   dependsOn:
     - name: onepassword
       namespace: external-secrets

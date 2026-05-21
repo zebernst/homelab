@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: vmalert
+spec:
+  groups:
+    - name: vmalert.rules
+      rules:
+        - alert: VmalertDown
+          expr: |
+            absent(up{job=~".*vmalert.*"})
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              vmalert is not running — log-based alerts are not being evaluated

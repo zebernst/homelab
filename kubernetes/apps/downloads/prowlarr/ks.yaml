@@ -10,6 +10,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/lokirule
   dependsOn:
     - name: cloudnative-pg-cluster
       namespace: database
