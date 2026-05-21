@@ -79,8 +79,6 @@ spec:
                 link_staging "wikimedia-importance.csv.gz"
                 link_staging "us_postcodes.csv.gz"
                 link_staging "secondary_importance.sql.gz"
-                link_staging "gb_postcodes.csv.gz"
-                link_staging "tiger-nominatim-preprocessed.csv.tar.gz"
 
                 OSMFILE="$${STAGING_DIR}/data.osm.pbf"
                 if [ -f "$${OSMFILE}" ]; then
@@ -111,6 +109,7 @@ spec:
               UPDATE_MODE: "none"
               REPLICATION_URL: ""
               IMPORT_WIKIPEDIA: "true"
+              IMPORT_SECONDARY_WIKIPEDIA: "true"
               IMPORT_US_POSTCODES: "true"
               PROJECT_DIR: /nominatim
             envFrom:
