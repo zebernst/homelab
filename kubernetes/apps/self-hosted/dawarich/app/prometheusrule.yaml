@@ -10,8 +10,8 @@ spec:
       rules:
         - alert: DawarichLocationSyncStale
           expr: |
-            changes(dawarich_points_count[25h]) == 0
-          for: 10m
+            increase(ruby_http_requests_total{controller="api/v1/points", action="create"}[25h]) == 0
+          for: 15m
           annotations:
             summary: Dawarich location sync stopped
             description: >-
