@@ -60,7 +60,7 @@ spec:
                 export PBF_URL="$${NOMINATIM_DOWNURL:-https://download.geofabrik.de}/$${FIRST_REGION}-latest.osm.pbf"
                 OSMFILE="$${PROJECT_DIR:-/nominatim}/data.osm.pbf"
                 if [ -f "$${OSMFILE}" ]; then
-                  REMOTE_SIZE="$(curl -fsIL "$${PBF_URL}" | awk 'tolower($1)==\"content-length:\" {gsub(\"\\r\",\"\",$2); len=$2} END {print len}')"
+                  REMOTE_SIZE="$(curl -fsIL "$${PBF_URL}" | grep -Fi 'content-length:' | tail -n1 | sed 's/.*:[[:space:]]*//' | tr -d '\r')"
                   LOCAL_SIZE="$(stat -c %s "$${OSMFILE}")"
                   if [ -n "$${REMOTE_SIZE}" ] && [ "$${LOCAL_SIZE}" -gt "$${REMOTE_SIZE}" ]; then
                     echo "Removing stale OSM extract ($${LOCAL_SIZE} bytes > remote $${REMOTE_SIZE} bytes): $${OSMFILE}"
