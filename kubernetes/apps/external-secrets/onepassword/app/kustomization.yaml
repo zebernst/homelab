@@ -5,4 +5,4 @@ kind: Kustomization
 resources:
   - clustersecretstore.yaml
   - helmrelease.yaml
-  - probe.yaml
+  - vmprobe.yaml
