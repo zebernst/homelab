@@ -1,0 +1,1794 @@
+{
+  "nodes": [
+    {
+      "id": "ai/holmesgpt",
+      "meta": {
+        "kind": "workload",
+        "namespace": "ai",
+        "tier": 4,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "ai/holmesgpt-checks",
+      "meta": {
+        "kind": "workload",
+        "namespace": "ai",
+        "tier": 5,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "ai/ollama",
+      "meta": {
+        "kind": "workload",
+        "namespace": "ai",
+        "tier": 3,
+        "dependents": 3
+      }
+    },
+    {
+      "id": "ai/open-webui",
+      "meta": {
+        "kind": "workload",
+        "namespace": "ai",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "ai/paperless-ai",
+      "meta": {
+        "kind": "workload",
+        "namespace": "ai",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "auth/pocket-id",
+      "meta": {
+        "kind": "workload",
+        "namespace": "auth",
+        "tier": 4,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "auth/tinyauth",
+      "meta": {
+        "kind": "workload",
+        "namespace": "auth",
+        "tier": 5,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "cert-manager/cert-manager",
+      "meta": {
+        "kind": "platform",
+        "namespace": "cert-manager",
+        "tier": 0,
+        "dependents": 3
+      }
+    },
+    {
+      "id": "cert-manager/cert-manager-issuers",
+      "meta": {
+        "kind": "platform",
+        "namespace": "cert-manager",
+        "tier": 1,
+        "dependents": 3
+      }
+    },
+    {
+      "id": "cert-manager/cert-manager-tls",
+      "meta": {
+        "kind": "workload",
+        "namespace": "cert-manager",
+        "tier": 2,
+        "dependents": 2
+      }
+    },
+    {
+      "id": "cert-manager/step-issuer",
+      "meta": {
+        "kind": "workload",
+        "namespace": "cert-manager",
+        "tier": 1,
+        "dependents": 2
+      }
+    },
+    {
+      "id": "cert-manager/step-issuer-issuers",
+      "meta": {
+        "kind": "workload",
+        "namespace": "cert-manager",
+        "tier": 2,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "cert-manager/step-issuer-tls",
+      "meta": {
+        "kind": "workload",
+        "namespace": "cert-manager",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "database/cloudnative-pg",
+      "meta": {
+        "kind": "platform",
+        "namespace": "database",
+        "tier": 2,
+        "dependents": 2
+      }
+    },
+    {
+      "id": "database/cloudnative-pg-cluster",
+      "meta": {
+        "kind": "platform",
+        "namespace": "database",
+        "tier": 3,
+        "dependents": 20
+      }
+    },
+    {
+      "id": "database/dragonfly",
+      "meta": {
+        "kind": "workload",
+        "namespace": "database",
+        "tier": 0,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "database/dragonfly-cluster",
+      "meta": {
+        "kind": "workload",
+        "namespace": "database",
+        "tier": 1,
+        "dependents": 2
+      }
+    },
+    {
+      "id": "database/mariadb",
+      "meta": {
+        "kind": "workload",
+        "namespace": "database",
+        "tier": 3,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "downloads/autobrr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/bazarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/bazarr-uhd",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/cross-seed",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/lidarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/omegabrr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/openbooks",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/prowlarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/qbittorrent",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 3,
+        "dependents": 3
+      }
+    },
+    {
+      "id": "downloads/qbittorrent-tools",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/qui",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/radarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/radarr-uhd",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/recyclarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/seasonpackarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 5,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/sonarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 4,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "downloads/sonarr-uhd",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/unpackerr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "downloads/whisparr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "external-secrets/cluster-secrets",
+      "meta": {
+        "kind": "workload",
+        "namespace": "external-secrets",
+        "tier": 2,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "external-secrets/external-secrets",
+      "meta": {
+        "kind": "platform",
+        "namespace": "external-secrets",
+        "tier": 0,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "external-secrets/onepassword",
+      "meta": {
+        "kind": "platform",
+        "namespace": "external-secrets",
+        "tier": 1,
+        "dependents": 53
+      }
+    },
+    {
+      "id": "fission/fission",
+      "meta": {
+        "kind": "workload",
+        "namespace": "fission",
+        "tier": 3,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "fission/fission-crds",
+      "meta": {
+        "kind": "workload",
+        "namespace": "fission",
+        "tier": 0,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "fission/fission-functions",
+      "meta": {
+        "kind": "workload",
+        "namespace": "fission",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "flux-system/flux-operator",
+      "meta": {
+        "kind": "workload",
+        "namespace": "flux-system",
+        "tier": 0,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "flux-system/flux-instance",
+      "meta": {
+        "kind": "workload",
+        "namespace": "flux-system",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "games/atm10",
+      "meta": {
+        "kind": "workload",
+        "namespace": "games",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "games/atmons",
+      "meta": {
+        "kind": "workload",
+        "namespace": "games",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "games/bluemap",
+      "meta": {
+        "kind": "workload",
+        "namespace": "games",
+        "tier": 3,
+        "dependents": 3
+      }
+    },
+    {
+      "id": "games/vanilla",
+      "meta": {
+        "kind": "workload",
+        "namespace": "games",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "kube-system/cilium",
+      "meta": {
+        "kind": "platform",
+        "namespace": "kube-system",
+        "tier": 0,
+        "dependents": 2
+      }
+    },
+    {
+      "id": "kube-system/cilium-config",
+      "meta": {
+        "kind": "workload",
+        "namespace": "kube-system",
+        "tier": 1,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "kube-system/cilium-gateway",
+      "meta": {
+        "kind": "workload",
+        "namespace": "kube-system",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "kube-system/node-feature-discovery",
+      "meta": {
+        "kind": "workload",
+        "namespace": "kube-system",
+        "tier": 0,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "kube-system/node-feature-discovery-features",
+      "meta": {
+        "kind": "workload",
+        "namespace": "kube-system",
+        "tier": 1,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "kube-system/node-healthcheck",
+      "meta": {
+        "kind": "workload",
+        "namespace": "kube-system",
+        "tier": 1,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "kube-system/node-healthcheck-config",
+      "meta": {
+        "kind": "workload",
+        "namespace": "kube-system",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "kube-system/self-node-remediation",
+      "meta": {
+        "kind": "workload",
+        "namespace": "kube-system",
+        "tier": 0,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "kube-system/snapshot-controller",
+      "meta": {
+        "kind": "platform",
+        "namespace": "kube-system",
+        "tier": 0,
+        "dependents": 2
+      }
+    },
+    {
+      "id": "kube-system/synology-csi-driver",
+      "meta": {
+        "kind": "workload",
+        "namespace": "kube-system",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "media/agregarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "media/booklore",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "media/capacitarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "media/maintainerr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "media/plex",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "media/seerr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "media/shelfmark",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "media/stash",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "media/steam",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "media/tautulli",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "media/wizarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "network/cloudflared",
+      "meta": {
+        "kind": "workload",
+        "namespace": "network",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "network/external-dns-cloudflare",
+      "meta": {
+        "kind": "workload",
+        "namespace": "network",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "network/external-dns-unifi",
+      "meta": {
+        "kind": "workload",
+        "namespace": "network",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "network/ingress-nginx-internal",
+      "meta": {
+        "kind": "workload",
+        "namespace": "network",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "network/ingress-nginx-external",
+      "meta": {
+        "kind": "workload",
+        "namespace": "network",
+        "tier": 3,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "network/smtp-relay",
+      "meta": {
+        "kind": "workload",
+        "namespace": "network",
+        "tier": 2,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "network/tailscale-operator",
+      "meta": {
+        "kind": "workload",
+        "namespace": "network",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "observability/blackbox-exporter",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability",
+        "tier": 1,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "observability/blackbox-exporter-probes",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "observability/fluent-bit",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "observability/gatus",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "observability/grafana",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "observability/silence-operator",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability",
+        "tier": 0,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "observability/silence-operator-silences",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability",
+        "tier": 1,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "observability/smartctl-exporter",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability",
+        "tier": 1,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "observability/unpoller",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability",
+        "tier": 2,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "observability/victoria-logs",
+      "meta": {
+        "kind": "platform",
+        "namespace": "observability",
+        "tier": 3,
+        "dependents": 2
+      }
+    },
+    {
+      "id": "observability/victoria-metrics",
+      "meta": {
+        "kind": "platform",
+        "namespace": "observability",
+        "tier": 3,
+        "dependents": 2
+      }
+    },
+    {
+      "id": "observability/victoria-metrics-operator",
+      "meta": {
+        "kind": "platform",
+        "namespace": "observability",
+        "tier": 0,
+        "dependents": 5
+      }
+    },
+    {
+      "id": "observability/vmalert",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "openebs-system/openebs",
+      "meta": {
+        "kind": "workload",
+        "namespace": "openebs-system",
+        "tier": 0,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "rook-ceph/rook-ceph",
+      "meta": {
+        "kind": "platform",
+        "namespace": "rook-ceph",
+        "tier": 1,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "rook-ceph/rook-ceph-cluster",
+      "meta": {
+        "kind": "platform",
+        "namespace": "rook-ceph",
+        "tier": 2,
+        "dependents": 42
+      }
+    },
+    {
+      "id": "self-hosted/atuin",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "self-hosted/dawarich",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "self-hosted/homebox",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "self-hosted/mealie",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "self-hosted/nocodb",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "self-hosted/nominatim",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted",
+        "tier": 3,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "self-hosted/paperless",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "self-hosted/radicale",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "self-hosted/rxresume",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "self-hosted/unwrapped",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted",
+        "tier": 4,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "system-upgrade/tuppr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "system-upgrade",
+        "tier": 0,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "system-upgrade/tuppr-upgrades",
+      "meta": {
+        "kind": "workload",
+        "namespace": "system-upgrade",
+        "tier": 1,
+        "dependents": 0
+      }
+    },
+    {
+      "id": "volsync-system/volsync",
+      "meta": {
+        "kind": "platform",
+        "namespace": "volsync-system",
+        "tier": 0,
+        "dependents": 30
+      }
+    },
+    {
+      "id": "flux-system/cluster-meta",
+      "meta": {
+        "kind": "platform",
+        "namespace": "flux-system",
+        "tier": 0,
+        "dependents": 1
+      }
+    },
+    {
+      "id": "flux-system/cluster-apps",
+      "meta": {
+        "kind": "platform",
+        "namespace": "flux-system",
+        "tier": 1,
+        "dependents": 0
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "ai/holmesgpt",
+      "to": "ai/ollama"
+    },
+    {
+      "from": "ai/holmesgpt",
+      "to": "observability/victoria-metrics"
+    },
+    {
+      "from": "ai/holmesgpt-checks",
+      "to": "ai/holmesgpt"
+    },
+    {
+      "from": "ai/ollama",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "ai/open-webui",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "ai/open-webui",
+      "to": "ai/ollama"
+    },
+    {
+      "from": "ai/open-webui",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "ai/paperless-ai",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "ai/paperless-ai",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "ai/paperless-ai",
+      "to": "ai/ollama"
+    },
+    {
+      "from": "ai/paperless-ai",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "auth/pocket-id",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "auth/pocket-id",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "auth/pocket-id",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "auth/pocket-id",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "auth/pocket-id",
+      "to": "network/smtp-relay"
+    },
+    {
+      "from": "auth/tinyauth",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "auth/tinyauth",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "auth/tinyauth",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "auth/tinyauth",
+      "to": "auth/pocket-id"
+    },
+    {
+      "from": "cert-manager/cert-manager-issuers",
+      "to": "cert-manager/cert-manager"
+    },
+    {
+      "from": "cert-manager/cert-manager-tls",
+      "to": "cert-manager/cert-manager"
+    },
+    {
+      "from": "cert-manager/cert-manager-tls",
+      "to": "cert-manager/cert-manager-issuers"
+    },
+    {
+      "from": "cert-manager/step-issuer",
+      "to": "cert-manager/cert-manager"
+    },
+    {
+      "from": "cert-manager/step-issuer-issuers",
+      "to": "cert-manager/step-issuer"
+    },
+    {
+      "from": "cert-manager/step-issuer-issuers",
+      "to": "cert-manager/cert-manager-issuers"
+    },
+    {
+      "from": "cert-manager/step-issuer-tls",
+      "to": "cert-manager/step-issuer-issuers"
+    },
+    {
+      "from": "cert-manager/step-issuer-tls",
+      "to": "cert-manager/step-issuer"
+    },
+    {
+      "from": "database/cloudnative-pg",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "database/cloudnative-pg-cluster",
+      "to": "database/cloudnative-pg"
+    },
+    {
+      "from": "database/cloudnative-pg-cluster",
+      "to": "openebs-system/openebs"
+    },
+    {
+      "from": "database/dragonfly-cluster",
+      "to": "database/dragonfly"
+    },
+    {
+      "from": "database/mariadb",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/autobrr",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "downloads/autobrr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/bazarr",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/bazarr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/bazarr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/bazarr-uhd",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/bazarr-uhd",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/bazarr-uhd",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/cross-seed",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/cross-seed",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/cross-seed",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/lidarr",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/lidarr",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "downloads/lidarr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/omegabrr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/openbooks",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/prowlarr",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "downloads/prowlarr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/qbittorrent",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/qbittorrent",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/qbittorrent",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/qbittorrent-tools",
+      "to": "downloads/qbittorrent"
+    },
+    {
+      "from": "downloads/qui",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/qui",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/qui",
+      "to": "downloads/qbittorrent"
+    },
+    {
+      "from": "downloads/qui",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/radarr",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/radarr",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "downloads/radarr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/radarr-uhd",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/radarr-uhd",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "downloads/radarr-uhd",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/recyclarr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/seasonpackarr",
+      "to": "downloads/sonarr"
+    },
+    {
+      "from": "downloads/seasonpackarr",
+      "to": "downloads/qbittorrent"
+    },
+    {
+      "from": "downloads/sonarr",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/sonarr",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "downloads/sonarr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/sonarr-uhd",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/sonarr-uhd",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "downloads/sonarr-uhd",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/unpackerr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "downloads/whisparr",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "downloads/whisparr",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "downloads/whisparr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/whisparr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "external-secrets/cluster-secrets",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "external-secrets/onepassword",
+      "to": "external-secrets/external-secrets"
+    },
+    {
+      "from": "fission/fission",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "fission/fission",
+      "to": "fission/fission-crds"
+    },
+    {
+      "from": "fission/fission",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "fission/fission-functions",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "fission/fission-functions",
+      "to": "fission/fission"
+    },
+    {
+      "from": "flux-system/flux-instance",
+      "to": "flux-system/flux-operator"
+    },
+    {
+      "from": "flux-system/flux-instance",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "games/atm10",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "games/atm10",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "games/atm10",
+      "to": "games/bluemap"
+    },
+    {
+      "from": "games/atm10",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "games/atmons",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "games/atmons",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "games/atmons",
+      "to": "games/bluemap"
+    },
+    {
+      "from": "games/atmons",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "games/bluemap",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "games/vanilla",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "games/vanilla",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "games/vanilla",
+      "to": "games/bluemap"
+    },
+    {
+      "from": "games/vanilla",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "kube-system/cilium-config",
+      "to": "kube-system/cilium"
+    },
+    {
+      "from": "kube-system/cilium-gateway",
+      "to": "kube-system/cilium-config"
+    },
+    {
+      "from": "kube-system/cilium-gateway",
+      "to": "kube-system/cilium"
+    },
+    {
+      "from": "kube-system/cilium-gateway",
+      "to": "cert-manager/cert-manager-issuers"
+    },
+    {
+      "from": "kube-system/node-feature-discovery-features",
+      "to": "kube-system/node-feature-discovery"
+    },
+    {
+      "from": "kube-system/node-healthcheck",
+      "to": "kube-system/self-node-remediation"
+    },
+    {
+      "from": "kube-system/node-healthcheck-config",
+      "to": "kube-system/node-healthcheck"
+    },
+    {
+      "from": "kube-system/synology-csi-driver",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "kube-system/synology-csi-driver",
+      "to": "kube-system/snapshot-controller"
+    },
+    {
+      "from": "media/agregarr",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "media/booklore",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "media/booklore",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "media/booklore",
+      "to": "database/mariadb"
+    },
+    {
+      "from": "media/booklore",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/capacitarr",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "media/capacitarr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "media/capacitarr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/maintainerr",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "media/maintainerr",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "media/maintainerr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/plex",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "media/plex",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "media/plex",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/seerr",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "media/seerr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/shelfmark",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "media/shelfmark",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/stash",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "media/stash",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "media/stash",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/stash",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "media/steam",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "media/steam",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "media/steam",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/tautulli",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "media/tautulli",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/wizarr",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "media/wizarr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "network/cloudflared",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "network/external-dns-cloudflare",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "network/external-dns-unifi",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "network/ingress-nginx-internal",
+      "to": "cert-manager/cert-manager-tls"
+    },
+    {
+      "from": "network/ingress-nginx-external",
+      "to": "cert-manager/cert-manager-tls"
+    },
+    {
+      "from": "network/smtp-relay",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "network/tailscale-operator",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "observability/blackbox-exporter",
+      "to": "observability/victoria-metrics-operator"
+    },
+    {
+      "from": "observability/blackbox-exporter-probes",
+      "to": "observability/blackbox-exporter"
+    },
+    {
+      "from": "observability/blackbox-exporter-probes",
+      "to": "observability/victoria-metrics-operator"
+    },
+    {
+      "from": "observability/fluent-bit",
+      "to": "observability/victoria-logs"
+    },
+    {
+      "from": "observability/gatus",
+      "to": "observability/victoria-metrics-operator"
+    },
+    {
+      "from": "observability/gatus",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "observability/gatus",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "observability/grafana",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "observability/silence-operator-silences",
+      "to": "observability/silence-operator"
+    },
+    {
+      "from": "observability/smartctl-exporter",
+      "to": "observability/victoria-metrics-operator"
+    },
+    {
+      "from": "observability/unpoller",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "observability/victoria-logs",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "observability/victoria-metrics",
+      "to": "observability/victoria-metrics-operator"
+    },
+    {
+      "from": "observability/victoria-metrics",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "observability/victoria-metrics",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "observability/vmalert",
+      "to": "observability/victoria-metrics"
+    },
+    {
+      "from": "observability/vmalert",
+      "to": "observability/victoria-logs"
+    },
+    {
+      "from": "rook-ceph/rook-ceph",
+      "to": "kube-system/snapshot-controller"
+    },
+    {
+      "from": "rook-ceph/rook-ceph-cluster",
+      "to": "rook-ceph/rook-ceph"
+    },
+    {
+      "from": "self-hosted/atuin",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "self-hosted/atuin",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "self-hosted/dawarich",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "self-hosted/dawarich",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/dawarich",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "self-hosted/dawarich",
+      "to": "database/cloudnative-pg"
+    },
+    {
+      "from": "self-hosted/dawarich",
+      "to": "self-hosted/nominatim"
+    },
+    {
+      "from": "self-hosted/homebox",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "self-hosted/homebox",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "self-hosted/homebox",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/homebox",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "self-hosted/mealie",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "self-hosted/mealie",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "self-hosted/mealie",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/mealie",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "self-hosted/nocodb",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "self-hosted/nocodb",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/nocodb",
+      "to": "database/dragonfly-cluster"
+    },
+    {
+      "from": "self-hosted/nocodb",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "self-hosted/nocodb",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "self-hosted/nominatim",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "self-hosted/nominatim",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "self-hosted/nominatim",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/paperless",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "self-hosted/paperless",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/paperless",
+      "to": "database/dragonfly-cluster"
+    },
+    {
+      "from": "self-hosted/paperless",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "self-hosted/paperless",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "self-hosted/radicale",
+      "to": "rook-ceph/rook-ceph-cluster"
+    },
+    {
+      "from": "self-hosted/radicale",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "self-hosted/radicale",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/radicale",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "self-hosted/rxresume",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "self-hosted/rxresume",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "self-hosted/unwrapped",
+      "to": "database/cloudnative-pg-cluster"
+    },
+    {
+      "from": "self-hosted/unwrapped",
+      "to": "external-secrets/cluster-secrets"
+    },
+    {
+      "from": "self-hosted/unwrapped",
+      "to": "external-secrets/onepassword"
+    },
+    {
+      "from": "system-upgrade/tuppr-upgrades",
+      "to": "system-upgrade/tuppr"
+    },
+    {
+      "from": "flux-system/cluster-apps",
+      "to": "flux-system/cluster-meta"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: '3'
+
+vars:
+  ARCHITECTURE_DIR: '{{.ROOT_DIR}}/docs/architecture'
+  DEPLOY_GRAPH: '{{.ARCHITECTURE_DIR}}/platform-deploy.json'
+
+tasks:
+
+  graph:
+    desc: Generate platform architecture graphs and report from Flux ks.yaml
+    cmds:
+      - python3 {{.ROOT_DIR}}/scripts/flux-architecture-graph.py --out-dir {{.ARCHITECTURE_DIR}}
+    preconditions:
+      - sh: test -x "$(command -v python3)"
+        msg: python3 is required
+      - sh: python3 -c "import yaml"
+        msg: PyYAML is required (python3-yaml)
+
+  render:
+    desc: Render Stacktower SVG from the collapsed deploy graph
+    deps: [graph]
+    cmds:
+      - stacktower render {{.DEPLOY_GRAPH}} -o {{.ARCHITECTURE_DIR}}/platform-deploy.svg --style simple --ordering barycentric
+    preconditions:
+      - sh: test -x "$(command -v stacktower)"
+        msg: stacktower is not installed (brew tap stacktower-io/homebrew-tap && brew install --cask stacktower)
+
+  stats:
+    desc: Show load-bearing platform stats via Stacktower
+    deps: [graph]
+    cmds:
+      - stacktower stats {{.DEPLOY_GRAPH}}
+    preconditions:
+      - sh: test -x "$(command -v stacktower)"
+        msg: stacktower is not installed (brew tap stacktower-io/homebrew-tap && brew install --cask stacktower)

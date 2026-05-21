@@ -1,0 +1,562 @@
+{
+  "nodes": [
+    {
+      "id": "ai/open-webui",
+      "meta": {
+        "kind": "workload",
+        "namespace": "ai"
+      }
+    },
+    {
+      "id": "ai/paperless-ai",
+      "meta": {
+        "kind": "workload",
+        "namespace": "ai"
+      }
+    },
+    {
+      "id": "auth/pocket-id",
+      "meta": {
+        "kind": "workload",
+        "namespace": "auth"
+      }
+    },
+    {
+      "id": "auth/tinyauth",
+      "meta": {
+        "kind": "workload",
+        "namespace": "auth"
+      }
+    },
+    {
+      "id": "database/mariadb",
+      "meta": {
+        "kind": "workload",
+        "namespace": "database"
+      }
+    },
+    {
+      "id": "downloads/bazarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/bazarr-uhd",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/cross-seed",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/lidarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/openbooks",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/qbittorrent",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/qbittorrent-tools",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/qui",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/radarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/radarr-uhd",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/sonarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/sonarr-uhd",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/unpackerr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "downloads/whisparr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "downloads"
+      }
+    },
+    {
+      "id": "games/atm10",
+      "meta": {
+        "kind": "workload",
+        "namespace": "games"
+      }
+    },
+    {
+      "id": "games/atmons",
+      "meta": {
+        "kind": "workload",
+        "namespace": "games"
+      }
+    },
+    {
+      "id": "games/vanilla",
+      "meta": {
+        "kind": "workload",
+        "namespace": "games"
+      }
+    },
+    {
+      "id": "kube-system/nfs-subdir-external-provisioner",
+      "meta": {
+        "kind": "workload",
+        "namespace": "kube-system"
+      }
+    },
+    {
+      "id": "media/agregarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media"
+      }
+    },
+    {
+      "id": "media/booklore",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media"
+      }
+    },
+    {
+      "id": "media/capacitarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media"
+      }
+    },
+    {
+      "id": "media/maintainerr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media"
+      }
+    },
+    {
+      "id": "media/plex",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media"
+      }
+    },
+    {
+      "id": "media/seerr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media"
+      }
+    },
+    {
+      "id": "media/shelfmark",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media"
+      }
+    },
+    {
+      "id": "media/stash",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media"
+      }
+    },
+    {
+      "id": "media/steam",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media"
+      }
+    },
+    {
+      "id": "media/tautulli",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media"
+      }
+    },
+    {
+      "id": "media/wizarr",
+      "meta": {
+        "kind": "workload",
+        "namespace": "media"
+      }
+    },
+    {
+      "id": "observability/gatus",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability"
+      }
+    },
+    {
+      "id": "observability/kromgo",
+      "meta": {
+        "kind": "workload",
+        "namespace": "observability"
+      }
+    },
+    {
+      "id": "self-hosted/atuin",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted"
+      }
+    },
+    {
+      "id": "self-hosted/dawarich",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted"
+      }
+    },
+    {
+      "id": "self-hosted/homebox",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted"
+      }
+    },
+    {
+      "id": "self-hosted/mealie",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted"
+      }
+    },
+    {
+      "id": "self-hosted/nocodb",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted"
+      }
+    },
+    {
+      "id": "self-hosted/nominatim",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted"
+      }
+    },
+    {
+      "id": "self-hosted/paperless",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted"
+      }
+    },
+    {
+      "id": "self-hosted/radicale",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted"
+      }
+    },
+    {
+      "id": "self-hosted/rxresume",
+      "meta": {
+        "kind": "workload",
+        "namespace": "self-hosted"
+      }
+    },
+    {
+      "id": "volsync-system/volsync",
+      "meta": {
+        "kind": "workload",
+        "namespace": "volsync-system"
+      }
+    },
+    {
+      "id": "volsync-system/volsync",
+      "meta": {
+        "kind": "platform"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "ai/open-webui",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "ai/paperless-ai",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "auth/pocket-id",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "auth/tinyauth",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "database/mariadb",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/bazarr",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/bazarr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/bazarr-uhd",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/bazarr-uhd",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/cross-seed",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/cross-seed",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/lidarr",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/openbooks",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "observability/gatus",
+      "to": "downloads/qbittorrent"
+    },
+    {
+      "from": "downloads/qbittorrent",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/qbittorrent",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/qbittorrent-tools",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/qui",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "downloads/radarr",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/radarr-uhd",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/sonarr",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/sonarr-uhd",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/unpackerr",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/whisparr",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "downloads/whisparr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "games/atm10",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "games/atmons",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "games/vanilla",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/agregarr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/booklore",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "media/booklore",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/capacitarr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/maintainerr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "observability/gatus",
+      "to": "media/plex"
+    },
+    {
+      "from": "media/plex",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "media/plex",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "observability/gatus",
+      "to": "media/seerr"
+    },
+    {
+      "from": "media/seerr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/shelfmark",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/stash",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "media/stash",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/steam",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "media/tautulli",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "observability/gatus",
+      "to": "media/wizarr"
+    },
+    {
+      "from": "media/wizarr",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "observability/gatus",
+      "to": "observability/gatus"
+    },
+    {
+      "from": "observability/gatus",
+      "to": "observability/kromgo"
+    },
+    {
+      "from": "observability/gatus",
+      "to": "self-hosted/atuin"
+    },
+    {
+      "from": "self-hosted/dawarich",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/homebox",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/mealie",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/nocodb",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/nominatim",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/paperless",
+      "to": "kube-system/nfs-subdir-external-provisioner"
+    },
+    {
+      "from": "self-hosted/paperless",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "self-hosted/radicale",
+      "to": "volsync-system/volsync"
+    },
+    {
+      "from": "observability/gatus",
+      "to": "self-hosted/rxresume"
+    }
+  ]
+}
