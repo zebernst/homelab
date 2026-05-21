@@ -19,6 +19,9 @@ kind: HelmRelease
 metadata:
   name: victoria-metrics
 spec:
+  dependsOn:
+    - name: prometheus-operator-crds
+      namespace: observability
   chartRef:
     kind: OCIRepository
     name: victoria-metrics-k8s-stack
@@ -35,7 +38,7 @@ spec:
         cleanup:
           enabled: true
       operator:
-        disable_prometheus_converter: true
+        disable_prometheus_converter: false
 
     defaultDashboards:
       enabled: true

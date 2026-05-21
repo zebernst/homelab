@@ -18,8 +18,8 @@ spec:
 
   values:
     monitoring:
-      enabled: false
-      createPrometheusRules: false
+      enabled: true
+      createPrometheusRules: true
     ingress:
       dashboard:
         ingressClassName: tailscale
@@ -191,3 +191,25 @@ spec:
           - name: external
             namespace: kube-system
             sectionName: https
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: monitoring.coreos.com
+              kind: PrometheusRule
+              name: prometheus-ceph-rules
+              version: v1
+            patch: |-
+              # CephNodeNetworkPacketDrops
+              - op: add
+                path: /spec/groups/6/rules/1/for
+                value: 5m
+              # CephNodeNetworkPacketErrors
+              - op: add
+                path: /spec/groups/6/rules/2/for
+                value: 5m
+
+              # CephMonClockSkew
+              - op: replace
+                path: /spec/groups/1/rules/4/for
+                value: 5m

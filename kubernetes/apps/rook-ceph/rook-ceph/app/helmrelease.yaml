@@ -20,10 +20,10 @@ spec:
       cephFSKernelMountOptions: ms_mode=prefer-crc
       enableLiveness: true
       serviceMonitor:
-        enabled: false
+        enabled: true
     enableDiscoveryDaemon: true
     monitoring:
-      enabled: false
+      enabled: true
     obcAllowAdditionalConfigFields: "maxObjects,maxSize,bucketPolicy,bucketLifecycle"
     resources:
       requests:
