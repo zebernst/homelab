@@ -103,6 +103,15 @@ spec:
                 service:
                   identifier: *app
                   port: java
+    serviceMonitor:
+      mc-router:
+        serviceName: *app
+        endpoints:
+          - port: api
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 30s
     route:
       api:
         kind: HTTPRoute

@@ -6,4 +6,3 @@ resources:
   - bucketclaim.yaml
   - externalsecret.yaml
   - helmrelease.yaml
-  - vmservicescrape.yaml

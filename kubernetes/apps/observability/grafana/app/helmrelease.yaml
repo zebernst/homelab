@@ -364,7 +364,7 @@ spec:
       - vonage-status-panel
       - victoriametrics-logs-datasource
     serviceMonitor:
-      enabled: false
+      enabled: true
     ingress:
       enabled: true
       ingressClassName: tailscale

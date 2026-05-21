@@ -62,6 +62,16 @@ spec:
             port: *smtpPort
 
 
+    serviceMonitor:
+      app:
+        serviceName: *app
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
+
     persistence:
       config:
         type: configMap

@@ -86,6 +86,16 @@ spec:
           http:
             port: *port
 
+    serviceMonitor:
+      vmalert:
+        serviceName: *app
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
+
     persistence:
       rules:
         type: emptyDir

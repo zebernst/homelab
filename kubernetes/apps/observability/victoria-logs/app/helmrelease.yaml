@@ -32,7 +32,7 @@ spec:
         storageClassName: ceph-block
         size: 20Gi
       serviceMonitor:
-        enabled: false
+        enabled: true
       retentionPeriod: 14d
       ingress:
         enabled: true

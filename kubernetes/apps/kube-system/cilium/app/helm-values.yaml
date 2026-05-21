@@ -30,7 +30,7 @@ envoy:
   rollOutPods: true
   prometheus:
     serviceMonitor:
-      enabled: false
+      enabled: true
 gatewayAPI:
   enabled: true
   enableAlpn: true
@@ -58,13 +58,13 @@ operator:
   prometheus:
     enabled: true
     serviceMonitor:
-      enabled: false
+      enabled: true
   dashboards:
     enabled: true
 prometheus:
   enabled: true
   serviceMonitor:
-    enabled: false
+    enabled: true
     trustCRDsExist: true
 rollOutCiliumPods: true
 routingMode: native

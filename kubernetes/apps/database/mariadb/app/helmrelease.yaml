@@ -19,7 +19,7 @@ spec:
       enabled: true
       resourcesPreset: small
       serviceMonitor:
-        enabled: false
+        enabled: true
     primary:
       priorityClassName: database-critical
       resourcesPreset: small

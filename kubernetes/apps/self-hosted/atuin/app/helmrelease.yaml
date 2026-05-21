@@ -90,6 +90,10 @@ spec:
         tls:
           - hosts:
               - *tsHost
+    serviceMonitor:
+      app:
+        endpoints:
+          - port: metrics
     persistence:
       config:
         type: emptyDir

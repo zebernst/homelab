@@ -28,4 +28,11 @@ spec:
     prometheusRules:
       enabled: false
     serviceMonitor:
-      enabled: false
+      enabled: true
+      relabelings:
+        - action: replace
+          sourceLabels: ["__meta_kubernetes_pod_node_name"]
+          targetLabel: node
+        - action: replace
+          sourceLabels: ["__meta_kubernetes_pod_host_ip"]
+          targetLabel: node_ip

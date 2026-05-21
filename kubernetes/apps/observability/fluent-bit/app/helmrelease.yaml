@@ -100,4 +100,4 @@ spec:
           compress gzip
           log_response_payload false
     serviceMonitor:
-      enabled: false
+      enabled: true

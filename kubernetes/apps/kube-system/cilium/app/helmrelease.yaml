@@ -32,13 +32,13 @@ spec:
           - icmp
           - http
         serviceMonitor:
-          enabled: false
+          enabled: true
       relay:
         enabled: true
         rollOutPods: true
         prometheus:
           serviceMonitor:
-            enabled: false
+            enabled: true
       ui:
         enabled: true
         rollOutPods: true
@@ -51,9 +51,9 @@ spec:
       prometheus:
         enabled: true
         serviceMonitor:
-          enabled: false
+          enabled: true
     prometheus:
       enabled: true
       serviceMonitor:
-        enabled: false
+        enabled: true
         trustCRDsExist: true

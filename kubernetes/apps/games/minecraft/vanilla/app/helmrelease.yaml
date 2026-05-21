@@ -148,6 +148,15 @@ spec:
           rcon:
             port: 25578
 
+    serviceMonitor:
+      vanilla:
+        serviceName: *app
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 30s
     persistence:
       tmp:
         type: emptyDir
@@ -204,4 +213,3 @@ spec:
               - path: /app/config
             bluemap:
               - path: /app/config
-
