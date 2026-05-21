@@ -17,7 +17,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: kubectl
-              image: bitnami/kubectl:latest
+              image: registry.k8s.io/kubectl:v1.34.5
               command: ["/bin/sh", "-ec"]
               args:
                 - |
