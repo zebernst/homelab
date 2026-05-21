@@ -172,9 +172,6 @@ spec:
           url: https://raw.githubusercontent.com/cilium/cilium/refs/heads/main/install/kubernetes/cilium/files/hubble/dashboards/hubble-l7-http-metrics-by-workload.json
           datasource:
             - { name: DS_PROMETHEUS, value: Prometheus }
-        goflow2:
-          url: https://raw.githubusercontent.com/netsampler/goflow2/v2.2.6/compose/kcg/grafana/dashboards/perfs.json
-          datasource: Prometheus
       unifi:
         unifi-clients:
           # renovate: depName="UniFi-Poller: Client Insights - Prometheus"

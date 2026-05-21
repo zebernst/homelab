@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app goflow2
+  name: &app ntopng
   namespace: &ns observability
 spec:
   targetNamespace: *ns
@@ -11,13 +11,13 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: victoria-logs
-      namespace: *ns
-    - name: victoria-metrics
-      namespace: *ns
+    - name: onepassword
+      namespace: external-secrets
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   interval: 30m
   retryInterval: 1m
-  path: kubernetes/apps/observability/goflow2/app
+  path: kubernetes/apps/observability/ntopng/app
   prune: true
   sourceRef:
     kind: GitRepository

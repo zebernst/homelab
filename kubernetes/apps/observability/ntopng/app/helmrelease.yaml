@@ -1,0 +1,135 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app ntopng
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      ntopng:
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          redis:
+            image:
+              repository: docker.io/library/redis
+              tag: 7.4.2-alpine@sha256:519f0189dfdee3bc0bad61fb265fe73d864b5c64020e6579ad48a45c49965635
+            args:
+              - --save
+              - ""
+              - --appendonly
+              - "no"
+            probes:
+              liveness: &redisProbe
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 6379
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+              readiness: *redisProbe
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+          ntopng:
+            dependsOn:
+              - redis
+            image:
+              repository: docker.io/ntop/ntopng
+              tag: latest@sha256:07514f6a6720360add2d9d87fa9c472ca03cbb5dc8dc17a60dc9d6b6116d2d61
+            args:
+              - --community
+              - --data-dir=/var/lib/ntopng
+              - --redis=127.0.0.1:6379@0
+              - --http-port=3000
+              - --http-bind-address=0.0.0.0
+              - --http-user=admin
+              - --http-password-file=/run/secrets/http-password
+              - -i=netflow://0.0.0.0:2055
+              - -i=sflow://0.0.0.0:6343
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &httpPort 3000
+                  initialDelaySeconds: 60
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness: *probe
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+
+    defaultPodOptions:
+      priorityClassName: external-facing
+
+    service:
+      ntopng:
+        controller: *app
+        ports:
+          http:
+            port: *httpPort
+      ntopng-flows:
+        controller: *app
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: 192.168.20.21, ::ffff:c0a8:1415
+        ports:
+          netflow:
+            port: 2055
+            protocol: UDP
+          sflow:
+            port: 6343
+            protocol: UDP
+
+    ingress:
+      tailscale:
+        className: tailscale
+        hosts:
+          - host: &tsHost ntopng.kite-harmonic.ts.net
+            paths:
+              - path: /
+                service:
+                  identifier: *app
+                  port: http
+        tls:
+          - hosts:
+              - *tsHost
+
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        storageClass: ceph-block
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        advancedMounts:
+          ntopng:
+            ntopng:
+              - path: /var/lib/ntopng
+      http-passwd:
+        type: secret
+        name: ntopng-secret
+        advancedMounts:
+          ntopng:
+            ntopng:
+              - path: /run/secrets/http-password
+                subPath: http-password
+                readOnly: true
