@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../components/keda/nfs-scaler
     - ../../../../components/volsync
-    - ../../../../components/vmrule
+    - ../../../../components/vmalert-rules
   dependsOn:
     - name: onepassword
       namespace: external-secrets
@@ -50,7 +50,7 @@ spec:
   components:
     - ../../../../components/keda/nfs-scaler
     - ../../../../components/volsync
-    - ../../../../components/vmrule
+    - ../../../../components/vmalert-rules
   dependsOn:
     - name: onepassword
       namespace: external-secrets

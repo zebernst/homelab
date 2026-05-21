@@ -7,12 +7,12 @@ resources:
   - helmrelease.yaml
   - prometheusrule.yaml
 configMapGenerator:
-  - name: autobrr-vm-rules
+  - name: autobrr-vmalert-rules
     files:
-      - autobrr.yaml=vmrule.yaml
+      - autobrr.yaml=alert-rules.yaml
     options:
       labels:
-        vm_rule: "true"
+        vmalert.io/rule: "true"
   - name: autobrr-grafana-dashboard
     files:
       - autobrr.json=resources/grafana-dashboard.json

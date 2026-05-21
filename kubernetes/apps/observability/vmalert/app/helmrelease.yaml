@@ -23,7 +23,7 @@ spec:
               tag: 1.30.11@sha256:91b49e5b6d2fb03e7a9014f8b072d0de199987845b02d96ce458dd9f14e753f5
             env:
               FOLDER: /rules
-              LABEL: vm_rule
+              LABEL: vmalert.io/rule
               NAMESPACE: ALL
               RESOURCE: configmap
               UNIQUE_FILENAMES: true

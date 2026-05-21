@@ -3,12 +3,12 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 configMapGenerator:
-  - name: ${APP}-vm-rules
+  - name: ${APP}-vmalert-rules
     files:
-      - ${APP}.yaml=rules.yaml
+      - ${APP}.yaml=alert-rules.yaml
     options:
       labels:
-        vm_rule: "true"
+        vmalert.io/rule: "true"
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

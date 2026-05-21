@@ -7,12 +7,12 @@ resources:
   - helmrelease.yaml
   - probe.yaml
 configMapGenerator:
-  - name: qbittorrent-vm-rules
+  - name: qbittorrent-vmalert-rules
     files:
-      - qbittorrent.yaml=resources/vmrule.yaml
+      - qbittorrent.yaml=resources/alert-rules.yaml
     options:
       labels:
-        vm_rule: "true"
+        vmalert.io/rule: "true"
   - name: qbittorrent-scripts
     files:
       - post-process.sh=resources/post-process.sh

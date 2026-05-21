@@ -16,4 +16,4 @@ spec:
             severity: critical
           annotations:
             summary: >-
-              vmalert is not running — log-based alerts are not being evaluated
+              vmalert is not running — VictoriaLogs alerting rules are not being evaluated

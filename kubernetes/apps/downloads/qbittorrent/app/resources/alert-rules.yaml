@@ -1,6 +1,7 @@
 ---
 groups:
   - name: qbittorrent
+    type: vlogs
     rules:
       - alert: QbittorrentFastResumeRejected
         expr: |
@@ -8,7 +9,7 @@ groups:
         for: 2m
         labels:
           severity: critical
-          category: logs
+          category: vlogs
         annotations:
           app: "{{ $labels.container }}"
           summary: "{{ $labels.container }} has a torrent with fast resume rejected"
