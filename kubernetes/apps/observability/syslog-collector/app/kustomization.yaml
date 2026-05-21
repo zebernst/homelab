@@ -9,5 +9,11 @@ configMapGenerator:
   - name: syslog-collector-configmap
     files:
       - fluent-bit.conf=resources/fluent-bit.conf
+  - name: syslog-collector-vmalert-rules
+    files:
+      - syslog-collector.yaml=resources/alert-rules.yaml
+    options:
+      labels:
+        vmalert.io/rule: "true"
 generatorOptions:
   disableNameSuffixHash: true

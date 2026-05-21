@@ -40,3 +40,15 @@ spec:
           sourceLabels:
             - __param_target
           targetLabel: instance
+    # IF-MIB example for routers/switches (enable SNMP on the device first):
+    # - port: http
+    #   path: /snmp
+    #   interval: 1m
+    #   params:
+    #     auth: [public_v2]
+    #     module: [if_mib]
+    #     target: [unifi]
+    #   relabelConfigs:
+    #     - action: replace
+    #       sourceLabels: [__param_target]
+    #       targetLabel: instance

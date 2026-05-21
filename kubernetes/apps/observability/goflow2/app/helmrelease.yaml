@@ -20,7 +20,7 @@ spec:
         containers:
           goflow2:
             image:
-              repository: ghcr.io/netsampler/goflow2
+              repository: docker.io/netsampler/goflow2
               tag: v2.2.6@sha256:9971fb4c08adbe6519d5da38f14d3a0eefcc3c0d88cb2e49ab4c6415e99d32a0
             args:
               - -addr=0.0.0.0:8080
@@ -111,3 +111,10 @@ spec:
               - path: /fluent-bit/etc/conf/fluent-bit.conf
                 subPath: fluent-bit.conf
                 readOnly: true
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          goflow2:
+            flow-shipper:
+              - path: /tmp
+              - path: /buffers

@@ -10,8 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../components/vmalert-rules
   dependsOn:
     - name: victoria-logs
       namespace: *ns
