@@ -12,6 +12,29 @@ spec:
     namespace: flux-system
 
   values:
+    serviceAccount:
+      nominatim-maintenance:
+        enabled: true
+    rbac:
+      roles:
+        nominatim-maintenance:
+          type: Role
+          rules:
+            - apiGroups: [""]
+              resources: ["pods"]
+              verbs: ["get", "list"]
+            - apiGroups: [""]
+              resources: ["pods/exec"]
+              verbs: ["create"]
+      bindings:
+        nominatim-maintenance:
+          type: RoleBinding
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: Role
+            identifier: nominatim-maintenance
+          subjects:
+            - identifier: nominatim-maintenance
     controllers:
       nominatim:
         annotations:
@@ -95,6 +118,37 @@ spec:
                 memory: 4Gi
               limits:
                 memory: 32Gi
+      nominatim-maintenance:
+        type: cronjob
+        cronjob:
+          schedule: "@daily"
+          concurrencyPolicy: Forbid
+          successfulJobsHistory: 1
+          failedJobsHistory: 3
+        containers:
+          kubectl:
+            image:
+              repository: registry.k8s.io/kubectl
+              tag: v1.34.5
+            command: ["/bin/sh", "-ec"]
+            args:
+              - |
+                POD_NAME="$(kubectl get pods -l app.kubernetes.io/name=nominatim -o jsonpath='{.items[0].metadata.name}')"
+                if [ -z "${POD_NAME}" ]; then
+                  echo "nominatim pod not found"
+                  exit 1
+                fi
+                kubectl exec "${POD_NAME}" -c nominatim -- /bin/bash /scripts/maintain-regions.sh
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
+        pod:
+          restartPolicy: Never
+        serviceAccount:
+          identifier: nominatim-maintenance
 
     configMaps:
       scripts:
@@ -194,6 +248,14 @@ spec:
           http:
             port: 80
             targetPort: 8080
+    route:
+      nominatim:
+        hostnames:
+          - nominatim.zebernst.dev
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
 
     persistence:
       pgdata:
