@@ -114,6 +114,8 @@ spec:
           seccompProfile:
             type: RuntimeDefault
       persistence:
+        library:
+          enabled: false
         media:
           type: nfs
           server: nas.internal

@@ -5,8 +5,8 @@ metadata:
   name: immich-data
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 100Gi
-  storageClassName: ceph-filesystem
+  storageClassName: ceph-block
