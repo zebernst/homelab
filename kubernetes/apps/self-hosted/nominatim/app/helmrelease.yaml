@@ -58,7 +58,31 @@ spec:
                   exit 1
                 fi
                 export PBF_URL="$${NOMINATIM_DOWNURL:-https://download.geofabrik.de}/$${FIRST_REGION}-latest.osm.pbf"
-                OSMFILE="$${PROJECT_DIR:-/nominatim}/data.osm.pbf"
+                STAGING_DIR="/import-staging"
+                PROJECT_DIR="$${PROJECT_DIR:-/nominatim}"
+                mkdir -p "$${STAGING_DIR}"
+
+                link_staging() {
+                  local name="$1"
+                  local link="$${PROJECT_DIR}/$${name}"
+                  local target="$${STAGING_DIR}/$${name}"
+
+                  if [ -e "$${link}" ] && [ ! -L "$${link}" ]; then
+                    echo "Removing stale import artifact from project volume: $${link}"
+                    rm -f "$${link}"
+                  fi
+
+                  ln -sfn "$${target}" "$${link}"
+                }
+
+                link_staging "data.osm.pbf"
+                link_staging "wikimedia-importance.csv.gz"
+                link_staging "us_postcodes.csv.gz"
+                link_staging "secondary_importance.sql.gz"
+                link_staging "gb_postcodes.csv.gz"
+                link_staging "tiger-nominatim-preprocessed.csv.tar.gz"
+
+                OSMFILE="$${STAGING_DIR}/data.osm.pbf"
                 if [ -f "$${OSMFILE}" ]; then
                   REMOTE_SIZE="$(curl -fsIL "$${PBF_URL}" | grep -Fi 'content-length:' | tail -n1 | sed 's/.*:[[:space:]]*//' | tr -d '\r')"
                   LOCAL_SIZE="$(stat -c %s "$${OSMFILE}")"
@@ -299,6 +323,12 @@ spec:
             nominatim:
               - path: /scripts/maintain-regions.sh
                 subPath: maintain-regions.sh
+      import-staging:
+        type: emptyDir
+        advancedMounts:
+          nominatim:
+            nominatim:
+              - path: /import-staging
       dev-shm:
         type: emptyDir
         medium: Memory
