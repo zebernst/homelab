@@ -77,6 +77,8 @@ spec:
               # Disable the image's built-in replication loop; updates are managed by CronJob.
               UPDATE_MODE: "none"
               REPLICATION_URL: ""
+              IMPORT_WIKIPEDIA: "true"
+              IMPORT_US_POSTCODES: "true"
               PROJECT_DIR: /nominatim
             envFrom:
               - secretRef:
@@ -288,3 +290,11 @@ spec:
             nominatim:
               - path: /scripts/maintain-regions.sh
                 subPath: maintain-regions.sh
+      dev-shm:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 4Gi
+        advancedMounts:
+          nominatim:
+            nominatim:
+              - path: /dev/shm
