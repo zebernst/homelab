@@ -14,6 +14,8 @@ resources:
   - kromgo/ks.yaml
   - victoria-metrics/ks.yaml
   - fluent-bit/ks.yaml
+  - ntopng/ks.yaml
+  - syslog-collector/ks.yaml
   - victoria-logs/ks.yaml
   - vmalert/ks.yaml
   - silence-operator/ks.yaml

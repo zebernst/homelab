@@ -67,6 +67,12 @@ modules:
   # Eaton Network-M2 Card
   # MIBs found at:
   #   https://www.eaton.com/us/en-us/catalog/backup-power-ups-surge-it-power-distribution/eaton-gigabit-network-card---na/network-m2.html
+  # Standard interface counters for routers, switches, and other IF-MIB devices.
+  if_mib:
+    walk:
+      - interfaces
+      - ifXTable
+
   eaton_xups:
     walk:
       - XUPS-MIB::xupsIdent             # 1.3.6.1.4.1.534.1.1

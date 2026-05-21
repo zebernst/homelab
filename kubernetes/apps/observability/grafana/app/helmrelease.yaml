@@ -303,6 +303,11 @@ spec:
           revision: 9
           datasource: Prometheus
       hardware:
+        snmp-interfaces:
+          # renovate: depName="SNMP Interface Statistics"
+          gnetId: 11169
+          revision: 1
+          datasource: Prometheus
         synology:
           # renovate: depname="Synology NAS Details"
           gnetId: 14284
