@@ -1,0 +1,24 @@
+---
+groups:
+  - name: syslog
+    type: vlogs
+    rules:
+      - alert: SyslogAuthFailure
+        expr: |
+          sum(count_over_time({app="syslog"} |~ "(?i)(auth|login).*(fail|denied|invalid|unauthorized)"[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: vlogs
+        annotations:
+          summary: Elevated authentication failure syslog messages
+
+      - alert: SyslogCriticalEvent
+        expr: |
+          sum(count_over_time({app="syslog"} |~ "(?i)(critical|emergency|alert)"[5m])) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: vlogs
+        annotations:
+          summary: Critical severity syslog messages detected
