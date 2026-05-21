@@ -20,11 +20,11 @@ spec:
     serviceAccount:
       app:
         enabled: true
-      maintenance:
+      replication:
         enabled: true
     rbac:
       roles:
-        maintenance:
+        replication:
           type: Role
           rules:
             - apiGroups: [""]
@@ -34,14 +34,14 @@ spec:
               resources: ["pods/exec"]
               verbs: ["create"]
       bindings:
-        maintenance:
+        replication:
           type: RoleBinding
           roleRef:
             apiGroup: rbac.authorization.k8s.io
             kind: Role
-            identifier: maintenance
+            identifier: replication
           subjects:
-            - identifier: maintenance
+            - identifier: replication
     controllers:
       nominatim:
         annotations:
@@ -54,47 +54,7 @@ spec:
               # renovate: datasource=docker
               repository: mediagis/nominatim
               tag: "5.3.2"
-            command: ["/bin/bash", "-ec"]
-            args:
-              - |
-                FIRST_REGION="$(printf '%s\n' "$${NOMINATIM_REGIONS}" | tr ',[:space:]' '\n' | sed '/^[[:space:]]*$/d' | awk 'NR==1 { print; exit }')"
-                if [ -z "$${FIRST_REGION}" ]; then
-                  echo "NOMINATIM_REGIONS must include at least one region"
-                  exit 1
-                fi
-                export PBF_URL="$${NOMINATIM_DOWNURL:-https://download.geofabrik.de}/$${FIRST_REGION}-latest.osm.pbf"
-                STAGING_DIR="/import-staging"
-                PROJECT_DIR="$${PROJECT_DIR:-/nominatim}"
-                mkdir -p "$${STAGING_DIR}"
-
-                link_staging() {
-                  local name="$1"
-                  local link="$${PROJECT_DIR}/$${name}"
-                  local target="$${STAGING_DIR}/$${name}"
-
-                  if [ -e "$${link}" ] && [ ! -L "$${link}" ]; then
-                    echo "Removing stale import artifact from project volume: $${link}"
-                    rm -f "$${link}"
-                  fi
-
-                  ln -sfn "$${target}" "$${link}"
-                }
-
-                link_staging "data.osm.pbf"
-                link_staging "wikimedia-importance.csv.gz"
-                link_staging "us_postcodes.csv.gz"
-                link_staging "secondary_importance.sql.gz"
-
-                OSMFILE="$${STAGING_DIR}/data.osm.pbf"
-                if [ -f "$${OSMFILE}" ]; then
-                  REMOTE_SIZE="$(curl -fsIL "$${PBF_URL}" | grep -Fi 'content-length:' | tail -n1 | sed 's/.*:[[:space:]]*//' | tr -d '\r')"
-                  LOCAL_SIZE="$(stat -c %s "$${OSMFILE}")"
-                  if [ -n "$${REMOTE_SIZE}" ] && [ "$${LOCAL_SIZE}" -gt "$${REMOTE_SIZE}" ]; then
-                    echo "Removing stale OSM extract ($${LOCAL_SIZE} bytes > remote $${REMOTE_SIZE} bytes): $${OSMFILE}"
-                    rm -f "$${OSMFILE}"
-                  fi
-                fi
-                exec /app/start.sh
+            command: ["/bin/bash", "/scripts/start.sh"]
             env:
               # Geofabrik region paths (newline, space, or comma separated).
               NOMINATIM_REGIONS: |-
@@ -117,6 +77,10 @@ spec:
               IMPORT_SECONDARY_WIKIPEDIA: "true"
               IMPORT_US_POSTCODES: "true"
               PROJECT_DIR: /nominatim
+              POSTGRES_SHARED_BUFFERS: 2GB
+              POSTGRES_MAINTENANCE_WORK_MEM: 4GB
+              POSTGRES_AUTOVACUUM_WORK_MEM: 1GB
+              POSTGRES_EFFECTIVE_CACHE_SIZE: 12GB
             envFrom:
               - secretRef:
                   name: nominatim-secret
@@ -158,10 +122,10 @@ spec:
             resources:
               requests:
                 cpu: 500m
-                memory: 4Gi
+                memory: 32Gi
               limits:
                 memory: 32Gi
-      nominatim-maintenance:
+      update-osm-db:
         type: cronjob
         cronjob:
           schedule: "@daily"
@@ -191,97 +155,7 @@ spec:
         pod:
           restartPolicy: Never
         serviceAccount:
-          identifier: maintenance
-
-    configMaps:
-      scripts:
-        enabled: true
-        forceRename: nominatim
-        data:
-          maintain-regions.sh: |
-            #!/bin/bash
-            set -euo pipefail
-
-            DOWNURL="$${NOMINATIM_DOWNURL:-https://download.geofabrik.de}"
-            PROJECT_DIR="$${PROJECT_DIR:-/nominatim}"
-            IMPORTED_LIST="$${PROJECT_DIR}/imported-regions.txt"
-            CURL_USER_AGENT="$${USER_AGENT:-nominatim-maintenance}"
-
-            if [ -z "$${NOMINATIM_REGIONS:-}" ]; then
-              echo "[nominatim-maintenance] NOMINATIM_REGIONS is not set; exiting."
-              exit 1
-            fi
-
-            mapfile -t DESIRED_REGIONS < <(
-              echo "$${NOMINATIM_REGIONS}" | tr ',' ' ' | tr ' ' '\n' | sed '/^[[:space:]]*$/d'
-            )
-
-            if [ "$${#DESIRED_REGIONS[@]}" -eq 0 ]; then
-              echo "[nominatim-maintenance] No regions configured; exiting."
-              exit 0
-            fi
-
-            seed_state() {
-              local region="$1"
-              local state_dir="$${PROJECT_DIR}/update/$${region}"
-              mkdir -p "$${state_dir}"
-              curl -fsSL "$${DOWNURL}/$${region}-updates/state.txt" > "$${state_dir}/sequence.state"
-            }
-
-            if [ ! -f "$${IMPORTED_LIST}" ]; then
-              touch "$${IMPORTED_LIST}"
-              BASE_REGION="$${DESIRED_REGIONS[0]}"
-              echo "[nominatim-maintenance] Seeding imported list with base region $${BASE_REGION}"
-              echo "$${BASE_REGION}" >> "$${IMPORTED_LIST}"
-              seed_state "$${BASE_REGION}"
-            fi
-
-            CHANGED=false
-
-            for region in "$${DESIRED_REGIONS[@]}"; do
-              if grep -qxF "$${region}" "$${IMPORTED_LIST}"; then
-                continue
-              fi
-
-              import_file="/tmp/$(echo "$${region}" | tr '/' '-')-latest.osm.pbf"
-              echo "[nominatim-maintenance] Importing new region $${region}"
-              curl -L -A "$${CURL_USER_AGENT}" --fail-with-body \
-                "$${DOWNURL}/$${region}-latest.osm.pbf" -o "$${import_file}"
-              sudo -E -u nominatim nominatim add-data --project-dir "$${PROJECT_DIR}" --file "$${import_file}"
-              seed_state "$${region}"
-              echo "$${region}" >> "$${IMPORTED_LIST}"
-              rm -f "$${import_file}"
-              CHANGED=true
-            done
-
-            for region in "$${DESIRED_REGIONS[@]}"; do
-              state_file="$${PROJECT_DIR}/update/$${region}/sequence.state"
-              if [ ! -f "$${state_file}" ]; then
-                echo "[nominatim-maintenance] Missing state for $${region}; seeding and continuing."
-                seed_state "$${region}"
-                continue
-              fi
-
-              changes_file="/tmp/changes-$(echo "$${region}" | tr '/' '-').osc.gz"
-              echo "[nominatim-maintenance] Fetching changes for $${region}"
-              if pyosmium-get-changes \
-                  --server "$${DOWNURL}/$${region}-updates/" \
-                  --state-file "$${state_file}" \
-                  -o "$${changes_file}" 2>/dev/null && [ -s "$${changes_file}" ]; then
-                sudo -E -u nominatim nominatim add-data \
-                  --project-dir "$${PROJECT_DIR}" \
-                  --diff "$${changes_file}"
-                CHANGED=true
-              fi
-              rm -f "$${changes_file}"
-            done
-
-            if [ "$${CHANGED}" = "true" ]; then
-              echo "[nominatim-maintenance] Re-indexing after import/update cycle."
-              sudo -E -u nominatim nominatim index --project-dir "$${PROJECT_DIR}"
-            else
-              echo "[nominatim-maintenance] No new data found."
-            fi
+          identifier: replication
 
     defaultPodOptions:
       priorityClassName: internal-only
@@ -318,15 +192,23 @@ spec:
           nominatim:
             nominatim:
               - path: /nominatim
+      flatnode:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 100Gi
+        storageClass: ceph-block
+        advancedMounts:
+          nominatim:
+            nominatim:
+              - path: /nominatim/flatnode
       scripts:
         type: configMap
-        name: nominatim
+        name: nominatim-scripts
         defaultMode: 0755
         advancedMounts:
           nominatim:
             nominatim:
-              - path: /scripts/maintain-regions.sh
-                subPath: maintain-regions.sh
+              - path: /scripts
       import-staging:
         type: emptyDir
         advancedMounts:
