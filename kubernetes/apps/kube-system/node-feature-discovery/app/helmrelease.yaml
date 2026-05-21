@@ -26,3 +26,7 @@ spec:
           sources: ["pci", "system", "usb"]
     prometheus:
       enable: true
+      serviceMonitor:
+        enabled: true
+        interval: 1m
+        scrapeTimeout: 10s

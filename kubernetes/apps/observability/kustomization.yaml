@@ -15,6 +15,7 @@ resources:
   - kube-prometheus-stack/ks.yaml
   - fluent-bit/ks.yaml
   - victoria-logs/ks.yaml
+  - vmalert/ks.yaml
   - silence-operator/ks.yaml
   - smartctl-exporter/ks.yaml
   - snmp-exporter/ks.yaml

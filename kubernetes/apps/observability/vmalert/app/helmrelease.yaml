@@ -1,0 +1,103 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app vmalert
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      vmalert:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-rules:
+            image:
+              repository: ghcr.io/kiwigrid/k8s-sidecar
+              tag: 1.30.11@sha256:91b49e5b6d2fb03e7a9014f8b072d0de199987845b02d96ce458dd9f14e753f5
+            env:
+              FOLDER: /rules
+              LABEL: vmalert.io/rule
+              NAMESPACE: ALL
+              RESOURCE: configmap
+              UNIQUE_FILENAMES: true
+              METHOD: WATCH
+            restartPolicy: Always
+            resources: &resources
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
+        containers:
+          vmalert:
+            image:
+              repository: quay.io/victoriametrics/vmalert
+              tag: v1.110.0@sha256:f4054ae50dede7e0c4439484802a26e195802ed300c6e085f682407e946afe46
+            args:
+              - --rule=/rules
+              - --rule.defaultRuleType=vlogs
+              - --datasource.url=http://victoria-logs-server.observability.svc.cluster.local:9428
+              - --notifier.url=http://alertmanager-operated.observability.svc.cluster.local:9093
+              - --evaluationInterval=30s
+              - --httpListenAddr=:8880
+              - --external.url=http://vmalert.observability.svc.cluster.local:8880
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &port 8880
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources: *resources
+
+    defaultPodOptions:
+      priorityClassName: control-plane-critical
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+
+    serviceAccount:
+      vmalert:
+        enabled: true
+
+    service:
+      vmalert:
+        controller: *app
+        ports:
+          http:
+            port: *port
+
+    serviceMonitor:
+      vmalert:
+        serviceName: *app
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
+
+    persistence:
+      rules:
+        type: emptyDir
+        globalMounts:
+          - path: /rules

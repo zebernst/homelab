@@ -5,16 +5,17 @@ kind: Kustomization
 resources:
   - externalsecret.yaml
   - helmrelease.yaml
+  - probe.yaml
 configMapGenerator:
   - name: cross-seed-configmap
     files:
       - resources/config.js
-  - name: cross-seed-loki-rules
+  - name: cross-seed-vmalert-rules
     files:
-      - resources/lokirule.yaml
+      - cross-seed.yaml=resources/alert-rules.yaml
     options:
       labels:
-        loki_rule: "true"
+        vmalert.io/rule: "true"
 generatorOptions:
   disableNameSuffixHash: true
   annotations:

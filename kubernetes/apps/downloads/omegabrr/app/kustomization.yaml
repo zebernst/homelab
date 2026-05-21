@@ -6,3 +6,4 @@ namespace: downloads
 resources:
   - externalsecret.yaml
   - helmrelease.yaml
+  - probe.yaml

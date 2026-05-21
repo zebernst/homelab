@@ -5,13 +5,14 @@ kind: Kustomization
 resources:
   - externalsecret.yaml
   - helmrelease.yaml
+  - probe.yaml
 configMapGenerator:
-  - name: qbittorrent-loki-rules
+  - name: qbittorrent-vmalert-rules
     files:
-      - qbittorrent.yaml=resources/lokirule.yaml
+      - qbittorrent.yaml=resources/alert-rules.yaml
     options:
       labels:
-        loki_rule: "true"
+        vmalert.io/rule: "true"
   - name: qbittorrent-scripts
     files:
       - post-process.sh=resources/post-process.sh
