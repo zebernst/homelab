@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nominatim-scripts
+  name: nominatim
 data:
   maintain-regions.sh: |
     #!/bin/bash

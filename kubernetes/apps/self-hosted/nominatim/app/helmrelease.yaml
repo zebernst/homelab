@@ -191,7 +191,7 @@ spec:
               - path: /nominatim
       scripts:
         type: configMap
-        name: nominatim-scripts
+        name: nominatim
         defaultMode: 0755
         advancedMounts:
           nominatim:
