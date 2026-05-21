@@ -26,8 +26,11 @@ pages:
                 title: selfh.st
                 limit: 4
               - url: https://ciechanow.ski/atom.xml
+                title: ciechanow.ski
               - url: https://samwho.dev/rss.xml
+                title: samwho.dev
               - url: https://thatshubham.com/rss.xml
+                title: thatshubham.com
               - url: https://jepsen.io/blog.atom
                 title: Jepsen
 
