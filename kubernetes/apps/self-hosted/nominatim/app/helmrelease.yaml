@@ -1,0 +1,284 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app nominatim
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    serviceAccount:
+      nominatim-maintenance:
+        enabled: true
+    rbac:
+      roles:
+        nominatim-maintenance:
+          type: Role
+          rules:
+            - apiGroups: [""]
+              resources: ["pods"]
+              verbs: ["get", "list"]
+            - apiGroups: [""]
+              resources: ["pods/exec"]
+              verbs: ["create"]
+      bindings:
+        nominatim-maintenance:
+          type: RoleBinding
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: Role
+            identifier: nominatim-maintenance
+          subjects:
+            - identifier: nominatim-maintenance
+    controllers:
+      nominatim:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          nominatim:
+            image:
+              # renovate: datasource=docker
+              repository: mediagis/nominatim
+              tag: "5.3.2"
+            command: ["/bin/bash", "-ec"]
+            args:
+              - |
+                FIRST_REGION="$(echo "$${NOMINATIM_REGIONS}" | tr ',' ' ' | awk '{print $1}')"
+                if [ -z "$${FIRST_REGION}" ]; then
+                  echo "NOMINATIM_REGIONS must include at least one region"
+                  exit 1
+                fi
+                export PBF_URL="$${NOMINATIM_DOWNURL:-https://download.geofabrik.de}/$${FIRST_REGION}-latest.osm.pbf"
+                exec /app/start.sh
+            env:
+              # Geofabrik region paths (newline, space, or comma separated).
+              NOMINATIM_REGIONS: |-
+                north-america/us
+                north-america/canada
+                north-america/mexico
+                europe/britain-and-ireland
+                europe/france
+                europe/germany
+                europe/switzerland
+                europe/norway
+                europe/netherlands
+                australia-oceania/new-zealand
+                asia/israel-and-palestine
+              NOMINATIM_DOWNURL: "https://download.geofabrik.de"
+              # Disable the image's built-in replication loop; updates are managed by CronJob.
+              UPDATE_MODE: "none"
+              REPLICATION_URL: ""
+              PROJECT_DIR: /nominatim
+            envFrom:
+              - secretRef:
+                  name: nominatim-secret
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: 8080
+                  initialDelaySeconds: 30
+                  periodSeconds: 60
+                  timeoutSeconds: 10
+                  # US import + index takes up to ~24h; allow 30h
+                  failureThreshold: 1800
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: 8080
+                  initialDelaySeconds: 0
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: 8080
+                  initialDelaySeconds: 0
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+            resources:
+              requests:
+                cpu: 500m
+                memory: 4Gi
+              limits:
+                memory: 32Gi
+      nominatim-maintenance:
+        type: cronjob
+        cronjob:
+          schedule: "@daily"
+          concurrencyPolicy: Forbid
+          successfulJobsHistory: 1
+          failedJobsHistory: 3
+        containers:
+          kubectl:
+            image:
+              repository: registry.k8s.io/kubectl
+              tag: v1.34.5
+            command: ["/bin/sh", "-ec"]
+            args:
+              - |
+                POD_NAME="$(kubectl get pods -l app.kubernetes.io/name=nominatim -o jsonpath='{.items[0].metadata.name}')"
+                if [ -z "$${POD_NAME}" ]; then
+                  echo "nominatim pod not found"
+                  exit 1
+                fi
+                kubectl exec "$${POD_NAME}" -c nominatim -- /bin/bash /scripts/maintain-regions.sh
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
+        pod:
+          restartPolicy: Never
+        serviceAccount:
+          identifier: nominatim-maintenance
+
+    configMaps:
+      scripts:
+        data:
+          maintain-regions.sh: |
+            #!/bin/bash
+            set -euo pipefail
+
+            DOWNURL="$${NOMINATIM_DOWNURL:-https://download.geofabrik.de}"
+            PROJECT_DIR="$${PROJECT_DIR:-/nominatim}"
+            IMPORTED_LIST="$${PROJECT_DIR}/imported-regions.txt"
+            CURL_USER_AGENT="$${USER_AGENT:-nominatim-maintenance}"
+
+            if [ -z "$${NOMINATIM_REGIONS:-}" ]; then
+              echo "[nominatim-maintenance] NOMINATIM_REGIONS is not set; exiting."
+              exit 1
+            fi
+
+            mapfile -t DESIRED_REGIONS < <(
+              echo "$${NOMINATIM_REGIONS}" | tr ',' ' ' | tr ' ' '\n' | sed '/^[[:space:]]*$/d'
+            )
+
+            if [ "$${#DESIRED_REGIONS[@]}" -eq 0 ]; then
+              echo "[nominatim-maintenance] No regions configured; exiting."
+              exit 0
+            fi
+
+            seed_state() {
+              local region="$1"
+              local state_dir="$${PROJECT_DIR}/update/$${region}"
+              mkdir -p "$${state_dir}"
+              curl -fsSL "$${DOWNURL}/$${region}-updates/state.txt" > "$${state_dir}/sequence.state"
+            }
+
+            if [ ! -f "$${IMPORTED_LIST}" ]; then
+              touch "$${IMPORTED_LIST}"
+              BASE_REGION="$${DESIRED_REGIONS[0]}"
+              echo "[nominatim-maintenance] Seeding imported list with base region $${BASE_REGION}"
+              echo "$${BASE_REGION}" >> "$${IMPORTED_LIST}"
+              seed_state "$${BASE_REGION}"
+            fi
+
+            CHANGED=false
+
+            for region in "$${DESIRED_REGIONS[@]}"; do
+              if grep -qxF "$${region}" "$${IMPORTED_LIST}"; then
+                continue
+              fi
+
+              import_file="/tmp/$(echo "$${region}" | tr '/' '-')-latest.osm.pbf"
+              echo "[nominatim-maintenance] Importing new region $${region}"
+              curl -L -A "$${CURL_USER_AGENT}" --fail-with-body \
+                "$${DOWNURL}/$${region}-latest.osm.pbf" -o "$${import_file}"
+              sudo -E -u nominatim nominatim add-data --project-dir "$${PROJECT_DIR}" --file "$${import_file}"
+              seed_state "$${region}"
+              echo "$${region}" >> "$${IMPORTED_LIST}"
+              rm -f "$${import_file}"
+              CHANGED=true
+            done
+
+            for region in "$${DESIRED_REGIONS[@]}"; do
+              state_file="$${PROJECT_DIR}/update/$${region}/sequence.state"
+              if [ ! -f "$${state_file}" ]; then
+                echo "[nominatim-maintenance] Missing state for $${region}; seeding and continuing."
+                seed_state "$${region}"
+                continue
+              fi
+
+              changes_file="/tmp/changes-$(echo "$${region}" | tr '/' '-').osc.gz"
+              echo "[nominatim-maintenance] Fetching changes for $${region}"
+              if pyosmium-get-changes \
+                  --server "$${DOWNURL}/$${region}-updates/" \
+                  --state-file "$${state_file}" \
+                  -o "$${changes_file}" 2>/dev/null && [ -s "$${changes_file}" ]; then
+                sudo -E -u nominatim nominatim add-data \
+                  --project-dir "$${PROJECT_DIR}" \
+                  --diff "$${changes_file}"
+                CHANGED=true
+              fi
+              rm -f "$${changes_file}"
+            done
+
+            if [ "$${CHANGED}" = "true" ]; then
+              echo "[nominatim-maintenance] Re-indexing after import/update cycle."
+              sudo -E -u nominatim nominatim index --project-dir "$${PROJECT_DIR}"
+            else
+              echo "[nominatim-maintenance] No new data found."
+            fi
+
+    defaultPodOptions:
+      priorityClassName: internal-only
+
+    service:
+      nominatim:
+        controller: *app
+        ports:
+          http:
+            port: 80
+            targetPort: 8080
+    route:
+      nominatim:
+        hostnames:
+          - nominatim.zebernst.dev
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
+
+    persistence:
+      pgdata:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 400Gi
+        storageClass: ceph-block
+        advancedMounts:
+          nominatim:
+            nominatim:
+              - path: /var/lib/postgresql/16/main
+      project:
+        existingClaim: nominatim-project
+        advancedMounts:
+          nominatim:
+            nominatim:
+              - path: /nominatim
+      scripts:
+        type: configMap
+        name: nominatim-scripts
+        defaultMode: 0755
+        advancedMounts:
+          nominatim:
+            nominatim:
+              - path: /scripts/maintain-regions.sh
+                subPath: maintain-regions.sh

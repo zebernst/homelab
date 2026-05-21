@@ -46,6 +46,8 @@ spec:
               OIDC_REDIRECT_URI: https://timeline.zebernst.dev/users/auth/openid_connect/callback
               OIDC_AUTO_REGISTER: "true"
               ALLOW_EMAIL_PASSWORD_REGISTRATION: "false"
+              NOMINATIM_API_HOST: nominatim.self-hosted.svc.cluster.local
+              NOMINATIM_API_USE_HTTPS: "false"
               SMTP_SERVER: smtp-relay.network.svc.cluster.local
               SMTP_PORT: "25"
               SMTP_DOMAIN: zebernst.dev
