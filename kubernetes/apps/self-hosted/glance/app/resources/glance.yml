@@ -26,13 +26,13 @@ pages:
                 title: selfh.st
                 limit: 4
               - url: https://ciechanow.ski/atom.xml
-                title: ciechanow.ski
+                title: Bartosz Ciechanowski
               - url: https://samwho.dev/rss.xml
-                title: samwho.dev
+                title: Sam Rose
               - url: https://thatshubham.com/rss.xml
-                title: thatshubham.com
+                title: Shubham Bose
               - url: https://jepsen.io/blog.atom
-                title: Jepsen
+                title: Kyle Kingsbury
 
       - size: full
         widgets:
