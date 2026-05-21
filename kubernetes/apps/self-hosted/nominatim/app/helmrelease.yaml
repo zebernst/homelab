@@ -13,11 +13,13 @@ spec:
 
   values:
     serviceAccount:
-      nominatim-maintenance:
+      app:
+        enabled: true
+      maintenance:
         enabled: true
     rbac:
       roles:
-        nominatim-maintenance:
+        maintenance:
           type: Role
           rules:
             - apiGroups: [""]
@@ -27,18 +29,20 @@ spec:
               resources: ["pods/exec"]
               verbs: ["create"]
       bindings:
-        nominatim-maintenance:
+        maintenance:
           type: RoleBinding
           roleRef:
             apiGroup: rbac.authorization.k8s.io
             kind: Role
-            identifier: nominatim-maintenance
+            identifier: maintenance
           subjects:
-            - identifier: nominatim-maintenance
+            - identifier: maintenance
     controllers:
       nominatim:
         annotations:
           reloader.stakater.com/auto: "true"
+        serviceAccount:
+          identifier: app
         containers:
           nominatim:
             image:
@@ -148,7 +152,7 @@ spec:
         pod:
           restartPolicy: Never
         serviceAccount:
-          identifier: nominatim-maintenance
+          identifier: maintenance
 
     configMaps:
       scripts:
