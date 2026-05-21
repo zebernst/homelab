@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400.0 1040.0" width="1400" height="1040">
+  <g transform="translate(0, 40.0)">
+<rect id="block-Sep_1_database/cloudnative-pg_volsync-system/volsync" class="block" x="60.00" y="459.09" width="1280.00" height="81.82" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-cert-manager/cert-manager" class="block" x="1125.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-cert-manager/cert-manager-issuers" class="block" x="1230.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-database/cloudnative-pg" class="block" x="75.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-database/cloudnative-pg-cluster" class="block" x="180.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/ai" class="block" x="70.00" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/auth" class="block" x="166.92" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/cert-manager" class="block" x="263.85" y="50.00" width="0.00" height="409.09" rx="0.0" ry="0.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/database" class="block" x="263.85" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/downloads" class="block" x="360.77" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/external-secrets" class="block" x="457.69" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/fission" class="block" x="554.62" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/flux-system" class="block" x="651.54" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/games" class="block" x="748.46" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/kube-system" class="block" x="845.38" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/media" class="block" x="942.31" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/network" class="block" x="1039.23" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/observability" class="block" x="1136.15" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-domain/self-hosted" class="block" x="1233.08" y="50.00" width="96.92" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-external-secrets/onepassword" class="block" x="285.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-kube-system/cilium" class="block" x="390.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-kube-system/snapshot-controller" class="block" x="495.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-observability/victoria-logs" class="block" x="600.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-observability/victoria-metrics" class="block" x="705.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-observability/victoria-metrics-operator" class="block" x="810.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-rook-ceph/rook-ceph-cluster" class="block" x="915.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+<rect id="block-volsync-system/volsync" class="block" x="1020.00" y="540.91" width="95.00" height="409.09" rx="18.0" ry="18.0" fill="white" stroke="#333" stroke-width="1"/>
+  <g class="block-text" data-block="cert-manager/cert-manager">
+    <rect x="1161.12" y="603.20" width="22.76" height="284.50" fill="white"/>
+    <text x="1172.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="19.0" fill="#333" transform="rotate(-90 1172.50 745.45)">cert-manager/cert-manager</text>
+  </g>
+  <g class="block-text" data-block="cert-manager/cert-manager-issuers">
+    <rect x="1268.88" y="603.20" width="17.24" height="284.50" fill="white"/>
+    <text x="1277.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="14.4" fill="#333" transform="rotate(-90 1277.50 745.45)">cert-manager/cert-manager-issuers</text>
+  </g>
+  <g class="block-text" data-block="database/cloudnative-pg">
+    <rect x="110.13" y="603.20" width="24.74" height="284.50" fill="white"/>
+    <text x="122.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="20.6" fill="#333" transform="rotate(-90 122.50 745.45)">database/cloudnative-pg</text>
+  </g>
+  <g class="block-text" data-block="database/cloudnative-pg-cluster">
+    <rect x="218.32" y="603.20" width="18.36" height="284.50" fill="white"/>
+    <text x="227.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="15.3" fill="#333" transform="rotate(-90 227.50 745.45)">database/cloudnative-pg-cluster</text>
+  </g>
+  <g class="block-text" data-block="domain/ai">
+    <rect x="104.06" y="189.75" width="28.80" height="129.60" fill="white"/>
+    <text x="118.46" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 118.46 254.55)">domain/ai</text>
+  </g>
+  <g class="block-text" data-block="domain/auth">
+    <rect x="200.98" y="175.35" width="28.80" height="158.40" fill="white"/>
+    <text x="215.38" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 215.38 254.55)">domain/auth</text>
+  </g>
+  <g class="block-text" data-block="domain/cert-manager">
+    <rect x="259.05" y="208.95" width="9.60" height="91.20" fill="white"/>
+    <text x="263.85" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="8.0" fill="#333" transform="rotate(-90 263.85 254.55)">domain/cert-manager</text>
+  </g>
+  <g class="block-text" data-block="domain/database">
+    <rect x="297.91" y="146.55" width="28.80" height="216.00" fill="white"/>
+    <text x="312.31" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 312.31 254.55)">domain/database</text>
+  </g>
+  <g class="block-text" data-block="domain/downloads">
+    <rect x="394.83" y="139.35" width="28.80" height="230.40" fill="white"/>
+    <text x="409.23" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 409.23 254.55)">domain/downloads</text>
+  </g>
+  <g class="block-text" data-block="domain/external-secrets">
+    <rect x="493.78" y="112.29" width="24.74" height="284.50" fill="white"/>
+    <text x="506.15" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="20.6" fill="#333" transform="rotate(-90 506.15 254.55)">domain/external-secrets</text>
+  </g>
+  <g class="block-text" data-block="domain/fission">
+    <rect x="588.68" y="153.75" width="28.80" height="201.60" fill="white"/>
+    <text x="603.08" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 603.08 254.55)">domain/fission</text>
+  </g>
+  <g class="block-text" data-block="domain/flux-system">
+    <rect x="685.60" y="124.95" width="28.80" height="259.20" fill="white"/>
+    <text x="700.00" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 700.00 254.55)">domain/flux-system</text>
+  </g>
+  <g class="block-text" data-block="domain/games">
+    <rect x="782.52" y="168.15" width="28.80" height="172.80" fill="white"/>
+    <text x="796.92" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 796.92 254.55)">domain/games</text>
+  </g>
+  <g class="block-text" data-block="domain/kube-system">
+    <rect x="879.45" y="124.95" width="28.80" height="259.20" fill="white"/>
+    <text x="893.85" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 893.85 254.55)">domain/kube-system</text>
+  </g>
+  <g class="block-text" data-block="domain/media">
+    <rect x="976.37" y="168.15" width="28.80" height="172.80" fill="white"/>
+    <text x="990.77" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 990.77 254.55)">domain/media</text>
+  </g>
+  <g class="block-text" data-block="domain/network">
+    <rect x="1073.29" y="153.75" width="28.80" height="201.60" fill="white"/>
+    <text x="1087.69" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 1087.69 254.55)">domain/network</text>
+  </g>
+  <g class="block-text" data-block="domain/observability">
+    <rect x="1170.39" y="112.29" width="28.45" height="284.50" fill="white"/>
+    <text x="1184.62" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="23.7" fill="#333" transform="rotate(-90 1184.62 254.55)">domain/observability</text>
+  </g>
+  <g class="block-text" data-block="domain/self-hosted">
+    <rect x="1267.14" y="124.95" width="28.80" height="259.20" fill="white"/>
+    <text x="1281.54" y="254.55" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 1281.54 254.55)">domain/self-hosted</text>
+  </g>
+  <g class="block-text" data-block="external-secrets/onepassword">
+    <rect x="322.34" y="603.20" width="20.32" height="284.50" fill="white"/>
+    <text x="332.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="16.9" fill="#333" transform="rotate(-90 332.50 745.45)">external-secrets/onepassword</text>
+  </g>
+  <g class="block-text" data-block="kube-system/cilium">
+    <rect x="423.10" y="615.85" width="28.80" height="259.20" fill="white"/>
+    <text x="437.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="24.0" fill="#333" transform="rotate(-90 437.50 745.45)">kube-system/cilium</text>
+  </g>
+  <g class="block-text" data-block="kube-system/snapshot-controller">
+    <rect x="533.32" y="603.20" width="18.36" height="284.50" fill="white"/>
+    <text x="542.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="15.3" fill="#333" transform="rotate(-90 542.50 745.45)">kube-system/snapshot-controller</text>
+  </g>
+  <g class="block-text" data-block="observability/victoria-logs">
+    <rect x="636.96" y="603.20" width="21.07" height="284.50" fill="white"/>
+    <text x="647.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="17.6" fill="#333" transform="rotate(-90 647.50 745.45)">observability/victoria-logs</text>
+  </g>
+  <g class="block-text" data-block="observability/victoria-metrics">
+    <rect x="743.02" y="603.20" width="18.97" height="284.50" fill="white"/>
+    <text x="752.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="15.8" fill="#333" transform="rotate(-90 752.50 745.45)">observability/victoria-metrics</text>
+  </g>
+  <g class="block-text" data-block="observability/victoria-metrics-operator">
+    <rect x="850.21" y="603.20" width="14.59" height="284.50" fill="white"/>
+    <text x="857.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="12.2" fill="#333" transform="rotate(-90 857.50 745.45)">observability/victoria-metrics-operator</text>
+  </g>
+  <g class="block-text" data-block="rook-ceph/rook-ceph-cluster">
+    <rect x="951.96" y="603.20" width="21.07" height="284.50" fill="white"/>
+    <text x="962.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="17.6" fill="#333" transform="rotate(-90 962.50 745.45)">rook-ceph/rook-ceph-cluster</text>
+  </g>
+  <g class="block-text" data-block="volsync-system/volsync">
+    <rect x="1054.57" y="603.20" width="25.86" height="284.50" fill="white"/>
+    <text x="1067.50" y="745.45" text-anchor="middle" dominant-baseline="middle" font-family="Times,serif" font-size="21.6" fill="#333" transform="rotate(-90 1067.50 745.45)">volsync-system/volsync</text>
+  </g>
+  </g>
+  <style>
+    .block { transition: stroke-width 0.2s ease; }
+    .block.highlight { stroke-width: 4; }
+    .block-text { transition: transform 0.2s ease; transform-origin: center; transform-box: fill-box; }
+    .block-text.highlight { transform: scale(1.08); font-weight: bold; }
+    a { cursor: pointer; }
+  </style>
+  <script type="text/javascript"><![CDATA[
+    function highlight(pkgs) {
+      document.querySelectorAll('.block').forEach(b => b.classList.toggle('highlight', pkgs.includes(b.id.replace('block-', ''))));
+      document.querySelectorAll('.block-text').forEach(t => t.classList.toggle('highlight', pkgs.includes(t.dataset.block)));
+      document.querySelectorAll('.license-flag, .license-stripe, .vuln-flag').forEach(f => f.classList.toggle('highlight', pkgs.includes(f.dataset.block)));
+    }
+    function clearHighlight() {
+      document.querySelectorAll('.block, .block-text, .license-flag, .license-stripe, .vuln-flag').forEach(el => el.classList.remove('highlight'));
+    }
+    document.querySelectorAll('.block').forEach(el => {
+      el.addEventListener('mouseenter', () => highlight([el.id.replace('block-', '')]));
+      el.addEventListener('mouseleave', clearHighlight);
+    });
+    document.querySelectorAll('.block-text').forEach(el => {
+      el.addEventListener('mouseenter', () => highlight([el.dataset.block]));
+      el.addEventListener('mouseleave', clearHighlight);
+    });
+  ]]></script>
+  <a href="https://www.stacktower.io" target="_blank" rel="noopener">
+    <g transform="translate(640.0, 15.0)" class="watermark">
+      <g transform="scale(0.67)">
+      <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+      <text x="20" y="11" font-family="'Gaegu', 'Comic Sans MS', 'Bradley Hand', 'Segoe Script', sans-serif" font-size="14" font-weight="500" fill="#000">stacktower.io</text>
+    </g>
+  </a>
+  <style>
+    .watermark { transition: opacity 0.2s ease; opacity: 1; }
+    .watermark:hover { opacity: 0.7; }
+  </style>
+</svg>

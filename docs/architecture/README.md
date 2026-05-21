@@ -4,6 +4,10 @@ Generated from Flux `Kustomization.spec.dependsOn`, declared Kustomize component
 and Helm/manifest monitoring configuration (ServiceMonitor, PodMonitor, VMServiceScrape).
 Deploy edges define reconcile ordering; operational edges are separate edge kinds.
 
+![Platform deploy tiers — app domains resting on shared platforms](platform-deploy.svg)
+
+Regenerate the diagram with `task architecture:diagram` (requires [Stacktower](https://github.com/stacktower-io/stacktower)).
+
 ## Load-bearing platforms
 
 | Platform | Direct dependents | Tier |
@@ -201,11 +205,10 @@ Edge direction: `observability/victoria-metrics-operator` → workload.
 
 ## Artifacts
 
-- `architecture/platform-deploy.json` — collapsed deploy graph for Stacktower
-- `architecture/platform-operational.json` — metrics/monitor/backup/scale edges
-- `architecture/full-deploy.json` — all Kustomizations and deploy edges
+- `platform-deploy.svg` — collapsed deploy-tier diagram (committed)
+- `platform-deploy.json`, `platform-operational.json`, `full-deploy.json` — generated locally by `task architecture:graph` (gitignored)
 
 ```bash
-stacktower render docs/architecture/platform-deploy.json -o docs/architecture/platform-deploy.svg
+task architecture:diagram
 stacktower stats docs/architecture/platform-deploy.json
 ```

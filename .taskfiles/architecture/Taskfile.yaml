@@ -22,10 +22,14 @@ tasks:
     desc: Render Stacktower SVG from the collapsed deploy graph
     deps: [graph]
     cmds:
-      - stacktower render {{.DEPLOY_GRAPH}} -o {{.ARCHITECTURE_DIR}}/platform-deploy.svg --style simple --ordering barycentric
+      - stacktower render {{.DEPLOY_GRAPH}} -o {{.ARCHITECTURE_DIR}}/platform-deploy.svg --style simple --ordering barycentric --width 1400 --height 1000 --popups=false
     preconditions:
       - sh: test -x "$(command -v stacktower)"
-        msg: stacktower is not installed (brew tap stacktower-io/homebrew-tap && brew install --cask stacktower)
+        msg: stacktower is not installed (mise install, or brew tap stacktower-io/homebrew-tap && brew install --cask stacktower)
+
+  diagram:
+    desc: Generate architecture report and Stacktower SVG
+    deps: [render]
 
   stats:
     desc: Show load-bearing platform stats via Stacktower

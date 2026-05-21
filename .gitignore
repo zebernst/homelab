@@ -18,6 +18,9 @@ Brewfile.lock.json
 # wiki
 wiki
 
+# Generated architecture graph JSON (local/intermediate; SVG is committed)
+docs/architecture/*.json
+
 # Dolt database files (added by bd init)
 .dolt/
 *.db
