@@ -18,6 +18,8 @@ spec:
       namespace: database
     - name: onepassword
       namespace: external-secrets
+    - name: pocket-id
+      namespace: auth
     - name: rook-ceph-cluster
       namespace: rook-ceph
     - name: volsync
