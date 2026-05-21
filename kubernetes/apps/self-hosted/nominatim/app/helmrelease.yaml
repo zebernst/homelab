@@ -12,33 +12,12 @@ spec:
     namespace: flux-system
 
   values:
-    serviceAccount:
-      nominatim-maintenance:
-        enabled: true
-    rbac:
-      roles:
-        nominatim-maintenance:
-          type: Role
-          rules:
-            - apiGroups: [""]
-              resources: ["pods"]
-              verbs: ["get", "list"]
-            - apiGroups: [""]
-              resources: ["pods/exec"]
-              verbs: ["create"]
-      bindings:
-        nominatim-maintenance:
-          type: RoleBinding
-          roleRef:
-            apiGroup: rbac.authorization.k8s.io
-            kind: Role
-            identifier: nominatim-maintenance
-          subjects:
-            - identifier: nominatim-maintenance
     controllers:
       nominatim:
         annotations:
           reloader.stakater.com/auto: "true"
+        serviceAccount:
+          identifier: default
         containers:
           nominatim:
             image:
