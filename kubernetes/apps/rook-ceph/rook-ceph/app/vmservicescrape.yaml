@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmservicescrape_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: rook-ceph-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rook-ceph-operator
+      app.kubernetes.io/instance: rook-ceph-operator
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 1m
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmservicescrape_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: rook-ceph-csi
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rook-ceph-operator
+      app.kubernetes.io/component: csi
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 1m

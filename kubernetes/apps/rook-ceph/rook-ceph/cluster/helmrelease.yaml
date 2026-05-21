@@ -18,8 +18,8 @@ spec:
 
   values:
     monitoring:
-      enabled: true
-      createPrometheusRules: true
+      enabled: false
+      createPrometheusRules: false
     ingress:
       dashboard:
         ingressClassName: tailscale
@@ -33,7 +33,7 @@ spec:
     cephClusterSpec:
       cephConfig:
         mgr:
-          mgr/dashboard/ALERTMANAGER_API_HOST: http://alertmanager-operated.observability.svc.cluster.local:9093
+          mgr/dashboard/ALERTMANAGER_API_HOST: http://vmalertmanager-victoria-metrics.observability.svc.cluster.local:9093
           mgr/dashboard/GRAFANA_API_URL: http://grafana.observability.svc.cluster.local
       crashCollector:
         disable: false
@@ -44,7 +44,7 @@ spec:
         enabled: true
         urlPrefix: /
         ssl: false
-        prometheusEndpoint: http://prometheus-operated.observability.svc.cluster.local:9090
+        prometheusEndpoint: http://vmsingle-victoria-metrics.observability.svc.cluster.local:8428
       mgr:
         modules:
           - name: insights
@@ -191,25 +191,3 @@ spec:
           - name: external
             namespace: kube-system
             sectionName: https
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              group: monitoring.coreos.com
-              kind: PrometheusRule
-              name: prometheus-ceph-rules
-              version: v1
-            patch: |-
-              # CephNodeNetworkPacketDrops
-              - op: add
-                path: /spec/groups/6/rules/1/for
-                value: 5m
-              # CephNodeNetworkPacketErrors
-              - op: add
-                path: /spec/groups/6/rules/2/for
-                value: 5m
-
-              # CephMonClockSkew
-              - op: replace
-                path: /spec/groups/1/rules/4/for
-                value: 5m

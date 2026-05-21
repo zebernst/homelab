@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmservicescrape_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: mc-router
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mc-router
+      app.kubernetes.io/instance: mc-router
+  endpoints:
+    - port: api
+      path: /metrics
+      interval: 1m
+      scrapeTimeout: 30s

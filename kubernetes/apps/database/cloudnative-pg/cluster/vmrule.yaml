@@ -4,9 +4,6 @@ apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:
   name: cloudnative-pg-rules
-  labels:
-    prometheus: k8s
-    role: alert-rules
 spec:
   groups:
     - name: cloudnative-pg.rules

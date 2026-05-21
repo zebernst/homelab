@@ -29,16 +29,4 @@ spec:
     podAnnotations:
       configmap.reloader.stakater.com/reload: *app
     serviceMonitor:
-      enabled: true
-      params:
-        - name: nas
-          auth: [public_v2]
-          module: [synology]
-          target: nas.internal
-        - name: ups
-          auth: [public_v1]
-          module: [eaton_xups]
-          target: ups.internal
-      relabelings:
-        - sourceLabels: [__param_target]
-          targetLabel: instance
+      enabled: false

@@ -77,15 +77,6 @@ spec:
             port: *port
           metrics:
             port: *metricsPort
-    serviceMonitor:
-      app:
-        serviceName: *app
-        endpoints:
-          - port: metrics
-            scheme: http
-            path: /metrics
-            interval: 1m
-            scrapeTimeout: 10s
     ingress:
       tailscale:
         className: tailscale

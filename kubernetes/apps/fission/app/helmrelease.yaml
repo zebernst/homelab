@@ -29,7 +29,7 @@ spec:
     canaryDeployment:
       enabled: false
     serviceMonitor:
-      enabled: true
+      enabled: false
     webhook:
       certManager:
         enabled: true

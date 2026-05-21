@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmservicescrape_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: unpoller
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: unpoller
+      app.kubernetes.io/instance: unpoller
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 2m
+      scrapeTimeout: 10s
+      relabelConfigs:
+        - action: labeldrop
+          regex: pod
+        - action: replace
+          targetLabel: instance
+          replacement: default

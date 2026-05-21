@@ -28,7 +28,4 @@ spec:
     prometheusRules:
       enabled: false
     serviceMonitor:
-      enabled: true
-      relabelings:
-        - action: labeldrop
-          regex: (pod)
+      enabled: false

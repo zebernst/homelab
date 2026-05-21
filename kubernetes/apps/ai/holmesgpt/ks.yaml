@@ -13,7 +13,7 @@ spec:
   dependsOn:
     - name: ollama
       namespace: ai
-    - name: kube-prometheus-stack
+    - name: victoria-metrics
       namespace: observability
   path: kubernetes/apps/ai/holmesgpt/app
   prune: true

@@ -42,7 +42,7 @@ spec:
     policy: sync
     sources: ["crd", "ingress", "gateway-httproute", "gateway-tlsroute"]
     domainFilters: ["zebernst.dev"]
-    serviceMonitor:
-      enabled: true
     podAnnotations:
       secret.reloader.stakater.com/reload: *secret
+    serviceMonitor:
+      enabled: false

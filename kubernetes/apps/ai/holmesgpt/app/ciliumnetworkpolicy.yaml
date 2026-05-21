@@ -33,20 +33,20 @@ spec:
         - ports:
             - port: "11434"
               protocol: TCP
-    # Prometheus
+    # VictoriaMetrics
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: observability
-            app.kubernetes.io/name: prometheus
+            app.kubernetes.io/name: vmsingle
       toPorts:
         - ports:
-            - port: "9090"
+            - port: "8428"
               protocol: TCP
-    # AlertManager
+    # Alertmanager
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: observability
-            app.kubernetes.io/name: alertmanager
+            app.kubernetes.io/name: vmalertmanager
       toPorts:
         - ports:
             - port: "9093"

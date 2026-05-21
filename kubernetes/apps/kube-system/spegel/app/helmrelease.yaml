@@ -25,4 +25,4 @@ spec:
       annotations:
         grafana_folder: "Kubernetes"
     serviceMonitor:
-      enabled: true
+      enabled: false

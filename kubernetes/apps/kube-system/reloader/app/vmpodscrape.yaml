@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmpodscrape_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+  name: reloader
+spec:
+  selector:
+    matchLabels:
+      app: reloader
+      release: reloader
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      interval: 1m

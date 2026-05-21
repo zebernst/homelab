@@ -1,0 +1,42 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmservicescrape_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: snmp-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-snmp-exporter
+      app.kubernetes.io/instance: snmp-exporter
+  endpoints:
+    - port: http
+      path: /snmp
+      interval: 1m
+      params:
+        auth:
+          - public_v2
+        module:
+          - synology
+        target:
+          - nas.internal
+      relabelConfigs:
+        - action: replace
+          sourceLabels:
+            - __param_target
+          targetLabel: instance
+    - port: http
+      path: /snmp
+      interval: 1m
+      params:
+        auth:
+          - public_v1
+        module:
+          - eaton_xups
+        target:
+          - ups.internal
+      relabelConfigs:
+        - action: replace
+          sourceLabels:
+            - __param_target
+          targetLabel: instance

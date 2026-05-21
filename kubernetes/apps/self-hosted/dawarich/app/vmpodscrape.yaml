@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmpodscrape_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+  name: dawarich-db
+spec:
+  selector:
+    matchLabels:
+      cnpg.io/cluster: dawarich-db
+  podTargetLabels:
+    - cnpg.io/cluster
+    - role
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 1m

@@ -205,12 +205,3 @@ spec:
             bluemap:
               - path: /app/config
 
-    serviceMonitor:
-      vanilla:
-        serviceName: *app
-        endpoints:
-          - port: metrics
-            scheme: http
-            path: /metrics
-            interval: 1m
-            scrapeTimeout: 30s

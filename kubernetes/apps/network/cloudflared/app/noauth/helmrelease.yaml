@@ -74,11 +74,6 @@ spec:
         ports:
           http:
             port: *port
-    serviceMonitor:
-      cloudflared:
-        serviceName: *app
-        endpoints:
-          - port: http
     persistence:
       config:
         type: configMap

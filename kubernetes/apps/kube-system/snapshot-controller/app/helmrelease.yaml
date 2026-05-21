@@ -23,6 +23,6 @@ spec:
     controller:
       priorityClassName: storage-critical
       serviceMonitor:
-        create: true
+        create: false
     webhook:
       enabled: false

@@ -4,9 +4,6 @@ apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:
   name: holmesgpt
-  labels:
-    prometheus: kube-prometheus
-    role: alert-rules
 spec:
   groups:
     - name: holmesgpt

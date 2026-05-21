@@ -6,4 +6,6 @@ resources:
   - cluster.yaml
   - externalsecret.yaml
   - helmrelease.yaml
+  - vmservicescrape.yaml
+  - vmpodscrape.yaml
   - vmrule.yaml

@@ -12,7 +12,7 @@ resources:
   - karma/ks.yaml
   - keda/ks.yaml
   - kromgo/ks.yaml
-  - kube-prometheus-stack/ks.yaml
+  - victoria-metrics/ks.yaml
   - fluent-bit/ks.yaml
   - victoria-logs/ks.yaml
   - silence-operator/ks.yaml

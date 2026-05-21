@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - externalsecret.yaml
   - helmrelease.yaml
+  - vmservicescrape.yaml
   - vmrule.yaml
 configMapGenerator:
   - name: autobrr-loki-rules
