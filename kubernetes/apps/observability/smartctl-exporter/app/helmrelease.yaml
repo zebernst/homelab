@@ -30,5 +30,9 @@ spec:
     serviceMonitor:
       enabled: true
       relabelings:
-        - action: labeldrop
-          regex: (pod)
+        - action: replace
+          sourceLabels: ["__meta_kubernetes_pod_node_name"]
+          targetLabel: node
+        - action: replace
+          sourceLabels: ["__meta_kubernetes_pod_host_ip"]
+          targetLabel: node_ip
