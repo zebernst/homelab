@@ -11,7 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../components/lokirule
+    - ../../../../components/vmrule
   dependsOn:
     - name: cloudnative-pg-cluster
       namespace: database

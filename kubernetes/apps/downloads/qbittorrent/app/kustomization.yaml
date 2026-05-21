@@ -7,12 +7,12 @@ resources:
   - helmrelease.yaml
   - probe.yaml
 configMapGenerator:
-  - name: qbittorrent-loki-rules
+  - name: qbittorrent-vm-rules
     files:
-      - qbittorrent.yaml=resources/lokirule.yaml
+      - qbittorrent.yaml=resources/vmrule.yaml
     options:
       labels:
-        loki_rule: "true"
+        vm_rule: "true"
   - name: qbittorrent-scripts
     files:
       - post-process.sh=resources/post-process.sh

@@ -10,12 +10,12 @@ configMapGenerator:
   - name: cross-seed-configmap
     files:
       - resources/config.js
-  - name: cross-seed-loki-rules
+  - name: cross-seed-vm-rules
     files:
-      - resources/lokirule.yaml
+      - cross-seed.yaml=resources/vmrule.yaml
     options:
       labels:
-        loki_rule: "true"
+        vm_rule: "true"
 generatorOptions:
   disableNameSuffixHash: true
   annotations:
