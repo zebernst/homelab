@@ -5,3 +5,4 @@ kind: Kustomization
 resources:
   - ./devices.yaml
   - ./nfs.yaml
+  - ./nominatim.yaml
