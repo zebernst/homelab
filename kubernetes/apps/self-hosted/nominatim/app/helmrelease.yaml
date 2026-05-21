@@ -22,13 +22,20 @@ spec:
               # renovate: datasource=docker
               repository: mediagis/nominatim
               tag: "5.3.2"
+            command: ["/bin/bash", "-ec"]
+            args:
+              - |
+                FIRST_REGION="$(echo "${NOMINATIM_REGIONS}" | tr ',' ' ' | awk '{print $1}')"
+                if [ -z "${FIRST_REGION}" ]; then
+                  echo "NOMINATIM_REGIONS must include at least one region"
+                  exit 1
+                fi
+                export PBF_URL="${NOMINATIM_DOWNURL:-https://download.geofabrik.de}/${FIRST_REGION}-latest.osm.pbf"
+                exec /app/start.sh
             env:
               # Space- or comma-separated Geofabrik region paths.
               # New regions are imported idempotently by the daily maintenance CronJob.
               NOMINATIM_REGIONS: "north-america/us"
-              # Keep this aligned to the first region used for initial /app/init.sh import.
-              NOMINATIM_BASE_REGION: "north-america/us"
-              PBF_URL: "https://download.geofabrik.de/north-america/us-latest.osm.pbf"
               NOMINATIM_DOWNURL: "https://download.geofabrik.de"
               # Disable the image's built-in replication loop; updates are managed by CronJob.
               UPDATE_MODE: "none"
@@ -89,7 +96,6 @@ spec:
             DOWNURL="${NOMINATIM_DOWNURL:-https://download.geofabrik.de}"
             PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
             IMPORTED_LIST="${PROJECT_DIR}/imported-regions.txt"
-            BASE_REGION="${NOMINATIM_BASE_REGION:-}"
             CURL_USER_AGENT="${USER_AGENT:-nominatim-maintenance}"
 
             if [ -z "${NOMINATIM_REGIONS:-}" ]; then
@@ -115,20 +121,10 @@ spec:
 
             if [ ! -f "${IMPORTED_LIST}" ]; then
               touch "${IMPORTED_LIST}"
-              if [ -z "${BASE_REGION}" ] && [ -n "${PBF_URL:-}" ]; then
-                BASE_REGION="${PBF_URL#${DOWNURL}/}"
-                BASE_REGION="${BASE_REGION%-latest.osm.pbf}"
-              fi
-              if [ -n "${BASE_REGION}" ]; then
-                for region in "${DESIRED_REGIONS[@]}"; do
-                  if [ "${region}" = "${BASE_REGION}" ]; then
-                    echo "[nominatim-maintenance] Seeding imported list with base region ${BASE_REGION}"
-                    echo "${BASE_REGION}" >> "${IMPORTED_LIST}"
-                    seed_state "${BASE_REGION}"
-                    break
-                  fi
-                done
-              fi
+              BASE_REGION="${DESIRED_REGIONS[0]}"
+              echo "[nominatim-maintenance] Seeding imported list with base region ${BASE_REGION}"
+              echo "${BASE_REGION}" >> "${IMPORTED_LIST}"
+              seed_state "${BASE_REGION}"
             fi
 
             CHANGED=false
