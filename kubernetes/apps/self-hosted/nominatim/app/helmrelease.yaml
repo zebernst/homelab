@@ -11,6 +11,11 @@ spec:
     name: app-template
     namespace: flux-system
 
+  install:
+    disableWait: true
+  upgrade:
+    disableWait: true
+
   values:
     serviceAccount:
       app:
