@@ -1,0 +1,238 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: victoria-metrics-k8s-stack
+spec:
+  interval: 15m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: 0.79.1
+  url: oci://ghcr.io/victoriametrics/helm-charts/victoria-metrics-k8s-stack
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-metrics
+spec:
+  dependsOn:
+    - name: prometheus-operator-crds
+      namespace: observability
+  chartRef:
+    kind: OCIRepository
+    name: victoria-metrics-k8s-stack
+  interval: 30m
+
+  values:
+    fullnameOverride: victoria-metrics
+    tenant: "0"
+
+    victoria-metrics-operator:
+      enabled: true
+      crds:
+        plain: true
+        cleanup:
+          enabled: true
+      operator:
+        disable_prometheus_converter: false
+
+    defaultDashboards:
+      enabled: true
+      defaultTimezone: America/Chicago
+
+    defaultRules:
+      create: true
+
+    extraRules:
+      dockerhub-rules:
+        groups:
+          - name: dockerhub
+            rules:
+              - alert: DockerhubRateLimitRisk
+                annotations:
+                  summary: Kubernetes cluster Dockerhub rate limit risk
+                expr: count(time() - container_last_seen{image=~"(docker.io).*",container!=""} < 30) > 100
+                labels:
+                  severity: critical
+      oom-rules:
+        groups:
+          - name: oom
+            rules:
+              - alert: OomKilled
+                annotations:
+                  summary: Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has been OOMKilled {{ $value }} times in the last 10 minutes.
+                expr: (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1
+                labels:
+                  severity: critical
+
+    grafana:
+      enabled: false
+
+    alertmanager:
+      enabled: true
+      useManagedConfig: true
+      spec:
+        externalURL: https://alertmanager.zebernst.dev
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: ceph-block
+              resources:
+                requests:
+                  storage: 1Gi
+      ingress:
+        enabled: true
+        ingressClassName: tailscale
+        hosts:
+          - alertmanager.kite-harmonic.ts.net
+        tls:
+          - hosts:
+              - alertmanager.kite-harmonic.ts.net
+
+    vmagent:
+      enabled: true
+      spec:
+        selectAllByDefault: true
+        scrapeInterval: 30s
+        priorityClassName: control-plane-critical
+        externalLabels:
+          cluster: jupiter
+        extraArgs:
+          promscrape.streamParse: "true"
+        resources:
+          requests:
+            cpu: 100m
+          limits:
+            memory: 512Mi
+
+    vmsingle:
+      enabled: true
+      spec:
+        retentionPeriod: "14d"
+        replicaCount: 1
+        priorityClassName: control-plane-critical
+        extraArgs:
+          search.maxQueryDuration: 120s
+        resources:
+          requests:
+            cpu: 100m
+          limits:
+            memory: 2000Mi
+        storage:
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: ceph-block
+          resources:
+            requests:
+              storage: 30Gi
+      ingress:
+        enabled: true
+        ingressClassName: tailscale
+        hosts:
+          - victoria-metrics.kite-harmonic.ts.net
+        tls:
+          - hosts:
+              - victoria-metrics.kite-harmonic.ts.net
+      route:
+        enabled: true
+        apiVersion: gateway.networking.k8s.io/v1
+        kind: HTTPRoute
+        hostnames:
+          - victoria-metrics.zebernst.dev
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
+
+    vmalert:
+      enabled: true
+      spec:
+        selectAllByDefault: true
+        evaluationInterval: 30s
+        externalLabels:
+          cluster: jupiter
+
+    prometheus-node-exporter:
+      fullnameOverride: node-exporter
+      vmScrape:
+        enabled: true
+        spec:
+          jobLabel: jobLabel
+          endpoints:
+            - port: metrics
+              relabelConfigs:
+                - action: replace
+                  regex: (.*)
+                  replacement: $1
+                  sourceLabels: ["__meta_kubernetes_pod_node_name"]
+                  targetLabel: kubernetes_node
+
+    kube-state-metrics:
+      fullnameOverride: kube-state-metrics
+      metricLabelsAllowlist:
+        - pods=[*]
+        - deployments=[*]
+        - persistentvolumeclaims=[*]
+      rbac:
+        extraRules:
+          - apiGroups: ["holmesgpt.dev"]
+            resources: ["healthchecks", "scheduledhealthchecks"]
+            verbs: ["list", "watch"]
+      customResourceState:
+        enabled: true
+        config:
+          spec:
+            resources:
+              - groupVersionKind:
+                  group: holmesgpt.dev
+                  version: v1alpha1
+                  kind: ScheduledHealthCheck
+                metrics:
+                  - name: scheduled_health_check_last_result_info
+                    help: "Last result of a HolmesGPT scheduled health check"
+                    each:
+                      type: Info
+                      info:
+                        labelsFromPath:
+                          result: [status, lastResult]
+      vmScrape:
+        enabled: true
+        spec:
+          endpoints:
+            - port: http
+              honorLabels: true
+              relabelConfigs:
+                - action: replace
+                  regex: (.*)
+                  replacement: $1
+                  sourceLabels: ["__meta_kubernetes_pod_node_name"]
+                  targetLabel: kubernetes_node
+
+    kubeProxy:
+      enabled: false
+
+    kubeApiServer:
+      vmScrape:
+        spec:
+          selector:
+            matchLabels:
+              k8s-app: kube-apiserver
+
+    kubeScheduler:
+      service:
+        selector:
+          k8s-app: kube-scheduler
+
+    kubeControllerManager:
+      service:
+        selector:
+          k8s-app: kube-controller-manager
+
+    kubeEtcd:
+      service:
+        selector:
+          k8s-app: kube-controller-manager

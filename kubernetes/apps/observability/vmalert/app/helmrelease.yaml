@@ -43,7 +43,7 @@ spec:
               - --rule=/rules/*.yaml
               - --rule.defaultRuleType=vlogs
               - --datasource.url=http://victoria-logs-server.observability.svc.cluster.local:9428
-              - --notifier.url=http://alertmanager-operated.observability.svc.cluster.local:9093
+              - --notifier.url=http://vmalertmanager-victoria-metrics.observability.svc.cluster.local:9093
               - --evaluationInterval=30s
               - --httpListenAddr=:8880
               - --external.url=http://vmalert.observability.svc.cluster.local:8880

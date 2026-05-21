@@ -25,7 +25,7 @@ spec:
     the pattern fix/holmes-<issue-slug>. Do not apply any changes directly to
     the cluster.
 ---
-# Observability stack: Prometheus, AlertManager, Victoria Logs
+# Observability stack: VictoriaMetrics, AlertManager, Victoria Logs
 apiVersion: holmesgpt.dev/v1alpha1
 kind: ScheduledHealthCheck
 metadata:
@@ -36,10 +36,10 @@ spec:
   mode: monitor
   query: >-
     Verify the health of the observability stack in the observability namespace.
-    Check: Prometheus retention and storage usage (alert if >80% of retentionSize),
+    Check: VictoriaMetrics (vmsingle) retention and storage usage,
     whether AlertManager is receiving and routing alerts correctly, Victoria Logs
-    ingestion rate and retention, and that all ServiceMonitors have active scrape
-    targets. Use Prometheus metrics to validate.
+    ingestion rate and retention, and that VMAgent has active scrape targets for
+    VMServiceScrapes. Use VictoriaMetrics metrics to validate.
 
     If a configuration change is needed to fix a problem: first search the
     zebernst/homelab repository for any open pull requests whose branch name

@@ -13,7 +13,7 @@ spec:
   dependsOn:
     - name: victoria-logs
       namespace: *ns
-    - name: kube-prometheus-stack
+    - name: victoria-metrics
       namespace: *ns
   path: kubernetes/apps/observability/vmalert/app
   prune: true

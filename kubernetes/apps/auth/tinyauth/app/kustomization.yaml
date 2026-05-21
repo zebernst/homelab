@@ -6,4 +6,4 @@ resources:
   - ciliumenvoyconfig.yaml
   - externalsecret.yaml
   - helmrelease.yaml
-  - probe.yaml
+  - vmprobe.yaml

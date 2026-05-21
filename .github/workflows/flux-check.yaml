@@ -81,30 +81,39 @@ jobs:
       - name: Generate Diff
         id: diff
         run: |
-          cat diff.patch;
+          if [ -s diff.patch ]; then
+            echo "has_diff=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_diff=false" >> "$GITHUB_OUTPUT"
+          fi
+
           {
-              echo 'diff<<EOF'
-              cat diff.patch
-              echo EOF
-          } >> "$GITHUB_OUTPUT";
-          {
-              echo "### Diff"
-              echo '```diff'
-              cat diff.patch
-              echo '```'
+            echo "### Diff"
+            echo '```diff'
+            cat diff.patch
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - if: ${{ steps.diff.outputs.diff != '' }}
+          # Write comment body to disk — avoid passing multi-MB diffs through
+          # GITHUB_OUTPUT or action inputs (exceeds Linux ARG_MAX).
+          {
+            echo '```diff'
+            head -c 500000 diff.patch
+            if [ "$(wc -c < diff.patch)" -gt 500000 ]; then
+              echo ""
+              echo "... diff truncated for PR comment ($(wc -c < diff.patch) bytes total). See workflow run summary for full output."
+            fi
+            echo '```'
+          } > diff-comment.md
+
+      - if: ${{ steps.diff.outputs.has_diff == 'true' }}
         name: Add Comment
         uses: mshick/add-pr-comment@v3
         with:
           repo-token: "${{ steps.app-token.outputs.token }}"
           message-id: "${{ github.event.pull_request.number }}/kubernetes/${{ matrix.resources }}"
           message-failure: Diff was not successful
-          message: |
-            ```diff
-            ${{ steps.diff.outputs.diff }}
-            ```
+          message-path: diff-comment.md
 
   flux-local-success:
     needs: ["test", "diff"]

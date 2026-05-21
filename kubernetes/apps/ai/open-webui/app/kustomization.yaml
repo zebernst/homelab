@@ -5,4 +5,4 @@ kind: Kustomization
 resources:
   - helmrelease.yaml
   - httproute.yaml
-  - probe.yaml
+  - vmprobe.yaml

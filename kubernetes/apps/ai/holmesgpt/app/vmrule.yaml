@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmrule_v1beta1.json
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: holmesgpt
+spec:
+  groups:
+    - name: holmesgpt
+      rules:
+        # Labels are fully deterministic (name + namespace + result only) so
+        # AlertManager deduplicates correctly across repeated failing runs.
+        # repeatInterval: 12h suppresses re-notification while the issue persists.
+        # The alert resolves automatically when the check next passes.
+        - alert: HolmesHealthCheckFailed
+          expr: |
+            kube_customresource_scheduled_health_check_last_result_info{result="fail"} == 1
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: "HolmesGPT health check failed: {{ $labels.name }}"
+            description: >-
+              Scheduled health check {{ $labels.namespace }}/{{ $labels.name }}
+              last result was failure. Check for a proposed fix:
+              kubectl describe shc {{ $labels.name }} -n {{ $labels.namespace }}
+        # Fired when Holmes itself errors (LLM/tooling failure) — distinct from a
+        # check that runs successfully and finds a real problem.
+        - alert: HolmesHealthCheckError
+          expr: |
+            kube_customresource_scheduled_health_check_last_result_info{result="error"} == 1
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: "HolmesGPT check errored: {{ $labels.name }}"
+            description: >-
+              Scheduled health check {{ $labels.namespace }}/{{ $labels.name }}
+              encountered an execution error (LLM or tooling failure). Check logs:
+              kubectl logs -l app.kubernetes.io/name=holmes -n ai

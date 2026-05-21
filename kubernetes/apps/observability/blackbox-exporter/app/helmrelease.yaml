@@ -52,7 +52,7 @@ spec:
         interval: 1m
         scrapeTimeout: 10s
     prometheusRule:
-      enabled: true
+      enabled: false
       rules:
         - alert: BlackboxProbeFailed
           expr: probe_success == 0

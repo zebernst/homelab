@@ -23,7 +23,7 @@ spec:
       - name: MODEL
         value: "ollama_chat/qwen3:8b"
       - name: ALERTMANAGER_URL
-        value: "http://alertmanager-operated.observability.svc.cluster.local:9093"
+        value: "http://vmalertmanager-victoria-metrics.observability.svc.cluster.local:9093"
 
     k8sRBAC: true
 
@@ -46,7 +46,7 @@ spec:
       prometheus/metrics:
         enabled: true
         config:
-          prometheus_url: "http://prometheus-operated.observability.svc.cluster.local:9090"
+          prometheus_url: "http://vmsingle-victoria-metrics.observability.svc.cluster.local:8428"
           subtype: prometheus
       victorialogs:
         enabled: true

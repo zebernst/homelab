@@ -149,6 +149,15 @@ spec:
           rcon:
             port: 25578
 
+    serviceMonitor:
+      atmons:
+        serviceName: *app
+        endpoints:
+          - port: metrics
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 30s
     persistence:
       tmp:
         type: emptyDir
@@ -205,13 +214,3 @@ spec:
               - path: /app/config
             bluemap:
               - path: /app/config
-
-    serviceMonitor:
-      atmons:
-        serviceName: *app
-        endpoints:
-          - port: metrics
-            scheme: http
-            path: /metrics
-            interval: 1m
-            scrapeTimeout: 30s

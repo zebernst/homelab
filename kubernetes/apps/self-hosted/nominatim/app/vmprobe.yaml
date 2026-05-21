@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmprobe_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMProbe
+metadata:
+  name: nominatim
+spec:
+  interval: 1m
+  module: http_2xx
+  vmProberSpec:
+    url: blackbox-exporter.observability.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      targets:
+        - http://nominatim.self-hosted.svc.cluster.local/status
