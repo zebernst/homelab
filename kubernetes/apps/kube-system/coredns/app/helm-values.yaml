@@ -48,3 +48,9 @@ tolerations:
   - key: node-role.kubernetes.io/control-plane
     operator: Exists
     effect: NoSchedule
+prometheus:
+  service:
+    enabled: true
+  monitor:
+    enabled: true
+    interval: 1m

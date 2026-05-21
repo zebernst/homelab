@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/probe_v1.json
+# In-cluster TCP connect checks for services without HTTP health endpoints.
+kind: Probe
+apiVersion: monitoring.coreos.com/v1
+metadata:
+  name: services-tcp
+spec:
+  module: tcp_connect
+  prober:
+    url: blackbox-exporter.observability.svc.cluster.local:9115
+  targets:
+    staticConfig:
+      static:
+        - flaresolverr.downloads.svc.cluster.local:8191
+        - omegabrr.downloads.svc.cluster.local:80
+        - booklore.media.svc.cluster.local:6060

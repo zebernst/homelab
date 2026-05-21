@@ -5,3 +5,5 @@ kind: Kustomization
 resources:
   - ./devices.yaml
   - ./nfs.yaml
+  - ./services-http.yaml
+  - ./services-tcp.yaml
