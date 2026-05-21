@@ -52,7 +52,7 @@ spec:
             command: ["/bin/bash", "-ec"]
             args:
               - |
-                FIRST_REGION="$(echo "$${NOMINATIM_REGIONS}" | tr ',' ' ' | awk '{print $1}')"
+                FIRST_REGION="$(printf '%s\n' "$${NOMINATIM_REGIONS}" | tr ',[:space:]' '\n' | sed '/^[[:space:]]*$/d' | awk 'NR==1 { print; exit }')"
                 if [ -z "$${FIRST_REGION}" ]; then
                   echo "NOMINATIM_REGIONS must include at least one region"
                   exit 1
