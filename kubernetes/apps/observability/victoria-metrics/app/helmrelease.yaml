@@ -22,6 +22,8 @@ spec:
   dependsOn:
     - name: prometheus-operator-crds
       namespace: observability
+    - name: victoria-metrics-operator
+      namespace: observability
   chartRef:
     kind: OCIRepository
     name: victoria-metrics-k8s-stack
@@ -32,13 +34,7 @@ spec:
     tenant: "0"
 
     victoria-metrics-operator:
-      enabled: true
-      crds:
-        plain: true
-        cleanup:
-          enabled: true
-      operator:
-        disable_prometheus_converter: false
+      enabled: false
 
     defaultDashboards:
       enabled: true

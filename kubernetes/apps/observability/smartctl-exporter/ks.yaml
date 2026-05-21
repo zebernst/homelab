@@ -9,6 +9,9 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: victoria-metrics-operator
+      namespace: *ns
   interval: 1h
   path: kubernetes/apps/observability/smartctl-exporter/app
   prune: true
