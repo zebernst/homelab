@@ -1,0 +1,29 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nominatim-maintenance
+spec:
+  schedule: "@daily"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          serviceAccountName: nominatim-maintenance
+          restartPolicy: Never
+          containers:
+            - name: kubectl
+              image: bitnami/kubectl:latest
+              command: ["/bin/sh", "-ec"]
+              args:
+                - |
+                  POD_NAME="$(kubectl get pods -l app.kubernetes.io/name=nominatim -o jsonpath='{.items[0].metadata.name}')"
+                  if [ -z "${POD_NAME}" ]; then
+                    echo "nominatim pod not found"
+                    exit 1
+                  fi
+                  kubectl exec "${POD_NAME}" -c nominatim -- /bin/bash /scripts/maintain-regions.sh

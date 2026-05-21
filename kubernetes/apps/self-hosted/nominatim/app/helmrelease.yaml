@@ -22,18 +22,19 @@ spec:
               # renovate: datasource=docker
               repository: mediagis/nominatim
               tag: "5.3.2"
-            # Remove import-finished on every start so our custom init.sh always runs.
-            # init.sh exits immediately when no new regions are pending.
-            command: ["/bin/bash", "-c"]
-            args:
-              - "rm -f /var/lib/postgresql/16/main/import-finished && exec /app/start.sh"
             env:
-              # Space- or comma-separated Geofabrik region paths, e.g.:
-              #   "north-america/us europe/france europe/great-britain"
-              # Adding a new entry triggers nominatim add-data on the next pod restart.
+              # Space- or comma-separated Geofabrik region paths.
+              # New regions are imported idempotently by the daily maintenance CronJob.
               NOMINATIM_REGIONS: "north-america/us"
+              # Keep this aligned to the first region used for initial /app/init.sh import.
+              NOMINATIM_BASE_REGION: "north-america/us"
+              PBF_URL: "https://download.geofabrik.de/north-america/us-latest.osm.pbf"
+              NOMINATIM_DOWNURL: "https://download.geofabrik.de"
+              # Disable the image's built-in replication loop; updates are managed by CronJob.
+              UPDATE_MODE: "none"
+              REPLICATION_URL: ""
               PROJECT_DIR: /nominatim
-            envFrom: &envFrom
+            envFrom:
               - secretRef:
                   name: nominatim-secret
             probes:
@@ -77,215 +78,105 @@ spec:
                 memory: 4Gi
               limits:
                 memory: 32Gi
-          replication:
-            image:
-              repository: mediagis/nominatim
-              tag: "5.3.2"
-            command: ["/bin/bash", "/scripts/update.sh"]
-            env:
-              NOMINATIM_REGIONS: "north-america/us"
-              PROJECT_DIR: /nominatim
-              # How often to poll each region for OSM updates (seconds)
-              REPLICATION_RECHECK_INTERVAL: "3600"
-              # Connect to the PostgreSQL socket shared with the main container
-              NOMINATIM_DATABASE_DSN: "pgsql:dbname=nominatim"
-              PGPASSWORD:
-                valueFrom:
-                  secretKeyRef:
-                    name: nominatim-secret
-                    key: NOMINATIM_PASSWORD
-            envFrom: *envFrom
-            resources:
-              requests:
-                cpu: 10m
-                memory: 128Mi
-              limits:
-                memory: 512Mi
 
     configMaps:
       scripts:
         data:
-          init.sh: |
-            #!/bin/bash -ex
-
-            DOWNURL="${NOMINATIM_DOWNURL:-https://download.geofabrik.de}"
-            PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
-            IMPORTED_LIST="${PROJECT_DIR}/imported-regions.txt"
-
-            if [ -z "${THREADS:-}" ]; then
-              THREADS=$(nproc)
-            fi
-
-            if [ -z "${NOMINATIM_REGIONS:-}" ]; then
-              echo "[nominatim-init] ERROR: NOMINATIM_REGIONS is not set"
-              exit 1
-            fi
-
-            mapfile -t ALL_REGIONS < <(
-              echo "${NOMINATIM_REGIONS}" | tr ',' ' ' | tr ' ' '\n' | sed '/^[[:space:]]*$/d'
-            )
-
-            if [ ! -f "${IMPORTED_LIST}" ]; then
-              # ── INITIAL IMPORT ────────────────────────────────────────────
-              echo "[nominatim-init] First boot — importing ${#ALL_REGIONS[@]} region(s)"
-
-              if [ ! -f /var/lib/postgresql/16/main/PG_VERSION ]; then
-                chown postgres:postgres /var/lib/postgresql/16/main
-                sudo -u postgres /usr/lib/postgresql/16/bin/initdb -D /var/lib/postgresql/16/main
-              fi
-
-              cp /etc/postgresql/16/main/conf.d/postgres-import.conf.disabled \
-                 /etc/postgresql/16/main/conf.d/postgres-import.conf
-
-              sudo service postgresql start
-
-              sudo -E -u postgres psql postgres -tAc \
-                "SELECT 1 FROM pg_roles WHERE rolname='nominatim'" | grep -q 1 \
-                || sudo -E -u postgres createuser -s nominatim
-              sudo -E -u postgres psql postgres -tAc \
-                "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1 \
-                || sudo -E -u postgres createuser -SDR www-data
-              sudo -E -u postgres psql postgres -c \
-                "ALTER USER nominatim WITH ENCRYPTED PASSWORD '${NOMINATIM_PASSWORD}'"
-              sudo -E -u postgres psql postgres -c \
-                "ALTER USER \"www-data\" WITH ENCRYPTED PASSWORD '${NOMINATIM_PASSWORD}'"
-              sudo -E -u postgres psql postgres -c "DROP DATABASE IF EXISTS nominatim"
-
-              chown -R nominatim:nominatim "${PROJECT_DIR}"
-
-              IMPORT_ARGS=()
-              for region in "${ALL_REGIONS[@]}"; do
-                fname="/tmp/$(echo "${region}" | tr '/' '-')-latest.osm.pbf"
-                echo "[nominatim-init] Downloading ${region}..."
-                curl -L -A "${USER_AGENT}" --fail-with-body \
-                  "${DOWNURL}/${region}-latest.osm.pbf" -o "${fname}"
-                IMPORT_ARGS+=(--osm-file "${fname}")
-              done
-
-              cd "${PROJECT_DIR}"
-              sudo -E -u nominatim nominatim import "${IMPORT_ARGS[@]}" --threads "${THREADS}"
-              sudo -E -u nominatim nominatim index --threads "${THREADS}"
-              sudo -E -u nominatim nominatim admin --check-database
-
-              # Seed per-region sequence state for the replication sidecar
-              for region in "${ALL_REGIONS[@]}"; do
-                mkdir -p "${PROJECT_DIR}/update/${region}"
-                curl -s "${DOWNURL}/${region}-updates/state.txt" \
-                  > "${PROJECT_DIR}/update/${region}/sequence.state"
-              done
-
-              export NOMINATIM_QUERY_TIMEOUT=600
-              export NOMINATIM_REQUEST_TIMEOUT=3600
-              sudo -H -E -u nominatim nominatim admin --warm
-              export NOMINATIM_QUERY_TIMEOUT=10
-              export NOMINATIM_REQUEST_TIMEOUT=60
-
-              sudo -E -u nominatim psql -d nominatim -c "ANALYZE VERBOSE"
-
-              sudo service postgresql stop
-              rm /etc/postgresql/16/main/conf.d/postgres-import.conf
-
-              for region in "${ALL_REGIONS[@]}"; do
-                rm -f "/tmp/$(echo "${region}" | tr '/' '-')-latest.osm.pbf"
-              done
-
-              printf '%s\n' "${ALL_REGIONS[@]}" > "${IMPORTED_LIST}"
-              echo "[nominatim-init] Initial import complete."
-
-            else
-              # ── INCREMENTAL ADD FOR NEW REGIONS ──────────────────────────
-              NEW_REGIONS=()
-              for region in "${ALL_REGIONS[@]}"; do
-                grep -qxF "${region}" "${IMPORTED_LIST}" || NEW_REGIONS+=("${region}")
-              done
-
-              if [ "${#NEW_REGIONS[@]}" -eq 0 ]; then
-                echo "[nominatim-init] All regions already imported — nothing to do."
-                exit 0
-              fi
-
-              echo "[nominatim-init] Adding ${#NEW_REGIONS[@]} new region(s): ${NEW_REGIONS[*]}"
-
-              sudo service postgresql start
-              chown -R nominatim:nominatim "${PROJECT_DIR}"
-              cd "${PROJECT_DIR}"
-
-              for region in "${NEW_REGIONS[@]}"; do
-                fname="/tmp/$(echo "${region}" | tr '/' '-')-latest.osm.pbf"
-                echo "[nominatim-init] Downloading ${region}..."
-                curl -L -A "${USER_AGENT}" --fail-with-body \
-                  "${DOWNURL}/${region}-latest.osm.pbf" -o "${fname}"
-
-                sudo -E -u nominatim nominatim add-data --file "${fname}"
-
-                mkdir -p "${PROJECT_DIR}/update/${region}"
-                curl -s "${DOWNURL}/${region}-updates/state.txt" \
-                  > "${PROJECT_DIR}/update/${region}/sequence.state"
-
-                rm -f "${fname}"
-                echo "${region}" >> "${IMPORTED_LIST}"
-              done
-
-              sudo -E -u nominatim nominatim index --threads "${THREADS}"
-              sudo -E -u nominatim nominatim admin --check-database
-
-              sudo service postgresql stop
-              echo "[nominatim-init] Incremental import complete."
-            fi
-
-          update.sh: |
+          maintain-regions.sh: |
             #!/bin/bash
             set -euo pipefail
 
             DOWNURL="${NOMINATIM_DOWNURL:-https://download.geofabrik.de}"
             PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
-            INTERVAL="${REPLICATION_RECHECK_INTERVAL:-3600}"
+            IMPORTED_LIST="${PROJECT_DIR}/imported-regions.txt"
+            BASE_REGION="${NOMINATIM_BASE_REGION:-}"
+            CURL_USER_AGENT="${USER_AGENT:-nominatim-maintenance}"
 
-            mapfile -t REGIONS < <(
+            if [ -z "${NOMINATIM_REGIONS:-}" ]; then
+              echo "[nominatim-maintenance] NOMINATIM_REGIONS is not set; exiting."
+              exit 1
+            fi
+
+            mapfile -t DESIRED_REGIONS < <(
               echo "${NOMINATIM_REGIONS}" | tr ',' ' ' | tr ' ' '\n' | sed '/^[[:space:]]*$/d'
             )
 
-            echo "[nominatim-replication] Waiting for Nominatim API..."
-            until curl -sf http://127.0.0.1:8080/status 2>/dev/null \
-                | python3 -c "import sys,json; d=json.load(sys.stdin); sys.exit(0 if d.get('status')==0 else 1)" \
-                2>/dev/null; do
-              sleep 30
-            done
-            echo "[nominatim-replication] Ready — starting update loop."
+            if [ "${#DESIRED_REGIONS[@]}" -eq 0 ]; then
+              echo "[nominatim-maintenance] No regions configured; exiting."
+              exit 0
+            fi
 
-            while true; do
-              CHANGED=false
+            seed_state() {
+              local region="$1"
+              local state_dir="${PROJECT_DIR}/update/${region}"
+              mkdir -p "${state_dir}"
+              curl -fsSL "${DOWNURL}/${region}-updates/state.txt" > "${state_dir}/sequence.state"
+            }
 
-              for region in "${REGIONS[@]}"; do
-                state_file="${PROJECT_DIR}/update/${region}/sequence.state"
-                if [[ ! -f "${state_file}" ]]; then
-                  echo "[nominatim-replication] No state file for ${region}, skipping"
-                  continue
-                fi
+            if [ ! -f "${IMPORTED_LIST}" ]; then
+              touch "${IMPORTED_LIST}"
+              if [ -z "${BASE_REGION}" ] && [ -n "${PBF_URL:-}" ]; then
+                BASE_REGION="${PBF_URL#${DOWNURL}/}"
+                BASE_REGION="${BASE_REGION%-latest.osm.pbf}"
+              fi
+              if [ -n "${BASE_REGION}" ]; then
+                for region in "${DESIRED_REGIONS[@]}"; do
+                  if [ "${region}" = "${BASE_REGION}" ]; then
+                    echo "[nominatim-maintenance] Seeding imported list with base region ${BASE_REGION}"
+                    echo "${BASE_REGION}" >> "${IMPORTED_LIST}"
+                    seed_state "${BASE_REGION}"
+                    break
+                  fi
+                done
+              fi
+            fi
 
-                changes="/tmp/changes-$(echo "${region}" | tr '/' '-').osc.gz"
-                echo "[nominatim-replication] Fetching changes for ${region}..."
+            CHANGED=false
 
-                if pyosmium-get-changes \
-                    --server "${DOWNURL}/${region}-updates/" \
-                    --state-file "${state_file}" \
-                    -o "${changes}" 2>/dev/null && [[ -s "${changes}" ]]; then
-                  sudo -E -u nominatim nominatim add-data \
-                    --project-dir "${PROJECT_DIR}" \
-                    --diff "${changes}"
-                  CHANGED=true
-                fi
-                rm -f "${changes}"
-              done
-
-              if [[ "${CHANGED}" == "true" ]]; then
-                echo "[nominatim-replication] Indexing changes..."
-                sudo -E -u nominatim nominatim index --project-dir "${PROJECT_DIR}"
+            for region in "${DESIRED_REGIONS[@]}"; do
+              if grep -qxF "${region}" "${IMPORTED_LIST}"; then
+                continue
               fi
 
-              echo "[nominatim-replication] Cycle done. Sleeping ${INTERVAL}s..."
-              sleep "${INTERVAL}"
+              import_file="/tmp/$(echo "${region}" | tr '/' '-')-latest.osm.pbf"
+              echo "[nominatim-maintenance] Importing new region ${region}"
+              curl -L -A "${CURL_USER_AGENT}" --fail-with-body \
+                "${DOWNURL}/${region}-latest.osm.pbf" -o "${import_file}"
+              sudo -E -u nominatim nominatim add-data --project-dir "${PROJECT_DIR}" --file "${import_file}"
+              seed_state "${region}"
+              echo "${region}" >> "${IMPORTED_LIST}"
+              rm -f "${import_file}"
+              CHANGED=true
             done
+
+            for region in "${DESIRED_REGIONS[@]}"; do
+              state_file="${PROJECT_DIR}/update/${region}/sequence.state"
+              if [ ! -f "${state_file}" ]; then
+                echo "[nominatim-maintenance] Missing state for ${region}; seeding and continuing."
+                seed_state "${region}"
+                continue
+              fi
+
+              changes_file="/tmp/changes-$(echo "${region}" | tr '/' '-').osc.gz"
+              echo "[nominatim-maintenance] Fetching changes for ${region}"
+              if pyosmium-get-changes \
+                  --server "${DOWNURL}/${region}-updates/" \
+                  --state-file "${state_file}" \
+                  -o "${changes_file}" 2>/dev/null && [ -s "${changes_file}" ]; then
+                sudo -E -u nominatim nominatim add-data \
+                  --project-dir "${PROJECT_DIR}" \
+                  --diff "${changes_file}"
+                CHANGED=true
+              fi
+              rm -f "${changes_file}"
+            done
+
+            if [ "${CHANGED}" = "true" ]; then
+              echo "[nominatim-maintenance] Re-indexing after import/update cycle."
+              sudo -E -u nominatim nominatim index --project-dir "${PROJECT_DIR}"
+            else
+              echo "[nominatim-maintenance] No new data found."
+            fi
 
     defaultPodOptions:
       priorityClassName: internal-only
@@ -311,12 +202,6 @@ spec:
           nominatim:
             nominatim:
               - path: /nominatim
-            replication:
-              - path: /nominatim
-      pg-socket:
-        type: emptyDir
-        globalMounts:
-          - path: /var/run/postgresql
       scripts:
         type: configMap
         name: nominatim-scripts
@@ -324,8 +209,5 @@ spec:
         advancedMounts:
           nominatim:
             nominatim:
-              - path: /app/init.sh
-                subPath: init.sh
-            replication:
-              - path: /scripts/update.sh
-                subPath: update.sh
+              - path: /scripts/maintain-regions.sh
+                subPath: maintain-regions.sh
