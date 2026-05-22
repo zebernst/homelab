@@ -58,3 +58,10 @@ spec:
         hostPath: /var/lib/scanopy-daemon
         globalMounts:
           - path: /root/.config/scanopy/daemon
+      snmp-community:
+        type: secret
+        name: scanopy-snmp-secret
+        globalMounts:
+          - path: /run/secrets/unifi-snmp-community
+            subPath: community
+            readOnly: true
