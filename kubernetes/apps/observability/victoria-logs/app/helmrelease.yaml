@@ -30,7 +30,7 @@ spec:
       persistentVolume:
         enabled: true
         storageClassName: ceph-block
-        size: 50Gi
+        size: 20Gi
       serviceMonitor:
         enabled: true
       retentionPeriod: 90d
