@@ -4,7 +4,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app scanopy
-  namespace: &ns network
+  namespace: &ns observability
 spec:
   targetNamespace: *ns
   commonMetadata:
@@ -24,7 +24,7 @@ spec:
       namespace: rook-ceph
     - name: volsync
       namespace: volsync-system
-  path: kubernetes/apps/network/scanopy/app
+  path: kubernetes/apps/observability/scanopy/app
   prune: true
   sourceRef:
     kind: GitRepository

@@ -23,7 +23,7 @@ spec:
             env:
               TZ: America/Chicago
               SCANOPY_LOG_LEVEL: info
-              SCANOPY_SERVER_URL: http://scanopy.network.svc.cluster.local:60072
+              SCANOPY_SERVER_URL: http://scanopy.observability.svc.cluster.local:60072
             envFrom:
               - secretRef:
                   name: scanopy-secret

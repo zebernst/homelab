@@ -20,4 +20,5 @@ resources:
   - silence-operator/ks.yaml
   - smartctl-exporter/ks.yaml
   - snmp-exporter/ks.yaml
+  - scanopy/ks.yaml
   - unpoller/ks.yaml
