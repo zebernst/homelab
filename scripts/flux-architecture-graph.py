@@ -50,6 +50,7 @@ GROUP_STYLES = {
     "ai": "fill:#581c87,stroke:#d8b4fe,color:#faf5ff",
     "workloads": "fill:#422006,stroke:#fbbf24,color:#fffbeb",
 }
+HUB_STYLE = "fill:none,stroke:none,color:transparent"
 
 
 @dataclass
@@ -225,6 +226,28 @@ def partition_label(partition_id: str, config: dict) -> str:
     return partition_id.rsplit("/", 1)[-1]
 
 
+def node_group(node_id: str, nodes: dict[str, Kustomization], config: dict) -> str:
+    return assign_partition(node_id, nodes[node_id].namespace, config)[0]
+
+
+def aggregate_tier_edges(nodes: dict[str, Kustomization], config: dict) -> set[tuple[int, int]]:
+    """Summarize cross-tier Flux dependsOn as higher-tier -> lower-tier edges only."""
+    edges: set[tuple[int, int]] = set()
+    for ks in nodes.values():
+        source_tier = vertical_tier_for_group(config, node_group(ks.node_id, nodes, config))
+        for dep in ks.deploy_deps:
+            if dep not in nodes:
+                continue
+            target_tier = vertical_tier_for_group(config, node_group(dep, nodes, config))
+            if source_tier > target_tier:
+                edges.add((source_tier, target_tier))
+    return edges
+
+
+def tier_hub_id(vertical_tier: int) -> str:
+    return mermaid_id(f"hub_vt{vertical_tier}")
+
+
 def generate_mermaid(
     nodes: dict[str, Kustomization],
     config: dict,
@@ -232,7 +255,6 @@ def generate_mermaid(
 ) -> str:
     rendered: dict[str, str] = {}
     rendered_sources: dict[str, list[str]] = defaultdict(list)
-    node_groups: dict[str, str] = {}
 
     for node_id, ks in nodes.items():
         group, _ = assign_partition(node_id, ks.namespace, config)
@@ -241,7 +263,6 @@ def generate_mermaid(
         render_id = render_node_id(node_id, group, ks.namespace, config)
         rendered[node_id] = render_id
         rendered_sources[render_id].append(node_id)
-        node_groups[render_id] = group if group == workload_group_name(config) else group
 
     placements: dict[int, dict[str, dict[str, list[str]]]] = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     for render_id, source_ids in rendered_sources.items():
@@ -253,20 +274,13 @@ def generate_mermaid(
         vertical_tier = vertical_tier_for_group(config, group)
         placements[vertical_tier][group][partition_id].append(render_id)
 
-    deploy_edges: set[tuple[str, str]] = set()
-    for ks in nodes.values():
-        source = rendered.get(ks.node_id)
-        if not source:
-            continue
-        for dep in ks.deploy_deps:
-            target = rendered.get(dep)
-            if target and source != target:
-                deploy_edges.add((source, target))
+    tier_edges = aggregate_tier_edges(nodes, config)
+    active_tiers = set(placements.keys())
 
     lines = [
         "flowchart BT",
         "",
-        "  %% Deploy-order edges from Flux Kustomization.spec.dependsOn",
+        "  %% Cross-tier dependsOn summary (higher tier -.-> lower tier it depends on)",
         "",
     ]
 
@@ -332,14 +346,19 @@ def generate_mermaid(
 
             lines.append("    end")
 
+        tier_hub = tier_hub_id(vertical_tier)
+        lines.append(f"    {tier_hub}(( ))")
+        lines.append(f"    class {tier_hub} hub")
         lines.append("  end")
         lines.append("")
 
-    lines.append("  %% dependsOn edges (dependent --> dependency)")
-    for source, target in sorted(deploy_edges):
-        lines.append(f"  {source} --> {target}")
+    for source_tier, target_tier in sorted(tier_edges):
+        if source_tier not in active_tiers or target_tier not in active_tiers:
+            continue
+        lines.append(f"  {tier_hub_id(source_tier)} -.-> {tier_hub_id(target_tier)}")
 
-    lines.extend(["", "  %% group styling"])
+    lines.extend(["", "  %% styling"])
+    lines.append(f"  classDef hub {HUB_STYLE}")
     for group_name, style in GROUP_STYLES.items():
         lines.append(f"  classDef {group_name} {style}")
 
@@ -367,7 +386,7 @@ def render_readme(
         "",
         "| Vertical tier | Groups | Role |",
         "| --- | --- | --- |",
-        "| Substrate | Substrate | Cluster cannot run without |",
+        "| Substrate | Substrate | Cluster, CNI, storage, backup |",
         "| Infrastructure | Platform · Observability | Infra providers vs metrics/logs/checks |",
         "| Shared services | Data · AI | Shared Postgres/Redis and inference |",
         "| Workloads | Workloads | User-facing applications |",
@@ -377,6 +396,9 @@ def render_readme(
         "```",
         "",
         "Regenerate: `task architecture:graph`",
+        "",
+        "Dashed edges summarize cross-tier Flux `dependsOn` (higher tier depends on lower).",
+        "Individual Kustomization edges are omitted to keep the diagram readable.",
         "",
         "## Load-bearing platforms",
         "",

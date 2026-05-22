@@ -7,7 +7,7 @@
 vertical_tiers:
   0:
     label: Substrate
-    description: Cluster-critical infrastructure the cluster cannot run without
+    description: Cluster-critical infrastructure and storage the cluster cannot run without
     groups: [substrate]
   1:
     label: Infrastructure
@@ -25,9 +25,10 @@ vertical_tiers:
 groups:
   substrate:
     label: Substrate
+    description: CNI, core cluster services, block/file storage, backup
   platform:
     label: Platform
-    description: Secrets, networking, auth, storage, security, gitops
+    description: Secrets, networking, auth, security, gitops
   observability:
     label: Observability
     description: Metrics, logs, alerting, synthetic checks — not an infra provider
@@ -87,6 +88,14 @@ partitions:
       nodes:
         - flux-system/cluster-meta
 
+  - id: substrate/storage
+    group: substrate
+    label: storage
+    match:
+      namespaces: [rook-ceph, volsync-system, openebs-system]
+      nodes:
+        - kube-system/synology-csi-driver
+
   - id: platform/gitops
     group: platform
     label: gitops
@@ -115,19 +124,12 @@ partitions:
       nodes:
         - kube-system/cilium-config
         - kube-system/cilium-gateway
-        - kube-system/synology-csi-driver
 
   - id: platform/auth
     group: platform
     label: auth
     match:
       namespaces: [auth]
-
-  - id: platform/storage
-    group: platform
-    label: storage
-    match:
-      namespaces: [rook-ceph, volsync-system, openebs-system]
 
   - id: platform/data-operators
     group: platform

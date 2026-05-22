@@ -5,7 +5,7 @@ and partitions in [`tier-categories.yaml`](tier-categories.yaml).
 
 | Vertical tier | Groups | Role |
 | --- | --- | --- |
-| Substrate | Substrate | Cluster cannot run without |
+| Substrate | Substrate | Cluster, CNI, storage, backup |
 | Infrastructure | Platform · Observability | Infra providers vs metrics/logs/checks |
 | Shared services | Data · AI | Shared Postgres/Redis and inference |
 | Workloads | Workloads | User-facing applications |
@@ -13,10 +13,10 @@ and partitions in [`tier-categories.yaml`](tier-categories.yaml).
 ```mermaid
 flowchart BT
 
-  %% Deploy-order edges from Flux Kustomization.spec.dependsOn
+  %% Cross-tier dependsOn summary (higher tier -.-> lower tier it depends on)
 
-  subgraph vt0["Substrate — Cluster-critical infrastructure the cluster cannot run without"]
-    subgraph g_substrate["Substrate"]
+  subgraph vt0["Substrate — Cluster-critical infrastructure and storage the cluster cannot run without"]
+    subgraph g_substrate["Substrate — CNI, core cluster services, block/file storage, backup"]
       subgraph p_substrate_substrate_cluster["cluster"]
         cilium["cilium"]
         class cilium substrate
@@ -27,11 +27,21 @@ flowchart BT
         cluster_meta["cluster-meta"]
         class cluster_meta substrate
       end
+      subgraph p_substrate_substrate_storage["storage"]
+        rook_ceph["rook-ceph"]
+        class rook_ceph substrate
+        rook_ceph_cluster["rook-ceph-cluster<br/>(42 deps)"]
+        class rook_ceph_cluster substrate
+        volsync["volsync<br/>(30 deps)"]
+        class volsync substrate
+      end
     end
+    hub_vt0(( ))
+    class hub_vt0 hub
   end
 
   subgraph vt1["Infrastructure — Platform providers and observability at the same tier, distinct groups"]
-    subgraph g_platform["Platform — Secrets, networking, auth, storage, security, gitops"]
+    subgraph g_platform["Platform — Secrets, networking, auth, security, gitops"]
       subgraph p_platform_platform_auth["auth"]
         pocket_id["pocket-id"]
         class pocket_id platform
@@ -66,14 +76,6 @@ flowchart BT
         cert_manager_issuers["cert-manager-issuers"]
         class cert_manager_issuers platform
       end
-      subgraph p_platform_platform_storage["storage"]
-        rook_ceph["rook-ceph"]
-        class rook_ceph platform
-        rook_ceph_cluster["rook-ceph-cluster<br/>(42 deps)"]
-        class rook_ceph_cluster platform
-        volsync["volsync<br/>(30 deps)"]
-        class volsync platform
-      end
     end
     subgraph g_observability["Observability — Metrics, logs, alerting, synthetic checks — not an infra provider"]
       subgraph p_observability_observability_metrics["metrics"]
@@ -83,6 +85,8 @@ flowchart BT
         class victoria_metrics_operator observability
       end
     end
+    hub_vt1(( ))
+    class hub_vt1 hub
   end
 
   subgraph vt2["Shared services — Data and AI at the same tier, distinct groups"]
@@ -102,6 +106,8 @@ flowchart BT
         class ollama ai
       end
     end
+    hub_vt2(( ))
+    class hub_vt2 hub
   end
 
   subgraph vt3["Workloads — User-facing applications"]
@@ -123,52 +129,19 @@ flowchart BT
       wl_system_upgrade["System Upgrade<br/>(2 ks)"]
       class wl_system_upgrade workloads
     end
+    hub_vt3(( ))
+    class hub_vt3 hub
   end
 
-  %% dependsOn edges (dependent --> dependency)
-  cert_manager_issuers --> cert_manager
-  cloudnative_pg --> onepassword
-  cloudnative_pg_cluster --> cloudnative_pg
-  cluster_apps --> cluster_meta
-  cluster_secrets --> onepassword
-  ollama --> rook_ceph_cluster
-  onepassword --> external_secrets
-  pocket_id --> cloudnative_pg_cluster
-  pocket_id --> onepassword
-  pocket_id --> rook_ceph_cluster
-  pocket_id --> volsync
-  rook_ceph --> snapshot_controller
-  rook_ceph_cluster --> rook_ceph
-  victoria_metrics --> onepassword
-  victoria_metrics --> rook_ceph_cluster
-  victoria_metrics --> victoria_metrics_operator
-  wl_ai --> ollama
-  wl_ai --> onepassword
-  wl_ai --> rook_ceph_cluster
-  wl_ai --> victoria_metrics
-  wl_ai --> volsync
-  wl_downloads --> cloudnative_pg_cluster
-  wl_downloads --> onepassword
-  wl_downloads --> rook_ceph_cluster
-  wl_downloads --> volsync
-  wl_fission --> onepassword
-  wl_fission --> rook_ceph_cluster
-  wl_games --> onepassword
-  wl_games --> rook_ceph_cluster
-  wl_games --> volsync
-  wl_media --> cloudnative_pg_cluster
-  wl_media --> onepassword
-  wl_media --> rook_ceph_cluster
-  wl_media --> volsync
-  wl_self_hosted --> cloudnative_pg
-  wl_self_hosted --> cloudnative_pg_cluster
-  wl_self_hosted --> cluster_secrets
-  wl_self_hosted --> dragonfly_cluster
-  wl_self_hosted --> onepassword
-  wl_self_hosted --> rook_ceph_cluster
-  wl_self_hosted --> volsync
+  hub_vt1 -.-> hub_vt0
+  hub_vt2 -.-> hub_vt0
+  hub_vt2 -.-> hub_vt1
+  hub_vt3 -.-> hub_vt0
+  hub_vt3 -.-> hub_vt1
+  hub_vt3 -.-> hub_vt2
 
-  %% group styling
+  %% styling
+  classDef hub fill:none,stroke:none,color:transparent
   classDef substrate fill:#1f2937,stroke:#9ca3af,color:#f9fafb
   classDef platform fill:#1e3a5f,stroke:#60a5fa,color:#eff6ff
   classDef observability fill:#312e81,stroke:#a78bfa,color:#f5f3ff
@@ -179,6 +152,9 @@ flowchart BT
 
 Regenerate: `task architecture:graph`
 
+Dashed edges summarize cross-tier Flux `dependsOn` (higher tier depends on lower).
+Individual Kustomization edges are omitted to keep the diagram readable.
+
 ## Load-bearing platforms
 
 Kustomizations with the most direct `dependsOn` inbound edges.
@@ -186,8 +162,8 @@ Kustomizations with the most direct `dependsOn` inbound edges.
 | Kustomization | Dependents | Group | dependsOn depth |
 | --- | ---: | --- | ---: |
 | `external-secrets/onepassword` | 53 | Platform | 1 |
-| `rook-ceph/rook-ceph-cluster` | 42 | Platform | 2 |
-| `volsync-system/volsync` | 30 | Platform | 0 |
+| `rook-ceph/rook-ceph-cluster` | 42 | Substrate | 2 |
+| `volsync-system/volsync` | 30 | Substrate | 0 |
 | `database/cloudnative-pg-cluster` | 20 | Data | 3 |
 | `observability/victoria-metrics-operator` | 5 | Observability | 0 |
 | `ai/ollama` | 3 | AI | 3 |
@@ -216,6 +192,11 @@ Kustomizations with the most direct `dependsOn` inbound edges.
 - `kube-system/reloader`
 - `kube-system/snapshot-controller` (2 deps)
 - `kube-system/spegel`
+- `kube-system/synology-csi-driver`
+- `openebs-system/openebs` (1 deps)
+- `rook-ceph/rook-ceph` (1 deps)
+- `rook-ceph/rook-ceph-cluster` (42 deps)
+- `volsync-system/volsync` (30 deps)
 
 ### Infrastructure
 
@@ -239,7 +220,6 @@ Kustomizations with the most direct `dependsOn` inbound edges.
 - `flux-system/flux-operator` (1 deps)
 - `kube-system/cilium-config` (1 deps)
 - `kube-system/cilium-gateway`
-- `kube-system/synology-csi-driver`
 - `network/cloudflared`
 - `network/echo-server`
 - `network/external-dns-cloudflare`
@@ -248,10 +228,6 @@ Kustomizations with the most direct `dependsOn` inbound edges.
 - `network/ingress-nginx-internal`
 - `network/smtp-relay` (1 deps)
 - `network/tailscale-operator`
-- `openebs-system/openebs` (1 deps)
-- `rook-ceph/rook-ceph` (1 deps)
-- `rook-ceph/rook-ceph-cluster` (42 deps)
-- `volsync-system/volsync` (30 deps)
 
 **Observability**
 
