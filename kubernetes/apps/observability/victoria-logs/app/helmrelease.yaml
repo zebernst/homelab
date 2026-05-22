@@ -34,3 +34,9 @@ spec:
       serviceMonitor:
         enabled: true
       retentionPeriod: 90d
+      podAnnotations:
+        glance/id: victoria-logs
+        glance/name: VictoriaLogs
+        glance/icon: si:victoriametrics
+        glance/url: https://logs.zebernst.dev
+        glance/category: observability

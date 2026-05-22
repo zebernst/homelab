@@ -16,6 +16,11 @@ spec:
       lidarr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: lidarr
+          glance/name: Lidarr
+          glance/icon: si:lidarr
+          glance/category: downloads
+          glance/url: https://lidarr.kite-harmonic.ts.net
         initContainers:
           init-db:
             image:

@@ -14,6 +14,8 @@ spec:
   values:
     controllers:
       flaresolverr:
+        annotations:
+          glance/hide: "true"
         replicas: 2
         strategy: RollingUpdate
         annotations:

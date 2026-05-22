@@ -19,6 +19,11 @@ spec:
       wizarr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: wizarr
+          glance/name: Wizarr
+          glance/icon: mdi:account-plus
+          glance/category: media
+          glance/url: https://join.zebernst.dev
         containers:
           wizarr:
             image:

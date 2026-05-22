@@ -17,6 +17,11 @@ spec:
 
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: paperless
+          glance/name: Paperless-ngx
+          glance/icon: si:readthedocs
+          glance/category: self-hosted
+          glance/url: https://paperless.kite-harmonic.ts.net
 
         initContainers:
           init-db:

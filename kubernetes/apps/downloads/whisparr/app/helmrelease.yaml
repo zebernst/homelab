@@ -16,6 +16,11 @@ spec:
       whisparr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: whisparr
+          glance/name: Whisparr
+          glance/icon: si:sonarr
+          glance/category: downloads
+          glance/url: https://whisparr.kite-harmonic.ts.net
         initContainers:
           init-db:
             image:

@@ -16,6 +16,11 @@ spec:
       autobrr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: autobrr
+          glance/name: Autobrr
+          glance/icon: mdi:robot
+          glance/category: downloads
+          glance/url: https://autobrr.kite-harmonic.ts.net
         initContainers:
           init-db:
             image:

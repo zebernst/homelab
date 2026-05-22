@@ -16,6 +16,11 @@ spec:
       prowlarr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: prowlarr
+          glance/name: Prowlarr
+          glance/icon: si:prowlarr
+          glance/category: downloads
+          glance/url: https://prowlarr.kite-harmonic.ts.net
         initContainers:
           init-db:
             image:

@@ -16,6 +16,11 @@ spec:
       unwrapped:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: unwrapped
+          glance/name: Unwrapped
+          glance/icon: mdi:gift
+          glance/category: self-hosted
+          glance/url: https://unwrapped.zebernst.dev
         containers:
           unwrapped:
             image:

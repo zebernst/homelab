@@ -16,6 +16,11 @@ spec:
       openbooks:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: openbooks
+          glance/name: OpenBooks
+          glance/icon: mdi:book-search
+          glance/category: downloads
+          glance/url: https://openbooks.kite-harmonic.ts.net
         containers:
           openbooks:
             image:

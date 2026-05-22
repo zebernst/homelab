@@ -14,6 +14,12 @@ spec:
   values:
     controllers:
       kromgo:
+        annotations:
+          glance/id: kromgo
+          glance/name: Kromgo
+          glance/icon: mdi:message-text
+          glance/category: observability
+          glance/url: https://kromgo.zebernst.dev
         replicas: 2
         strategy: RollingUpdate
         annotations:

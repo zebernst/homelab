@@ -16,6 +16,11 @@ spec:
       rxresume:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: rxresume
+          glance/name: RxResume
+          glance/icon: mdi:file-document
+          glance/category: self-hosted
+          glance/url: https://rxresume.zebernst.dev
         initContainers:
           init-db:
             image:

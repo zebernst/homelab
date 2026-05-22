@@ -16,6 +16,11 @@ spec:
       bluemap:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: bluemap
+          glance/name: BlueMap
+          glance/icon: si:minecraft
+          glance/category: games
+          glance/parent: minecraft
         initContainers:
           init-config:
             image:

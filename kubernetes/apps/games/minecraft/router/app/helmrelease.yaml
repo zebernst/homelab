@@ -47,6 +47,11 @@ spec:
       mc-router:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: minecraft
+          glance/name: Minecraft
+          glance/icon: si:minecraft
+          glance/category: games
+          glance/url: https://worldmap.zebernst.dev
         containers:
           mc-router:
             image:

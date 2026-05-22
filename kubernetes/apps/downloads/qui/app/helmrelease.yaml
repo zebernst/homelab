@@ -16,6 +16,11 @@ spec:
       qui:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: qui
+          glance/name: Qui
+          glance/icon: si:qbittorrent
+          glance/category: downloads
+          glance/url: https://qui.zebernst.dev
         containers:
           qui:
             image:

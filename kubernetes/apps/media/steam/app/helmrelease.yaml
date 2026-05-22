@@ -16,6 +16,11 @@ spec:
       steam:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: steam
+          glance/name: Steam Headless
+          glance/icon: si:steam
+          glance/category: media
+          glance/url: https://steam.kite-harmonic.ts.net
         containers:
           steam:
             image:

@@ -16,6 +16,11 @@ spec:
       gatus:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: gatus
+          glance/name: Gatus
+          glance/icon: mdi:heart-pulse
+          glance/category: observability
+          glance/url: https://status.zebernst.dev
         initContainers:
           init-db:
             image:
