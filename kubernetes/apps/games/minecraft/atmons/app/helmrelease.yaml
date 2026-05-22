@@ -14,15 +14,14 @@ spec:
   values:
     controllers:
       atmons:
+        type: statefulset
         annotations:
+          reloader.stakater.com/auto: "true"
           glance/id: minecraft-atmons
           glance/name: Minecraft ATMons
           glance/icon: si:minecraft
           glance/category: games
           glance/parent: minecraft
-        type: statefulset
-        annotations:
-          reloader.stakater.com/auto: "true"
         initContainers:
           init-bluemap-config:
             image:

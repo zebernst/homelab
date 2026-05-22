@@ -14,15 +14,14 @@ spec:
   values:
     controllers:
       atm10:
+        type: statefulset
         annotations:
+          reloader.stakater.com/auto: "true"
           glance/id: minecraft-atm10
           glance/name: Minecraft ATM10
           glance/icon: si:minecraft
           glance/category: games
           glance/parent: minecraft
-        type: statefulset
-        annotations:
-          reloader.stakater.com/auto: "true"
         initContainers:
           init-bluemap-config:
             image:

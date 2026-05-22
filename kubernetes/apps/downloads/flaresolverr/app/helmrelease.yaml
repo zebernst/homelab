@@ -15,11 +15,10 @@ spec:
     controllers:
       flaresolverr:
         annotations:
+          reloader.stakater.com/auto: "true"
           glance/hide: "true"
         replicas: 2
         strategy: RollingUpdate
-        annotations:
-          reloader.stakater.com/auto: "true"
         containers:
           flaresolverr:
             image:

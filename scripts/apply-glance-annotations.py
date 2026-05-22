@@ -35,6 +35,19 @@ def already_has_glance(text: str) -> bool:
     return "glance/id:" in text or 'glance/hide: "true"' in text
 
 
+def controller_block_end(text: str, start: int) -> int:
+    """Return index after the controller block starting at `start`."""
+    lines = text[start:].splitlines(keepends=True)
+    consumed = 0
+    for line in lines[1:]:
+        if line.startswith("      ") and not line.startswith("        ") and line.strip():
+            break
+        if line.startswith("    ") and not line.startswith("      ") and line.strip():
+            break
+        consumed += len(line)
+    return start + consumed
+
+
 def apply_app_template(path: Path, controller: str, lines: list[str]) -> bool:
     text = path.read_text()
     if already_has_glance(text):
@@ -46,23 +59,26 @@ def apply_app_template(path: Path, controller: str, lines: list[str]) -> bool:
         print(f"WARN: controller {controller} not found in {path}", file=sys.stderr)
         return False
 
-    after = text[match.end() :]
-    ann_match = re.search(r"        annotations:\n((?:          .+\n)*)", after)
-    if ann_match:
-        insert_at = match.end() + ann_match.end(1)
+    block_end = controller_block_end(text, match.start())
+    block = text[match.start() : block_end]
+    ann_matches = list(re.finditer(r"^        annotations:\n((?:          .+\n)*)", block, re.MULTILINE))
+    if ann_matches:
+        ann_match = ann_matches[0]
+        insert_at = match.start() + ann_match.end(1)
         text = text[:insert_at] + "".join(line + "\n" for line in lines) + text[insert_at:]
         path.write_text(text)
         return True
 
     child_match = re.search(
-        r"        (?:(?:replicas|strategy|initContainers|containers|type):)",
-        after,
+        r"^        (?:(?:replicas|strategy|initContainers|containers|type):)",
+        block,
+        re.MULTILINE,
     )
     if not child_match:
         print(f"WARN: no insertion point for {controller} in {path}", file=sys.stderr)
         return False
 
-    insert_at = match.end()
+    insert_at = match.start() + child_match.start()
     ann_block = "        annotations:\n" + "".join(line + "\n" for line in lines)
     text = text[:insert_at] + ann_block + text[insert_at:]
     path.write_text(text)
