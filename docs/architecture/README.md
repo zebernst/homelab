@@ -4,9 +4,160 @@ Generated from Flux `Kustomization.spec.dependsOn`, declared Kustomize component
 and Helm/manifest monitoring configuration (ServiceMonitor, PodMonitor, VMServiceScrape).
 Deploy edges define reconcile ordering; operational edges are separate edge kinds.
 
+## Platform tier model
+
+Conceptual deploy tiers and platform categories, generated from Flux `dependsOn`.
+Workloads at tier 4+ collapse into per-namespace groups. Customize labels and grouping
+in [`tier-categories.yaml`](tier-categories.yaml).
+
+```mermaid
+flowchart BT
+
+  subgraph tier_0["Tier 0 — Cluster substrate"]
+    subgraph t0_platform_cluster["platform/cluster"]
+      snapshot_controller["snapshot-controller"]
+    end
+    subgraph t0_platform_gitops["platform/gitops"]
+      cluster_meta["cluster-meta"]
+    end
+    subgraph t0_platform_networking["platform/networking"]
+      cilium["cilium"]
+    end
+    subgraph t0_platform_observability["platform/observability"]
+      victoria_metrics_operator["victoria-metrics-operator"]
+    end
+    subgraph t0_platform_secrets["platform/secrets"]
+      external_secrets["external-secrets"]
+    end
+    subgraph t0_platform_security["platform/security"]
+      cert_manager["cert-manager"]
+    end
+    subgraph t0_platform_storage["platform/storage"]
+      volsync["volsync"]
+    end
+  end
+
+  subgraph tier_1["Tier 1 — Platform services"]
+    subgraph t1_platform_gitops["platform/gitops"]
+      cluster_apps["cluster-apps"]
+    end
+    subgraph t1_platform_secrets["platform/secrets"]
+      onepassword["onepassword"]
+    end
+    subgraph t1_platform_security["platform/security"]
+      cert_manager_issuers["cert-manager-issuers"]
+    end
+    subgraph t1_platform_storage["platform/storage"]
+      rook_ceph["rook-ceph"]
+    end
+  end
+
+  subgraph tier_2["Tier 2 — Shared infrastructure"]
+    subgraph t2_platform_data["platform/data"]
+      cloudnative_pg["cloudnative-pg"]
+    end
+    subgraph t2_platform_secrets["platform/secrets"]
+      cluster_secrets["cluster-secrets"]
+    end
+    subgraph t2_platform_storage["platform/storage"]
+      rook_ceph_cluster["rook-ceph-cluster"]
+    end
+  end
+
+  subgraph tier_3["Tier 3 — Data and edge platforms"]
+    subgraph t3_platform_data["platform/data"]
+      cloudnative_pg_cluster["cloudnative-pg-cluster"]
+    end
+    subgraph t3_platform_networking["platform/networking"]
+      ingress_nginx_external["ingress-nginx-external"]
+      ingress_nginx_internal["ingress-nginx-internal"]
+    end
+    subgraph t3_platform_observability["platform/observability"]
+      victoria_logs["victoria-logs"]
+      victoria_metrics["victoria-metrics"]
+    end
+    subgraph t3_workloads["workloads"]
+      bluemap["bluemap"]
+      ollama["ollama"]
+      qbittorrent["qbittorrent"]
+    end
+  end
+
+  subgraph tier_4["Tier 4 — Workloads"]
+    subgraph t4_workloads["workloads"]
+      workloads_ai["AI<br/>(4 ks)"]
+      workloads_auth["Auth<br/>(2 ks)"]
+      workloads_downloads["Downloads<br/>(11 ks)"]
+      workloads_fission["Fission<br/>(1 ks)"]
+      workloads_games["Games<br/>(3 ks)"]
+      workloads_media["Media<br/>(2 ks)"]
+      workloads_observability["Observability<br/>(3 ks)"]
+      workloads_self_hosted["Self-Hosted<br/>(9 ks)"]
+    end
+  end
+
+  bluemap --> rook_ceph_cluster
+  cert_manager_issuers --> cert_manager
+  cloudnative_pg --> onepassword
+  cloudnative_pg_cluster --> cloudnative_pg
+  cluster_apps --> cluster_meta
+  cluster_secrets --> onepassword
+  ollama --> rook_ceph_cluster
+  onepassword --> external_secrets
+  qbittorrent --> onepassword
+  qbittorrent --> rook_ceph_cluster
+  qbittorrent --> volsync
+  rook_ceph --> snapshot_controller
+  rook_ceph_cluster --> rook_ceph
+  victoria_logs --> rook_ceph_cluster
+  victoria_metrics --> onepassword
+  victoria_metrics --> rook_ceph_cluster
+  victoria_metrics --> victoria_metrics_operator
+  workloads_ai --> ollama
+  workloads_ai --> onepassword
+  workloads_ai --> rook_ceph_cluster
+  workloads_ai --> victoria_metrics
+  workloads_ai --> volsync
+  workloads_auth --> cloudnative_pg_cluster
+  workloads_auth --> onepassword
+  workloads_auth --> rook_ceph_cluster
+  workloads_auth --> volsync
+  workloads_downloads --> cloudnative_pg_cluster
+  workloads_downloads --> onepassword
+  workloads_downloads --> qbittorrent
+  workloads_downloads --> rook_ceph_cluster
+  workloads_downloads --> volsync
+  workloads_fission --> onepassword
+  workloads_games --> bluemap
+  workloads_games --> onepassword
+  workloads_games --> rook_ceph_cluster
+  workloads_games --> volsync
+  workloads_media --> cloudnative_pg_cluster
+  workloads_media --> onepassword
+  workloads_media --> rook_ceph_cluster
+  workloads_media --> volsync
+  workloads_observability --> cloudnative_pg_cluster
+  workloads_observability --> onepassword
+  workloads_observability --> victoria_logs
+  workloads_observability --> victoria_metrics
+  workloads_observability --> victoria_metrics_operator
+  workloads_self_hosted --> cloudnative_pg
+  workloads_self_hosted --> cloudnative_pg_cluster
+  workloads_self_hosted --> cluster_secrets
+  workloads_self_hosted --> onepassword
+  workloads_self_hosted --> rook_ceph_cluster
+  workloads_self_hosted --> volsync
+```
+
+## Load-bearing view (Stacktower)
+
+Stacktower emphasizes fan-out and load-bearing platforms; the Mermaid chart above
+emphasizes named tiers and platform categories. Use both: Mermaid for architecture
+storytelling, Stacktower for dependency density and DR prioritization stats.
+
 ![Platform deploy tiers — app domains resting on shared platforms](platform-deploy.svg)
 
-Regenerate the diagram with `task architecture:diagram` (requires [Stacktower](https://github.com/stacktower-io/stacktower)).
+Regenerate with `task architecture:diagram` (requires [Stacktower](https://github.com/stacktower-io/stacktower)).
 
 ## Load-bearing platforms
 
@@ -205,7 +356,9 @@ Edge direction: `observability/victoria-metrics-operator` → workload.
 
 ## Artifacts
 
-- `platform-deploy.svg` — collapsed deploy-tier diagram (committed)
+- `platform-deploy.svg` — Stacktower load-bearing view (committed)
+- `platform-tiers.mmd` — Mermaid tier model source (committed; also embedded above)
+- `tier-categories.yaml` — tier labels and platform category rules
 - `platform-deploy.json`, `platform-operational.json`, `full-deploy.json` — generated locally by `task architecture:graph` (gitignored)
 
 ```bash

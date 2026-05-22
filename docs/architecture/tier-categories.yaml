@@ -1,0 +1,90 @@
+# Category and tier presentation rules for the generated Mermaid architecture diagram.
+# Tiers are computed from Flux Kustomization dependsOn depth; categories classify nodes
+# within each tier for readability.
+
+tier_labels:
+  0: Cluster substrate
+  1: Platform services
+  2: Shared infrastructure
+  3: Data and edge platforms
+  4: Workloads
+
+# Kustomizations at or above this tier are collapsed into per-namespace workload groups.
+collapse_from_tier: 4
+
+# Always render these nodes explicitly even when collapsed tiers absorb their dependents.
+always_show:
+  - flux-system/cluster-meta
+  - flux-system/cluster-apps
+  - external-secrets/external-secrets
+  - external-secrets/onepassword
+  - volsync-system/volsync
+  - kube-system/snapshot-controller
+  - kube-system/cilium
+  - rook-ceph/rook-ceph
+  - rook-ceph/rook-ceph-cluster
+  - database/cloudnative-pg
+  - database/cloudnative-pg-cluster
+  - external-secrets/cluster-secrets
+  - cert-manager/cert-manager
+  - cert-manager/cert-manager-issuers
+  - observability/victoria-metrics-operator
+  - observability/victoria-metrics
+  - observability/victoria-logs
+  - network/ingress-nginx-external
+  - network/ingress-nginx-internal
+  - downloads/qbittorrent
+  - ai/ollama
+
+categories:
+  platform/gitops:
+    label: platform/gitops
+    match:
+      namespaces: [flux-system]
+
+  platform/secrets:
+    label: platform/secrets
+    match:
+      namespaces: [external-secrets]
+
+  platform/security:
+    label: platform/security
+    match:
+      namespaces: [cert-manager]
+
+  platform/networking:
+    label: platform/networking
+    match:
+      namespaces: [network]
+      nodes:
+        - kube-system/cilium
+        - kube-system/cilium-config
+        - kube-system/cilium-gateway
+
+  platform/observability:
+    label: platform/observability
+    match:
+      namespaces: [observability]
+
+  platform/storage:
+    label: platform/storage
+    match:
+      namespaces: [rook-ceph, volsync-system, openebs-system]
+
+  platform/data:
+    label: platform/data
+    match:
+      namespaces: [database]
+
+  platform/cluster:
+    label: platform/cluster
+    match:
+      namespaces: [kube-system]
+      exclude_nodes:
+        - kube-system/cilium
+        - kube-system/cilium-config
+        - kube-system/cilium-gateway
+
+  workloads:
+    label: workloads
+    default: true

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
@@ -16,6 +17,8 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_KS_GLOB = "kubernetes/**/ks.yaml"
 DEFAULT_OUT_DIR = ROOT / "docs" / "architecture"
+TIER_CONFIG_PATH = DEFAULT_OUT_DIR / "tier-categories.yaml"
+WORKLOAD_TIER = 4
 
 # Upstream platforms included in collapsed views even when fan-out is smaller.
 UPSTREAM_PLATFORMS = {
@@ -398,6 +401,168 @@ def stacktower_graph(
     return {"nodes": payload_nodes, "edges": payload_edges}
 
 
+def load_tier_config(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    with path.open() as handle:
+        return yaml.safe_load(handle) or {}
+
+
+def node_matches(match: dict, node_id: str, namespace: str) -> bool:
+    if node_id in match.get("exclude_nodes", []):
+        return False
+    if node_id in match.get("nodes", []):
+        return True
+    return namespace in match.get("namespaces", [])
+
+
+def assign_category(node_id: str, namespace: str, config: dict) -> str:
+    default_category = "workloads"
+    for name, category in config.get("categories", {}).items():
+        if category.get("default"):
+            default_category = name
+            continue
+        if node_matches(category.get("match", {}), node_id, namespace):
+            return name
+    return default_category
+
+
+def mermaid_slug(label: str) -> str:
+    slug = re.sub(r"[^a-zA-Z0-9_]", "_", label.replace("-", "_").replace("/", "_"))
+    if not slug:
+        slug = "node"
+    if slug[0].isdigit():
+        slug = f"n_{slug}"
+    return slug
+
+
+def tier_labels(config: dict) -> dict[int, str]:
+    raw = config.get("tier_labels", {})
+    return {int(key): str(value) for key, value in raw.items()}
+
+
+def collapse_from_tier(config: dict) -> int:
+    return int(config.get("collapse_from_tier", WORKLOAD_TIER))
+
+
+def always_show_nodes(config: dict) -> set[str]:
+    return set(config.get("always_show", []))
+
+
+def should_show_explicit(
+    node_id: str,
+    tier: int,
+    dependents: Counter[str],
+    config: dict,
+    platforms: set[str],
+) -> bool:
+    if node_id in always_show_nodes(config):
+        return True
+    if tier >= collapse_from_tier(config):
+        return False
+    if node_id in platforms:
+        return True
+    if tier == 3 and dependents[node_id] >= 2:
+        return True
+    return False
+
+
+def diagram_node_id(
+    node_id: str,
+    nodes: dict[str, Kustomization],
+    tiers: dict[str, int],
+    config: dict,
+    dependents: Counter[str],
+    platforms: set[str],
+) -> str | None:
+    ks = nodes[node_id]
+    if should_show_explicit(node_id, tiers[node_id], dependents, config, platforms):
+        return mermaid_slug(node_id.split("/")[-1])
+    if tiers[node_id] >= collapse_from_tier(config):
+        return mermaid_slug(f"workloads_{ks.namespace}")
+    return None
+
+
+def diagram_node_label(diagram_id: str, nodes: dict[str, Kustomization], node_ids: list[str]) -> str:
+    if diagram_id.startswith("workloads_"):
+        namespace = diagram_id.removeprefix("workloads_").replace("_", "-")
+        count = sum(1 for node_id in node_ids if nodes[node_id].namespace == namespace)
+        label = DOMAIN_LABELS.get(namespace, namespace.replace("-", " ").title())
+        return f"{label}<br/>({count} ks)"
+    return diagram_id.replace("_", "-")
+
+
+def generate_mermaid_tiers(
+    nodes: dict[str, Kustomization],
+    tiers: dict[str, int],
+    deploy: list[Edge],
+    dependents: Counter[str],
+    platforms: set[str],
+    config: dict,
+) -> str:
+    labels = tier_labels(config)
+    collapse_at = collapse_from_tier(config)
+    visible: dict[str, str] = {}
+    visible_sources: dict[str, list[str]] = defaultdict(list)
+
+    for node_id, ks in nodes.items():
+        diagram_id = diagram_node_id(node_id, nodes, tiers, config, dependents, platforms)
+        if diagram_id is None:
+            continue
+        visible[node_id] = diagram_id
+        visible_sources[diagram_id].append(node_id)
+
+    node_meta: dict[str, tuple[int, str]] = {}
+    for diagram_id, source_ids in visible_sources.items():
+        if diagram_id.startswith("workloads_"):
+            tier = collapse_at
+            category = "workloads"
+        else:
+            tier = min(tiers[node_id] for node_id in source_ids)
+            category = assign_category(source_ids[0], nodes[source_ids[0]].namespace, config)
+        node_meta[diagram_id] = (tier, category)
+
+    grouped: dict[int, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
+    for diagram_id, (tier, category) in sorted(node_meta.items(), key=lambda item: (item[1][0], item[1][1], item[0])):
+        grouped[tier][category].append(diagram_id)
+
+    edge_set: set[tuple[str, str]] = set()
+    for edge in deploy:
+        source = visible.get(edge.source)
+        target = visible.get(edge.target)
+        if source and target and source != target:
+            edge_set.add((source, target))
+
+    lines = ["flowchart BT", ""]
+
+    for tier in sorted(grouped):
+        if tier > collapse_at:
+            continue
+        tier_label = labels.get(tier, f"Tier {tier}")
+        tier_slug = mermaid_slug(f"tier_{tier}")
+        lines.append(f'  subgraph {tier_slug}["Tier {tier} — {tier_label}"]')
+
+        for category in sorted(grouped[tier]):
+            category_cfg = config.get("categories", {}).get(category, {})
+            category_label = category_cfg.get("label", category)
+            category_slug = mermaid_slug(f"t{tier}_{category}")
+            lines.append(f'    subgraph {category_slug}["{category_label}"]')
+
+            for diagram_id in sorted(grouped[tier][category]):
+                node_label = diagram_node_label(diagram_id, nodes, visible_sources[diagram_id])
+                lines.append(f"      {diagram_id}[\"{node_label}\"]")
+
+            lines.append("    end")
+
+        lines.append("  end")
+        lines.append("")
+
+    for source, target in sorted(edge_set):
+        lines.append(f"  {source} --> {target}")
+
+    return "\n".join(lines).strip() + "\n"
+
+
 def render_markdown(
     nodes: dict[str, Kustomization],
     tiers: dict[str, int],
@@ -406,6 +571,7 @@ def render_markdown(
     metrics_targets: dict[str, set[str]],
     platforms: set[str],
     out_dir: Path,
+    mermaid_tiers: str,
 ) -> str:
     dependents = reverse_counts(deploy)
     by_tier: dict[int, list[str]] = defaultdict(list)
@@ -419,9 +585,25 @@ def render_markdown(
         "and Helm/manifest monitoring configuration (ServiceMonitor, PodMonitor, VMServiceScrape).",
         "Deploy edges define reconcile ordering; operational edges are separate edge kinds.",
         "",
+        "## Platform tier model",
+        "",
+        "Conceptual deploy tiers and platform categories, generated from Flux `dependsOn`.",
+        "Workloads at tier 4+ collapse into per-namespace groups. Customize labels and grouping",
+        "in [`tier-categories.yaml`](tier-categories.yaml).",
+        "",
+        "```mermaid",
+        mermaid_tiers.rstrip(),
+        "```",
+        "",
+        "## Load-bearing view (Stacktower)",
+        "",
+        "Stacktower emphasizes fan-out and load-bearing platforms; the Mermaid chart above",
+        "emphasizes named tiers and platform categories. Use both: Mermaid for architecture",
+        "storytelling, Stacktower for dependency density and DR prioritization stats.",
+        "",
         "![Platform deploy tiers — app domains resting on shared platforms](platform-deploy.svg)",
         "",
-        "Regenerate the diagram with `task architecture:diagram` (requires [Stacktower](https://github.com/stacktower-io/stacktower)).",
+        "Regenerate with `task architecture:diagram` (requires [Stacktower](https://github.com/stacktower-io/stacktower)).",
         "",
         "## Load-bearing platforms",
         "",
@@ -511,7 +693,9 @@ def render_markdown(
         [
             "## Artifacts",
             "",
-            "- `platform-deploy.svg` — collapsed deploy-tier diagram (committed)",
+            "- `platform-deploy.svg` — Stacktower load-bearing view (committed)",
+            "- `platform-tiers.mmd` — Mermaid tier model source (committed; also embedded above)",
+            "- `tier-categories.yaml` — tier labels and platform category rules",
             "- `platform-deploy.json`, `platform-operational.json`, `full-deploy.json` — generated locally by `task architecture:graph` (gitignored)",
             "",
             "```bash",
@@ -535,8 +719,15 @@ def main() -> int:
     parser.add_argument("--root", type=Path, default=ROOT, help="Repository root")
     parser.add_argument("--pattern", default=DEFAULT_KS_GLOB, help="Glob for ks.yaml files")
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR, help="Output directory")
+    parser.add_argument(
+        "--tier-config",
+        type=Path,
+        default=TIER_CONFIG_PATH,
+        help="Tier label and category config for Mermaid output",
+    )
     args = parser.parse_args()
 
+    tier_config = load_tier_config(args.tier_config)
     nodes = load_kustomizations(args.root, args.pattern)
     tiers = compute_tiers(nodes)
     deploy = deploy_edges(nodes)
@@ -544,6 +735,7 @@ def main() -> int:
     operational = operational_edges(nodes, metrics_targets)
     dependents = reverse_counts(deploy)
     platforms = {node_id for node_id in nodes if is_platform(node_id, dependents)}
+    mermaid_tiers = generate_mermaid_tiers(nodes, tiers, deploy, dependents, platforms, tier_config)
 
     collapsed_nodes, collapsed_edges = collapse_domains(nodes, deploy, platforms)
     collapsed_with_meta = [
@@ -561,6 +753,7 @@ def main() -> int:
     ]
 
     out_dir = args.out_dir
+    (out_dir / "platform-tiers.mmd").write_text(mermaid_tiers)
     write_json(
         out_dir / "platform-deploy.json",
         stacktower_graph(collapsed_with_meta, collapsed_edges),
@@ -592,7 +785,16 @@ def main() -> int:
         ),
     )
     (out_dir / "README.md").write_text(
-        render_markdown(nodes, tiers, deploy, operational, metrics_targets, platforms, out_dir)
+        render_markdown(
+            nodes,
+            tiers,
+            deploy,
+            operational,
+            metrics_targets,
+            platforms,
+            out_dir,
+            mermaid_tiers,
+        )
     )
 
     print(f"Wrote architecture artifacts to {out_dir}")
