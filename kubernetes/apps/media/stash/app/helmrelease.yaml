@@ -16,6 +16,11 @@ spec:
       stash:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: stash
+          glance/name: Stash
+          glance/icon: mdi:filmstrip-box
+          glance/category: media
+          glance/url: https://stash.kite-harmonic.ts.net
         containers:
           stash:
             image:

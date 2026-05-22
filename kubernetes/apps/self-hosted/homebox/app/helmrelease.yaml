@@ -16,6 +16,11 @@ spec:
       homebox:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: homebox
+          glance/name: Homebox
+          glance/icon: mdi:home-analytics
+          glance/category: self-hosted
+          glance/url: https://homebox.kite-harmonic.ts.net
 
         initContainers:
           init-db:

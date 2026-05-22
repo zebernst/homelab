@@ -16,6 +16,11 @@ spec:
       tautulli:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: tautulli
+          glance/name: Tautulli
+          glance/icon: si:plex
+          glance/category: media
+          glance/url: https://tautulli.zebernst.dev
         containers:
           tautulli:
             image:

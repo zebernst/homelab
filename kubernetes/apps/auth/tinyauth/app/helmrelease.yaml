@@ -16,6 +16,11 @@ spec:
       tinyauth:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: tinyauth
+          glance/name: Tinyauth
+          glance/icon: mdi:shield-account
+          glance/category: auth
+          glance/url: https://auth.zebernst.dev
 
         containers:
           tinyauth:

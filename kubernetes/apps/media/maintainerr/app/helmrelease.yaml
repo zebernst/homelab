@@ -16,6 +16,11 @@ spec:
       maintainerr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: maintainerr
+          glance/name: Maintainerr
+          glance/icon: mdi:broom
+          glance/category: media
+          glance/url: https://maintainerr.kite-harmonic.ts.net
         containers:
           maintainerr:
             image:

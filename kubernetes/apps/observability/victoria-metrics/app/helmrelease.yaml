@@ -74,6 +74,9 @@ spec:
       useManagedConfig: true
       spec:
         externalURL: https://alertmanager.zebernst.dev
+        podMetadata:
+          annotations:
+            glance/hide: "true"
         storage:
           volumeClaimTemplate:
             spec:
@@ -113,6 +116,13 @@ spec:
         retentionPeriod: "14d"
         replicaCount: 1
         priorityClassName: control-plane-critical
+        podMetadata:
+          annotations:
+            glance/id: victoria-metrics
+            glance/name: VictoriaMetrics
+            glance/icon: si:victoriametrics
+            glance/url: https://victoria-metrics.zebernst.dev
+            glance/category: observability
         extraArgs:
           search.maxQueryDuration: 120s
         resources:

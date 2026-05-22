@@ -16,6 +16,11 @@ spec:
       paperless-ai:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: paperless-ai
+          glance/name: Paperless AI
+          glance/icon: si:openai
+          glance/category: ai
+          glance/url: https://paperless-ai.internal
         containers:
           app:
             image:

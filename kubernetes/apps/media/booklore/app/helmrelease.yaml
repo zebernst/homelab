@@ -14,6 +14,12 @@ spec:
   values:
     controllers:
       booklore:
+        annotations:
+          glance/id: booklore
+          glance/name: Booklore
+          glance/icon: mdi:book-open-variant
+          glance/category: media
+          glance/url: https://booklore.zebernst.dev
         containers:
           booklore:
             image:

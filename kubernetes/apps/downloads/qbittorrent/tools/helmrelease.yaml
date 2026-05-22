@@ -17,6 +17,8 @@ spec:
   values:
     controllers:
       tagging:
+        annotations:
+          glance/hide: "true"
         type: cronjob
         cronjob: &cronJobSpec
           schedule: "@hourly"
@@ -75,6 +77,8 @@ spec:
         pod:
           restartPolicy: OnFailure
       orphaned:
+        annotations:
+          glance/hide: "true"
         type: cronjob
         cronjob:
           <<: *cronJobSpec

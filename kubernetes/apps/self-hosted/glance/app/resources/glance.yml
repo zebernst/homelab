@@ -112,7 +112,7 @@ pages:
 
       - size: full
         widgets:
-          - title: Apps
+          - title: Media
             type: extension
             url: http://localhost:8080/extension/apps
             allow-potentially-dangerous-html: true
@@ -120,4 +120,71 @@ pages:
             parameters:
               show-if: |
                 namespace != "kube-system" and
-                ("glance/hide" not in annotations || annotations["glance/hide"] != "true")
+                ("glance/hide" not in annotations || annotations["glance/hide"] != "true") and
+                annotations["glance/category"] == "media"
+
+          - title: Downloads
+            type: extension
+            url: http://localhost:8080/extension/apps
+            allow-potentially-dangerous-html: true
+            cache: 1s
+            parameters:
+              show-if: |
+                namespace != "kube-system" and
+                ("glance/hide" not in annotations || annotations["glance/hide"] != "true") and
+                annotations["glance/category"] == "downloads"
+
+          - title: Self-Hosted
+            type: extension
+            url: http://localhost:8080/extension/apps
+            allow-potentially-dangerous-html: true
+            cache: 1s
+            parameters:
+              show-if: |
+                namespace != "kube-system" and
+                ("glance/hide" not in annotations || annotations["glance/hide"] != "true") and
+                annotations["glance/category"] == "self-hosted"
+
+          - title: AI
+            type: extension
+            url: http://localhost:8080/extension/apps
+            allow-potentially-dangerous-html: true
+            cache: 1s
+            parameters:
+              show-if: |
+                namespace != "kube-system" and
+                ("glance/hide" not in annotations || annotations["glance/hide"] != "true") and
+                annotations["glance/category"] == "ai"
+
+          - title: Auth
+            type: extension
+            url: http://localhost:8080/extension/apps
+            allow-potentially-dangerous-html: true
+            cache: 1s
+            parameters:
+              show-if: |
+                namespace != "kube-system" and
+                ("glance/hide" not in annotations || annotations["glance/hide"] != "true") and
+                annotations["glance/category"] == "auth"
+
+          - title: Games
+            type: extension
+            url: http://localhost:8080/extension/apps
+            allow-potentially-dangerous-html: true
+            cache: 1s
+            parameters:
+              show-if: |
+                namespace != "kube-system" and
+                ("glance/hide" not in annotations || annotations["glance/hide"] != "true") and
+                annotations["glance/category"] == "games"
+
+          - title: Observability
+            type: extension
+            url: http://localhost:8080/extension/apps
+            allow-potentially-dangerous-html: true
+            cache: 1s
+            parameters:
+              show-if: |
+                namespace != "kube-system" and
+                ("glance/hide" not in annotations || annotations["glance/hide"] != "true") and
+                annotations["glance/category"] == "observability"

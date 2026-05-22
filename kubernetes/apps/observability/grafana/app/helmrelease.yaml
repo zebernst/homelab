@@ -365,6 +365,12 @@ spec:
       - victoriametrics-logs-datasource
     serviceMonitor:
       enabled: true
+    podAnnotations:
+      glance/id: grafana
+      glance/name: Grafana
+      glance/icon: si:grafana
+      glance/url: https://grafana.kite-harmonic.ts.net
+      glance/category: observability
     ingress:
       enabled: true
       ingressClassName: tailscale

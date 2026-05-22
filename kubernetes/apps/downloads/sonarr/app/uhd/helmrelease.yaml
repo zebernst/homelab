@@ -16,6 +16,11 @@ spec:
       sonarr-uhd:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: sonarr-uhd
+          glance/name: Sonarr UHD
+          glance/icon: si:sonarr
+          glance/category: downloads
+          glance/url: https://sonarr-uhd.kite-harmonic.ts.net
         initContainers:
           init-db:
             image:

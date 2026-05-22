@@ -19,6 +19,7 @@ spec:
       omegabrr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/hide: "true"
         containers:
           omegabrr:
             image:

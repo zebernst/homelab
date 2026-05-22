@@ -14,6 +14,12 @@ spec:
   values:
     controllers:
       atuin:
+        annotations:
+          glance/id: atuin
+          glance/name: Atuin
+          glance/icon: mdi:history
+          glance/category: self-hosted
+          glance/url: https://atuin.kite-harmonic.ts.net
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
