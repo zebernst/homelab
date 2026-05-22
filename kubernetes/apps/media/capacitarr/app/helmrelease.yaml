@@ -16,6 +16,11 @@ spec:
       capacitarr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: capacitarr
+          glance/name: Capacitarr
+          glance/icon: si:sonarr
+          glance/category: media
+          glance/url: https://capacitarr.zebernst.dev
         containers:
           capacitarr:
             image:

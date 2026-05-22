@@ -16,6 +16,11 @@ spec:
       it-tools:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: it-tools
+          glance/name: IT-Tools
+          glance/icon: mdi:tools
+          glance/category: self-hosted
+          glance/url: https://it-tools.kite-harmonic.ts.net
         containers:
           it-tools:
             image:

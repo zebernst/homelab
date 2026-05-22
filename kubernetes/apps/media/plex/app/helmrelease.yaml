@@ -19,6 +19,11 @@ spec:
       plex:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: plex
+          glance/name: Plex
+          glance/icon: si:plex
+          glance/category: media
+          glance/url: https://plex.zebernst.dev
         containers:
           plex:
             image:

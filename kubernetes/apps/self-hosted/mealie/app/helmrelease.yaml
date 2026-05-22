@@ -16,6 +16,11 @@ spec:
       mealie:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: mealie
+          glance/name: Mealie
+          glance/icon: si:mealie
+          glance/category: self-hosted
+          glance/url: https://mealie.kite-harmonic.ts.net
 
         initContainers:
           init-db:

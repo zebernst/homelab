@@ -1,0 +1,424 @@
+# Canonical glance-k8s annotation registry for homelab workloads.
+# Categories align with Glance Homelab page widgets (namespace-oriented UX).
+
+categories:
+  - media
+  - downloads
+  - self-hosted
+  - ai
+  - auth
+  - games
+  - observability
+
+multi_route:
+  - auth/pocket-id
+  - ai/ollama
+  - downloads/qui
+  - media/tautulli
+  - media/plex
+  - self-hosted/mealie
+  - observability/victoria-metrics
+
+app_template:
+  # AI
+  - file: kubernetes/apps/ai/paperless-ai/app/helmrelease.yaml
+    controller: paperless-ai
+    id: paperless-ai
+    name: Paperless AI
+    icon: si:openai
+    url: https://paperless-ai.internal
+    category: ai
+
+  # AUTH
+  - file: kubernetes/apps/auth/pocket-id/app/helmrelease.yaml
+    controller: pocket-id
+    id: pocket-id
+    name: Pocket ID
+    icon: si:keycloak
+    url: https://id.zebernst.dev
+    category: auth
+
+  - file: kubernetes/apps/auth/tinyauth/app/helmrelease.yaml
+    controller: tinyauth
+    id: tinyauth
+    name: Tinyauth
+    icon: mdi:shield-account
+    url: https://auth.zebernst.dev
+    category: auth
+
+  # DOWNLOADS
+  - file: kubernetes/apps/downloads/autobrr/app/helmrelease.yaml
+    controller: autobrr
+    id: autobrr
+    name: Autobrr
+    icon: mdi:robot
+    url: https://autobrr.kite-harmonic.ts.net
+    category: downloads
+
+  - file: kubernetes/apps/downloads/bazarr/hd/helmrelease.yaml
+    controller: bazarr
+    id: bazarr-hd
+    name: Bazarr HD
+    icon: si:bazarr
+    url: https://bazarr.kite-harmonic.ts.net
+    category: downloads
+
+  - file: kubernetes/apps/downloads/bazarr/uhd/helmrelease.yaml
+    controller: bazarr-uhd
+    id: bazarr-uhd
+    name: Bazarr UHD
+    icon: si:bazarr
+    url: https://bazarr-uhd.kite-harmonic.ts.net
+    category: downloads
+
+  - file: kubernetes/apps/downloads/lidarr/app/helmrelease.yaml
+    controller: lidarr
+    id: lidarr
+    name: Lidarr
+    icon: si:lidarr
+    url: https://lidarr.kite-harmonic.ts.net
+    category: downloads
+
+  - file: kubernetes/apps/downloads/openbooks/app/helmrelease.yaml
+    controller: openbooks
+    id: openbooks
+    name: OpenBooks
+    icon: mdi:book-search
+    url: https://openbooks.kite-harmonic.ts.net
+    category: downloads
+
+  - file: kubernetes/apps/downloads/prowlarr/app/helmrelease.yaml
+    controller: prowlarr
+    id: prowlarr
+    name: Prowlarr
+    icon: si:prowlarr
+    url: https://prowlarr.kite-harmonic.ts.net
+    category: downloads
+
+  - file: kubernetes/apps/downloads/qbittorrent/app/helmrelease.yaml
+    controller: qbittorrent
+    id: qbittorrent
+    name: qBittorrent
+    icon: si:qbittorrent
+    url: https://qbittorrent.kite-harmonic.ts.net
+    category: downloads
+
+  - file: kubernetes/apps/downloads/qui/app/helmrelease.yaml
+    controller: qui
+    id: qui
+    name: Qui
+    icon: si:qbittorrent
+    url: https://qui.zebernst.dev
+    category: downloads
+
+  - file: kubernetes/apps/downloads/radarr/app/hd/helmrelease.yaml
+    controller: radarr
+    id: radarr-hd
+    name: Radarr HD
+    icon: si:radarr
+    url: https://radarr.kite-harmonic.ts.net
+    category: downloads
+
+  - file: kubernetes/apps/downloads/radarr/app/uhd/helmrelease.yaml
+    controller: radarr-uhd
+    id: radarr-uhd
+    name: Radarr UHD
+    icon: si:radarr
+    url: https://radarr-uhd.kite-harmonic.ts.net
+    category: downloads
+
+  - file: kubernetes/apps/downloads/sonarr/app/hd/helmrelease.yaml
+    controller: sonarr
+    id: sonarr-hd
+    name: Sonarr HD
+    icon: si:sonarr
+    url: https://sonarr.kite-harmonic.ts.net
+    category: downloads
+
+  - file: kubernetes/apps/downloads/sonarr/app/uhd/helmrelease.yaml
+    controller: sonarr-uhd
+    id: sonarr-uhd
+    name: Sonarr UHD
+    icon: si:sonarr
+    url: https://sonarr-uhd.kite-harmonic.ts.net
+    category: downloads
+
+  - file: kubernetes/apps/downloads/whisparr/app/helmrelease.yaml
+    controller: whisparr
+    id: whisparr
+    name: Whisparr
+    icon: si:sonarr
+    url: https://whisparr.kite-harmonic.ts.net
+    category: downloads
+
+  # GAMES
+  - file: kubernetes/apps/games/minecraft/router/app/helmrelease.yaml
+    controller: mc-router
+    id: minecraft
+    name: Minecraft
+    icon: si:minecraft
+    url: https://worldmap.zebernst.dev
+    category: games
+
+  - file: kubernetes/apps/games/minecraft/bluemap/app/helmrelease.yaml
+    controller: bluemap
+    id: bluemap
+    name: BlueMap
+    icon: si:minecraft
+    parent: minecraft
+    category: games
+
+  - file: kubernetes/apps/games/minecraft/vanilla/app/helmrelease.yaml
+    controller: vanilla
+    id: minecraft-vanilla
+    name: Minecraft Vanilla
+    icon: si:minecraft
+    parent: minecraft
+    category: games
+
+  - file: kubernetes/apps/games/minecraft/atm10/app/helmrelease.yaml
+    controller: atm10
+    id: minecraft-atm10
+    name: Minecraft ATM10
+    icon: si:minecraft
+    parent: minecraft
+    category: games
+
+  - file: kubernetes/apps/games/minecraft/atmons/app/helmrelease.yaml
+    controller: atmons
+    id: minecraft-atmons
+    name: Minecraft ATMons
+    icon: si:minecraft
+    parent: minecraft
+    category: games
+
+  # MEDIA
+  - file: kubernetes/apps/media/agregarr/app/helmrelease.yaml
+    controller: agregarr
+    id: agregarr
+    name: Agregarr
+    icon: si:sonarr
+    url: https://agregarr.zebernst.dev
+    category: media
+
+  - file: kubernetes/apps/media/booklore/app/helmrelease.yaml
+    controller: booklore
+    id: booklore
+    name: Booklore
+    icon: mdi:book-open-variant
+    url: https://booklore.zebernst.dev
+    category: media
+
+  - file: kubernetes/apps/media/capacitarr/app/helmrelease.yaml
+    controller: capacitarr
+    id: capacitarr
+    name: Capacitarr
+    icon: si:sonarr
+    url: https://capacitarr.zebernst.dev
+    category: media
+
+  - file: kubernetes/apps/media/maintainerr/app/helmrelease.yaml
+    controller: maintainerr
+    id: maintainerr
+    name: Maintainerr
+    icon: mdi:broom
+    url: https://maintainerr.kite-harmonic.ts.net
+    category: media
+
+  - file: kubernetes/apps/media/plex/app/helmrelease.yaml
+    controller: plex
+    id: plex
+    name: Plex
+    icon: si:plex
+    url: https://plex.zebernst.dev
+    category: media
+
+  - file: kubernetes/apps/media/seerr/app/helmrelease.yaml
+    controller: seerr
+    id: seerr
+    name: Seerr
+    icon: mdi:movie-open
+    url: https://requests.zebernst.dev
+    category: media
+
+  - file: kubernetes/apps/media/shelfmark/app/helmrelease.yaml
+    controller: shelfmark
+    id: shelfmark
+    name: Shelfmark
+    icon: mdi:bookmark
+    url: https://shelfmark.zebernst.dev
+    category: media
+
+  - file: kubernetes/apps/media/stash/app/helmrelease.yaml
+    controller: stash
+    id: stash
+    name: Stash
+    icon: mdi:filmstrip-box
+    url: https://stash.kite-harmonic.ts.net
+    category: media
+
+  - file: kubernetes/apps/media/steam/app/helmrelease.yaml
+    controller: steam
+    id: steam
+    name: Steam Headless
+    icon: si:steam
+    url: https://steam.kite-harmonic.ts.net
+    category: media
+
+  - file: kubernetes/apps/media/tautulli/app/helmrelease.yaml
+    controller: tautulli
+    id: tautulli
+    name: Tautulli
+    icon: si:plex
+    url: https://tautulli.zebernst.dev
+    category: media
+
+  - file: kubernetes/apps/media/wizarr/app/helmrelease.yaml
+    controller: wizarr
+    id: wizarr
+    name: Wizarr
+    icon: mdi:account-plus
+    url: https://join.zebernst.dev
+    category: media
+
+  # OBSERVABILITY
+  - file: kubernetes/apps/observability/gatus/app/helmrelease.yaml
+    controller: gatus
+    id: gatus
+    name: Gatus
+    icon: mdi:heart-pulse
+    url: https://status.zebernst.dev
+    category: observability
+
+  - file: kubernetes/apps/observability/karma/app/helmrelease.yaml
+    controller: karma
+    id: karma
+    name: Karma
+    icon: mdi:alert-circle
+    url: https://karma.kite-harmonic.ts.net
+    category: observability
+
+  - file: kubernetes/apps/observability/kromgo/app/helmrelease.yaml
+    controller: kromgo
+    id: kromgo
+    name: Kromgo
+    icon: mdi:message-text
+    url: https://kromgo.zebernst.dev
+    category: observability
+
+  # SELF-HOSTED
+  - file: kubernetes/apps/self-hosted/atuin/app/helmrelease.yaml
+    controller: atuin
+    id: atuin
+    name: Atuin
+    icon: mdi:history
+    url: https://atuin.kite-harmonic.ts.net
+    category: self-hosted
+
+  - file: kubernetes/apps/self-hosted/dawarich/app/helmrelease.yaml
+    controller: dawarich
+    id: dawarich
+    name: Dawarich
+    icon: mdi:map-marker-path
+    url: https://timeline.zebernst.dev
+    category: self-hosted
+
+  - file: kubernetes/apps/self-hosted/glance/app/helmrelease.yaml
+    controller: glance
+    id: glance
+    name: Glance
+    icon: di:glance
+    url: https://glance.zebernst.dev
+    category: self-hosted
+
+  - file: kubernetes/apps/self-hosted/homebox/app/helmrelease.yaml
+    controller: homebox
+    id: homebox
+    name: Homebox
+    icon: mdi:home-analytics
+    url: https://homebox.kite-harmonic.ts.net
+    category: self-hosted
+
+  - file: kubernetes/apps/self-hosted/it-tools/app/helmrelease.yaml
+    controller: it-tools
+    id: it-tools
+    name: IT-Tools
+    icon: mdi:tools
+    url: https://it-tools.kite-harmonic.ts.net
+    category: self-hosted
+
+  - file: kubernetes/apps/self-hosted/mealie/app/helmrelease.yaml
+    controller: mealie
+    id: mealie
+    name: Mealie
+    icon: si:mealie
+    url: https://mealie.kite-harmonic.ts.net
+    category: self-hosted
+
+  - file: kubernetes/apps/self-hosted/nocodb/app/helmrelease.yaml
+    controller: nocodb
+    id: nocodb
+    name: NocoDB
+    icon: si:nocodb
+    url: https://nocodb.kite-harmonic.ts.net
+    category: self-hosted
+
+  - file: kubernetes/apps/self-hosted/nominatim/app/helmrelease.yaml
+    controller: nominatim
+    id: nominatim
+    name: Nominatim
+    icon: mdi:map-search
+    url: https://nominatim.zebernst.dev
+    category: self-hosted
+
+  - file: kubernetes/apps/self-hosted/paperless/app/helmrelease.yaml
+    controller: paperless
+    id: paperless
+    name: Paperless-ngx
+    icon: si:readthedocs
+    url: https://paperless.kite-harmonic.ts.net
+    category: self-hosted
+
+  - file: kubernetes/apps/self-hosted/radicale/app/helmrelease.yaml
+    controller: radicale
+    id: radicale
+    name: Radicale
+    icon: mdi:calendar-sync
+    url: https://radicale.kite-harmonic.ts.net
+    category: self-hosted
+
+  - file: kubernetes/apps/self-hosted/rxresume/app/helmrelease.yaml
+    controller: rxresume
+    id: rxresume
+    name: RxResume
+    icon: mdi:file-document
+    url: https://rxresume.zebernst.dev
+    category: self-hosted
+
+  - file: kubernetes/apps/self-hosted/unwrapped/app/helmrelease.yaml
+    controller: unwrapped
+    id: unwrapped
+    name: Unwrapped
+    icon: mdi:gift
+    url: https://unwrapped.zebernst.dev
+    category: self-hosted
+
+hide:
+  - file: kubernetes/apps/network/echo-server/app/helmrelease.yaml
+    controller: echo-server
+
+  - file: kubernetes/apps/downloads/flaresolverr/app/helmrelease.yaml
+    controller: flaresolverr
+
+  - file: kubernetes/apps/downloads/qbittorrent/tools/helmrelease.yaml
+    controller: tagging
+
+  - file: kubernetes/apps/downloads/cross-seed/app/helmrelease.yaml
+    controller: cross-seed
+
+  - file: kubernetes/apps/downloads/omegabrr/app/helmrelease.yaml
+    controller: omegabrr
+
+upstream_values:
+  # Upstream chart annotations are applied manually in HelmRelease values to preserve formatting.
+  # See ollama, open-webui, grafana, hajimari, victoria-metrics, victoria-logs helmreleases.

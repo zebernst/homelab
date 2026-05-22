@@ -16,6 +16,11 @@ spec:
       bazarr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: bazarr-hd
+          glance/name: Bazarr HD
+          glance/icon: si:bazarr
+          glance/category: downloads
+          glance/url: https://bazarr.kite-harmonic.ts.net
         containers:
           bazarr:
             image:

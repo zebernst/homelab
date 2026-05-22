@@ -16,6 +16,11 @@ spec:
       radarr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: radarr-hd
+          glance/name: Radarr HD
+          glance/icon: si:radarr
+          glance/category: downloads
+          glance/url: https://radarr.kite-harmonic.ts.net
         initContainers:
           init-db:
             image:

@@ -16,6 +16,11 @@ spec:
       bazarr-uhd:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: bazarr-uhd
+          glance/name: Bazarr UHD
+          glance/icon: si:bazarr
+          glance/category: downloads
+          glance/url: https://bazarr-uhd.kite-harmonic.ts.net
         containers:
           bazarr-uhd:
             image:

@@ -17,6 +17,11 @@ spec:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: minecraft-atm10
+          glance/name: Minecraft ATM10
+          glance/icon: si:minecraft
+          glance/category: games
+          glance/parent: minecraft
         initContainers:
           init-bluemap-config:
             image:

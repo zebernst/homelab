@@ -16,6 +16,11 @@ spec:
       radicale:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: radicale
+          glance/name: Radicale
+          glance/icon: mdi:calendar-sync
+          glance/category: self-hosted
+          glance/url: https://radicale.kite-harmonic.ts.net
 
         containers:
           radicale:

@@ -14,10 +14,15 @@ spec:
   values:
     controllers:
       kromgo:
-        replicas: 2
-        strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: kromgo
+          glance/name: Kromgo
+          glance/icon: mdi:message-text
+          glance/category: observability
+          glance/url: https://kromgo.zebernst.dev
+        replicas: 2
+        strategy: RollingUpdate
         containers:
           kromgo:
             image:

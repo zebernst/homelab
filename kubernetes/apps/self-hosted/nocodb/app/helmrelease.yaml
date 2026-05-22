@@ -16,6 +16,11 @@ spec:
       nocodb:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: nocodb
+          glance/name: NocoDB
+          glance/icon: si:nocodb
+          glance/category: self-hosted
+          glance/url: https://nocodb.kite-harmonic.ts.net
         initContainers:
           init-db:
             image:

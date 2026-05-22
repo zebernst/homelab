@@ -16,6 +16,11 @@ spec:
       pocket-id:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: pocket-id
+          glance/name: Pocket ID
+          glance/icon: si:keycloak
+          glance/category: auth
+          glance/url: https://id.zebernst.dev
 
         initContainers:
           init-db:
