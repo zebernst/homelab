@@ -1,0 +1,154 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: nominatim
+spec:
+  hostnames:
+    - nominatim.zebernst.dev
+  parentRefs:
+    - name: internal
+      namespace: kube-system
+      sectionName: https
+  rules:
+    # Static UI assets under /ui
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /ui
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: nominatim-ui
+          port: 80
+
+    # Landing page
+    - matches:
+        - path:
+            type: Exact
+            value: /
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /ui/search.html
+            statusCode: 302
+
+    # API: /search with explicit non-HTML formats
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /search
+          queryParams:
+            - type: Exact
+              name: format
+              value: json
+        - path:
+            type: PathPrefix
+            value: /search
+          queryParams:
+            - type: Exact
+              name: format
+              value: jsonv2
+        - path:
+            type: PathPrefix
+            value: /search
+          queryParams:
+            - type: Exact
+              name: format
+              value: xml
+        - path:
+            type: PathPrefix
+            value: /search
+          queryParams:
+            - type: Exact
+              name: format
+              value: geojson
+        - path:
+            type: PathPrefix
+            value: /search
+          queryParams:
+            - type: Exact
+              name: format
+              value: geocodejson
+        - path:
+            type: PathPrefix
+            value: /search
+          queryParams:
+            - type: Exact
+              name: format
+              value: debug
+      backendRefs:
+        - name: nominatim
+          port: 80
+
+    # UI: /search without format or with format=html
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /search
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /ui/search.html
+            statusCode: 302
+
+    # UI: html format on supported endpoints
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /reverse
+          queryParams:
+            - type: Exact
+              name: format
+              value: html
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /ui/reverse.html
+            statusCode: 302
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /status
+          queryParams:
+            - type: Exact
+              name: format
+              value: html
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /ui/status.html
+            statusCode: 302
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /details
+          queryParams:
+            - type: Exact
+              name: format
+              value: html
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /ui/details.html
+            statusCode: 302
+
+    # API catch-all
+    - backendRefs:
+        - name: nominatim
+          port: 80
