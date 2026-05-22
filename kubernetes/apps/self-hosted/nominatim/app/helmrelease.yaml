@@ -27,6 +27,9 @@ spec:
         replication:
           type: Role
           rules:
+            - apiGroups: ["apps"]
+              resources: ["deployments"]
+              verbs: ["get"]
             - apiGroups: [""]
               resources: ["pods"]
               verbs: ["get", "list"]
@@ -137,15 +140,15 @@ spec:
             image:
               repository: registry.k8s.io/kubectl
               tag: v1.34.5
-            command: ["/bin/sh", "-ec"]
+            command: ["/kubectl"]
             args:
-              - |
-                POD_NAME="$(kubectl get pods -l app.kubernetes.io/name=nominatim -o jsonpath='{.items[0].metadata.name}')"
-                if [ -z "$${POD_NAME}" ]; then
-                  echo "nominatim pod not found"
-                  exit 1
-                fi
-                kubectl exec "$${POD_NAME}" -c nominatim -- /bin/bash /scripts/maintain-regions.sh
+              - exec
+              - deploy/nominatim
+              - -c
+              - nominatim
+              - --
+              - /bin/bash
+              - /scripts/maintain-regions.sh
             resources:
               requests:
                 cpu: 10m
