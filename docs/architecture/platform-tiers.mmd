@@ -1,88 +1,118 @@
 flowchart BT
 
-  subgraph vt_0["Substrate — Cluster-critical infrastructure the cluster cannot run without"]
+  %% Deploy-order edges from Flux Kustomization.spec.dependsOn
+
+  subgraph vt0["Substrate — Cluster-critical infrastructure the cluster cannot run without"]
     subgraph g_substrate["Substrate"]
       subgraph p_substrate_substrate_cluster["cluster"]
         cilium["cilium"]
+        class cilium substrate
         snapshot_controller["snapshot-controller"]
+        class snapshot_controller substrate
       end
       subgraph p_substrate_substrate_gitops["gitops"]
         cluster_meta["cluster-meta"]
+        class cluster_meta substrate
       end
     end
   end
 
-  subgraph vt_1["Infrastructure — Platform providers and observability at the same tier, distinct groups"]
+  subgraph vt1["Infrastructure — Platform providers and observability at the same tier, distinct groups"]
     subgraph g_platform["Platform — Secrets, networking, auth, storage, security, gitops"]
       subgraph p_platform_platform_auth["auth"]
         pocket_id["pocket-id"]
+        class pocket_id platform
       end
       subgraph p_platform_platform_data_operators["data operators"]
         cloudnative_pg["cloudnative-pg"]
+        class cloudnative_pg platform
       end
       subgraph p_platform_platform_gitops["gitops"]
         cluster_apps["cluster-apps"]
+        class cluster_apps platform
         flux_operator["flux-operator"]
+        class flux_operator platform
       end
       subgraph p_platform_platform_networking["networking"]
         ingress_nginx_external["ingress-nginx-external"]
+        class ingress_nginx_external platform
         ingress_nginx_internal["ingress-nginx-internal"]
+        class ingress_nginx_internal platform
       end
       subgraph p_platform_platform_secrets["secrets"]
         cluster_secrets["cluster-secrets"]
+        class cluster_secrets platform
         external_secrets["external-secrets"]
-        onepassword["onepassword"]
+        class external_secrets platform
+        onepassword["onepassword<br/>(53 deps)"]
+        class onepassword platform
       end
       subgraph p_platform_platform_security["security"]
         cert_manager["cert-manager"]
+        class cert_manager platform
         cert_manager_issuers["cert-manager-issuers"]
+        class cert_manager_issuers platform
       end
       subgraph p_platform_platform_storage["storage"]
         rook_ceph["rook-ceph"]
-        rook_ceph_cluster["rook-ceph-cluster"]
-        volsync["volsync"]
+        class rook_ceph platform
+        rook_ceph_cluster["rook-ceph-cluster<br/>(42 deps)"]
+        class rook_ceph_cluster platform
+        volsync["volsync<br/>(30 deps)"]
+        class volsync platform
       end
     end
     subgraph g_observability["Observability — Metrics, logs, alerting, synthetic checks — not an infra provider"]
       subgraph p_observability_observability_metrics["metrics"]
-        victoria_logs["victoria-logs"]
         victoria_metrics["victoria-metrics"]
-        victoria_metrics_operator["victoria-metrics-operator"]
+        class victoria_metrics observability
+        victoria_metrics_operator["victoria-metrics-operator<br/>(5 deps)"]
+        class victoria_metrics_operator observability
       end
     end
   end
 
-  subgraph vt_2["Shared services — Data and AI at the same tier, distinct groups"]
+  subgraph vt2["Shared services — Data and AI at the same tier, distinct groups"]
     subgraph g_data["Data — Shared databases and cache clusters"]
       subgraph p_data_data_cache["cache"]
         dragonfly_cluster["dragonfly-cluster"]
+        class dragonfly_cluster data
       end
       subgraph p_data_data_postgres["postgres"]
-        cloudnative_pg_cluster["cloudnative-pg-cluster"]
+        cloudnative_pg_cluster["cloudnative-pg-cluster<br/>(20 deps)"]
+        class cloudnative_pg_cluster data
       end
     end
     subgraph g_ai["AI — Shared inference infrastructure"]
       subgraph p_ai_ai_inference["inference"]
         ollama["ollama"]
+        class ollama ai
       end
     end
   end
 
-  subgraph vt_3["Workloads — User-facing applications"]
+  subgraph vt3["Workloads — User-facing applications"]
     subgraph g_workloads["Workloads"]
-      subgraph p_workloads_workloads["applications"]
-        workloads_ai["AI<br/>(4 ks)"]
-        workloads_downloads["Downloads<br/>(20 ks)"]
-        workloads_fission["Fission<br/>(3 ks)"]
-        workloads_games["Games<br/>(5 ks)"]
-        workloads_kube_system["Kube System<br/>(13 ks)"]
-        workloads_media["Media<br/>(11 ks)"]
-        workloads_self_hosted["Self-Hosted<br/>(13 ks)"]
-        workloads_system_upgrade["System Upgrade<br/>(2 ks)"]
-      end
+      wl_ai["AI<br/>(4 ks)"]
+      class wl_ai workloads
+      wl_downloads["Downloads<br/>(20 ks)"]
+      class wl_downloads workloads
+      wl_fission["Fission<br/>(3 ks)"]
+      class wl_fission workloads
+      wl_games["Games<br/>(5 ks)"]
+      class wl_games workloads
+      wl_kube_system["Kube System<br/>(13 ks)"]
+      class wl_kube_system workloads
+      wl_media["Media<br/>(11 ks)"]
+      class wl_media workloads
+      wl_self_hosted["Self-Hosted<br/>(13 ks)"]
+      class wl_self_hosted workloads
+      wl_system_upgrade["System Upgrade<br/>(2 ks)"]
+      class wl_system_upgrade workloads
     end
   end
 
+  %% dependsOn edges (dependent --> dependency)
   cert_manager_issuers --> cert_manager
   cloudnative_pg --> onepassword
   cloudnative_pg_cluster --> cloudnative_pg
@@ -96,32 +126,39 @@ flowchart BT
   pocket_id --> volsync
   rook_ceph --> snapshot_controller
   rook_ceph_cluster --> rook_ceph
-  victoria_logs --> rook_ceph_cluster
   victoria_metrics --> onepassword
   victoria_metrics --> rook_ceph_cluster
   victoria_metrics --> victoria_metrics_operator
-  workloads_ai --> ollama
-  workloads_ai --> onepassword
-  workloads_ai --> rook_ceph_cluster
-  workloads_ai --> victoria_metrics
-  workloads_ai --> volsync
-  workloads_downloads --> cloudnative_pg_cluster
-  workloads_downloads --> onepassword
-  workloads_downloads --> rook_ceph_cluster
-  workloads_downloads --> volsync
-  workloads_fission --> onepassword
-  workloads_fission --> rook_ceph_cluster
-  workloads_games --> onepassword
-  workloads_games --> rook_ceph_cluster
-  workloads_games --> volsync
-  workloads_media --> cloudnative_pg_cluster
-  workloads_media --> onepassword
-  workloads_media --> rook_ceph_cluster
-  workloads_media --> volsync
-  workloads_self_hosted --> cloudnative_pg
-  workloads_self_hosted --> cloudnative_pg_cluster
-  workloads_self_hosted --> cluster_secrets
-  workloads_self_hosted --> dragonfly_cluster
-  workloads_self_hosted --> onepassword
-  workloads_self_hosted --> rook_ceph_cluster
-  workloads_self_hosted --> volsync
+  wl_ai --> ollama
+  wl_ai --> onepassword
+  wl_ai --> rook_ceph_cluster
+  wl_ai --> victoria_metrics
+  wl_ai --> volsync
+  wl_downloads --> cloudnative_pg_cluster
+  wl_downloads --> onepassword
+  wl_downloads --> rook_ceph_cluster
+  wl_downloads --> volsync
+  wl_fission --> onepassword
+  wl_fission --> rook_ceph_cluster
+  wl_games --> onepassword
+  wl_games --> rook_ceph_cluster
+  wl_games --> volsync
+  wl_media --> cloudnative_pg_cluster
+  wl_media --> onepassword
+  wl_media --> rook_ceph_cluster
+  wl_media --> volsync
+  wl_self_hosted --> cloudnative_pg
+  wl_self_hosted --> cloudnative_pg_cluster
+  wl_self_hosted --> cluster_secrets
+  wl_self_hosted --> dragonfly_cluster
+  wl_self_hosted --> onepassword
+  wl_self_hosted --> rook_ceph_cluster
+  wl_self_hosted --> volsync
+
+  %% group styling
+  classDef substrate fill:#1f2937,stroke:#9ca3af,color:#f9fafb
+  classDef platform fill:#1e3a5f,stroke:#60a5fa,color:#eff6ff
+  classDef observability fill:#312e81,stroke:#a78bfa,color:#f5f3ff
+  classDef data fill:#14532d,stroke:#4ade80,color:#f0fdf4
+  classDef ai fill:#581c87,stroke:#d8b4fe,color:#faf5ff
+  classDef workloads fill:#422006,stroke:#fbbf24,color:#fffbeb
