@@ -10,7 +10,7 @@ spec:
       rules:
         - alert: VmalertDown
           expr: |
-            absent(up{job=~".*vmalert.*"})
+            absent(up{instance=~".*:8880"})
           for: 5m
           labels:
             severity: critical

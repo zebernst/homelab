@@ -105,8 +105,9 @@ spec:
         resources:
           requests:
             cpu: 100m
+            memory: 256Mi
           limits:
-            memory: 512Mi
+            memory: 1Gi
 
     vmsingle:
       enabled: true
@@ -156,6 +157,12 @@ spec:
           cluster: jupiter
         datasource:
           url: http://vmauth-vmks.observability.svc.cluster.local:8427
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
 
     vmauth:
       enabled: true
