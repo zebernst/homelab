@@ -99,6 +99,8 @@ spec:
         externalLabels:
           cluster: jupiter
         extraArgs:
+          promscrape.dropOriginalLabels: "true"
+          promscrape.maxScrapeSize: 50MiB
           promscrape.streamParse: "true"
         resources:
           requests:
@@ -110,7 +112,7 @@ spec:
     vmsingle:
       enabled: true
       spec:
-        retentionPeriod: "14d"
+        retentionPeriod: "90d"
         replicaCount: 1
         priorityClassName: control-plane-critical
         extraArgs:
@@ -126,7 +128,7 @@ spec:
           storageClassName: ceph-block
           resources:
             requests:
-              storage: 30Gi
+              storage: 50Gi
       ingress:
         enabled: true
         ingressClassName: tailscale
@@ -230,13 +232,35 @@ spec:
       service:
         selector:
           k8s-app: kube-scheduler
+      vmScrape:
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              port: http-metrics
+              scheme: https
+              tlsConfig:
+                insecureSkipVerify: true
 
     kubeControllerManager:
       service:
         selector:
           k8s-app: kube-controller-manager
+      vmScrape:
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              port: http-metrics
+              scheme: https
+              tlsConfig:
+                insecureSkipVerify: true
 
     kubeEtcd:
       service:
         selector:
-          k8s-app: kube-controller-manager
+          component: kube-apiserver
+        port: 2381
+        targetPort: 2381
+      vmScrape:
+        spec:
+          endpoints:
+            - scheme: http

@@ -30,11 +30,12 @@ spec:
     crds:
       plain: true
       cleanup:
-        enabled: true
+        enabled: false
     admissionWebhooks:
       policy: Ignore
     operator:
       disable_prometheus_converter: false
+      enable_converter_ownership: true
     serviceMonitor:
       enabled: true
       vm: true
