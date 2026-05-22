@@ -1,0 +1,95 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app scanopy
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      scanopy:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: 17
+            envFrom: &envFrom
+              - secretRef:
+                  name: scanopy-secret
+        containers:
+          scanopy:
+            image:
+              repository: ghcr.io/scanopy/scanopy/server
+              tag: v0.16.2@sha256:85bfa17727b87ffec60d17783821a77e6b028f7443ecc4b1a08798cc13c8fc58
+            env:
+              TZ: America/Chicago
+              SCANOPY_LOG_LEVEL: info
+              SCANOPY_PUBLIC_URL: https://scanopy.zebernst.dev
+              SCANOPY_WEB_EXTERNAL_PATH: /app/static
+              SCANOPY_USE_SECURE_SESSION_COOKIES: "true"
+              SCANOPY_DISABLE_PASSWORD_LOGIN: "true"
+              SCANOPY_SMTP_RELAY: smtp-relay.network.svc.cluster.local:25
+              SCANOPY_SMTP_EMAIL: scanopy@zebernst.dev
+            envFrom: *envFrom
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/health
+                    port: &port 60072
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probe
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 512Mi
+    defaultPodOptions:
+      priorityClassName: internal-only
+      dnsConfig:
+        options:
+          - { name: ndots, value: "1" }
+    service:
+      scanopy:
+        controller: *app
+        ports:
+          http:
+            port: *port
+    route:
+      scanopy:
+        hostnames:
+          - scanopy.zebernst.dev
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
+    persistence:
+      data:
+        existingClaim: *app
+        globalMounts:
+          - path: /data
+      oidc:
+        type: secret
+        name: scanopy-secret
+        globalMounts:
+          - path: /oidc.toml
+            subPath: oidc.toml
+            readOnly: true
