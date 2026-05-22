@@ -4,99 +4,97 @@ Generated from Flux `Kustomization.spec.dependsOn`, declared Kustomize component
 and Helm/manifest monitoring configuration (ServiceMonitor, PodMonitor, VMServiceScrape).
 Deploy edges define reconcile ordering; operational edges are separate edge kinds.
 
-## Platform tier model
+## Architecture layers
 
-Conceptual deploy tiers and platform categories, generated from Flux `dependsOn`.
-Workloads at tier 4+ collapse into per-namespace groups. Customize labels and grouping
-in [`tier-categories.yaml`](tier-categories.yaml).
+Conceptual layers aligned with [PriorityClass](../../kubernetes/apps/kube-system/priority-class/)
+semantics — substrate first, then platform services, shared data, AI, and workloads.
+Customize layer and partition rules in [`tier-categories.yaml`](tier-categories.yaml).
+
+| Layer | Role | PriorityClass analog |
+| --- | --- | --- |
+| Substrate | Cluster cannot run without | `system-node-critical`, core CNI/DNS |
+| Platform | Shared services workloads need | `network-critical`, `control-plane-critical`, `storage-critical` |
+| Data | Shared databases and cache | `database-critical` |
+| AI | Shared inference | — |
+| Workloads | User-facing apps | `external-facing`, `media-core`, `best-effort` |
 
 ```mermaid
 flowchart BT
 
-  subgraph tier_0["Tier 0 — Cluster substrate"]
-    subgraph t0_platform_cluster["platform/cluster"]
+  subgraph layer_substrate["Substrate — Cluster-critical infrastructure the cluster cannot run without"]
+    subgraph substrate_substrate_cluster["cluster"]
+      cilium["cilium"]
       snapshot_controller["snapshot-controller"]
     end
-    subgraph t0_platform_gitops["platform/gitops"]
+    subgraph substrate_substrate_gitops["gitops"]
       cluster_meta["cluster-meta"]
     end
-    subgraph t0_platform_networking["platform/networking"]
-      cilium["cilium"]
+  end
+
+  subgraph layer_platform["Platform — Shared services that workloads depend on"]
+    subgraph platform_platform_auth["auth"]
+      pocket_id["pocket-id"]
     end
-    subgraph t0_platform_observability["platform/observability"]
+    subgraph platform_platform_data_operators["data operators"]
+      cloudnative_pg["cloudnative-pg"]
+    end
+    subgraph platform_platform_gitops["gitops"]
+      cluster_apps["cluster-apps"]
+      flux_operator["flux-operator"]
+    end
+    subgraph platform_platform_networking["networking"]
+      ingress_nginx_external["ingress-nginx-external"]
+      ingress_nginx_internal["ingress-nginx-internal"]
+    end
+    subgraph platform_platform_observability["observability"]
+      victoria_logs["victoria-logs"]
+      victoria_metrics["victoria-metrics"]
       victoria_metrics_operator["victoria-metrics-operator"]
     end
-    subgraph t0_platform_secrets["platform/secrets"]
+    subgraph platform_platform_secrets["secrets"]
+      cluster_secrets["cluster-secrets"]
       external_secrets["external-secrets"]
+      onepassword["onepassword"]
     end
-    subgraph t0_platform_security["platform/security"]
+    subgraph platform_platform_security["security"]
       cert_manager["cert-manager"]
+      cert_manager_issuers["cert-manager-issuers"]
     end
-    subgraph t0_platform_storage["platform/storage"]
+    subgraph platform_platform_storage["storage"]
+      rook_ceph["rook-ceph"]
+      rook_ceph_cluster["rook-ceph-cluster"]
       volsync["volsync"]
     end
   end
 
-  subgraph tier_1["Tier 1 — Platform services"]
-    subgraph t1_platform_gitops["platform/gitops"]
-      cluster_apps["cluster-apps"]
+  subgraph layer_data["Data — Shared databases and cache clusters"]
+    subgraph data_data_cache["cache"]
+      dragonfly_cluster["dragonfly-cluster"]
     end
-    subgraph t1_platform_secrets["platform/secrets"]
-      onepassword["onepassword"]
-    end
-    subgraph t1_platform_security["platform/security"]
-      cert_manager_issuers["cert-manager-issuers"]
-    end
-    subgraph t1_platform_storage["platform/storage"]
-      rook_ceph["rook-ceph"]
-    end
-  end
-
-  subgraph tier_2["Tier 2 — Shared infrastructure"]
-    subgraph t2_platform_data["platform/data"]
-      cloudnative_pg["cloudnative-pg"]
-    end
-    subgraph t2_platform_secrets["platform/secrets"]
-      cluster_secrets["cluster-secrets"]
-    end
-    subgraph t2_platform_storage["platform/storage"]
-      rook_ceph_cluster["rook-ceph-cluster"]
-    end
-  end
-
-  subgraph tier_3["Tier 3 — Data and edge platforms"]
-    subgraph t3_platform_data["platform/data"]
+    subgraph data_data_postgres["postgres"]
       cloudnative_pg_cluster["cloudnative-pg-cluster"]
     end
-    subgraph t3_platform_networking["platform/networking"]
-      ingress_nginx_external["ingress-nginx-external"]
-      ingress_nginx_internal["ingress-nginx-internal"]
-    end
-    subgraph t3_platform_observability["platform/observability"]
-      victoria_logs["victoria-logs"]
-      victoria_metrics["victoria-metrics"]
-    end
-    subgraph t3_workloads["workloads"]
-      bluemap["bluemap"]
+  end
+
+  subgraph layer_ai["AI — Shared inference infrastructure"]
+    subgraph ai_ai_inference["inference"]
       ollama["ollama"]
-      qbittorrent["qbittorrent"]
     end
   end
 
-  subgraph tier_4["Tier 4 — Workloads"]
-    subgraph t4_workloads["workloads"]
+  subgraph layer_workloads["Workloads — User-facing applications"]
+    subgraph workloads_workloads["applications"]
       workloads_ai["AI<br/>(4 ks)"]
-      workloads_auth["Auth<br/>(2 ks)"]
-      workloads_downloads["Downloads<br/>(11 ks)"]
-      workloads_fission["Fission<br/>(1 ks)"]
-      workloads_games["Games<br/>(3 ks)"]
-      workloads_media["Media<br/>(2 ks)"]
-      workloads_observability["Observability<br/>(3 ks)"]
-      workloads_self_hosted["Self-Hosted<br/>(9 ks)"]
+      workloads_downloads["Downloads<br/>(20 ks)"]
+      workloads_fission["Fission<br/>(3 ks)"]
+      workloads_games["Games<br/>(5 ks)"]
+      workloads_kube_system["Kube System<br/>(13 ks)"]
+      workloads_media["Media<br/>(11 ks)"]
+      workloads_self_hosted["Self-Hosted<br/>(13 ks)"]
+      workloads_system_upgrade["System Upgrade<br/>(2 ks)"]
     end
   end
 
-  bluemap --> rook_ceph_cluster
   cert_manager_issuers --> cert_manager
   cloudnative_pg --> onepassword
   cloudnative_pg_cluster --> cloudnative_pg
@@ -104,9 +102,10 @@ flowchart BT
   cluster_secrets --> onepassword
   ollama --> rook_ceph_cluster
   onepassword --> external_secrets
-  qbittorrent --> onepassword
-  qbittorrent --> rook_ceph_cluster
-  qbittorrent --> volsync
+  pocket_id --> cloudnative_pg_cluster
+  pocket_id --> onepassword
+  pocket_id --> rook_ceph_cluster
+  pocket_id --> volsync
   rook_ceph --> snapshot_controller
   rook_ceph_cluster --> rook_ceph
   victoria_logs --> rook_ceph_cluster
@@ -118,17 +117,12 @@ flowchart BT
   workloads_ai --> rook_ceph_cluster
   workloads_ai --> victoria_metrics
   workloads_ai --> volsync
-  workloads_auth --> cloudnative_pg_cluster
-  workloads_auth --> onepassword
-  workloads_auth --> rook_ceph_cluster
-  workloads_auth --> volsync
   workloads_downloads --> cloudnative_pg_cluster
   workloads_downloads --> onepassword
-  workloads_downloads --> qbittorrent
   workloads_downloads --> rook_ceph_cluster
   workloads_downloads --> volsync
   workloads_fission --> onepassword
-  workloads_games --> bluemap
+  workloads_fission --> rook_ceph_cluster
   workloads_games --> onepassword
   workloads_games --> rook_ceph_cluster
   workloads_games --> volsync
@@ -136,14 +130,10 @@ flowchart BT
   workloads_media --> onepassword
   workloads_media --> rook_ceph_cluster
   workloads_media --> volsync
-  workloads_observability --> cloudnative_pg_cluster
-  workloads_observability --> onepassword
-  workloads_observability --> victoria_logs
-  workloads_observability --> victoria_metrics
-  workloads_observability --> victoria_metrics_operator
   workloads_self_hosted --> cloudnative_pg
   workloads_self_hosted --> cloudnative_pg_cluster
   workloads_self_hosted --> cluster_secrets
+  workloads_self_hosted --> dragonfly_cluster
   workloads_self_hosted --> onepassword
   workloads_self_hosted --> rook_ceph_cluster
   workloads_self_hosted --> volsync
@@ -152,7 +142,7 @@ flowchart BT
 ## Load-bearing view (Stacktower)
 
 Stacktower emphasizes fan-out and load-bearing platforms; the Mermaid chart above
-emphasizes named tiers and platform categories. Use both: Mermaid for architecture
+emphasizes named layers and platform partitions. Use both: Mermaid for architecture
 storytelling, Stacktower for dependency density and DR prioritization stats.
 
 ![Platform deploy tiers — app domains resting on shared platforms](platform-deploy.svg)
@@ -161,29 +151,116 @@ Regenerate with `task architecture:diagram` (requires [Stacktower](https://githu
 
 ## Load-bearing platforms
 
-| Platform | Direct dependents | Tier |
-| --- | ---: | ---: |
-| `external-secrets/onepassword` | 53 | 1 |
-| `rook-ceph/rook-ceph-cluster` | 42 | 2 |
-| `volsync-system/volsync` | 30 | 0 |
-| `database/cloudnative-pg-cluster` | 20 | 3 |
-| `observability/victoria-metrics-operator` | 5 | 0 |
-| `cert-manager/cert-manager` | 3 | 0 |
-| `cert-manager/cert-manager-issuers` | 3 | 1 |
-| `observability/victoria-metrics` | 2 | 3 |
-| `database/cloudnative-pg` | 2 | 2 |
-| `kube-system/cilium` | 2 | 0 |
-| `kube-system/snapshot-controller` | 2 | 0 |
-| `observability/victoria-logs` | 2 | 3 |
-| `external-secrets/external-secrets` | 1 | 0 |
-| `rook-ceph/rook-ceph` | 1 | 1 |
-| `flux-system/cluster-meta` | 1 | 0 |
+| Platform | Direct dependents | Layer | dependsOn depth |
+| --- | ---: | --- | ---: |
+| `external-secrets/onepassword` | 53 | Platform | 1 |
+| `rook-ceph/rook-ceph-cluster` | 42 | Platform | 2 |
+| `volsync-system/volsync` | 30 | Platform | 0 |
+| `database/cloudnative-pg-cluster` | 20 | Data | 3 |
+| `observability/victoria-metrics-operator` | 5 | Platform | 0 |
+| `cert-manager/cert-manager` | 3 | Platform | 0 |
+| `cert-manager/cert-manager-issuers` | 3 | Platform | 1 |
+| `observability/victoria-metrics` | 2 | Platform | 3 |
+| `database/cloudnative-pg` | 2 | Platform | 2 |
+| `kube-system/cilium` | 2 | Substrate | 0 |
+| `kube-system/snapshot-controller` | 2 | Substrate | 0 |
+| `observability/victoria-logs` | 2 | Platform | 3 |
+| `external-secrets/external-secrets` | 1 | Platform | 0 |
+| `rook-ceph/rook-ceph` | 1 | Platform | 1 |
+| `flux-system/cluster-meta` | 1 | Substrate | 0 |
 
-## Deploy tiers
+## Kustomizations by layer
 
-Tier 0 sits at the bottom of the reconcile stack; higher tiers rest on lower ones.
+### Substrate
 
-### Tier 0
+- `flux-system/cluster-meta` (1 dependents)
+- `kube-system/cilium` (2 dependents)
+- `kube-system/coredns`
+- `kube-system/kubelet-csr-approver`
+- `kube-system/metrics-server`
+- `kube-system/node-feature-discovery` (1 dependents)
+- `kube-system/reloader`
+- `kube-system/snapshot-controller` (2 dependents)
+- `kube-system/spegel`
+
+### Platform
+
+- `auth/pocket-id` (1 dependents)
+- `auth/tinyauth`
+- `cert-manager/cert-manager` (3 dependents)
+- `cert-manager/cert-manager-issuers` (3 dependents)
+- `cert-manager/cert-manager-tls` (2 dependents)
+- `cert-manager/step-issuer` (2 dependents)
+- `cert-manager/step-issuer-issuers` (1 dependents)
+- `cert-manager/step-issuer-tls`
+- `database/cloudnative-pg` (2 dependents)
+- `database/dragonfly` (1 dependents)
+- `external-secrets/cluster-secrets` (1 dependents)
+- `external-secrets/external-secrets` (1 dependents)
+- `external-secrets/onepassword` (53 dependents)
+- `flux-system/cluster-apps`
+- `flux-system/flux-instance`
+- `flux-system/flux-operator` (1 dependents)
+- `kube-system/cilium-config` (1 dependents)
+- `kube-system/cilium-gateway`
+- `kube-system/synology-csi-driver`
+- `network/cloudflared`
+- `network/echo-server`
+- `network/external-dns-cloudflare`
+- `network/external-dns-unifi`
+- `network/ingress-nginx-external`
+- `network/ingress-nginx-internal`
+- `network/smtp-relay` (1 dependents)
+- `network/tailscale-operator`
+- `observability/blackbox-exporter` (1 dependents)
+- `observability/blackbox-exporter-probes`
+- `observability/fluent-bit`
+- `observability/gatus`
+- `observability/grafana`
+- `observability/karma`
+- `observability/keda`
+- `observability/kromgo`
+- `observability/silence-operator` (1 dependents)
+- `observability/silence-operator-silences`
+- `observability/smartctl-exporter`
+- `observability/snmp-exporter`
+- `observability/unpoller`
+- `observability/victoria-logs` (2 dependents)
+- `observability/victoria-metrics` (2 dependents)
+- `observability/victoria-metrics-operator` (5 dependents)
+- `observability/vmalert`
+- `openebs-system/openebs` (1 dependents)
+- `rook-ceph/rook-ceph` (1 dependents)
+- `rook-ceph/rook-ceph-cluster` (42 dependents)
+- `volsync-system/volsync` (30 dependents)
+
+### Data
+
+- `database/cloudnative-pg-cluster` (20 dependents)
+- `database/dragonfly-cluster` (2 dependents)
+- `database/mariadb` (1 dependents)
+
+### AI
+
+- `ai/ollama` (3 dependents)
+
+### Workloads
+
+- AI: 4 Kustomizations
+- Downloads: 20 Kustomizations
+- Fission: 3 Kustomizations
+- Games: 5 Kustomizations
+- Kube System: 13 Kustomizations
+- Media: 11 Kustomizations
+- Self-Hosted: 13 Kustomizations
+- System Upgrade: 2 Kustomizations
+
+
+## Flux dependsOn depth
+
+Longest-path depth from `dependsOn` — useful for reconcile ordering, distinct from layer assignment.
+
+### Depth 0
 
 - `cert-manager/cert-manager` (3 dependents)
 - `database/dragonfly` (1 dependents)
@@ -201,7 +278,7 @@ Tier 0 sits at the bottom of the reconcile stack; higher tiers rest on lower one
 - `system-upgrade/tuppr` (1 dependents)
 - `volsync-system/volsync` (30 dependents)
 
-### Tier 1
+### Depth 1
 
 - `cert-manager/cert-manager-issuers` (3 dependents)
 - `cert-manager/step-issuer` (2 dependents)
@@ -213,7 +290,7 @@ Tier 0 sits at the bottom of the reconcile stack; higher tiers rest on lower one
 - `observability/blackbox-exporter` (1 dependents)
 - `rook-ceph/rook-ceph` (1 dependents)
 
-### Tier 2
+### Depth 2
 
 - `cert-manager/cert-manager-tls` (2 dependents)
 - `cert-manager/step-issuer-issuers` (1 dependents)
@@ -222,7 +299,7 @@ Tier 0 sits at the bottom of the reconcile stack; higher tiers rest on lower one
 - `network/smtp-relay` (1 dependents)
 - `rook-ceph/rook-ceph-cluster` (42 dependents)
 
-### Tier 3
+### Depth 3
 
 - `ai/ollama` (3 dependents)
 - `database/cloudnative-pg-cluster` (20 dependents)
@@ -234,7 +311,7 @@ Tier 0 sits at the bottom of the reconcile stack; higher tiers rest on lower one
 - `observability/victoria-metrics` (2 dependents)
 - `self-hosted/nominatim` (1 dependents)
 
-### Tier 4
+### Depth 4
 
 - `ai/holmesgpt` (1 dependents)
 - `auth/pocket-id` (1 dependents)
@@ -357,8 +434,8 @@ Edge direction: `observability/victoria-metrics-operator` → workload.
 ## Artifacts
 
 - `platform-deploy.svg` — Stacktower load-bearing view (committed)
-- `platform-tiers.mmd` — Mermaid tier model source (committed; also embedded above)
-- `tier-categories.yaml` — tier labels and platform category rules
+- `platform-tiers.mmd` — Mermaid layer model source (committed; also embedded above)
+- `tier-categories.yaml` — layer and partition assignment rules
 - `platform-deploy.json`, `platform-operational.json`, `full-deploy.json` — generated locally by `task architecture:graph` (gitignored)
 
 ```bash
