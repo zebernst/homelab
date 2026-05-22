@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_KS_GLOB = "kubernetes/**/ks.yaml"
 DEFAULT_OUT_DIR = ROOT / "docs" / "architecture"
 LAYER_CONFIG_PATH = DEFAULT_OUT_DIR / "tier-categories.yaml"
-WORKLOAD_LAYER = "workloads"
+WORKLOAD_GROUP = "workloads"
 
 # Upstream platforms included in collapsed views even when fan-out is smaller.
 UPSTREAM_PLATFORMS = {
@@ -417,27 +417,57 @@ def node_matches(match: dict, node_id: str, namespace: str) -> bool:
 
 
 def assign_partition(node_id: str, namespace: str, config: dict) -> tuple[str, str, str]:
-    default = ("workloads", "workloads", "applications")
+    default = (WORKLOAD_GROUP, "workloads", "applications")
     for partition in config.get("partitions", []):
         if partition.get("default"):
-            default = (partition["layer"], partition["id"], partition.get("label", partition["id"]))
+            group = partition.get("group", partition.get("layer", WORKLOAD_GROUP))
+            default = (group, partition["id"], partition.get("label", partition["id"]))
             continue
         if node_matches(partition.get("match", {}), node_id, namespace):
-            return partition["layer"], partition["id"], partition.get("label", partition["id"])
+            group = partition.get("group", partition.get("layer", WORKLOAD_GROUP))
+            return group, partition["id"], partition.get("label", partition["id"])
     return default
 
 
-def layer_definitions(config: dict) -> list[tuple[str, dict]]:
-    raw = config.get("layers", {})
-    items = [(name, meta or {}) for name, meta in raw.items()]
-    return sorted(items, key=lambda item: item[1].get("order", 999))
+def vertical_tier_definitions(config: dict) -> list[tuple[int, dict]]:
+    raw = config.get("vertical_tiers", {})
+    if raw:
+        return sorted(((int(key), meta or {}) for key, meta in raw.items()), key=lambda item: item[0])
+    # Legacy fallback from layers.order
+    layers = config.get("layers", {})
+    return sorted(
+        ((meta.get("order", index), {"label": meta.get("label", name), "groups": [name]}) for index, (name, meta) in enumerate(layers.items())),
+        key=lambda item: item[0],
+    )
 
 
-def workload_layer_name(config: dict) -> str:
-    for name, meta in config.get("layers", {}).items():
+def groups_for_vertical_tier(config: dict, vertical_tier: int) -> list[str]:
+    for tier_num, meta in vertical_tier_definitions(config):
+        if tier_num == vertical_tier:
+            return meta.get("groups", [])
+    return []
+
+
+def group_definitions(config: dict) -> dict[str, dict]:
+    groups = dict(config.get("groups", {}))
+    if groups:
+        return groups
+    return dict(config.get("layers", {}))
+
+
+def workload_group_name(config: dict) -> str:
+    for name, meta in group_definitions(config).items():
         if meta and meta.get("collapse_by_namespace"):
             return name
-    return WORKLOAD_LAYER
+    return WORKLOAD_GROUP
+
+
+def vertical_tier_for_group(config: dict, group: str) -> int:
+    for tier_num, meta in vertical_tier_definitions(config):
+        if group in meta.get("groups", []):
+            return tier_num
+    group_meta = group_definitions(config).get(group, {})
+    return int(group_meta.get("vertical_tier", group_meta.get("order", 999)))
 
 
 def always_show_nodes(config: dict) -> set[str]:
@@ -446,12 +476,12 @@ def always_show_nodes(config: dict) -> set[str]:
 
 def should_show_explicit(
     node_id: str,
-    layer: str,
+    group: str,
     dependents: Counter[str],
     config: dict,
     platforms: set[str],
 ) -> bool:
-    if layer == workload_layer_name(config):
+    if group == workload_group_name(config):
         return False
     if node_id in always_show_nodes(config):
         return True
@@ -468,10 +498,10 @@ def diagram_node_id(
     platforms: set[str],
 ) -> str | None:
     ks = nodes[node_id]
-    layer, _, _ = assign_partition(node_id, ks.namespace, config)
-    if layer == workload_layer_name(config):
+    group, _, _ = assign_partition(node_id, ks.namespace, config)
+    if group == workload_group_name(config):
         return mermaid_slug(f"workloads_{ks.namespace}")
-    if should_show_explicit(node_id, layer, dependents, config, platforms):
+    if should_show_explicit(node_id, group, dependents, config, platforms):
         return mermaid_slug(node_id.split("/")[-1])
     return None
 
@@ -514,20 +544,21 @@ def generate_mermaid_layers(
     node_meta: dict[str, tuple[str, str, str]] = {}
     for diagram_id, source_ids in visible_sources.items():
         source_id = source_ids[0]
-        layer, partition_id, partition_label = assign_partition(
+        group, partition_id, partition_label = assign_partition(
             source_id,
             nodes[source_id].namespace,
             config,
         )
         if diagram_id.startswith("workloads_"):
-            layer = workload_layer_name(config)
+            group = workload_group_name(config)
             partition_id = "workloads"
             partition_label = "applications"
-        node_meta[diagram_id] = (layer, partition_id, partition_label)
+        node_meta[diagram_id] = (group, partition_id, partition_label)
 
-    grouped: dict[str, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
-    for diagram_id, (layer, partition_id, _) in node_meta.items():
-        grouped[layer][partition_id].append(diagram_id)
+    grouped: dict[int, dict[str, dict[str, list[str]]]] = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    for diagram_id, (group, partition_id, _) in node_meta.items():
+        vertical_tier = vertical_tier_for_group(config, group)
+        grouped[vertical_tier][group][partition_id].append(diagram_id)
 
     edge_set: set[tuple[str, str]] = set()
     for edge in deploy:
@@ -541,24 +572,41 @@ def generate_mermaid_layers(
         partition["id"]: partition.get("label", partition["id"])
         for partition in config.get("partitions", [])
     }
+    group_meta = group_definitions(config)
 
-    for layer_name, layer_meta in layer_definitions(config):
-        if layer_name not in grouped:
+    for vertical_tier, vt_meta in vertical_tier_definitions(config):
+        tier_groups = grouped.get(vertical_tier)
+        if not tier_groups:
             continue
-        layer_label = layer_meta.get("label", layer_name.title())
-        layer_desc = layer_meta.get("description", "")
-        layer_title = f"{layer_label} — {layer_desc}" if layer_desc else layer_label
-        layer_slug = mermaid_slug(f"layer_{layer_name}")
-        lines.append(f'  subgraph {layer_slug}["{layer_title}"]')
 
-        for partition_id in sorted(grouped[layer_name], key=lambda pid: partition_labels.get(pid, pid)):
-            partition_label = partition_labels.get(partition_id, partition_id)
-            partition_slug = mermaid_slug(f"{layer_name}_{partition_id}")
-            lines.append(f'    subgraph {partition_slug}["{partition_label}"]')
+        vt_label = vt_meta.get("label", f"Tier {vertical_tier}")
+        vt_desc = vt_meta.get("description", "")
+        vt_title = f"{vt_label} — {vt_desc}" if vt_desc else vt_label
+        vt_slug = mermaid_slug(f"vt_{vertical_tier}")
+        lines.append(f'  subgraph {vt_slug}["{vt_title}"]')
 
-            for diagram_id in sorted(grouped[layer_name][partition_id]):
-                node_label = diagram_node_label(diagram_id, nodes, visible_sources[diagram_id])
-                lines.append(f"      {diagram_id}[\"{node_label}\"]")
+        for group_name in groups_for_vertical_tier(config, vertical_tier):
+            partitions = tier_groups.get(group_name)
+            if not partitions:
+                continue
+
+            g_meta = group_meta.get(group_name, {})
+            g_label = g_meta.get("label", group_name.title())
+            g_desc = g_meta.get("description", "")
+            g_title = f"{g_label} — {g_desc}" if g_desc else g_label
+            g_slug = mermaid_slug(f"g_{group_name}")
+            lines.append(f'    subgraph {g_slug}["{g_title}"]')
+
+            for partition_id in sorted(partitions, key=lambda pid: partition_labels.get(pid, pid)):
+                partition_label = partition_labels.get(partition_id, partition_id)
+                p_slug = mermaid_slug(f"p_{group_name}_{partition_id}")
+                lines.append(f'      subgraph {p_slug}["{partition_label}"]')
+
+                for diagram_id in sorted(partitions[partition_id]):
+                    node_label = diagram_node_label(diagram_id, nodes, visible_sources[diagram_id])
+                    lines.append(f"        {diagram_id}[\"{node_label}\"]")
+
+                lines.append("      end")
 
             lines.append("    end")
 
@@ -594,12 +642,12 @@ def render_markdown(
     layer_config: dict,
 ) -> str:
     dependents = reverse_counts(deploy)
-    by_layer: dict[str, list[str]] = defaultdict(list)
+    by_group: dict[str, list[str]] = defaultdict(list)
     for node_id in nodes:
-        layer, _, _ = assign_partition(node_id, nodes[node_id].namespace, layer_config)
-        by_layer[layer].append(node_id)
+        group, _, _ = assign_partition(node_id, nodes[node_id].namespace, layer_config)
+        by_group[group].append(node_id)
 
-    layer_meta = dict(layer_definitions(layer_config))
+    group_meta = group_definitions(layer_config)
 
     lines = [
         "# Cluster Platform Architecture",
@@ -608,19 +656,18 @@ def render_markdown(
         "and Helm/manifest monitoring configuration (ServiceMonitor, PodMonitor, VMServiceScrape).",
         "Deploy edges define reconcile ordering; operational edges are separate edge kinds.",
         "",
-        "## Architecture layers",
+        "## Architecture model",
         "",
-        "Conceptual layers aligned with [PriorityClass](../../kubernetes/apps/kube-system/priority-class/)",
-        "semantics — substrate first, then platform services, shared data, AI, and workloads.",
-        "Customize layer and partition rules in [`tier-categories.yaml`](tier-categories.yaml).",
+        "The diagram uses **vertical tiers** (chart position) and **groups** (conceptual class).",
+        "Platform and observability share a tier; data and AI share a tier — each remains a",
+        "distinct group. Customize in [`tier-categories.yaml`](tier-categories.yaml).",
         "",
-        "| Layer | Role | PriorityClass analog |",
+        "| Vertical tier | Groups | Role |",
         "| --- | --- | --- |",
-        "| Substrate | Cluster cannot run without | `system-node-critical`, core CNI/DNS |",
-        "| Platform | Shared services workloads need | `network-critical`, `control-plane-critical`, `storage-critical` |",
-        "| Data | Shared databases and cache | `database-critical` |",
-        "| AI | Shared inference | — |",
-        "| Workloads | User-facing apps | `external-facing`, `media-core`, `best-effort` |",
+        "| Substrate | Substrate | Cluster cannot run without (Cilium, cluster-meta) |",
+        "| Infrastructure | Platform · Observability | Infra providers vs metrics/logs/checks |",
+        "| Shared services | Data · AI | Shared Postgres/Redis and inference (Ollama) |",
+        "| Workloads | Workloads | User-facing apps (media, downloads, games, …) |",
         "",
         "```mermaid",
         mermaid_tiers.rstrip(),
@@ -629,7 +676,7 @@ def render_markdown(
         "## Load-bearing view (Stacktower)",
         "",
         "Stacktower emphasizes fan-out and load-bearing platforms; the Mermaid chart above",
-        "emphasizes named layers and platform partitions. Use both: Mermaid for architecture",
+        "emphasizes vertical tiers and logical groups. Use both: Mermaid for architecture",
         "storytelling, Stacktower for dependency density and DR prioritization stats.",
         "",
         "![Platform deploy tiers — app domains resting on shared platforms](platform-deploy.svg)",
@@ -638,50 +685,52 @@ def render_markdown(
         "",
         "## Load-bearing platforms",
         "",
-        "| Platform | Direct dependents | Layer | dependsOn depth |",
+        "| Platform | Direct dependents | Group | dependsOn depth |",
         "| --- | ---: | --- | ---: |",
     ]
 
     for node_id, count in dependents.most_common():
         if not is_platform(node_id, dependents):
             continue
-        layer, _, _ = assign_partition(node_id, nodes[node_id].namespace, layer_config)
-        layer_label = layer_meta.get(layer, {}).get("label", layer)
-        lines.append(f"| `{node_id}` | {count} | {layer_label} | {tiers.get(node_id, 0)} |")
+        group, _, _ = assign_partition(node_id, nodes[node_id].namespace, layer_config)
+        group_label = group_meta.get(group, {}).get("label", group)
+        lines.append(f"| `{node_id}` | {count} | {group_label} | {tiers.get(node_id, 0)} |")
 
     lines.extend(
         [
             "",
-            "## Kustomizations by layer",
+            "## Kustomizations by group",
             "",
         ]
     )
 
-    for layer_name, layer_info in layer_definitions(layer_config):
-        members = sorted(by_layer.get(layer_name, []))
-        if not members:
-            continue
-        layer_label = layer_info.get("label", layer_name.title())
-        lines.append(f"### {layer_label}")
+    for _vt, vt_meta in vertical_tier_definitions(layer_config):
+        lines.append(f"### Vertical tier: {vt_meta.get('label', '')}")
         lines.append("")
-        for node_id in members:
-            if layer_name == workload_layer_name(layer_config):
+        for group_name in vt_meta.get("groups", []):
+            members = sorted(by_group.get(group_name, []))
+            if not members:
                 continue
-            suffix = f" ({dependents[node_id]} dependents)" if dependents[node_id] else ""
-            lines.append(f"- `{node_id}`{suffix}")
-        if layer_name == workload_layer_name(layer_config):
-            counts = Counter(nodes[node_id].namespace for node_id in members)
-            for namespace, count in sorted(counts.items()):
-                label = DOMAIN_LABELS.get(namespace, namespace)
-                lines.append(f"- {label}: {count} Kustomizations")
-        lines.append("")
+            g_label = group_meta.get(group_name, {}).get("label", group_name.title())
+            lines.append(f"**{g_label}**")
+            lines.append("")
+            if group_name == workload_group_name(layer_config):
+                counts = Counter(nodes[node_id].namespace for node_id in members)
+                for namespace, count in sorted(counts.items()):
+                    label = DOMAIN_LABELS.get(namespace, namespace)
+                    lines.append(f"- {label}: {count} Kustomizations")
+            else:
+                for node_id in members:
+                    suffix = f" ({dependents[node_id]} dependents)" if dependents[node_id] else ""
+                    lines.append(f"- `{node_id}`{suffix}")
+            lines.append("")
 
     lines.extend(
         [
             "",
             "## Flux dependsOn depth",
             "",
-            "Longest-path depth from `dependsOn` — useful for reconcile ordering, distinct from layer assignment.",
+            "Longest-path depth from `dependsOn` — useful for reconcile ordering, distinct from group assignment.",
             "",
         ]
     )
@@ -759,7 +808,7 @@ def render_markdown(
             "",
             "- `platform-deploy.svg` — Stacktower load-bearing view (committed)",
             "- `platform-tiers.mmd` — Mermaid layer model source (committed; also embedded above)",
-            "- `tier-categories.yaml` — layer and partition assignment rules",
+            "- `tier-categories.yaml` — vertical tiers, groups, and partition rules",
             "- `platform-deploy.json`, `platform-operational.json`, `full-deploy.json` — generated locally by `task architecture:graph` (gitignored)",
             "",
             "```bash",

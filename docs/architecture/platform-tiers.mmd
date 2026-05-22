@@ -1,76 +1,85 @@
 flowchart BT
 
-  subgraph layer_substrate["Substrate — Cluster-critical infrastructure the cluster cannot run without"]
-    subgraph substrate_substrate_cluster["cluster"]
-      cilium["cilium"]
-      snapshot_controller["snapshot-controller"]
-    end
-    subgraph substrate_substrate_gitops["gitops"]
-      cluster_meta["cluster-meta"]
-    end
-  end
-
-  subgraph layer_platform["Platform — Shared services that workloads depend on"]
-    subgraph platform_platform_auth["auth"]
-      pocket_id["pocket-id"]
-    end
-    subgraph platform_platform_data_operators["data operators"]
-      cloudnative_pg["cloudnative-pg"]
-    end
-    subgraph platform_platform_gitops["gitops"]
-      cluster_apps["cluster-apps"]
-      flux_operator["flux-operator"]
-    end
-    subgraph platform_platform_networking["networking"]
-      ingress_nginx_external["ingress-nginx-external"]
-      ingress_nginx_internal["ingress-nginx-internal"]
-    end
-    subgraph platform_platform_observability["observability"]
-      victoria_logs["victoria-logs"]
-      victoria_metrics["victoria-metrics"]
-      victoria_metrics_operator["victoria-metrics-operator"]
-    end
-    subgraph platform_platform_secrets["secrets"]
-      cluster_secrets["cluster-secrets"]
-      external_secrets["external-secrets"]
-      onepassword["onepassword"]
-    end
-    subgraph platform_platform_security["security"]
-      cert_manager["cert-manager"]
-      cert_manager_issuers["cert-manager-issuers"]
-    end
-    subgraph platform_platform_storage["storage"]
-      rook_ceph["rook-ceph"]
-      rook_ceph_cluster["rook-ceph-cluster"]
-      volsync["volsync"]
+  subgraph vt_0["Substrate — Cluster-critical infrastructure the cluster cannot run without"]
+    subgraph g_substrate["Substrate"]
+      subgraph p_substrate_substrate_cluster["cluster"]
+        cilium["cilium"]
+        snapshot_controller["snapshot-controller"]
+      end
+      subgraph p_substrate_substrate_gitops["gitops"]
+        cluster_meta["cluster-meta"]
+      end
     end
   end
 
-  subgraph layer_data["Data — Shared databases and cache clusters"]
-    subgraph data_data_cache["cache"]
-      dragonfly_cluster["dragonfly-cluster"]
+  subgraph vt_1["Infrastructure — Platform providers and observability at the same tier, distinct groups"]
+    subgraph g_platform["Platform — Secrets, networking, auth, storage, security, gitops"]
+      subgraph p_platform_platform_auth["auth"]
+        pocket_id["pocket-id"]
+      end
+      subgraph p_platform_platform_data_operators["data operators"]
+        cloudnative_pg["cloudnative-pg"]
+      end
+      subgraph p_platform_platform_gitops["gitops"]
+        cluster_apps["cluster-apps"]
+        flux_operator["flux-operator"]
+      end
+      subgraph p_platform_platform_networking["networking"]
+        ingress_nginx_external["ingress-nginx-external"]
+        ingress_nginx_internal["ingress-nginx-internal"]
+      end
+      subgraph p_platform_platform_secrets["secrets"]
+        cluster_secrets["cluster-secrets"]
+        external_secrets["external-secrets"]
+        onepassword["onepassword"]
+      end
+      subgraph p_platform_platform_security["security"]
+        cert_manager["cert-manager"]
+        cert_manager_issuers["cert-manager-issuers"]
+      end
+      subgraph p_platform_platform_storage["storage"]
+        rook_ceph["rook-ceph"]
+        rook_ceph_cluster["rook-ceph-cluster"]
+        volsync["volsync"]
+      end
     end
-    subgraph data_data_postgres["postgres"]
-      cloudnative_pg_cluster["cloudnative-pg-cluster"]
+    subgraph g_observability["Observability — Metrics, logs, alerting, synthetic checks — not an infra provider"]
+      subgraph p_observability_observability_metrics["metrics"]
+        victoria_logs["victoria-logs"]
+        victoria_metrics["victoria-metrics"]
+        victoria_metrics_operator["victoria-metrics-operator"]
+      end
     end
   end
 
-  subgraph layer_ai["AI — Shared inference infrastructure"]
-    subgraph ai_ai_inference["inference"]
-      ollama["ollama"]
+  subgraph vt_2["Shared services — Data and AI at the same tier, distinct groups"]
+    subgraph g_data["Data — Shared databases and cache clusters"]
+      subgraph p_data_data_cache["cache"]
+        dragonfly_cluster["dragonfly-cluster"]
+      end
+      subgraph p_data_data_postgres["postgres"]
+        cloudnative_pg_cluster["cloudnative-pg-cluster"]
+      end
+    end
+    subgraph g_ai["AI — Shared inference infrastructure"]
+      subgraph p_ai_ai_inference["inference"]
+        ollama["ollama"]
+      end
     end
   end
 
-  subgraph layer_workloads["Workloads — User-facing applications"]
-    subgraph workloads_workloads["applications"]
-      workloads_ai["AI<br/>(4 ks)"]
-      workloads_downloads["Downloads<br/>(20 ks)"]
-      workloads_fission["Fission<br/>(3 ks)"]
-      workloads_games["Games<br/>(5 ks)"]
-      workloads_kube_system["Kube System<br/>(13 ks)"]
-      workloads_media["Media<br/>(11 ks)"]
-      workloads_self_hosted["Self-Hosted<br/>(13 ks)"]
-      workloads_system_upgrade["System Upgrade<br/>(2 ks)"]
+  subgraph vt_3["Workloads — User-facing applications"]
+    subgraph g_workloads["Workloads"]
+      subgraph p_workloads_workloads["applications"]
+        workloads_ai["AI<br/>(4 ks)"]
+        workloads_downloads["Downloads<br/>(20 ks)"]
+        workloads_fission["Fission<br/>(3 ks)"]
+        workloads_games["Games<br/>(5 ks)"]
+        workloads_kube_system["Kube System<br/>(13 ks)"]
+        workloads_media["Media<br/>(11 ks)"]
+        workloads_self_hosted["Self-Hosted<br/>(13 ks)"]
+        workloads_system_upgrade["System Upgrade<br/>(2 ks)"]
+      end
     end
   end
 

@@ -1,33 +1,46 @@
-# Architecture layers — aligned with PriorityClass semantics and DR restore order.
+# Architecture model for the generated Mermaid diagram.
 #
-# Layers are conceptual (not Flux dependsOn depth). Partitions group Kustomizations
-# within a layer. First matching partition wins.
+# vertical_tiers  — chart position (bottom to top). Multiple groups can share a tier.
+# groups          — conceptual classification (platform vs observability, data vs AI).
+# partitions      — subdivisions within a group. First matching partition wins.
 
-layers:
-  substrate:
+vertical_tiers:
+  0:
     label: Substrate
     description: Cluster-critical infrastructure the cluster cannot run without
-    order: 0
+    groups: [substrate]
+  1:
+    label: Infrastructure
+    description: Platform providers and observability at the same tier, distinct groups
+    groups: [platform, observability]
+  2:
+    label: Shared services
+    description: Data and AI at the same tier, distinct groups
+    groups: [data, ai]
+  3:
+    label: Workloads
+    description: User-facing applications
+    groups: [workloads]
+
+groups:
+  substrate:
+    label: Substrate
   platform:
     label: Platform
-    description: Shared services that workloads depend on
-    order: 1
+    description: Secrets, networking, auth, storage, security, gitops
+  observability:
+    label: Observability
+    description: Metrics, logs, alerting, synthetic checks — not an infra provider
   data:
     label: Data
     description: Shared databases and cache clusters
-    order: 2
   ai:
     label: AI
     description: Shared inference infrastructure
-    order: 3
   workloads:
     label: Workloads
-    description: User-facing applications
-    order: 4
     collapse_by_namespace: true
 
-# Kustomizations to render explicitly (non-workload layers). Others collapse into
-# namespace workload groups unless load-bearing (>= 5 direct dependents).
 always_show:
   - flux-system/cluster-meta
   - flux-system/cluster-apps
@@ -54,7 +67,7 @@ always_show:
 
 partitions:
   - id: substrate/cluster
-    layer: substrate
+    group: substrate
     label: cluster
     match:
       nodes:
@@ -68,14 +81,14 @@ partitions:
         - kube-system/kubelet-csr-approver
 
   - id: substrate/gitops
-    layer: substrate
+    group: substrate
     label: gitops
     match:
       nodes:
         - flux-system/cluster-meta
 
   - id: platform/gitops
-    layer: platform
+    group: platform
     label: gitops
     match:
       namespaces: [flux-system]
@@ -83,19 +96,19 @@ partitions:
         - flux-system/cluster-meta
 
   - id: platform/secrets
-    layer: platform
+    group: platform
     label: secrets
     match:
       namespaces: [external-secrets]
 
   - id: platform/security
-    layer: platform
+    group: platform
     label: security
     match:
       namespaces: [cert-manager]
 
   - id: platform/networking
-    layer: platform
+    group: platform
     label: networking
     match:
       namespaces: [network]
@@ -105,33 +118,52 @@ partitions:
         - kube-system/synology-csi-driver
 
   - id: platform/auth
-    layer: platform
+    group: platform
     label: auth
     match:
       namespaces: [auth]
 
-  - id: platform/observability
-    layer: platform
-    label: observability
-    match:
-      namespaces: [observability]
-
   - id: platform/storage
-    layer: platform
+    group: platform
     label: storage
     match:
       namespaces: [rook-ceph, volsync-system, openebs-system]
 
   - id: platform/data-operators
-    layer: platform
+    group: platform
     label: data operators
     match:
       nodes:
         - database/cloudnative-pg
         - database/dragonfly
 
+  - id: observability/metrics
+    group: observability
+    label: metrics
+    match:
+      nodes:
+        - observability/victoria-metrics-operator
+        - observability/victoria-metrics
+        - observability/victoria-logs
+        - observability/vmalert
+
+  - id: observability/checks
+    group: observability
+    label: checks
+    match:
+      nodes:
+        - observability/gatus
+        - observability/blackbox-exporter
+        - observability/kromgo
+
+  - id: observability/other
+    group: observability
+    label: other
+    match:
+      namespaces: [observability]
+
   - id: data/postgres
-    layer: data
+    group: data
     label: postgres
     match:
       nodes:
@@ -139,20 +171,20 @@ partitions:
         - database/mariadb
 
   - id: data/cache
-    layer: data
+    group: data
     label: cache
     match:
       nodes:
         - database/dragonfly-cluster
 
   - id: ai/inference
-    layer: ai
+    group: ai
     label: inference
     match:
       nodes:
         - ai/ollama
 
   - id: workloads
-    layer: workloads
+    group: workloads
     label: applications
     default: true

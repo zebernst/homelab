@@ -4,94 +4,102 @@ Generated from Flux `Kustomization.spec.dependsOn`, declared Kustomize component
 and Helm/manifest monitoring configuration (ServiceMonitor, PodMonitor, VMServiceScrape).
 Deploy edges define reconcile ordering; operational edges are separate edge kinds.
 
-## Architecture layers
+## Architecture model
 
-Conceptual layers aligned with [PriorityClass](../../kubernetes/apps/kube-system/priority-class/)
-semantics — substrate first, then platform services, shared data, AI, and workloads.
-Customize layer and partition rules in [`tier-categories.yaml`](tier-categories.yaml).
+The diagram uses **vertical tiers** (chart position) and **groups** (conceptual class).
+Platform and observability share a tier; data and AI share a tier — each remains a
+distinct group. Customize in [`tier-categories.yaml`](tier-categories.yaml).
 
-| Layer | Role | PriorityClass analog |
+| Vertical tier | Groups | Role |
 | --- | --- | --- |
-| Substrate | Cluster cannot run without | `system-node-critical`, core CNI/DNS |
-| Platform | Shared services workloads need | `network-critical`, `control-plane-critical`, `storage-critical` |
-| Data | Shared databases and cache | `database-critical` |
-| AI | Shared inference | — |
-| Workloads | User-facing apps | `external-facing`, `media-core`, `best-effort` |
+| Substrate | Substrate | Cluster cannot run without (Cilium, cluster-meta) |
+| Infrastructure | Platform · Observability | Infra providers vs metrics/logs/checks |
+| Shared services | Data · AI | Shared Postgres/Redis and inference (Ollama) |
+| Workloads | Workloads | User-facing apps (media, downloads, games, …) |
 
 ```mermaid
 flowchart BT
 
-  subgraph layer_substrate["Substrate — Cluster-critical infrastructure the cluster cannot run without"]
-    subgraph substrate_substrate_cluster["cluster"]
-      cilium["cilium"]
-      snapshot_controller["snapshot-controller"]
-    end
-    subgraph substrate_substrate_gitops["gitops"]
-      cluster_meta["cluster-meta"]
-    end
-  end
-
-  subgraph layer_platform["Platform — Shared services that workloads depend on"]
-    subgraph platform_platform_auth["auth"]
-      pocket_id["pocket-id"]
-    end
-    subgraph platform_platform_data_operators["data operators"]
-      cloudnative_pg["cloudnative-pg"]
-    end
-    subgraph platform_platform_gitops["gitops"]
-      cluster_apps["cluster-apps"]
-      flux_operator["flux-operator"]
-    end
-    subgraph platform_platform_networking["networking"]
-      ingress_nginx_external["ingress-nginx-external"]
-      ingress_nginx_internal["ingress-nginx-internal"]
-    end
-    subgraph platform_platform_observability["observability"]
-      victoria_logs["victoria-logs"]
-      victoria_metrics["victoria-metrics"]
-      victoria_metrics_operator["victoria-metrics-operator"]
-    end
-    subgraph platform_platform_secrets["secrets"]
-      cluster_secrets["cluster-secrets"]
-      external_secrets["external-secrets"]
-      onepassword["onepassword"]
-    end
-    subgraph platform_platform_security["security"]
-      cert_manager["cert-manager"]
-      cert_manager_issuers["cert-manager-issuers"]
-    end
-    subgraph platform_platform_storage["storage"]
-      rook_ceph["rook-ceph"]
-      rook_ceph_cluster["rook-ceph-cluster"]
-      volsync["volsync"]
+  subgraph vt_0["Substrate — Cluster-critical infrastructure the cluster cannot run without"]
+    subgraph g_substrate["Substrate"]
+      subgraph p_substrate_substrate_cluster["cluster"]
+        cilium["cilium"]
+        snapshot_controller["snapshot-controller"]
+      end
+      subgraph p_substrate_substrate_gitops["gitops"]
+        cluster_meta["cluster-meta"]
+      end
     end
   end
 
-  subgraph layer_data["Data — Shared databases and cache clusters"]
-    subgraph data_data_cache["cache"]
-      dragonfly_cluster["dragonfly-cluster"]
+  subgraph vt_1["Infrastructure — Platform providers and observability at the same tier, distinct groups"]
+    subgraph g_platform["Platform — Secrets, networking, auth, storage, security, gitops"]
+      subgraph p_platform_platform_auth["auth"]
+        pocket_id["pocket-id"]
+      end
+      subgraph p_platform_platform_data_operators["data operators"]
+        cloudnative_pg["cloudnative-pg"]
+      end
+      subgraph p_platform_platform_gitops["gitops"]
+        cluster_apps["cluster-apps"]
+        flux_operator["flux-operator"]
+      end
+      subgraph p_platform_platform_networking["networking"]
+        ingress_nginx_external["ingress-nginx-external"]
+        ingress_nginx_internal["ingress-nginx-internal"]
+      end
+      subgraph p_platform_platform_secrets["secrets"]
+        cluster_secrets["cluster-secrets"]
+        external_secrets["external-secrets"]
+        onepassword["onepassword"]
+      end
+      subgraph p_platform_platform_security["security"]
+        cert_manager["cert-manager"]
+        cert_manager_issuers["cert-manager-issuers"]
+      end
+      subgraph p_platform_platform_storage["storage"]
+        rook_ceph["rook-ceph"]
+        rook_ceph_cluster["rook-ceph-cluster"]
+        volsync["volsync"]
+      end
     end
-    subgraph data_data_postgres["postgres"]
-      cloudnative_pg_cluster["cloudnative-pg-cluster"]
+    subgraph g_observability["Observability — Metrics, logs, alerting, synthetic checks — not an infra provider"]
+      subgraph p_observability_observability_metrics["metrics"]
+        victoria_logs["victoria-logs"]
+        victoria_metrics["victoria-metrics"]
+        victoria_metrics_operator["victoria-metrics-operator"]
+      end
     end
   end
 
-  subgraph layer_ai["AI — Shared inference infrastructure"]
-    subgraph ai_ai_inference["inference"]
-      ollama["ollama"]
+  subgraph vt_2["Shared services — Data and AI at the same tier, distinct groups"]
+    subgraph g_data["Data — Shared databases and cache clusters"]
+      subgraph p_data_data_cache["cache"]
+        dragonfly_cluster["dragonfly-cluster"]
+      end
+      subgraph p_data_data_postgres["postgres"]
+        cloudnative_pg_cluster["cloudnative-pg-cluster"]
+      end
+    end
+    subgraph g_ai["AI — Shared inference infrastructure"]
+      subgraph p_ai_ai_inference["inference"]
+        ollama["ollama"]
+      end
     end
   end
 
-  subgraph layer_workloads["Workloads — User-facing applications"]
-    subgraph workloads_workloads["applications"]
-      workloads_ai["AI<br/>(4 ks)"]
-      workloads_downloads["Downloads<br/>(20 ks)"]
-      workloads_fission["Fission<br/>(3 ks)"]
-      workloads_games["Games<br/>(5 ks)"]
-      workloads_kube_system["Kube System<br/>(13 ks)"]
-      workloads_media["Media<br/>(11 ks)"]
-      workloads_self_hosted["Self-Hosted<br/>(13 ks)"]
-      workloads_system_upgrade["System Upgrade<br/>(2 ks)"]
+  subgraph vt_3["Workloads — User-facing applications"]
+    subgraph g_workloads["Workloads"]
+      subgraph p_workloads_workloads["applications"]
+        workloads_ai["AI<br/>(4 ks)"]
+        workloads_downloads["Downloads<br/>(20 ks)"]
+        workloads_fission["Fission<br/>(3 ks)"]
+        workloads_games["Games<br/>(5 ks)"]
+        workloads_kube_system["Kube System<br/>(13 ks)"]
+        workloads_media["Media<br/>(11 ks)"]
+        workloads_self_hosted["Self-Hosted<br/>(13 ks)"]
+        workloads_system_upgrade["System Upgrade<br/>(2 ks)"]
+      end
     end
   end
 
@@ -142,7 +150,7 @@ flowchart BT
 ## Load-bearing view (Stacktower)
 
 Stacktower emphasizes fan-out and load-bearing platforms; the Mermaid chart above
-emphasizes named layers and platform partitions. Use both: Mermaid for architecture
+emphasizes vertical tiers and logical groups. Use both: Mermaid for architecture
 storytelling, Stacktower for dependency density and DR prioritization stats.
 
 ![Platform deploy tiers — app domains resting on shared platforms](platform-deploy.svg)
@@ -151,27 +159,29 @@ Regenerate with `task architecture:diagram` (requires [Stacktower](https://githu
 
 ## Load-bearing platforms
 
-| Platform | Direct dependents | Layer | dependsOn depth |
+| Platform | Direct dependents | Group | dependsOn depth |
 | --- | ---: | --- | ---: |
 | `external-secrets/onepassword` | 53 | Platform | 1 |
 | `rook-ceph/rook-ceph-cluster` | 42 | Platform | 2 |
 | `volsync-system/volsync` | 30 | Platform | 0 |
 | `database/cloudnative-pg-cluster` | 20 | Data | 3 |
-| `observability/victoria-metrics-operator` | 5 | Platform | 0 |
+| `observability/victoria-metrics-operator` | 5 | Observability | 0 |
 | `cert-manager/cert-manager` | 3 | Platform | 0 |
 | `cert-manager/cert-manager-issuers` | 3 | Platform | 1 |
-| `observability/victoria-metrics` | 2 | Platform | 3 |
+| `observability/victoria-metrics` | 2 | Observability | 3 |
 | `database/cloudnative-pg` | 2 | Platform | 2 |
 | `kube-system/cilium` | 2 | Substrate | 0 |
 | `kube-system/snapshot-controller` | 2 | Substrate | 0 |
-| `observability/victoria-logs` | 2 | Platform | 3 |
+| `observability/victoria-logs` | 2 | Observability | 3 |
 | `external-secrets/external-secrets` | 1 | Platform | 0 |
 | `rook-ceph/rook-ceph` | 1 | Platform | 1 |
 | `flux-system/cluster-meta` | 1 | Substrate | 0 |
 
-## Kustomizations by layer
+## Kustomizations by group
 
-### Substrate
+### Vertical tier: Substrate
+
+**Substrate**
 
 - `flux-system/cluster-meta` (1 dependents)
 - `kube-system/cilium` (2 dependents)
@@ -183,7 +193,9 @@ Regenerate with `task architecture:diagram` (requires [Stacktower](https://githu
 - `kube-system/snapshot-controller` (2 dependents)
 - `kube-system/spegel`
 
-### Platform
+### Vertical tier: Infrastructure
+
+**Platform**
 
 - `auth/pocket-id` (1 dependents)
 - `auth/tinyauth`
@@ -212,6 +224,13 @@ Regenerate with `task architecture:diagram` (requires [Stacktower](https://githu
 - `network/ingress-nginx-internal`
 - `network/smtp-relay` (1 dependents)
 - `network/tailscale-operator`
+- `openebs-system/openebs` (1 dependents)
+- `rook-ceph/rook-ceph` (1 dependents)
+- `rook-ceph/rook-ceph-cluster` (42 dependents)
+- `volsync-system/volsync` (30 dependents)
+
+**Observability**
+
 - `observability/blackbox-exporter` (1 dependents)
 - `observability/blackbox-exporter-probes`
 - `observability/fluent-bit`
@@ -229,22 +248,22 @@ Regenerate with `task architecture:diagram` (requires [Stacktower](https://githu
 - `observability/victoria-metrics` (2 dependents)
 - `observability/victoria-metrics-operator` (5 dependents)
 - `observability/vmalert`
-- `openebs-system/openebs` (1 dependents)
-- `rook-ceph/rook-ceph` (1 dependents)
-- `rook-ceph/rook-ceph-cluster` (42 dependents)
-- `volsync-system/volsync` (30 dependents)
 
-### Data
+### Vertical tier: Shared services
+
+**Data**
 
 - `database/cloudnative-pg-cluster` (20 dependents)
 - `database/dragonfly-cluster` (2 dependents)
 - `database/mariadb` (1 dependents)
 
-### AI
+**AI**
 
 - `ai/ollama` (3 dependents)
 
-### Workloads
+### Vertical tier: Workloads
+
+**Workloads**
 
 - AI: 4 Kustomizations
 - Downloads: 20 Kustomizations
@@ -258,7 +277,7 @@ Regenerate with `task architecture:diagram` (requires [Stacktower](https://githu
 
 ## Flux dependsOn depth
 
-Longest-path depth from `dependsOn` — useful for reconcile ordering, distinct from layer assignment.
+Longest-path depth from `dependsOn` — useful for reconcile ordering, distinct from group assignment.
 
 ### Depth 0
 
@@ -435,7 +454,7 @@ Edge direction: `observability/victoria-metrics-operator` → workload.
 
 - `platform-deploy.svg` — Stacktower load-bearing view (committed)
 - `platform-tiers.mmd` — Mermaid layer model source (committed; also embedded above)
-- `tier-categories.yaml` — layer and partition assignment rules
+- `tier-categories.yaml` — vertical tiers, groups, and partition rules
 - `platform-deploy.json`, `platform-operational.json`, `full-deploy.json` — generated locally by `task architecture:graph` (gitignored)
 
 ```bash
