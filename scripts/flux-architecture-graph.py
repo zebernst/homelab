@@ -386,7 +386,7 @@ def render_readme(
         "",
         "| Vertical tier | Groups | Role |",
         "| --- | --- | --- |",
-        "| Substrate | Substrate | Cluster, CNI, storage, backup |",
+        "| Substrate | Substrate | CNI, DNS, PVC/CSI, snapshots — pods cannot run without this |",
         "| Infrastructure | Platform · Observability | Infra providers vs metrics/logs/checks |",
         "| Shared services | Data · AI | Shared Postgres/Redis and inference |",
         "| Workloads | Workloads | User-facing applications |",

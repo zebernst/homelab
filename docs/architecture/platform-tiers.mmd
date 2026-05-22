@@ -2,23 +2,27 @@ flowchart BT
 
   %% Cross-tier dependsOn summary (higher tier -.-> lower tier it depends on)
 
-  subgraph vt0["Substrate — Cluster-critical infrastructure and storage the cluster cannot run without"]
-    subgraph g_substrate["Substrate — CNI, core cluster services, block/file storage, backup"]
+  subgraph vt0["Substrate — Cluster-critical — pods cannot run without this (CNI, DNS, PVC/CSI, snapshots)"]
+    subgraph g_substrate["Substrate — CNI, DNS, PVC provisioners, CSI, snapshots, device plugins, node labels"]
       subgraph p_substrate_substrate_cluster["cluster"]
         cilium["cilium"]
         class cilium substrate
-        snapshot_controller["snapshot-controller"]
-        class snapshot_controller substrate
       end
       subgraph p_substrate_substrate_gitops["gitops"]
         cluster_meta["cluster-meta"]
         class cluster_meta substrate
       end
       subgraph p_substrate_substrate_storage["storage"]
+        nfs_subdir_external_provisioner["nfs-subdir-external-provisioner"]
+        class nfs_subdir_external_provisioner substrate
         rook_ceph["rook-ceph"]
         class rook_ceph substrate
         rook_ceph_cluster["rook-ceph-cluster<br/>(42 deps)"]
         class rook_ceph_cluster substrate
+        snapshot_controller["snapshot-controller"]
+        class snapshot_controller substrate
+        synology_csi_driver["synology-csi-driver"]
+        class synology_csi_driver substrate
         volsync["volsync<br/>(30 deps)"]
         class volsync substrate
       end
@@ -107,7 +111,7 @@ flowchart BT
       class wl_fission workloads
       wl_games["Games<br/>(5 ks)"]
       class wl_games workloads
-      wl_kube_system["Kube System<br/>(13 ks)"]
+      wl_kube_system["Kube System<br/>(8 ks)"]
       class wl_kube_system workloads
       wl_media["Media<br/>(11 ks)"]
       class wl_media workloads

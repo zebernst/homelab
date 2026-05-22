@@ -5,7 +5,7 @@ and partitions in [`tier-categories.yaml`](tier-categories.yaml).
 
 | Vertical tier | Groups | Role |
 | --- | --- | --- |
-| Substrate | Substrate | Cluster, CNI, storage, backup |
+| Substrate | Substrate | CNI, DNS, PVC/CSI, snapshots — pods cannot run without this |
 | Infrastructure | Platform · Observability | Infra providers vs metrics/logs/checks |
 | Shared services | Data · AI | Shared Postgres/Redis and inference |
 | Workloads | Workloads | User-facing applications |
@@ -15,23 +15,27 @@ flowchart BT
 
   %% Cross-tier dependsOn summary (higher tier -.-> lower tier it depends on)
 
-  subgraph vt0["Substrate — Cluster-critical infrastructure and storage the cluster cannot run without"]
-    subgraph g_substrate["Substrate — CNI, core cluster services, block/file storage, backup"]
+  subgraph vt0["Substrate — Cluster-critical — pods cannot run without this (CNI, DNS, PVC/CSI, snapshots)"]
+    subgraph g_substrate["Substrate — CNI, DNS, PVC provisioners, CSI, snapshots, device plugins, node labels"]
       subgraph p_substrate_substrate_cluster["cluster"]
         cilium["cilium"]
         class cilium substrate
-        snapshot_controller["snapshot-controller"]
-        class snapshot_controller substrate
       end
       subgraph p_substrate_substrate_gitops["gitops"]
         cluster_meta["cluster-meta"]
         class cluster_meta substrate
       end
       subgraph p_substrate_substrate_storage["storage"]
+        nfs_subdir_external_provisioner["nfs-subdir-external-provisioner"]
+        class nfs_subdir_external_provisioner substrate
         rook_ceph["rook-ceph"]
         class rook_ceph substrate
         rook_ceph_cluster["rook-ceph-cluster<br/>(42 deps)"]
         class rook_ceph_cluster substrate
+        snapshot_controller["snapshot-controller"]
+        class snapshot_controller substrate
+        synology_csi_driver["synology-csi-driver"]
+        class synology_csi_driver substrate
         volsync["volsync<br/>(30 deps)"]
         class volsync substrate
       end
@@ -120,7 +124,7 @@ flowchart BT
       class wl_fission workloads
       wl_games["Games<br/>(5 ks)"]
       class wl_games workloads
-      wl_kube_system["Kube System<br/>(13 ks)"]
+      wl_kube_system["Kube System<br/>(8 ks)"]
       class wl_kube_system workloads
       wl_media["Media<br/>(11 ks)"]
       class wl_media workloads
@@ -186,10 +190,15 @@ Kustomizations with the most direct `dependsOn` inbound edges.
 - `flux-system/cluster-meta` (1 deps)
 - `kube-system/cilium` (2 deps)
 - `kube-system/coredns`
+- `kube-system/generic-device-plugin`
+- `kube-system/intel-device-plugin`
+- `kube-system/intel-device-plugin-gpu`
 - `kube-system/kubelet-csr-approver`
-- `kube-system/metrics-server`
+- `kube-system/nfs-subdir-external-provisioner`
 - `kube-system/node-feature-discovery` (1 deps)
-- `kube-system/reloader`
+- `kube-system/node-feature-discovery-features`
+- `kube-system/nvidia-device-plugin`
+- `kube-system/priority-class`
 - `kube-system/snapshot-controller` (2 deps)
 - `kube-system/spegel`
 - `kube-system/synology-csi-driver`
@@ -269,7 +278,7 @@ Kustomizations with the most direct `dependsOn` inbound edges.
 - Downloads: 20
 - Fission: 3
 - Games: 5
-- Kube System: 13
+- Kube System: 8
 - Media: 11
 - Self-Hosted: 13
 - System Upgrade: 2
