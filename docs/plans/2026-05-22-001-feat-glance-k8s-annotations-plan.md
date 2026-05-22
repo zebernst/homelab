@@ -3,6 +3,7 @@ title: "feat: Annotate cluster routes for glance-k8s grouping"
 type: feat
 status: active
 date: 2026-05-22
+deepened: 2026-05-22
 ---
 
 # feat: Annotate cluster routes for glance-k8s grouping
@@ -25,7 +26,7 @@ Glance with the glance-k8s sidecar is deployed and discovers ingresses/HTTPRoute
 
 - **Primary URL policy:** Glance tile links use the URL you would open from the home LAN — `https://<app>.zebernst.dev` or `https://<app>.internal` for Gateway routes, and `https://<app>.kite-harmonic.ts.net` for Tailscale-only apps until they gain Gateway HTTPRoutes.
 - **Category taxonomy:** User-facing categories map to Kubernetes namespaces (`media`, `downloads`, `self-hosted`, `ai`, `auth`, `games`, `observability`) via a custom `glance/category` annotation. This is intentionally simpler than `docs/architecture/tier-categories.yaml` platform tiers, which describe Flux deploy ordering rather than dashboard UX.
-- **Unannotated fallback:** A catch-all Apps widget remains on the Homelab page showing workloads that have `glance/name` or `glance/id` but no `glance/category`, so partial rollouts do not produce empty sections.
+- **Transition layout:** Category widgets are added alongside the existing permissive Apps widget until annotation rollout completes; the legacy widget is removed only in the final cleanup unit (U8). A catch-all widget (for annotated apps missing `glance/category`) is optional during partial rollout but does not replace the legacy widget.
 - **Platform UIs:** User-facing observability apps (Gatus, Grafana, Karma, Kromgo, Victoria Metrics) appear under `glance/category: observability`. Operators and infra (external-dns, volsync, CNPG operator, echo-server, flux webhook) get `glance/hide: "true"`.
 - **Multi-route grouping:** Apps with internal + external + Tailscale routes always get an explicit `glance/url` on the main controller; route-level annotations are used only when a route-specific URL override is needed.
 - **Architecture branch:** `cursor/architecture-graph-cf7b` informs naming and grouping intuition but is not authoritative for Glance categories.
@@ -40,7 +41,7 @@ Glance with the glance-k8s sidecar is deployed and discovers ingresses/HTTPRoute
 - R4. Multi-route and dual-stack apps (pocket-id, rxresume, ollama, qui, tautulli, etc.) link to a single canonical URL, not an arbitrary discovered route.
 - R5. glance-k8s can list HTTPRoutes cluster-wide so Gateway API routes participate in discovery and annotation merge.
 - R6. Multi-component apps (minecraft ecosystem, future sidecar groupings) can collapse into one tile via `glance/id` / `glance/parent`.
-- R7. Annotation changes live in GitOps manifests (HelmRelease controller annotations or standalone HTTPRoute metadata) following existing app-template patterns.
+- R7. Annotation changes live in GitOps manifests — app-template controller annotations, upstream chart annotation values, Kustomize workload patches, or standalone HTTPRoute metadata — following patterns established in U2 catalog.
 
 ---
 
@@ -92,9 +93,10 @@ Glance with the glance-k8s sidecar is deployed and discovers ingresses/HTTPRoute
 - **Annotate workloads, not routes alone:** glance-k8s discovers Deployments/StatefulSets/DaemonSets and merges route annotations as overrides. Primary metadata goes on `controllers.*.annotations`; `glance/url` is set explicitly on the controller for multi-route apps.
 - **Custom `glance/category` annotation:** Not built into glance-k8s, but fully supported by expr-lang `show-if` filters. Values: `media`, `downloads`, `self-hosted`, `ai`, `auth`, `games`, `observability`.
 - **RBAC before category widgets:** Add `gateway.networking.k8s.io/httproutes` list permission; drop unused `ingressclasses` from Glance ClusterRole. Consider bumping glance-k8s to v0.5.0 in the same unit for cache behavior.
-- **Rollout sequencing:** RBAC → hide pass → URL/name/icon pass → category annotations → glance.yml widgets. Category widgets ship only after at least one namespace per category is annotated, with a catch-all widget for partial coverage.
+- **Rollout sequencing:** Catalog (U2) → multi-route URL stabilization (U1b) → RBAC fix (U1) → hide pass (U4) → namespace annotation passes (U5–U7) → category widgets alongside legacy Apps (U3) → remove legacy widget (U8). Never deploy RBAC before multi-route apps have explicit `glance/url`.
+- **Annotation placement by chart type:** app-template apps use `controllers.*.annotations`; upstream charts use chart-specific pod/deployment annotation values (e.g. Ollama chart `podAnnotations`) or a Kustomize `patch` on the rendered Deployment/StatefulSet; route-only metadata on standalone HTTPRoute YAML is a fallback when no workload patch is practical (fission router Service owner).
 - **HD/UHD pairs:** Separate `glance/id` per instance (e.g. `radarr-hd`, `radarr-uhd`) with distinct names and URLs — do not group.
-- **Minecraft grouping:** Shared `glance/id: minecraft` on router (main), `glance/parent: minecraft` on bluemap if both should appear under one tile.
+- **Minecraft grouping:** Shared `glance/id: minecraft` on router (main); `glance/parent: minecraft` on bluemap and route-less server StatefulSets (vanilla, atm10, atmons) so they collapse under one tile or stay hidden from standalone discovery.
 
 ---
 
@@ -169,13 +171,38 @@ flowchart TD
 
 ## Implementation Units
 
+- U1b. **Stabilize multi-route URLs before RBAC**
+
+**Goal:** Set explicit `glance/url` on all dual-stack and multi-route apps so enabling HTTPRoute discovery cannot flip tile links.
+
+**Requirements:** R4
+
+**Dependencies:** U2
+
+**Files:**
+- Modify: HelmReleases for every app listed in U2 `multi_route` section (pocket-id, rxresume, ollama, qui, tautulli, victoria-metrics, mc-router, and any app with both Tailscale Ingress and Gateway HTTPRoute)
+
+**Approach:**
+- Apply only `glance/url` (and `glance/id` if missing) from the U2 catalog — defer name/icon/category to U5–U7
+- For upstream charts without `controllers.*`, use chart-native annotation keys or Kustomize patches (see Key Technical Decisions)
+- Ship and verify before U1 merges
+
+**Test scenarios:**
+- Happy path: pocket-id tile URL unchanged before and after U1 RBAC deploy
+- Happy path: qui/tautulli link to internal `*.zebernst.dev`, not tailnet hostname
+
+**Verification:**
+- Every `multi_route` catalog entry has `glance/url` on its workload before U1 proceeds
+
+---
+
 - U1. **Fix glance-k8s RBAC and sidecar version**
 
 **Goal:** Enable HTTPRoute discovery and improve multi-widget performance.
 
 **Requirements:** R5
 
-**Dependencies:** None
+**Dependencies:** U1b
 
 **Files:**
 - Modify: `kubernetes/apps/self-hosted/glance/app/helmrelease.yaml`
@@ -230,22 +257,23 @@ flowchart TD
 
 ---
 
-- U3. **Restructure Homelab page with category widgets**
+- U3. **Add category widgets alongside legacy Apps widget**
 
-**Goal:** Split the single Apps extension widget into category sections with a catch-all fallback.
+**Goal:** Introduce per-category extension widgets without breaking the Homelab page during partial annotation rollout.
 
 **Requirements:** R2
 
-**Dependencies:** U2 (category values defined)
+**Dependencies:** U2, U5 (at least one annotated app per category as pilot)
 
 **Files:**
 - Modify: `kubernetes/apps/self-hosted/glance/app/resources/glance.yml`
 
 **Approach:**
-- Replace the single full-column Apps widget with a column (or grouped layout) containing one extension widget per category: Media, Downloads, Self-Hosted, AI, Auth, Games, Observability
-- Each widget uses the same base `show-if` guard (`kube-system` exclusion + `glance/hide`) plus `annotations["glance/category"] == "<value>"`
-- Add a catch-all Apps widget with `show-if` requiring `glance/name` or `glance/id` present AND `glance/category` not in annotations (partial rollout safety)
-- Set `cache: 1s` on all widgets (consistent with existing Nodes/Apps widgets)
+- **Keep** the existing permissive Apps widget unchanged until U8 removes it
+- Add category extension widgets (Media, Downloads, Self-Hosted, AI, Auth, Games, Observability) in the full column below or beside the legacy widget
+- Each category widget uses the base `show-if` guard (`kube-system` exclusion + `glance/hide`) plus `annotations["glance/category"] == "<value>"`
+- Optionally add a catch-all widget for annotated apps missing `glance/category` (does not replace legacy widget)
+- Set `cache: 1s` on all new widgets
 - Keep Infrastructure, Smart Home, and Nodes widgets unchanged
 
 **Patterns to follow:**
@@ -309,7 +337,10 @@ flowchart TD
 - Modify: `kubernetes/apps/ai/paperless-ai/app/httproute.yaml` and workload manifest
 - Modify: `kubernetes/apps/games/minecraft/router/app/helmrelease.yaml`
 - Modify: `kubernetes/apps/games/minecraft/bluemap/app/helmrelease.yaml`
-- Modify: `kubernetes/apps/fission/app/httproute.yaml` and fission router workload
+- Modify: `kubernetes/apps/games/minecraft/vanilla/app/helmrelease.yaml`
+- Modify: `kubernetes/apps/games/minecraft/atm10/app/helmrelease.yaml`
+- Modify: `kubernetes/apps/games/minecraft/atmons/app/helmrelease.yaml`
+- Modify: `kubernetes/apps/fission/app/httproute.yaml` and fission router Deployment patch (Kustomize) or HTTPRoute metadata
 - Modify: `kubernetes/apps/fission/functions/ics-proxy/httproute.yaml` (hide or explicit URL with path)
 - Modify: `kubernetes/apps/rook-ceph/rook-ceph/cluster/helmrelease.yaml` (dashboard hide; S3 route per deferred decision)
 
@@ -317,11 +348,13 @@ flowchart TD
 - Apply catalog entries from U2 to each controller
 - pocket-id: mandatory `glance/url: https://id.zebernst.dev`, `glance/category: auth`
 - ollama: single tile with `glance/url` picking primary (recommend `https://ollama.internal` for LAN AI use)
-- minecraft: `glance/id: minecraft` on router, `glance/parent: minecraft` on bluemap
-- fission: annotate the workload backing the `router` Service, not the HTTPRoute alone
+- minecraft: `glance/id: minecraft` on router; `glance/parent: minecraft` on bluemap and server StatefulSets (vanilla, atm10, atmons) so they do not appear as undiscovered standalone tiles
+- fission: patch the `router` Deployment (Kustomize strategic merge) with glance annotations, or set metadata on `httproute.yaml` plus `glance/url` if workload patch is impractical
+- ollama (upstream chart): use chart `podAnnotations` or a Kustomize Deployment patch — no app-template `controllers` block
 
 **Patterns to follow:**
 - `controllers.*.annotations` in app-template HelmReleases
+- Kustomize `patches` targeting Deployments/StatefulSets for upstream charts (ollama, fission, grafana, victoria-metrics stack)
 - Metadata annotations on standalone HTTPRoute YAML for route-only resources
 
 **Test scenarios:**
@@ -409,6 +442,32 @@ flowchart TD
 
 ---
 
+- U8. **Remove legacy Apps widget**
+
+**Goal:** Complete the Homelab page transition once all user-facing apps are categorized.
+
+**Requirements:** R2
+
+**Dependencies:** U3, U5, U6, U7
+
+**Files:**
+- Modify: `kubernetes/apps/self-hosted/glance/app/resources/glance.yml`
+
+**Approach:**
+- Remove the original permissive Apps widget (the one filtering only `kube-system` + `glance/hide`)
+- Remove optional catch-all widget if no longer needed
+- Verify every user-facing app appears in exactly one category widget
+
+**Test scenarios:**
+- Happy path: Homelab page shows categorized tiles only; no duplicate tiles from legacy widget
+- Edge case: No user-facing app visible only in legacy widget (would indicate missing `glance/category`)
+
+**Verification:**
+- Full annotation catalog coverage confirmed against live `/extension/apps` inventory
+- Homelab Apps column contains category widgets only
+
+---
+
 ## System-Wide Impact
 
 - **Interaction graph:** glance-k8s reads annotations from Deployment metadata after Flux reconciles HelmReleases; Glance UI reads extension HTML from sidecar; no other controllers consume `glance/*` annotations
@@ -425,7 +484,8 @@ flowchart TD
 | Risk | Mitigation |
 |------|------------|
 | RBAC deploy changes auto-discovered URLs for dual-stack apps | Set explicit `glance/url` on affected apps before or with RBAC change |
-| Category widgets empty during partial rollout | Catch-all widget + ship glance.yml after first namespace annotations |
+| Category widgets empty during partial rollout | Keep legacy Apps widget until U8; category widgets are additive during U3–U7 |
+| RBAC deploy before multi-route URLs set | U1b blocks U1 until all `multi_route` catalog entries have explicit `glance/url` |
 | Wrong icon shorthand breaks tile rendering | Use validated `si:` / `di:` names; spot-check in Glance UI per namespace PR |
 | ~50 apps × manual edits = drift from catalog | Maintain `docs/architecture/glance-annotations.yaml` as source of truth |
 | Multi-widget load on apiserver | Upgrade glance-k8s to v0.5.0 for List() cache |
