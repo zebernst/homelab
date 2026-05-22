@@ -15,6 +15,7 @@ spec:
     controllers:
       kromgo:
         annotations:
+          reloader.stakater.com/auto: "true"
           glance/id: kromgo
           glance/name: Kromgo
           glance/icon: mdi:message-text
@@ -22,8 +23,6 @@ spec:
           glance/url: https://kromgo.zebernst.dev
         replicas: 2
         strategy: RollingUpdate
-        annotations:
-          reloader.stakater.com/auto: "true"
         containers:
           kromgo:
             image:

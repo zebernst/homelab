@@ -14,15 +14,14 @@ spec:
   values:
     controllers:
       vanilla:
+        type: statefulset
         annotations:
+          reloader.stakater.com/auto: "true"
           glance/id: minecraft-vanilla
           glance/name: Minecraft Vanilla
           glance/icon: si:minecraft
           glance/category: games
           glance/parent: minecraft
-        type: statefulset
-        annotations:
-          reloader.stakater.com/auto: "true"
         initContainers:
           init-bluemap-config:
             image:
