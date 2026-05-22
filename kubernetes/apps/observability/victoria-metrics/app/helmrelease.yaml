@@ -99,6 +99,8 @@ spec:
         externalLabels:
           cluster: jupiter
         extraArgs:
+          promscrape.dropOriginalLabels: "true"
+          promscrape.maxScrapeSize: 50MiB
           promscrape.streamParse: "true"
         resources:
           requests:
@@ -152,6 +154,23 @@ spec:
         evaluationInterval: 30s
         externalLabels:
           cluster: jupiter
+        datasource:
+          url: http://vmauth-vmks.observability.svc.cluster.local:8427
+
+    vmauth:
+      enabled: true
+      spec:
+        extraArgs:
+          requestBufferSize: "65536"
+        unauthorizedUserAccessSpec:
+          url_map:
+            - src_paths:
+                - /api/v1/query.*
+                - /api/v1/label/.*
+              url_prefix: http://vmsingle-vmks.observability.svc.cluster.local:8428
+            - src_paths:
+                - /select/logsql/.*
+              url_prefix: http://victoria-logs-server.observability.svc.cluster.local:9428
 
     prometheus-node-exporter:
       fullnameOverride: node-exporter
@@ -230,9 +249,7 @@ spec:
               port: http-metrics
               scheme: https
               tlsConfig:
-                caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                 insecureSkipVerify: true
-                serverName: 127.0.0.1
 
     kubeControllerManager:
       service:
@@ -245,11 +262,15 @@ spec:
               port: http-metrics
               scheme: https
               tlsConfig:
-                caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                 insecureSkipVerify: true
-                serverName: localhost
 
     kubeEtcd:
       service:
         selector:
-          k8s-app: kube-controller-manager
+          component: kube-apiserver
+        port: 2381
+        targetPort: 2381
+      vmScrape:
+        spec:
+          endpoints:
+            - scheme: http
