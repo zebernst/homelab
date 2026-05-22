@@ -226,6 +226,14 @@ def partition_label(partition_id: str, config: dict) -> str:
     return partition_id.rsplit("/", 1)[-1]
 
 
+def partition_sort_key(partition_id: str, config: dict) -> tuple[int, str]:
+    for partition in config.get("partitions", []):
+        if partition["id"] == partition_id:
+            label = partition.get("label", partition_id.rsplit("/", 1)[-1])
+            return partition.get("order", 999), label
+    return 999, partition_id
+
+
 def node_group(node_id: str, nodes: dict[str, Kustomization], config: dict) -> str:
     return assign_partition(node_id, nodes[node_id].namespace, config)[0]
 
@@ -309,7 +317,7 @@ def generate_mermaid(
             g_id = mermaid_id(f"g_{group_name}")
             lines.append(f'    subgraph {g_id}["{g_title}"]')
 
-            partition_keys = sorted(partitions.keys(), key=lambda pid: partition_label(pid, config))
+            partition_keys = sorted(partitions.keys(), key=lambda pid: partition_sort_key(pid, config))
             use_partition_subgraphs = len(partition_keys) > 1 or (
                 len(partition_keys) == 1 and partition_keys[0] != "workloads"
             )
@@ -386,7 +394,7 @@ def render_readme(
         "",
         "| Vertical tier | Groups | Role |",
         "| --- | --- | --- |",
-        "| Substrate | Substrate | CNI, DNS, PVC/CSI, snapshots — pods cannot run without this |",
+        "| Substrate | Substrate | Gitops, network, PKI, storage, hardware, meta |",
         "| Infrastructure | Platform · Observability | Infra providers vs metrics/logs/checks |",
         "| Shared services | Data · AI | Shared Postgres/Redis and inference |",
         "| Workloads | Workloads | User-facing applications |",

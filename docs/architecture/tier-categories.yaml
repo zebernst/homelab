@@ -28,7 +28,7 @@ vertical_tiers:
 groups:
   substrate:
     label: Substrate
-    description: CNI, DNS, PVC provisioners, CSI, snapshots, device plugins, node labels
+    description: Network, PKI, storage, hardware, cluster meta — pods cannot run without this
   platform:
     label: Platform
     description: Secrets, networking, auth, security, gitops
@@ -50,6 +50,11 @@ always_show:
   - flux-system/cluster-apps
   - flux-system/flux-operator
   - kube-system/cilium
+  - kube-system/coredns
+  - kube-system/kubelet-csr-approver
+  - kube-system/node-feature-discovery
+  - kube-system/priority-class
+  - kube-system/spegel
   - kube-system/snapshot-controller
   - kube-system/nfs-subdir-external-provisioner
   - kube-system/synology-csi-driver
@@ -75,19 +80,60 @@ partitions:
   - id: substrate/gitops
     group: substrate
     label: gitops
+    order: 1
     match:
       nodes:
         - flux-system/cluster-meta
 
+  - id: substrate/network
+    group: substrate
+    label: network
+    order: 2
+    match:
+      nodes:
+        - kube-system/cilium
+        - kube-system/coredns
+
+  - id: substrate/pki
+    group: substrate
+    label: pki
+    order: 3
+    match:
+      nodes:
+        - kube-system/kubelet-csr-approver
+
   - id: substrate/storage
     group: substrate
     label: storage
+    order: 4
     match:
       namespaces: [rook-ceph, volsync-system, openebs-system]
       nodes:
         - kube-system/nfs-subdir-external-provisioner
         - kube-system/snapshot-controller
         - kube-system/synology-csi-driver
+
+  - id: substrate/hardware
+    group: substrate
+    label: hardware
+    order: 5
+    match:
+      nodes:
+        - kube-system/generic-device-plugin
+        - kube-system/intel-device-plugin
+        - kube-system/intel-device-plugin-gpu
+        - kube-system/nvidia-device-plugin
+        - kube-system/node-feature-discovery
+        - kube-system/node-feature-discovery-features
+
+  - id: substrate/meta
+    group: substrate
+    label: meta
+    order: 6
+    match:
+      nodes:
+        - kube-system/priority-class
+        - kube-system/spegel
 
   - id: platform/gitops
     group: platform
@@ -117,26 +163,6 @@ partitions:
       nodes:
         - kube-system/cilium-config
         - kube-system/cilium-gateway
-
-  - id: substrate/cluster
-    group: substrate
-    label: cluster
-    match:
-      namespaces: [kube-system]
-      exclude_nodes:
-        - kube-system/cilium-config
-        - kube-system/cilium-gateway
-        - kube-system/descheduler
-        - kube-system/irqbalance
-        - kube-system/metrics-server
-        - kube-system/nfs-subdir-external-provisioner
-        - kube-system/node-healthcheck
-        - kube-system/node-healthcheck-config
-        - kube-system/node-problem-detector
-        - kube-system/reloader
-        - kube-system/self-node-remediation
-        - kube-system/snapshot-controller
-        - kube-system/synology-csi-driver
 
   - id: platform/auth
     group: platform

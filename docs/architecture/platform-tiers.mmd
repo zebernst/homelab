@@ -3,14 +3,20 @@ flowchart BT
   %% Cross-tier dependsOn summary (higher tier -.-> lower tier it depends on)
 
   subgraph vt0["Substrate — Cluster-critical — pods cannot run without this (CNI, DNS, PVC/CSI, snapshots)"]
-    subgraph g_substrate["Substrate — CNI, DNS, PVC provisioners, CSI, snapshots, device plugins, node labels"]
-      subgraph p_substrate_substrate_cluster["cluster"]
-        cilium["cilium"]
-        class cilium substrate
-      end
+    subgraph g_substrate["Substrate — Network, PKI, storage, hardware, cluster meta — pods cannot run without this"]
       subgraph p_substrate_substrate_gitops["gitops"]
         cluster_meta["cluster-meta"]
         class cluster_meta substrate
+      end
+      subgraph p_substrate_substrate_network["network"]
+        cilium["cilium"]
+        class cilium substrate
+        coredns["coredns"]
+        class coredns substrate
+      end
+      subgraph p_substrate_substrate_pki["pki"]
+        kubelet_csr_approver["kubelet-csr-approver"]
+        class kubelet_csr_approver substrate
       end
       subgraph p_substrate_substrate_storage["storage"]
         nfs_subdir_external_provisioner["nfs-subdir-external-provisioner"]
@@ -25,6 +31,16 @@ flowchart BT
         class synology_csi_driver substrate
         volsync["volsync<br/>(30 deps)"]
         class volsync substrate
+      end
+      subgraph p_substrate_substrate_hardware["hardware"]
+        node_feature_discovery["node-feature-discovery"]
+        class node_feature_discovery substrate
+      end
+      subgraph p_substrate_substrate_meta["meta"]
+        priority_class["priority-class"]
+        class priority_class substrate
+        spegel["spegel"]
+        class spegel substrate
       end
     end
     hub_vt0(( ))
