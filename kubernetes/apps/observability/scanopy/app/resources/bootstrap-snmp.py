@@ -15,7 +15,7 @@ from uuid import UUID
 API_URL = os.environ.get("SCANOPY_API_URL", "http://scanopy.observability.svc.cluster.local:60072")
 API_KEY = os.environ.get("SCANOPY_USER_API_KEY", "")
 NETWORK_ID = os.environ.get("SCANOPY_NETWORK_ID", "")
-COMMUNITY = os.environ.get("UNIFI_SNMP_COMMUNITY", "")
+COMMUNITY_FILE = "/run/secrets/unifi-snmp-community"
 CREDENTIAL_NAME = "UniFi SNMP"
 
 
@@ -24,7 +24,7 @@ def log(message: str) -> None:
 
 
 def missing_config() -> bool:
-    return not API_KEY or not NETWORK_ID or not COMMUNITY
+    return not API_KEY or not NETWORK_ID
 
 
 def request(method: str, path: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -75,7 +75,7 @@ def create_credential() -> str:
                 "name": CREDENTIAL_NAME,
                 "credential_type": {
                     "type": "SnmpV2c",
-                    "community": {"mode": "Inline", "value": COMMUNITY},
+                    "community": {"mode": "FilePath", "path": COMMUNITY_FILE},
                 },
                 "tags": [],
             }
@@ -97,7 +97,7 @@ def assign_credential(credential_id: str) -> None:
 
 def main() -> int:
     if missing_config():
-        log("SNMP bootstrap skipped: SCANOPY_USER_API_KEY, SCANOPY_NETWORK_ID, or UNIFI_SNMP_COMMUNITY not set")
+        log("SNMP bootstrap skipped: SCANOPY_USER_API_KEY or SCANOPY_NETWORK_ID not set")
         return 0
 
     wait_for_server()
