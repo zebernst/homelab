@@ -84,6 +84,8 @@ spec:
               POSTGRES_MAINTENANCE_WORK_MEM: 4GB
               POSTGRES_AUTOVACUUM_WORK_MEM: 1GB
               POSTGRES_EFFECTIVE_CACHE_SIZE: 12GB
+              GUNICORN_WORKERS: "4"
+              NOMINATIM_API_POOL_SIZE: "5"
             envFrom:
               - secretRef:
                   name: nominatim-secret
