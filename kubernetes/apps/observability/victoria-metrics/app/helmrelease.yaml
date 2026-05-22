@@ -111,7 +111,7 @@ spec:
     vmsingle:
       enabled: true
       spec:
-        retentionPeriod: "14d"
+        retentionPeriod: "90d"
         replicaCount: 1
         priorityClassName: control-plane-critical
         extraArgs:
@@ -127,7 +127,7 @@ spec:
           storageClassName: ceph-block
           resources:
             requests:
-              storage: 30Gi
+              storage: 50Gi
       ingress:
         enabled: true
         ingressClassName: tailscale
