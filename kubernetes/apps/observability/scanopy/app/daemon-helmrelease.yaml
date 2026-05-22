@@ -24,6 +24,11 @@ spec:
               TZ: America/Chicago
               SCANOPY_LOG_LEVEL: info
               SCANOPY_SERVER_URL: http://scanopy.observability.svc.cluster.local:60072
+              SCANOPY_ENABLE_LOCAL_DOCKER_SOCKET: "false"
+              SCANOPY_NAME:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: spec.nodeName
             envFrom:
               - secretRef:
                   name: scanopy-secret
