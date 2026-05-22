@@ -5,7 +5,6 @@ kind: Kustomization
 resources:
   - externalsecret.yaml
   - helmrelease.yaml
-  - daemon-helmrelease.yaml
   - bootstrap-helmrelease.yaml
 configMapGenerator:
   - name: scanopy-snmp-bootstrap

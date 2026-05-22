@@ -40,24 +40,68 @@ spec:
               SCANOPY_SMTP_EMAIL: scanopy@zebernst.dev
             envFrom: *envFrom
             probes:
-              liveness: &probe
+              liveness: &serverProbe
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
                     path: /api/health
-                    port: &port 60072
+                    port: &serverPort 60072
                   initialDelaySeconds: 15
                   periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 3
-              readiness: *probe
+              readiness: *serverProbe
             resources:
               requests:
                 cpu: 50m
                 memory: 256Mi
               limits:
                 memory: 512Mi
+      scanopy-daemon:
+        type: daemonset
+        containers:
+          scanopy-daemon:
+            image:
+              repository: ghcr.io/scanopy/scanopy/daemon
+              tag: v0.16.2@sha256:421cc71effcb3daa40140a015f4ba6d6d323408ae9c0d657e0e42514a774514b
+            env:
+              TZ: America/Chicago
+              SCANOPY_LOG_LEVEL: info
+              SCANOPY_SERVER_URL: http://scanopy.observability.svc.cluster.local:60072
+              SCANOPY_ENABLE_LOCAL_DOCKER_SOCKET: "false"
+              SCANOPY_NAME:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: spec.nodeName
+            envFrom:
+              - secretRef:
+                  name: scanopy-secret
+            probes:
+              liveness: &daemonProbe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/health
+                    port: &daemonPort 60073
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *daemonProbe
+            securityContext:
+              privileged: true
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+        pod:
+          hostNetwork: true
+          dnsPolicy: ClusterFirstWithHostNet
+          priorityClassName: system-node-critical
     defaultPodOptions:
       priorityClassName: internal-only
       dnsConfig:
@@ -65,10 +109,10 @@ spec:
           - { name: ndots, value: "1" }
     service:
       scanopy:
-        controller: *app
+        controller: scanopy
         ports:
           http:
-            port: *port
+            port: *serverPort
     route:
       scanopy:
         hostnames:
@@ -80,16 +124,27 @@ spec:
         rules:
           - backendRefs:
               - name: *app
-                port: *port
+                port: *serverPort
     persistence:
       data:
         existingClaim: *app
-        globalMounts:
-          - path: /data
+        advancedMounts:
+          scanopy:
+            scanopy:
+              - path: /data
       oidc:
         type: secret
         name: scanopy-secret
-        globalMounts:
-          - path: /oidc.toml
-            subPath: oidc.toml
-            readOnly: true
+        advancedMounts:
+          scanopy:
+            scanopy:
+              - path: /oidc.toml
+                subPath: oidc.toml
+                readOnly: true
+      daemon-config:
+        type: hostPath
+        hostPath: /var/lib/scanopy-daemon
+        advancedMounts:
+          scanopy-daemon:
+            scanopy-daemon:
+              - path: /root/.config/scanopy/daemon
