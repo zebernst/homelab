@@ -11,17 +11,29 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
+  filter:
+    name: Pre-pull Images - Filter
+    runs-on: ubuntu-latest
+    outputs:
+      changed-files: ${{ steps.changed-files.outputs.changed_files }}
+    steps:
+      - name: Get Changed Files
+        id: changed-files
+        uses: bjw-s-labs/action-changed-files@v0.6.0
+        with:
+          patterns: kubernetes/**/*
+
   extract-images:
+    if: ${{ needs.filter.outputs.changed-files != '[]' || github.event_name == 'workflow_dispatch' }}
+    needs: filter
     name: Extract Images
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        branches: ["default", "pull"]
-      fail-fast: false
     outputs:
-      default: ${{ steps.extract-images.outputs.default }}
-      pull: ${{ steps.extract-images.outputs.pull }}
+      images: ${{ steps.extract-images.outputs.images }}
     steps:
       - name: Generate Token
         uses: actions/create-github-app-token@v3
@@ -30,56 +42,41 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Checkout
+      - name: Checkout Pull Request Branch
         uses: actions/checkout@v6
         with:
           token: "${{ steps.app-token.outputs.token }}"
-          ref: "${{ matrix.branches == 'default' && github.event.repository.default_branch || '' }}"
+          path: pull
+
+      - name: Checkout Default Branch
+        uses: actions/checkout@v6
+        with:
+          token: "${{ steps.app-token.outputs.token }}"
+          ref: "${{ github.event.repository.default_branch }}"
+          path: default
 
       - name: Gather Images
-        uses: docker://ghcr.io/allenporter/flux-local:v8.2.0
+        uses: docker://ghcr.io/home-operations/flate:0.1.3
         with:
           args: >-
-            get cluster
-            --path /github/workspace/kubernetes/flux/cluster
-            --all-namespaces
-            --enable-images
-            --output yaml
-            --output-file images.yaml
+            diff images
+            --path ./pull
+            --path-orig ./default
+            --output json
+            --output-file images.json
 
       - name: Extract Images
         id: extract-images
-        run: |
-          images=$(yq --indent=0 --output-format=json \
-              '[.. | .images? | select(. != null)] | flatten | sort | unique' images.yaml \
-          )
-          echo "${{ matrix.branches }}=${images}" >> $GITHUB_OUTPUT
-
-  compare-images:
-    name: Compare Images
-    runs-on: ubuntu-latest
-    needs: ["extract-images"]
-    outputs:
-      images: ${{ steps.compare-images.outputs.images }}
-    steps:
-      - name: Compare Images
-        id: compare-images
-        run: |
-          images=$(jq --compact-output --null-input \
-              --argjson f1 '${{ needs.extract-images.outputs.default }}' \
-              --argjson f2 '${{ needs.extract-images.outputs.pull }}' \
-              '$f2 - $f1' \
-          )
-          echo "images=${images}" >> $GITHUB_OUTPUT
+        run: echo "images=$(jq --compact-output '.' images.json)" >> "$GITHUB_OUTPUT"
 
   pre-pull-images:
-    if: ${{ needs.compare-images.outputs.images != '[]' }}
+    if: ${{ needs.extract-images.outputs.images != '[]' }}
     name: Pre-pull Images
     runs-on: ["homelab-runner"]
-    needs: ["compare-images"]
+    needs: [extract-images]
     strategy:
       matrix:
-        images: ${{ fromJSON(needs.compare-images.outputs.images) }}
+        images: ${{ fromJSON(needs.extract-images.outputs.images) }}
       max-parallel: 4
       fail-fast: false
     steps:
@@ -94,7 +91,7 @@ jobs:
 
   pre-pull-images-success:
     if: ${{ always() }}
-    needs: ["pre-pull-images"]
+    needs: [pre-pull-images]
     name: Pre-pull Images Successful
     runs-on: ubuntu-latest
     steps:
