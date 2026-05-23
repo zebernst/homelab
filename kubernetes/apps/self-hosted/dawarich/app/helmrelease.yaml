@@ -20,7 +20,7 @@ spec:
           web:
             image:
               repository: freikin/dawarich
-              tag: "1.7.5"
+              tag: "1.7.9"
             command: ["web-entrypoint.sh"]
             args:
               - bin/rails
@@ -39,13 +39,13 @@ spec:
               SELF_HOSTED: "true"
               STORE_GEODATA: "true"
               PROMETHEUS_EXPORTER_ENABLED: "true"
-              PROMETHEUS_EXPORTER_HOST: "0.0.0.0"
-              PROMETHEUS_EXPORTER_PORT: &metricsPort "9394"
+              SIDEKIQ_METRICS_URL: http://127.0.0.1:9394/metrics
               OIDC_ISSUER: https://id.zebernst.dev
               OIDC_PROVIDER_NAME: Pocket ID
               OIDC_REDIRECT_URI: https://timeline.zebernst.dev/users/auth/openid_connect/callback
               OIDC_AUTO_REGISTER: "true"
               ALLOW_EMAIL_PASSWORD_REGISTRATION: "false"
+              ALLOW_EMAIL_PASSWORD_LOGIN: "false"
               NOMINATIM_API_HOST: &nominatimApiHost nominatim.self-hosted.svc.cluster.local
               NOMINATIM_API_USE_HTTPS: &nominatimApiUseHttps "false"
               SMTP_SERVER: smtp-relay.network.svc.cluster.local
@@ -95,7 +95,7 @@ spec:
           sidekiq:
             image:
               repository: freikin/dawarich
-              tag: "1.7.5"
+              tag: "1.7.9"
             command: ["sidekiq-entrypoint.sh"]
             args: ["sidekiq"]
             env:
@@ -108,8 +108,8 @@ spec:
               TIME_ZONE: America/Chicago
               BACKGROUND_PROCESSING_CONCURRENCY: "5"
               PROMETHEUS_EXPORTER_ENABLED: "true"
-              PROMETHEUS_EXPORTER_HOST: "127.0.0.1"
-              PROMETHEUS_EXPORTER_PORT: *metricsPort
+              PROMETHEUS_EXPORTER_HOST: "0.0.0.0"
+              PROMETHEUS_EXPORTER_PORT: "9394"
             envFrom: *envFrom
             resources:
               requests:
@@ -141,8 +141,6 @@ spec:
         ports:
           http:
             port: 3000
-          metrics:
-            port: 9394
 
     route:
       app:
@@ -162,11 +160,18 @@ spec:
       app:
         serviceName: *app
         endpoints:
-          - port: metrics
+          - port: http
             scheme: http
             path: /metrics
             interval: 1m
             scrapeTimeout: 10s
+            basicAuth:
+              username:
+                name: dawarich-secret
+                key: METRICS_USERNAME
+              password:
+                name: dawarich-secret
+                key: METRICS_PASSWORD
 
     persistence:
       data:
