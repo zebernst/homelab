@@ -46,8 +46,8 @@ spec:
               OIDC_REDIRECT_URI: https://timeline.zebernst.dev/users/auth/openid_connect/callback
               OIDC_AUTO_REGISTER: "true"
               ALLOW_EMAIL_PASSWORD_REGISTRATION: "false"
-              NOMINATIM_API_HOST: nominatim.self-hosted.svc.cluster.local
-              NOMINATIM_API_USE_HTTPS: "false"
+              NOMINATIM_API_HOST: &nominatimApiHost nominatim.self-hosted.svc.cluster.local
+              NOMINATIM_API_USE_HTTPS: &nominatimApiUseHttps "false"
               SMTP_SERVER: smtp-relay.network.svc.cluster.local
               SMTP_PORT: "25"
               SMTP_DOMAIN: zebernst.dev
@@ -103,6 +103,8 @@ spec:
               RAILS_LOG_TO_STDOUT: "true"
               SELF_HOSTED: "true"
               STORE_GEODATA: "true"
+              NOMINATIM_API_HOST: *nominatimApiHost
+              NOMINATIM_API_USE_HTTPS: *nominatimApiUseHttps
               TIME_ZONE: America/Chicago
               BACKGROUND_PROCESSING_CONCURRENCY: "5"
               PROMETHEUS_EXPORTER_ENABLED: "true"
