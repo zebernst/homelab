@@ -18,7 +18,7 @@ spec:
           seasonpackarr:
             image:
               repository: ghcr.io/nuxencs/seasonpackarr
-              tag: v0.14.0
+              tag: v0.15.0
             env:
               SEASONPACKARR__DISABLE_CONFIG_FILE: "true"
               SEASONPACKARR__HOST: 0.0.0.0
