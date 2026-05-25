@@ -141,7 +141,7 @@ spec:
           kubectl:
             image:
               repository: registry.k8s.io/kubectl
-              tag: v1.34.5
+              tag: v1.36.1
             command: ["/kubectl"]
             args:
               - exec
