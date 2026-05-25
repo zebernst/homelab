@@ -109,6 +109,23 @@ spec:
           limits:
             memory: 1Gi
 
+    kubelet:
+      vmScrape:
+        spec:
+          metricRelabelConfigs:
+            - action: labeldrop
+              regex: (uid)
+            - action: labeldrop
+              regex: (id|name)
+            - action: drop
+              source_labels: [__name__]
+              regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+            # labelmap copies every node label onto kubelet/cadvisor metrics; GPU
+            # nodes with Talos extensions + NFD + NVIDIA labels exceed the 40-label
+            # vmsingle limit and spam RowsRejectedOnIngestion / TooManyLogs.
+            - action: labeldrop
+              regex: (extensions_talos_dev_.+|feature_node_kubernetes_io_.+|nvidia_com_gpu_.+|plan_upgrade_cattle_io_.+|beta_kubernetes_io_.+)
+
     vmsingle:
       enabled: true
       spec:
@@ -220,13 +237,16 @@ spec:
 
     kubeProxy:
       enabled: false
+      service:
+        enabled: false
 
     kubeApiServer:
       vmScrape:
         spec:
           selector:
             matchLabels:
-              k8s-app: kube-apiserver
+              component: apiserver
+              provider: kubernetes
 
     kubeScheduler:
       service:
