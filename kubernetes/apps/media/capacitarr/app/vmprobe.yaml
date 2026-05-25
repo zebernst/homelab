@@ -12,4 +12,4 @@ spec:
   targets:
     static:
       targets:
-        - http://capacitarr.media.svc.cluster.local/api/v1/health
+        - http://capacitarr.media.svc.cluster.local:2187/api/v1/health
