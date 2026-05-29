@@ -30,7 +30,7 @@ spec:
           mealie:
             image:
               repository: ghcr.io/mealie-recipes/mealie
-              tag: v3.12.0@sha256:8d962f611390a1cca667eed32a29e9467e9c01c523e2db3ad00f667372067f9d
+              tag: v3.19.2@sha256:f68e959bf66f4f458893ea58facac71690fe6f2ac7a31466b5cecb41b4e99c02
             env:
               TZ: "America/Chicago"
               BASE_URL: https://mealie.kite-harmonic.ts.net
