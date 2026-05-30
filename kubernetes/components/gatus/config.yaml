@@ -1,6 +1,7 @@
 ---
 endpoints:
   - name: "${APP}"
+    group: external
     url: "https://${GATUS_SUBDOMAIN:=${APP}}.zebernst.dev${GATUS_PATH:=/}"
     interval: 1m
     client:

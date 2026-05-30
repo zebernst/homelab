@@ -55,7 +55,8 @@ spec:
             rules:
               - alert: DockerhubRateLimitRisk
                 annotations:
-                  summary: Kubernetes cluster Dockerhub rate limit risk
+                  summary: >-
+                    There are {{ $value }} containers pulling from Dockerhub. This may lead to rate limiting.
                 expr: count(time() - container_last_seen{image=~"(docker.io).*",container!=""} < 30) > 100
                 for: 5m
                 keep_firing_for: 90s
@@ -126,6 +127,9 @@ spec:
                       {{ .Annotations.message }}
                     {{- else }}
                       Alert description not available
+                    {{- end }}
+                    {{- if ne .Annotations.runbook_url "" }}
+                      <p><a href="{{ .Annotations.runbook_url }}">Runbook</a></p>
                     {{- end }}
                     {{- if gt (len .Labels.SortedPairs) 0 }}
                       <small>
