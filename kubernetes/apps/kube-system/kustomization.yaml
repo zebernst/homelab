@@ -25,3 +25,4 @@ resources:
   - snapshot-controller/ks.yaml
   - spegel/ks.yaml
   - synology-csi-driver/ks.yaml
+  - tetragon/ks.yaml

@@ -24,6 +24,10 @@ dashboards:
   enabled: true
 devices: bond0
 enableIPv4BIGTCP: true
+encryption:
+  enabled: true
+  type: wireguard
+  nodeEncryption: true
 endpointRoutes:
   enabled: true
 envoy:
