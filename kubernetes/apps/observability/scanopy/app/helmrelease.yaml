@@ -71,6 +71,9 @@ spec:
             port: *port
     route:
       scanopy:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            path: /api/health
         hostnames:
           - scanopy.zebernst.dev
         parentRefs:

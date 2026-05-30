@@ -112,6 +112,7 @@ jobs:
         run: >-
           flate diff ${{ matrix.resource }}
           --path ./kubernetes
+          --allow-missing-secrets
           -o markdown
           > diff.patch
 

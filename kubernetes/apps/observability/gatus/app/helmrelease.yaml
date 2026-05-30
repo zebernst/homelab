@@ -24,24 +24,23 @@ spec:
             envFrom: &envFrom
               - secretRef:
                   name: gatus-secret
-          init-config:
+          gatus-sidecar:
             dependsOn: init-db
             image:
-              repository: ghcr.io/kiwigrid/k8s-sidecar
-              tag: 1.30.11@sha256:91b49e5b6d2fb03e7a9014f8b072d0de199987845b02d96ce458dd9f14e753f5
-            env:
-              FOLDER: /config
-              LABEL: gatus.io/enabled
-              NAMESPACE: ALL
-              RESOURCE: both
-              UNIQUE_FILENAMES: true
-              METHOD: WATCH
-            restartPolicy: Always
+              repository: ghcr.io/home-operations/gatus-sidecar
+              tag: 0.0.18@sha256:3e8ab2f65ac6eba268c963919e34e6f4c4e10439979de3ded71242240621edcd
+            args:
+              - --auto-httproute
+              - --enable-httproute
+              - --enable-service
+              - --gateway-name=external
+              - --gateway-name=internal
             resources: &resources
               requests:
                 cpu: 10m
               limits:
-                memory: 256Mi
+                memory: 128Mi
+            restartPolicy: Always
         containers:
           gatus:
             image:
@@ -72,6 +71,7 @@ spec:
               capabilities: { drop: ["ALL"] }
             resources: *resources
     defaultPodOptions:
+      automountServiceAccountToken: true
       priorityClassName: external-facing
       dnsConfig:
         options:
@@ -87,6 +87,8 @@ spec:
             port: *port
     route:
       gatus:
+        annotations:
+          gatus.home-operations.com/enabled: "false"
         hostnames:
           - status.zebernst.dev
         parentRefs:
@@ -112,6 +114,9 @@ spec:
         type: configMap
         name: gatus-configmap
         globalMounts:
+          - path: /config/buddy.yaml
+            subPath: buddy.yaml
+            readOnly: true
           - path: /config/config.yaml
             subPath: config.yaml
             readOnly: true

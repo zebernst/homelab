@@ -18,9 +18,3 @@ configMapGenerator:
       - bluemap/maps/vanilla-overworld.conf
       - bluemap/maps/vanilla-nether.conf
       - bluemap/maps/vanilla-end.conf
-  - name: vanilla-gatus-ep
-    files:
-      - config.yaml=gatus-config.yaml
-    options:
-      labels:
-        gatus.io/enabled: "true"

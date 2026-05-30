@@ -10,8 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../components/gatus
   path: kubernetes/apps/observability/kromgo/app
   prune: true
   sourceRef:
@@ -25,4 +23,3 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_PATH: /talos_version

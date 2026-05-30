@@ -10,8 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../components/gatus
   dependsOn:
     - name: victoria-metrics-operator
       namespace: *ns
@@ -31,9 +29,6 @@ spec:
   timeout: 5m
   postBuild:
     substitute:
-      APP: *app
-      GATUS_PATH: /health
-      GATUS_SUBDOMAIN: status
       GATUS_WEB_PORT: "80"
       INIT_POSTGRES_DBNAME: gatus
       INIT_POSTGRES_HOST: redspot-rw.database.svc.cluster.local

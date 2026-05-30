@@ -29,9 +29,3 @@ configMapGenerator:
       - bluemap/maps/atm10-allthemodium-mining.conf
       - bluemap/maps/atm10-allthemodium-other.conf
       - bluemap/maps/atm10-allthemodium-beyond.conf
-  - name: atm10-gatus-ep
-    files:
-      - config.yaml=gatus-config.yaml
-    options:
-      labels:
-        gatus.io/enabled: "true"

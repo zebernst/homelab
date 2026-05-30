@@ -87,6 +87,9 @@ spec:
             port: *port
     route:
       plex:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            path: /web/index.html
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"
         parentRefs:

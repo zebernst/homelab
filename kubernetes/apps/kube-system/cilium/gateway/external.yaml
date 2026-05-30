@@ -5,6 +5,11 @@ metadata:
   name: external
   annotations:
     external-dns.alpha.kubernetes.io/target: &hostname external.zebernst.dev
+    gatus.home-operations.com/endpoint: |
+      client:
+        dns-resolver: tcp://1.1.1.1:53
+      conditions:
+        - "[STATUS] == 200"
   labels:
     external-dns.alpha.kubernetes.io/registry: cloudflare
 spec:
