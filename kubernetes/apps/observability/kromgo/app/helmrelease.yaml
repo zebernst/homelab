@@ -66,6 +66,9 @@ spec:
             port: *healthPort
     route:
       app:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            path: /talos_version
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"
         parentRefs:

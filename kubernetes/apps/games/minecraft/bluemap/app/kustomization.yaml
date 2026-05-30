@@ -5,8 +5,6 @@ kind: Kustomization
 resources:
   - pvc.yaml
   - helmrelease.yaml
-components:
-  - ../../../../../components/gatus
 generatorOptions:
   disableNameSuffixHash: true
 configMapGenerator:
