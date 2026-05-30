@@ -4,8 +4,6 @@ apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMAlertmanagerConfig
 metadata:
   name: alertmanager
-  labels:
-    alertmanager.config: zebernst
 spec:
   route:
     group_by: ["alertname", "cluster", "job"]
