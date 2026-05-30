@@ -132,7 +132,7 @@ spec:
           gatus.home-operations.com/enabled: "true"
           gatus.home-operations.com/endpoint: |
             name: all the mods 10
-            group: minecraft
+            group: cluster
             url: tcp://atm10.games.svc.cluster.local:25565
             interval: 1m
             conditions:

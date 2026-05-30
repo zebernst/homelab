@@ -120,7 +120,7 @@ task volsync:unlock
 kubernetes/
 ├── apps/           # Application deployments organized by namespace
 ├── bootstrap/      # Initial cluster bootstrap (helmfile + secrets)
-├── components/     # Reusable kustomize components (volsync, gatus, keda, common)
+├── components/     # Reusable kustomize components (volsync, keda, common)
 └── flux/           # Core Flux GitOps configuration
 ```
 
@@ -200,6 +200,25 @@ Useful kubectl plugins (via krew/aqua):
 - `kubectl-rook-ceph`: Rook management
 
 ## YAML Conventions
+
+### Gatus exposure tiers
+
+Gatus endpoint discovery uses `gatus-sidecar` in `kubernetes/apps/observability/gatus/`. Tier defaults live on Gateways; per-app overrides should only set route-specific fields (`path:`, `enabled: "false"`, custom `url:`).
+
+| Tier | Resource | Group | DNS resolver |
+|------|----------|-------|--------------|
+| **Public** | HTTPRoute → `external` Gateway | `public` | `1.1.1.1` (inherited from Gateway) |
+| **Internal** | HTTPRoute → `internal` Gateway | `internal` | `kube-dns` (inherited from Gateway) |
+| **Cluster** | Service (opt-in) | `cluster` | in-cluster (auto `*.svc` URL) |
+
+Cluster-tier Services require explicit opt-in:
+
+```yaml
+gatus.home-operations.com/enabled: "true"
+gatus.home-operations.com/endpoint: |
+  group: cluster
+  # url: tcp://myapp.namespace.svc:8080  # optional override
+```
 
 ### ks.yaml (Flux Kustomization)
 - Schema comment (`kubernetes-schemas.pages.dev`) above `---` as first line

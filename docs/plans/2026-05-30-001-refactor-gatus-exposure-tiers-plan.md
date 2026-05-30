@@ -1,7 +1,7 @@
 ---
 title: "refactor: Three-tier Gatus exposure model (cluster / internal / public)"
 type: refactor
-status: active
+status: completed
 date: 2026-05-30
 ---
 
