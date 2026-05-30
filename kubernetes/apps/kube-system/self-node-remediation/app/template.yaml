@@ -1,9 +1,0 @@
----
-apiVersion: self-node-remediation.medik8s.io/v1alpha1
-kind: SelfNodeRemediationTemplate
-metadata:
-  name: self-node-remediation-automatic
-spec:
-  template:
-    spec:
-      remediationStrategy: Automatic
