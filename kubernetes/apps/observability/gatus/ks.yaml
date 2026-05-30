@@ -34,3 +34,11 @@ spec:
       APP: *app
       GATUS_PATH: /health
       GATUS_SUBDOMAIN: status
+      # Placeholders for Flate/Flux postBuild (runtime values come from gatus-secret via envFrom).
+      GATUS_PUSHOVER_APP_TOKEN: "0000000000000000000000000000000001"
+      GATUS_PUSHOVER_USER_KEY: "0000000000000000000000000000000001"
+      GATUS_WEB_PORT: "80"
+      INIT_POSTGRES_DBNAME: gatus
+      INIT_POSTGRES_HOST: redspot-rw.database.svc.cluster.local
+      INIT_POSTGRES_PASS: gatus
+      INIT_POSTGRES_USER: gatus
