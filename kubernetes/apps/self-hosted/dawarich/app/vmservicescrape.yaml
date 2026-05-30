@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmservicescrape_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: dawarich
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: dawarich
+      app.kubernetes.io/name: dawarich
+      app.kubernetes.io/service: dawarich
+  endpoints:
+    - port: http
+      path: /metrics
+      scheme: http
+      interval: 1m
+      scrapeTimeout: 10s
+      basicAuth:
+        username:
+          name: dawarich-secret
+          key: METRICS_USERNAME
+        password:
+          name: dawarich-secret
+          key: METRICS_PASSWORD
+      vm_scrape_params:
+        headers:
+          - "X-Forwarded-Proto: https"
+          - "Host: localhost"
