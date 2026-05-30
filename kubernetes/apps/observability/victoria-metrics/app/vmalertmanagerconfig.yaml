@@ -31,6 +31,12 @@ spec:
     - name: blackhole
     - name: heartbeat
       webhook_configs:
+        # External dead man's switch — alerts when the cluster cannot reach the internet
+        # (Healthchecks.io notices missing pings even if Gatus/Pushover cannot send).
+        - url_secret:
+            name: alertmanager-secret
+            key: ALERTMANAGER_HEARTBEAT_URL
+        # In-cluster push so buddy/heartbeat appears on the Gatus dashboard when LAN is up
         - url_secret:
             name: alertmanager-secret
             key: BUDDY_HEARTBEAT_URL
