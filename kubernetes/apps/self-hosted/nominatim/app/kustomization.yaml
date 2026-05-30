@@ -6,11 +6,16 @@ resources:
   - vmprobe.yaml
   - externalsecret.yaml
   - helmrelease.yaml
+  - httproute.yaml
 configMapGenerator:
   - name: nominatim-scripts
     files:
       - scripts/start.sh
       - scripts/maintain-regions.sh
+      - scripts/init-ui.sh
+  - name: nominatim-nginx
+    files:
+      - nginx/default.conf
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled

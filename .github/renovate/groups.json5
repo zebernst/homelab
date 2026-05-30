@@ -106,6 +106,14 @@
       minimumGroupSize: 2,
     },
     {
+      description: "Nominatim",
+      groupName: "nominatim",
+      matchFilePaths: ["kubernetes/apps/self-hosted/nominatim/**"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
       description: ["Minecraft Group"],
       groupName: "Minecraft",
       matchPackagePatterns: [
