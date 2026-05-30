@@ -6,6 +6,7 @@ resources:
   - externalsecret.yaml
   - helmrelease.yaml
   - rbac.yaml
+  - vmrule.yaml
 configMapGenerator:
   - name: gatus-configmap
     files:

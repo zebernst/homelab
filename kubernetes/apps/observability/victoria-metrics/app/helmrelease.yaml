@@ -55,7 +55,8 @@ spec:
             rules:
               - alert: DockerhubRateLimitRisk
                 annotations:
-                  summary: Kubernetes cluster Dockerhub rate limit risk
+                  summary: >-
+                    There are {{ $value }} containers pulling from Dockerhub. This may lead to rate limiting.
                 expr: count(time() - container_last_seen{image=~"(docker.io).*",container!=""} < 30) > 100
                 for: 5m
                 keep_firing_for: 90s
@@ -81,6 +82,10 @@ spec:
       enabled: true
       useManagedConfig: true
       spec:
+        # Required when merging chart vmks + standalone VMAlertmanagerConfig; otherwise
+        # the operator forces continue: true on first-level routes and alerts fan out
+        # to multiple receivers (e.g. blackhole + pushover).
+        disableRouteContinueEnforce: true
         externalURL: https://alertmanager.zebernst.dev
         storage:
           volumeClaimTemplate:

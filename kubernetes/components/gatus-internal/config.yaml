@@ -1,0 +1,16 @@
+---
+# Probes public DNS (1.1.1.1) for an A record on ${APP}.zebernst.dev.
+# Success means no public A record (not exposed). Pair with VMRule GatusEndpointExposed.
+endpoints:
+  - name: "${APP}"
+    group: internal
+    url: 1.1.1.1
+    interval: 1m
+    ui:
+      hide-hostname: true
+      hide-url: true
+    dns:
+      query-name: "${GATUS_SUBDOMAIN:=${APP}}.zebernst.dev"
+      query-type: A
+    conditions:
+      - "len([BODY]) == 0"
