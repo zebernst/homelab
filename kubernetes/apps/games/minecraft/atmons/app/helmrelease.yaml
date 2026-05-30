@@ -32,7 +32,7 @@ spec:
           atmons:
             image:
               repository: ghcr.io/itzg/minecraft-server
-              tag: 2026.5.2-java21
+              tag: 2026.5.4-java21
             env:
               EULA: "true"
               TZ: America/Chicago
@@ -87,7 +87,7 @@ spec:
           mc-monitor:
             image:
               repository: itzg/mc-monitor
-              tag: 0.16.5@sha256:9ba093b1dd8c12fd1f9126b6b4033f5cdf51fd11d1a27c6598bd4ac6d0962a6c
+              tag: 0.16.6@sha256:1957e638f79280090a92bf7aaf90d60db566378e6485b25491c2b766e99ba832
             args: ["export-for-prometheus"]
             env:
               EXPORT_SERVERS: atmons
