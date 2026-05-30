@@ -39,7 +39,7 @@ endpoints:
       - type: pushover
 
 external-endpoints:
-  - name: Heartbeat
+  - name: heartbeat
     group: buddy
     token: ${BUDDY_HEARTBEAT_TOKEN}
     heartbeat:

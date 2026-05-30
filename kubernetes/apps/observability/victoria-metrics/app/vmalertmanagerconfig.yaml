@@ -33,7 +33,11 @@ spec:
       webhook_configs:
         - url_secret:
             name: alertmanager-secret
-            key: ALERTMANAGER_HEARTBEAT_URL
+            key: BUDDY_HEARTBEAT_URL
+          http_config:
+            bearer_token_secret:
+              name: alertmanager-secret
+              key: BUDDY_HEARTBEAT_TOKEN
     - name: pushover
       pushover_configs:
         - html: true
