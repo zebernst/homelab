@@ -42,6 +42,9 @@ spec:
         metadata:
           name: _
         spec:
+          ignoreMissingComponents: true
+          components:
+            - ../../../../components/vmrule
           patches:
             - patch: |-
                 apiVersion: helm.toolkit.fluxcd.io/v2
