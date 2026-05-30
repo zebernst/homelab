@@ -2,9 +2,8 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 # Default alert `job` from VMRule metadata.name on every rule group.
 #
-# Injected cluster-wide via kubernetes/flux/cluster/ks.yaml on all Flux Kustomizations.
-# ignoreMissingComponents skips component paths that do not resolve for a given spec.path
-# depth (see ../../../ vs ../../../../ vs ../../../../../ entries there).
+# Include only in app kustomization.yaml files that list vmrule.yaml (not cluster-wide:
+# replacements require a VMRule source and fail when the overlay has none).
 #
 # Overrides (replacements overwrite existing group labels.job):
 # - Per-VMRule job: set metadata.name to the desired job (e.g. volsync-metrics).
