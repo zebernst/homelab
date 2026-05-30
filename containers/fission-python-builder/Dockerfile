@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 FROM ghcr.io/fission/python-fastapi-builder:1.34.2
-COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.17 /uv /usr/local/bin/uv
 COPY --chmod=755 <<'EOF' /usr/local/bin/build
 #!/bin/sh
 set -e
