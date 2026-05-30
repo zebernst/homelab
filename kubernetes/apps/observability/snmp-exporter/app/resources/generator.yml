@@ -5,6 +5,10 @@ auths:
   public_v2:
     version: 2
 
+# Regenerate modules.yml after editing this file:
+#   generator generate -g generator.yml -o /tmp/snmp.yml   # requires MIBs; see generator README
+#   tail -n +17 /tmp/snmp.yml > modules.yml
+
 modules:
   # Synology
   #

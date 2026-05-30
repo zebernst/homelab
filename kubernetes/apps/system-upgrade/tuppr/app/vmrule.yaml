@@ -13,6 +13,7 @@ spec:
             description: Tuppr upgrade {{ $labels.name }} is in a failed state.
             summary: Tuppr upgrade failed
           expr: tuppr_talos_upgrade_phase{phase="Failed"} == 3
+          for: 5m
           labels:
             severity: critical
         - alert: TupprUpgradeStuck
