@@ -3,7 +3,7 @@
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:
-  name: volsync
+  name: volsync-metrics
 spec:
   groups:
     - name: volsync.rules

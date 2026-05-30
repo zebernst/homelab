@@ -64,11 +64,16 @@ jobs:
       - name: Setup flate
         uses: home-operations/flate/action@0.1.35
         with:
-          base: ${{ github.event_name == 'pull_request' && github.base_ref || '' }}
+          # Empty base = full-tree reconcile. PR changed-only mode (--base main)
+          # skips unchanged HelmRelease dependsOn targets, which surfaces as
+          # "dependency not found" for charts like victoria-metrics and volsync.
+          base: ""
           cache: true
           token: ${{ github.event_name == 'pull_request' && steps.app-token.outputs.token || github.token }}
 
       - name: Run flate test
+        env:
+          FLATE_BASE: ""
         run: >-
           flate test ${{ matrix.resource }}
           --path ./kubernetes
@@ -104,17 +109,39 @@ jobs:
       - name: Setup flate
         uses: home-operations/flate/action@0.1.35
         with:
-          base: ${{ github.base_ref }}
+          base: ""
           cache: true
           token: "${{ steps.app-token.outputs.token }}"
 
       - name: Run flate diff
-        run: >-
-          flate diff ${{ matrix.resource }}
-          --path ./kubernetes
-          --allow-missing-secrets
-          -o markdown
-          > diff.patch
+        env:
+          FLATE_BASE: ""
+        run: |
+          set -euo pipefail
+          rc=0
+          flate diff ${{ matrix.resource }} \
+            --path ./kubernetes \
+            --allow-missing-secrets \
+            -o markdown \
+            > diff.patch 2> diff.err || rc=$?
+          if [[ "$rc" -eq 0 ]]; then
+            exit 0
+          fi
+          if [[ -s diff.patch ]]; then
+            cat diff.err >&2
+            exit "$rc"
+          fi
+          # `flate diff` always materializes a merge-base baseline, so changed-only
+          # mode still runs. HelmRelease dependsOn peers stay out of the keep set and
+          # reconcile as "dependency not found" on both snapshots — exit 1 with no diff
+          # output even when the PR is valid. Allow that specific failure mode.
+          if grep -qF 'dependency not found' diff.err \
+            && ! grep -E 'fetch https?://|artifact not found|chart not found' diff.err; then
+            echo "::warning::Ignoring HelmRelease dependsOn failures in changed-only flate diff (upstream limitation)"
+            exit 0
+          fi
+          cat diff.err >&2
+          exit "$rc"
 
       - name: Generate Diff
         id: diff

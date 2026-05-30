@@ -45,13 +45,16 @@ spec:
       create: true
       alerting:
         spec:
-          # Delay resolve notifications until the condition has been clear for 3 eval cycles (30s).
           keep_firing_for: 90s
+          labels:
+            job: '{{ $labels.namespace | default "cluster" }}'
 
     extraRules:
       dockerhub-rules:
         groups:
           - name: dockerhub
+            labels:
+              job: cadvisor
             rules:
               - alert: DockerhubRateLimitRisk
                 annotations:
@@ -65,6 +68,8 @@ spec:
       oom-rules:
         groups:
           - name: oom
+            labels:
+              job: '{{ $labels.namespace | default "cluster" }}'
             rules:
               - alert: OomKilled
                 annotations:
