@@ -80,27 +80,6 @@ spec:
           bittorrent-tcp:
             port: *bittorrentPort
             protocol: TCP
-    route:
-      app:
-        hostnames:
-          - qb.zebernst.dev
-        parentRefs:
-          - name: external
-            namespace: kube-system
-            sectionName: https
-    ingress:
-      tailscale:
-        className: tailscale
-        hosts:
-          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
-            paths:
-              - path: /
-                service:
-                  identifier: *app
-                  port: http
-        tls:
-          - hosts:
-              - *tsHost
     persistence:
       config:
         existingClaim: *app
