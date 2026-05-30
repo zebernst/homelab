@@ -6,7 +6,7 @@ metadata:
   name: alertmanager
 spec:
   route:
-    group_by: ["alertname", "job"]
+    group_by: ["alertname", "namespace", "severity"]
     group_interval: 10m
     group_wait: 1m
     receiver: pushover
@@ -21,9 +21,6 @@ spec:
         repeat_interval: 1m
         matchers:
           - alertname="Watchdog"
-      - receiver: pushover
-        matchers:
-          - severity="critical"
   inhibit_rules:
     - equal: ["alertname", "namespace"]
       source_matchers:
@@ -60,7 +57,16 @@ spec:
               {{- end }}
             {{- end }}
           priority: |-
-            {{ if eq .Status "firing" }}1{{ else }}0{{ end }}
+            {{- if eq .Status "firing" -}}
+              {{- if eq .CommonLabels.severity "critical" -}}1
+              {{- else if eq .CommonLabels.severity "warning" -}}-1
+              {{- else -}}0
+              {{- end -}}
+            {{- else -}}
+              {{- if eq .CommonLabels.severity "critical" -}}0
+              {{- else -}}-2
+              {{- end -}}
+            {{- end -}}
           send_resolved: true
           sound: gamelan
           title: >-

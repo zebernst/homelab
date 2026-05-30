@@ -11,6 +11,7 @@ spec:
         - alert: CeleryWorkerOffline
           expr: flower_worker_online == 0
           for: 2m
+          keep_firing_for: 90s
           labels:
             severity: critical
             context: celery-worker
@@ -21,6 +22,7 @@ spec:
         - alert: TaskFailureRatioTooHigh
           expr: (sum(avg_over_time(flower_events_total{type="task-failed"}[15m])) by (task) / sum(avg_over_time(flower_events_total{type=~"task-failed|task-succeeded"}[15m])) by (task)) * 100 > 1
           for: 5m
+          keep_firing_for: 90s
           labels:
             severity: critical
             context: celery-task
@@ -31,6 +33,7 @@ spec:
         - alert: TaskPrefetchTimeTooHigh
           expr: sum(avg_over_time(flower_task_prefetch_time_seconds[15m])) by (task, worker) > 1
           for: 5m
+          keep_firing_for: 90s
           labels:
             severity: critical
             context: celery-task

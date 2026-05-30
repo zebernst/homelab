@@ -12,6 +12,7 @@ spec:
           expr: |
             increase(rails_requests_total{controller="api/v1/points", action="create"}[25h]) == 0
           for: 15m
+          keep_firing_for: 90s
           annotations:
             summary: Dawarich location sync stopped
             description: >-

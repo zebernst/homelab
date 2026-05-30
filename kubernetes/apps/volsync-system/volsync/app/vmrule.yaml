@@ -15,6 +15,7 @@ spec:
             summary: >-
               VolSync component has disappeared from Prometheus target discovery
           for: 5m
+          keep_firing_for: 90s
           labels:
             severity: critical
 
@@ -24,6 +25,7 @@ spec:
           annotations:
             summary: >-
               {{ $labels.obj_namespace }}/{{ $labels.obj_name }} volume is out of sync
-          for: 5m
+          for: 15m
+          keep_firing_for: 90s
           labels:
             severity: critical

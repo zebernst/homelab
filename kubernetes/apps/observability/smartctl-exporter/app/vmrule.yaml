@@ -12,6 +12,7 @@ spec:
           expr: |
             smartctl_device_temperature > 65
           for: 5m
+          keep_firing_for: 90s
           annotations:
             summary: >-
               Mounted drive {{ $labels.device }} on node {{ $labels.node }} ({{ $labels.node_ip }}) has a temperature higher than {{ $value }}°C
@@ -22,6 +23,7 @@ spec:
           expr: |
             (smartctl_device_smart_status != 1 or smartctl_device_status != 1)
           for: 5m
+          keep_firing_for: 90s
           annotations:
             summary: >-
               Mounted drive {{ $labels.device }} on node {{ $labels.node }} ({{ $labels.node_ip }}) did not pass its SMART test
@@ -32,6 +34,7 @@ spec:
           expr: |
             smartctl_device_critical_warning != 0
           for: 5m
+          keep_firing_for: 90s
           annotations:
             summary: >-
               Mounted drive {{ $labels.device }} on node {{ $labels.node }} ({{ $labels.node_ip }}) is in a critical state
@@ -42,6 +45,7 @@ spec:
           expr: |
             smartctl_device_media_errors != 0
           for: 5m
+          keep_firing_for: 90s
           annotations:
             summary: >-
               Mounted drive {{ $labels.device }} on node {{ $labels.node }} ({{ $labels.node_ip }}) has media errors
@@ -52,6 +56,7 @@ spec:
           expr: |
             smartctl_device_available_spare_threshold > smartctl_device_available_spare
           for: 5m
+          keep_firing_for: 90s
           annotations:
             summary: >-
               Device {{ $labels.device }} on node {{ $labels.node }} ({{ $labels.node_ip }}) is under available spare threshold
@@ -65,5 +70,6 @@ spec:
             summary: >-
               Device {{ $labels.device }} on node {{ $labels.node }} ({{ $labels.node_ip }}) interface is slower then it should be
           for: 5m
+          keep_firing_for: 90s
           labels:
             severity: critical

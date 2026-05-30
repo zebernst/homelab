@@ -12,6 +12,7 @@ spec:
           expr: |
             absent(up{instance=~".*:8880"})
           for: 5m
+          keep_firing_for: 90s
           labels:
             severity: critical
           annotations:

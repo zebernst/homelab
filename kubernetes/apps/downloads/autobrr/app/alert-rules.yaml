@@ -6,6 +6,7 @@ groups:
         expr: |
           sum by (app) (count_over_time({app="autobrr"} |~ "(?i)network unhealthy"[2m])) > 0
         for: 2m
+        keep_firing_for: 90s
         labels:
           severity: critical
           category: logs

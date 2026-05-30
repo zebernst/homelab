@@ -7,6 +7,7 @@ groups:
         expr: |
           sum by (app) (count_over_time({app="plex"} |~ "(?i)retry busy DB"[5m])) > 0
         for: 5m
+        keep_firing_for: 90s
         annotations:
           summary: >-
             {{ $labels.app }} is experiencing database issues
