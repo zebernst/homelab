@@ -133,7 +133,7 @@ spec:
           gatus.home-operations.com/enabled: "true"
           gatus.home-operations.com/endpoint: |
             name: vanilla
-            group: cluster
+            group: public
             url: tcp://vanilla.games.svc.cluster.local:25565
             interval: 1m
             conditions:
