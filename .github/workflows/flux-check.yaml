@@ -57,13 +57,17 @@ jobs:
           ref: "${{ github.event.repository.default_branch }}"
           path: default
 
-      - name: Run flate test
-        uses: docker://ghcr.io/home-operations/flate:0.1.35
+      - name: Setup flate
+        uses: home-operations/flate/action@v0.1.35
         with:
-          args: >-
-            test ${{ matrix.resource }}
-            --path ./pull
-            --path-orig ./default
+          cache: true
+          token: "${{ steps.app-token.outputs.token }}"
+
+      - name: Run flate test
+        run: >-
+          flate test ${{ matrix.resource }}
+          --path ./pull
+          --path-orig ./default
 
   diff:
     if: ${{ needs.filter.outputs.changed-files != '[]' }}
@@ -98,17 +102,19 @@ jobs:
           ref: "${{ github.event.repository.default_branch }}"
           path: default
 
+      - name: Setup flate
+        uses: home-operations/flate/action@v0.1.35
+        with:
+          cache: true
+          token: "${{ steps.app-token.outputs.token }}"
+
       - name: Run flate diff
-        run: |
-          docker run --rm \
-            -v "${{ github.workspace }}:/github/workspace" \
-            -w /github/workspace \
-            ghcr.io/home-operations/flate:0.1.35 \
-            diff ${{ matrix.resource }} \
-              --path ./pull \
-              --path-orig ./default \
-              -o markdown \
-            > diff.patch
+        run: >-
+          flate diff ${{ matrix.resource }}
+          --path ./pull
+          --path-orig ./default
+          -o markdown
+          > diff.patch
 
       - name: Generate Diff
         id: diff
