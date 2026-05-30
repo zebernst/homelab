@@ -47,7 +47,8 @@ spec:
         spec:
           keep_firing_for: 90s
           labels:
-            job: '{{ $labels.namespace | default "cluster" }}'
+            # vmalert/VMRule webhook only allows $labels/$value/$expr — not Helm's `default`
+            job: '{{ if $labels.namespace }}{{ $labels.namespace }}{{ else }}cluster{{ end }}'
 
     extraRules:
       dockerhub-rules:
@@ -69,7 +70,7 @@ spec:
         groups:
           - name: oom
             labels:
-              job: '{{ $labels.namespace | default "cluster" }}'
+              job: '{{ if $labels.namespace }}{{ $labels.namespace }}{{ else }}cluster{{ end }}'
             rules:
               - alert: OomKilled
                 annotations:
