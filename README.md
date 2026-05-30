@@ -21,8 +21,7 @@ _... automated via [Flux](https://github.com/fluxcd/flux2), [Renovate](https://g
 <div align="center">
 
 [![Home-Internet](https://img.shields.io/uptimerobot/status/m798207245-e361357b4ae0adccce695dd9?style=for-the-badge&logo=ubiquiti&logoColor=white&logoSize=auto&label=Home%20Internet&color=brightgreen)](https://status.zebernst.dev)&nbsp;&nbsp;
-[![Status-Page](https://img.shields.io/uptimerobot/status/m798207270-986abc3b5ee42d8f51b9fc5c?color=brightgreeen&label=Status%20Page&style=for-the-badge&logo=statuspage&logoColor=white)](https://status.zebernst.dev)&nbsp;&nbsp;
-[![Alertmanager](https://img.shields.io/endpoint?url=https%3A%2F%2Fhealthchecks.io%2Fb%2F2%2F75190d22-c52a-410d-9f45-9bd7c95cbb96.shields?color=brightgreeen&label=Alertmanager&style=for-the-badge&logo=prometheus&logoColor=white)](https://status.zebernst.dev)
+[![Status-Page](https://img.shields.io/uptimerobot/status/m798207270-986abc3b5ee42d8f51b9fc5c?color=brightgreeen&label=Status%20Page&style=for-the-badge&logo=statuspage&logoColor=white)](https://status.zebernst.dev)
 </div>
 
 <div align="center">
@@ -151,8 +150,7 @@ Alternative solutions to the first two of these problems would be to host a Kube
 | [Backblaze](https://www.backblaze.com)      | S3-compatible object storage                                      | ~$36/yr        |
 | [GitHub](https://github.com/)               | Hosting this repository and continuous integration/deployments    | Free           |
 | [Pushover](https://pushover.net/)           | Kubernetes Alerts and application notifications                   | $5 OTP         |
-| [UptimeRobot](https://uptimerobot.com/)     | Monitoring internet connectivity and external facing applications | Free           |
-| [Healthchecks.io](https://healthchecks.io/) | Dead man's switch for monitoring cron jobs                        | Free           |
+| [UptimeRobot](https://uptimerobot.com/)     | External monitoring (home internet, status page, WAN-down alerts)   | Free           |
 |                                             |                                                                   | Total: ~$10/mo |
 
 ---

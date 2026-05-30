@@ -15,7 +15,7 @@ alerting:
 
 endpoints:
   # Shown on the status page when the cluster has outbound connectivity. WAN-down
-  # alerts rely on UptimeRobot (external) and the Healthchecks.io Watchdog webhook.
+  # alerts rely on UptimeRobot (external).
   - name: Ping
     group: buddy
     url: icmp://${BUDDY_DDNS_HOSTNAME}
