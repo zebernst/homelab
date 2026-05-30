@@ -1,16 +1,30 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cilium.io/ciliumnetworkpolicy_v2.json
 ---
-# Holmes core pod (server + operator): cluster-internal only, no internet.
+# Holmes server + operator: cluster-internal only, no internet.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: holmesgpt
 spec:
   endpointSelector:
-    matchLabels:
-      app.kubernetes.io/name: holmes
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - holmes
+          - holmes-operator
   egress:
     # DNS
+    - toServices:
+        - k8sService:
+            serviceName: kube-dns
+            namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: kube-system
@@ -60,17 +74,17 @@ spec:
         - ports:
             - port: "9428"
               protocol: TCP
-    # GitHub MCP sidecar (in-namespace, chart-managed port 8000)
+    # GitHub MCP server (in-namespace, chart-managed port 8000)
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: ai
-            app.kubernetes.io/component: github-mcp
+            app.kubernetes.io/name: github-mcp-server
       toPorts:
         - ports:
             - port: "8000"
               protocol: TCP
 ---
-# GitHub MCP sidecar: only allowed to reach api.github.com.
+# GitHub MCP server: only allowed to reach api.github.com.
 # All other internet egress is denied.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -79,9 +93,19 @@ metadata:
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/component: github-mcp
+      app.kubernetes.io/name: github-mcp-server
   egress:
     # DNS (required to resolve api.github.com)
+    - toServices:
+        - k8sService:
+            serviceName: kube-dns
+            namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: kube-system
