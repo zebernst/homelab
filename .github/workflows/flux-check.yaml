@@ -99,16 +99,16 @@ jobs:
           path: default
 
       - name: Run flate diff
-        uses: docker://ghcr.io/home-operations/flate:0.1.35
-        with:
-          args: >-
-            diff ${{ matrix.resource }}
-            --path ./pull
-            --path-orig ./default
-            --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
-            --limit-bytes 10000
-            --unified 6
-            --output-file diff.patch
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/github/workspace" \
+            -w /github/workspace \
+            ghcr.io/home-operations/flate:0.1.35 \
+            diff ${{ matrix.resource }} \
+              --path ./pull \
+              --path-orig ./default \
+              -o markdown \
+            > diff.patch
 
       - name: Generate Diff
         id: diff
