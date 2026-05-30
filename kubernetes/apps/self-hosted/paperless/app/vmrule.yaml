@@ -7,6 +7,8 @@ metadata:
 spec:
   groups:
     - name: paperless.rules
+      labels:
+        job: paperless
       rules:
         - alert: CeleryWorkerOffline
           expr: flower_worker_online == 0

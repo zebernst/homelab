@@ -10,8 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../components/vmrule
   path: kubernetes/apps/volsync-system/volsync/app
   prune: true
   sourceRef:

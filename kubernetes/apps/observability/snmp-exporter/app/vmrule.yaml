@@ -7,6 +7,8 @@ metadata:
 spec:
   groups:
     - name: snmp-exporter.rules
+      labels:
+        job: snmp-exporter
       rules:
         - alert: UPSOnBattery
           expr: |

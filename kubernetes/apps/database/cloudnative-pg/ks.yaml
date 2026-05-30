@@ -22,7 +22,8 @@ spec:
     namespace: flux-system
   targetNamespace: *ns
   timeout: 5m
-  wait: true---
+  wait: true
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -43,8 +44,6 @@ spec:
       failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
       current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   interval: 1h
-  components:
-    - ../../../../components/vmrule
   path: kubernetes/apps/database/cloudnative-pg/cluster
   postBuild:
     substitute:

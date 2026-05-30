@@ -13,8 +13,6 @@ spec:
     - name: victoria-metrics-operator
       namespace: *ns
   interval: 1h
-  components:
-    - ../../../../components/vmrule
   path: kubernetes/apps/observability/smartctl-exporter/app
   prune: true
   retryInterval: 1m

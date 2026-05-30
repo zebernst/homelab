@@ -37,8 +37,6 @@ spec:
       namespace: *ns
     - name: onepassword
       namespace: external-secrets
-  components:
-    - ../../../../components/vmrule
   path: kubernetes/apps/flux-system/flux-operator/instance
   prune: false # never should be deleted
   sourceRef:

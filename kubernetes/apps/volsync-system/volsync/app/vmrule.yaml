@@ -3,10 +3,12 @@
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:
-  name: volsync-metrics
+  name: volsync
 spec:
   groups:
     - name: volsync.rules
+      labels:
+        job: volsync-metrics
       rules:
         - alert: VolSyncComponentAbsent
           expr: |

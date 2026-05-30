@@ -8,6 +8,8 @@ metadata:
 spec:
   groups:
     - name: flux-instance.rules
+      labels:
+        job: flux
       rules:
         - alert: FluxInstanceAbsent
           expr: |

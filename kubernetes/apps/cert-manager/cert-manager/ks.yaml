@@ -10,8 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../components/vmrule
   path: kubernetes/apps/cert-manager/cert-manager/app
   prune: true
   sourceRef:

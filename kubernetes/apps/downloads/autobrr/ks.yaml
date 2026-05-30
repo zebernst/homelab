@@ -15,8 +15,6 @@ spec:
       namespace: database
     - name: onepassword
       namespace: external-secrets
-  components:
-    - ../../../../components/vmrule
   path: kubernetes/apps/downloads/autobrr/app
   prune: true
   sourceRef:

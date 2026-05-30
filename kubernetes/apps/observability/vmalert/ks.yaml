@@ -15,8 +15,6 @@ spec:
       namespace: *ns
     - name: victoria-metrics
       namespace: *ns
-  components:
-    - ../../../../components/vmrule
   path: kubernetes/apps/observability/vmalert/app
   prune: true
   sourceRef:

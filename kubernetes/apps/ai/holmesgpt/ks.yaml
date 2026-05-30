@@ -15,8 +15,6 @@ spec:
       namespace: ai
     - name: victoria-metrics
       namespace: observability
-  components:
-    - ../../../../components/vmrule
   path: kubernetes/apps/ai/holmesgpt/app
   prune: true
   sourceRef:
