@@ -142,7 +142,6 @@ spec:
             image:
               repository: registry.k8s.io/kubectl
               tag: v1.34.5
-            command: ["/kubectl"]
             args:
               - exec
               - deploy/nominatim
