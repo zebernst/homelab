@@ -54,8 +54,8 @@ spec:
         containers:
           nominatim:
             image:
-              # renovate: datasource=docker
               repository: mediagis/nominatim
+              # renovate: datasource=docker depName=mediagis/nominatim
               tag: "5.3.2"
             command: ["/bin/bash", "/scripts/start.sh"]
             env:
@@ -130,6 +130,46 @@ spec:
                 memory: 32Gi
               limits:
                 memory: 32Gi
+      ui:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        serviceAccount:
+          identifier: app
+        initContainers:
+          ui-init:
+            image:
+              repository: docker.io/library/alpine
+              # renovate: datasource=docker depName=library/alpine
+              tag: 3.21.3
+            command: ["/bin/sh", "/scripts/init-ui.sh"]
+            env:
+              # renovate: datasource=github-releases depName=osm-search/nominatim-ui
+              NOMINATIM_UI_VERSION: "3.11.0"
+        containers:
+          ui:
+            image:
+              repository: docker.io/library/nginx
+              # renovate: datasource=docker depName=library/nginx
+              tag: 1.27.5-alpine
+            probes:
+              liveness: &uiProbe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /search.html
+                    port: 80
+                  initialDelaySeconds: 0
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *uiProbe
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
       update-osm-db:
         type: cronjob
         cronjob:
@@ -141,6 +181,7 @@ spec:
           kubectl:
             image:
               repository: registry.k8s.io/kubectl
+              # renovate: datasource=docker depName=registry.k8s.io/kubectl
               tag: v1.34.5
             args:
               - exec
@@ -166,19 +207,17 @@ spec:
 
     service:
       nominatim:
-        controller: *app
+        controller: nominatim
         ports:
           http:
             port: 80
             targetPort: 8080
-    route:
-      nominatim:
-        hostnames:
-          - nominatim.zebernst.dev
-        parentRefs:
-          - name: internal
-            namespace: kube-system
-            sectionName: https
+      ui:
+        controller: ui
+        forceRename: nominatim-ui
+        ports:
+          http:
+            port: 80
 
     persistence:
       pgdata:
@@ -213,6 +252,26 @@ spec:
           nominatim:
             nominatim:
               - path: /scripts
+          ui:
+            ui-init:
+              - path: /scripts
+      ui-www:
+        type: emptyDir
+        advancedMounts:
+          ui:
+            ui-init:
+              - path: /ui-www
+            ui:
+              - path: /ui-www
+                readOnly: true
+      ui-nginx:
+        type: configMap
+        name: nominatim-nginx
+        advancedMounts:
+          ui:
+            ui:
+              - path: /etc/nginx/conf.d
+                readOnly: true
       import-staging:
         type: emptyDir
         advancedMounts:
