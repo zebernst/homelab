@@ -17,6 +17,7 @@ spec:
               Cert Manager has dissapeared from Prometheus service discovery
           labels:
             severity: critical
+            job: cert-manager
 
     - name: certificates
       rules:
@@ -31,6 +32,7 @@ spec:
               The cert {{ $labels.name }} is {{ $value | humanizeDuration }} from expiry, it should have renewed over a week ago
           labels:
             severity: critical
+            job: cert-manager
 
         - alert: CertManagerShortLivedCertExpirySoon
           expr: |
@@ -43,6 +45,7 @@ spec:
               The short-lived cert {{ $labels.name }} is {{ $value | humanizeDuration }} from expiry and has not renewed
           labels:
             severity: critical
+            job: cert-manager
 
         - alert: CertManagerCertNotReady
           expr: |
@@ -53,6 +56,7 @@ spec:
               The cert {{ $labels.name }} is not ready to serve traffic
           labels:
             severity: critical
+            job: cert-manager
 
         - alert: CertManagerHittingRateLimits
           expr: |
@@ -63,3 +67,4 @@ spec:
               Cert manager hitting LetsEncrypt rate limits
           labels:
             severity: critical
+            job: cert-manager

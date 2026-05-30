@@ -17,6 +17,7 @@ spec:
               The {{ $labels.name }} endpoint is down
           labels:
             severity: critical
+            job: gatus
 
         - alert: GatusEndpointExposed
           expr: |
@@ -27,3 +28,4 @@ spec:
               The {{ $labels.name }} endpoint has a public DNS record and is exposed
           labels:
             severity: critical
+            job: gatus

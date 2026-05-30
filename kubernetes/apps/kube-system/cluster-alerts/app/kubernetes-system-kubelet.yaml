@@ -1,0 +1,183 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmrule_v1beta1.json
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: kubernetes-system-kubelet
+spec:
+  groups:
+  - name: kubernetes-system-kubelet
+    rules:
+    - alert: KubeNodeNotReady
+      expr: (kube_node_status_condition{job="kube-state-metrics",condition="Ready",status="true"} == 0) and on(cluster,node) (kube_node_spec_unschedulable{job="kube-state-metrics"} == 0)
+      annotations:
+        description: '{{ $labels.node }} has been unready for more than 15 minutes on cluster {{ $labels.cluster }}.'
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubenodenotready
+        summary: Node is not ready.
+      for: 15m
+      labels:
+        severity: warning
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeNodePressure
+      expr: (kube_node_status_condition{job="kube-state-metrics",condition=~"(MemoryPressure|DiskPressure|PIDPressure)",status="true"} == 1) and on(cluster,node) (kube_node_spec_unschedulable{job="kube-state-metrics"} == 0)
+      annotations:
+        description: '{{ $labels.node }} on cluster {{ $labels.cluster }} has active Condition {{ $labels.condition }}. This is caused by resource usage exceeding eviction thresholds.'
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubenodepressure
+        summary: Node has as active Condition.
+      for: 10m
+      labels:
+        severity: info
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeNodeUnreachable
+      expr: (kube_node_spec_taint{job="kube-state-metrics",key="node.kubernetes.io/unreachable",effect="NoSchedule"} unless ignoring(key,value) kube_node_spec_taint{job="kube-state-metrics",key=~"ToBeDeletedByClusterAutoscaler|cloud.google.com/impending-node-termination|aws-node-termination-handler/spot-itn"}) == 1
+      annotations:
+        description: '{{ $labels.node }} is unreachable and some workloads may be rescheduled on cluster {{ $labels.cluster }}.'
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubenodeunreachable
+        summary: Node is unreachable.
+      for: 15m
+      labels:
+        severity: warning
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeletTooManyPods
+      expr: ((max(kubelet_running_pods{job="kubelet",metrics_path="/metrics"} > 1) by(cluster,instance) * on(cluster,instance) group_left(node) max(kubelet_node_name{job="kubelet",metrics_path="/metrics"}) by(cluster,instance,node)) / on(cluster,node) group_left() max(kube_node_status_capacity{job="kube-state-metrics",resource="pods"} != 1) by(cluster,node)) > 0.95
+      annotations:
+        description: Kubelet '{{ $labels.node }}' is running at {{ $value | humanizePercentage }} of its Pod capacity on cluster {{ $labels.cluster }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubelettoomanypods
+        summary: Kubelet is running at capacity.
+      for: 15m
+      labels:
+        severity: info
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeNodeReadinessFlapping
+      expr: (sum(changes(kube_node_status_condition{job="kube-state-metrics",status="true",condition="Ready"}[15m])) by(cluster,node) > 2) and on(cluster,node) (kube_node_spec_unschedulable{job="kube-state-metrics"} == 0)
+      annotations:
+        description: The readiness status of node {{ $labels.node }} has changed {{ $value }} times in the last 15 minutes on cluster {{ $labels.cluster }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubenodereadinessflapping
+        summary: Node readiness status is flapping.
+      for: 15m
+      labels:
+        severity: warning
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeNodeEviction
+      expr: (sum(rate(kubelet_evictions{job="kubelet",metrics_path="/metrics"}[15m])) by(cluster,eviction_signal,instance) * on(cluster,instance) group_left(node) max(kubelet_node_name{job="kubelet",metrics_path="/metrics"}) by(cluster,instance,node)) > 0
+      annotations:
+        description: Node {{ $labels.node }} on {{ $labels.cluster }} is evicting Pods due to {{ $labels.eviction_signal }}.  Eviction occurs when eviction thresholds are crossed, typically caused by Pods exceeding RAM/ephemeral-storage limits.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubenodeeviction
+        summary: Node is evicting pods.
+      for: 0s
+      labels:
+        severity: info
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeletPlegDurationHigh
+      expr: node_quantile:kubelet_pleg_relist_duration_seconds:histogram_quantile{quantile="0.99"} >= 10
+      annotations:
+        description: The Kubelet Pod Lifecycle Event Generator has a 99th percentile duration of {{ $value }} seconds on node {{ $labels.node }} on cluster {{ $labels.cluster }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletplegdurationhigh
+        summary: Kubelet Pod Lifecycle Event Generator is taking too long to relist.
+      for: 5m
+      labels:
+        severity: warning
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeletPodStartUpLatencyHigh
+      expr: (histogram_quantile(0.99, sum(topk(1, rate(kubelet_pod_worker_duration_seconds_bucket{job="kubelet",metrics_path="/metrics"}[5m])) by(cluster,instance,le,operation_type)) by(cluster,instance,le)) * on(cluster,instance) group_left(node) topk(1, kubelet_node_name{job="kubelet",metrics_path="/metrics"}) by(cluster,instance,node)) > 60
+      annotations:
+        description: Kubelet Pod startup 99th percentile latency is {{ $value }} seconds on node {{ $labels.node }} on cluster {{ $labels.cluster }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletpodstartuplatencyhigh
+        summary: Kubelet Pod startup latency is too high.
+      for: 15m
+      labels:
+        severity: warning
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeletClientCertificateExpiration
+      expr: kubelet_certificate_manager_client_ttl_seconds < 604800
+      annotations:
+        description: Client certificate for Kubelet on node {{ $labels.node }} expires in {{ $value | humanizeDuration }} on cluster {{ $labels.cluster }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletclientcertificateexpiration
+        summary: Kubelet client certificate is about to expire.
+      labels:
+        severity: warning
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeletClientCertificateExpiration
+      expr: kubelet_certificate_manager_client_ttl_seconds < 86400
+      annotations:
+        description: Client certificate for Kubelet on node {{ $labels.node }} expires in {{ $value | humanizeDuration }} on cluster {{ $labels.cluster }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletclientcertificateexpiration
+        summary: Kubelet client certificate is about to expire.
+      labels:
+        severity: critical
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeletServerCertificateExpiration
+      expr: kubelet_certificate_manager_server_ttl_seconds < 604800
+      annotations:
+        description: Server certificate for Kubelet on node {{ $labels.node }} expires in {{ $value | humanizeDuration }} on cluster {{ $labels.cluster }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletservercertificateexpiration
+        summary: Kubelet server certificate is about to expire.
+      labels:
+        severity: warning
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeletServerCertificateExpiration
+      expr: kubelet_certificate_manager_server_ttl_seconds < 86400
+      annotations:
+        description: Server certificate for Kubelet on node {{ $labels.node }} expires in {{ $value | humanizeDuration }} on cluster {{ $labels.cluster }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletservercertificateexpiration
+        summary: Kubelet server certificate is about to expire.
+      labels:
+        severity: critical
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeletClientCertificateRenewalErrors
+      expr: increase(kubelet_certificate_manager_client_expiration_renew_errors[5m]) > 0
+      annotations:
+        description: Kubelet on node {{ $labels.node }} has failed to renew its client certificate ({{ $value | humanize }} errors in the last 5 minutes) on cluster {{ $labels.cluster }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletclientcertificaterenewalerrors
+        summary: Kubelet has failed to renew its client certificate.
+      for: 15m
+      labels:
+        severity: warning
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeletServerCertificateRenewalErrors
+      expr: increase(kubelet_server_expiration_renew_errors[5m]) > 0
+      annotations:
+        description: Kubelet on node {{ $labels.node }} has failed to renew its server certificate ({{ $value | humanize }} errors in the last 5 minutes) on cluster {{ $labels.cluster }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletservercertificaterenewalerrors
+        summary: Kubelet has failed to renew its server certificate.
+      for: 15m
+      labels:
+        severity: warning
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeletInstanceUnreachable
+      expr: up{job="kubelet",metrics_path="/metrics"} == 0
+      annotations:
+        description: A Kubelet instance has been unreachable for more than 15 minutes.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletinstanceunreachable
+        summary: Kubelet instance is unreachable.
+      for: 15m
+      labels:
+        severity: warning
+        job: kubelet
+      keep_firing_for: 90s
+    - alert: KubeletDown
+      expr: count(kube_node_info{job="kube-state-metrics"}) by(cluster) unless on(cluster) count(up{job="kubelet",metrics_path="/metrics"} == 1) by(cluster)
+      annotations:
+        description: Kubelet has disappeared from Prometheus target discovery on cluster {{ $labels.cluster }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeletdown
+        summary: Target disappeared from Prometheus target discovery.
+      condition: null
+      for: 15m
+      labels:
+        severity: critical
+        job: kubelet
+      keep_firing_for: 90s

@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - k8s.container_cpu_limits.yaml
+  - k8s.container_cpu_requests.yaml
+  - k8s.container_cpu_usage_seconds_total.yaml
+  - k8s.container_memory_cache.yaml
+  - k8s.container_memory_limits.yaml
+  - k8s.container_memory_requests.yaml
+  - k8s.container_memory_rss.yaml
+  - k8s.container_memory_swap.yaml
+  - k8s.container_memory_working_set_bytes.yaml
+  - k8s.pod_owner.yaml
+  - kube-prometheus-node-recording.yaml

@@ -14,6 +14,7 @@ spec:
           for: 5m
           labels:
             severity: critical
+            job: vmalert
           annotations:
             summary: >-
               vmalert is not running — VictoriaLogs alerting rules are not being evaluated

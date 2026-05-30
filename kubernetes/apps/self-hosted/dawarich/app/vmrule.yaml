@@ -19,3 +19,4 @@ spec:
               The iPhone app may have stopped syncing — check the app and its configuration.
           labels:
             severity: warning
+            job: dawarich

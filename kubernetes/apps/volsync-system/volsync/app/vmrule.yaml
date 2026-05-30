@@ -17,6 +17,7 @@ spec:
           for: 5m
           labels:
             severity: critical
+            job: volsync-metrics
 
         - alert: VolSyncVolumeOutOfSync
           expr: |
@@ -27,3 +28,4 @@ spec:
           for: 15m
           labels:
             severity: critical
+            job: volsync-metrics

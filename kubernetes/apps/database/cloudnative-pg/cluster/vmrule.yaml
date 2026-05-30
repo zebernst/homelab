@@ -17,6 +17,7 @@ spec:
           for: 1m
           labels:
             severity: warning
+            job: cloudnative-pg
         - alert: BackendsWaiting
           annotations:
             description: Pod {{ $labels.pod }} has been waiting for longer than 5 minutes
@@ -26,6 +27,7 @@ spec:
           for: 1m
           labels:
             severity: warning
+            job: cloudnative-pg
         - alert: PGDatabase
           annotations:
             description: Over 150,000,000 transactions from frozen xid on pod {{ $labels.pod }}
@@ -35,6 +37,7 @@ spec:
           for: 1m
           labels:
             severity: warning
+            job: cloudnative-pg
         - alert: PGReplication
           annotations:
             description: Standby is lagging behind by over 300 seconds (5 minutes)
@@ -44,6 +47,7 @@ spec:
           for: 1m
           labels:
             severity: warning
+            job: cloudnative-pg
         - alert: LastFailedArchiveTime
           annotations:
             description: Archiving failed for {{ $labels.pod }}
@@ -53,6 +57,7 @@ spec:
           for: 1m
           labels:
             severity: warning
+            job: cloudnative-pg
         - alert: DatabaseDeadlockConflicts
           annotations:
             description: There are over 10 deadlock conflicts in {{ $labels.pod }}
@@ -62,3 +67,4 @@ spec:
           for: 1m
           labels:
             severity: warning
+            job: cloudnative-pg

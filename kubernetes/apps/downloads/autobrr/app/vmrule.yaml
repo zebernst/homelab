@@ -17,3 +17,4 @@ spec:
               One or more IRC channels on the {{ $labels.network }} network are enabled but not being monitored
           labels:
             severity: critical
+            job: autobrr

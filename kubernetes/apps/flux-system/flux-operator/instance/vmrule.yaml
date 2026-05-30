@@ -18,6 +18,7 @@ spec:
               Flux instance metric is missing
           labels:
             severity: critical
+            job: flux
 
         - alert: FluxInstanceNotReady
           expr: |
@@ -28,6 +29,7 @@ spec:
               Flux instance {{ $labels.name }} is not ready
           labels:
             severity: critical
+            job: flux
 
         - alert: HelmReleaseReconciliationFailure
           expr: |
@@ -38,6 +40,7 @@ spec:
               HelmRelease {{ $labels.name }} in {{ $labels.exported_namespace }} is not ready
           labels:
             severity: critical
+            job: flux
 
         - alert: KustomizationReconciliationFailure
           expr: |
@@ -48,3 +51,4 @@ spec:
               Kustomization {{ $labels.name }} in {{ $labels.exported_namespace }} is not ready
           labels:
             severity: critical
+            job: flux

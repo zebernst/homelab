@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmrule_v1beta1.json
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: alertmanager-rules
+spec:
+  groups:
+  - name: alertmanager.rules
+    rules:
+    - alert: AlertmanagerFailedReload
+      expr: max_over_time(alertmanager_config_last_reload_successful{job="cluster",container="alertmanager",namespace="cluster"}[5m]) == 0
+      annotations:
+        description: Configuration has failed to load for {{ $labels.namespace }}/{{ $labels.pod }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerfailedreload
+        summary: Reloading an Alertmanager configuration has failed.
+      for: 10m
+      labels:
+        severity: critical
+        job: alertmanager
+      keep_firing_for: 90s
+    - alert: AlertmanagerMembersInconsistent
+      expr: max_over_time(alertmanager_cluster_members{job="cluster",container="alertmanager",namespace="cluster"}[5m]) < on(namespace,service,cluster) group_left() count(max_over_time(alertmanager_cluster_members{job="cluster",container="alertmanager",namespace="cluster"}[5m])) by(namespace,service,cluster)
+      annotations:
+        description: Alertmanager {{ $labels.namespace }}/{{ $labels.pod }} has only found {{ $value }} members of the {{ $labels.job }} cluster.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagermembersinconsistent
+        summary: A member of an Alertmanager cluster has not found all other cluster members.
+      for: 15m
+      labels:
+        severity: critical
+        job: alertmanager
+      keep_firing_for: 90s
+    - alert: AlertmanagerFailedToSendAlerts
+      expr: (rate(alertmanager_notifications_failed_total{job="cluster",container="alertmanager",namespace="cluster"}[15m]) / ignoring(reason) group_left() rate(alertmanager_notifications_total{job="cluster",container="alertmanager",namespace="cluster"}[15m])) > 0.01
+      annotations:
+        description: Alertmanager {{ $labels.namespace }}/{{ $labels.pod }} failed to send {{ $value | humanizePercentage }} of notifications to {{ $labels.integration }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerfailedtosendalerts
+        summary: An Alertmanager instance failed to send notifications.
+      for: 5m
+      labels:
+        severity: warning
+        job: alertmanager
+      keep_firing_for: 90s
+    - alert: AlertmanagerClusterFailedToSendAlerts
+      expr: min((rate(alertmanager_notifications_failed_total{job="cluster",container="alertmanager",namespace="cluster",integration=~".*"}[15m]) / ignoring(reason) group_left() rate(alertmanager_notifications_total{job="cluster",container="alertmanager",namespace="cluster",integration=~".*"}[15m])) > 0) by(namespace,service,integration,cluster) > 0.01
+      annotations:
+        description: The minimum notification failure rate to {{ $labels.integration }} sent from any instance in the {{ $labels.job }} cluster is {{ $value | humanizePercentage }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerclusterfailedtosendalerts
+        summary: All Alertmanager instances in a cluster failed to send notifications to a critical integration.
+      for: 5m
+      labels:
+        severity: critical
+        job: alertmanager
+      keep_firing_for: 90s
+    - alert: AlertmanagerClusterFailedToSendAlerts
+      expr: min((rate(alertmanager_notifications_failed_total{job="cluster",container="alertmanager",namespace="cluster",integration!~".*"}[15m]) / ignoring(reason) group_left() rate(alertmanager_notifications_total{job="cluster",container="alertmanager",namespace="cluster",integration!~".*"}[15m])) > 0) by(namespace,service,integration,cluster) > 0.01
+      annotations:
+        description: The minimum notification failure rate to {{ $labels.integration }} sent from any instance in the {{ $labels.job }} cluster is {{ $value | humanizePercentage }}.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerclusterfailedtosendalerts
+        summary: All Alertmanager instances in a cluster failed to send notifications to a non-critical integration.
+      for: 5m
+      labels:
+        severity: warning
+        job: alertmanager
+      keep_firing_for: 90s
+    - alert: AlertmanagerConfigInconsistent
+      expr: count(count_values("config_hash", alertmanager_config_hash{job="cluster",container="alertmanager",namespace="cluster"}) by(namespace,service,cluster)) by(namespace,service,cluster) != 1
+      annotations:
+        description: Alertmanager instances within the {{ $labels.job }} cluster have different configurations.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerconfiginconsistent
+        summary: Alertmanager instances within the same cluster have different configurations.
+      for: 20m
+      labels:
+        severity: critical
+        job: alertmanager
+      keep_firing_for: 90s
+    - alert: AlertmanagerClusterDown
+      expr: (count(avg_over_time(up{job="cluster",container="alertmanager",namespace="cluster"}[5m]) < 0.5) by(namespace,service,cluster) / count(up{job="cluster",container="alertmanager",namespace="cluster"}) by(namespace,service,cluster)) >= 0.5
+      annotations:
+        description: '{{ $value | humanizePercentage }} of Alertmanager instances within the {{ $labels.job }} cluster have been up for less than half of the last 5m.'
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerclusterdown
+        summary: Half or more of the Alertmanager instances within the same cluster are down.
+      for: 5m
+      labels:
+        severity: critical
+        job: alertmanager
+      keep_firing_for: 90s
+    - alert: AlertmanagerClusterCrashlooping
+      expr: (count(changes(process_start_time_seconds{job="cluster",container="alertmanager",namespace="cluster"}[10m]) > 4) by(namespace,service,cluster) / count(up{job="cluster",container="alertmanager",namespace="cluster"}) by(namespace,service,cluster)) >= 0.5
+      annotations:
+        description: '{{ $value | humanizePercentage }} of Alertmanager instances within the {{ $labels.job }} cluster have restarted at least 5 times in the last 10m.'
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/alertmanager/alertmanagerclustercrashlooping
+        summary: Half or more of the Alertmanager instances within the same cluster are crashlooping.
+      for: 5m
+      labels:
+        severity: critical
+        job: alertmanager
+      keep_firing_for: 90s

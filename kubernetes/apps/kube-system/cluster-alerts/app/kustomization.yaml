@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - etcd.yaml
+  - kube-apiserver-availability.yaml
+  - kube-apiserver-burnrate.yaml
+  - kube-apiserver-histogram.yaml
+  - kube-apiserver-slos.yaml
+  - kube-scheduler.yaml
+  - kubernetes-system-apiserver.yaml
+  - kubernetes-system-controller-manager.yaml
+  - kubernetes-system-kubelet.yaml
+  - kubernetes-system-scheduler.yaml
+  - kubernetes-system.yaml
