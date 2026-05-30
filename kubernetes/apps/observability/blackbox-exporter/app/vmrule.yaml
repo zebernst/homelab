@@ -12,7 +12,6 @@ spec:
           expr: |
             probe_success == 0
           for: 5m
-          keep_firing_for: 90s
           annotations:
             summary: >-
               The host {{ $labels.instance }} is down

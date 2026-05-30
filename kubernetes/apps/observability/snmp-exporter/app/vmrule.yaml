@@ -15,6 +15,5 @@ spec:
             summary: >
               UPS {{ $labels.instance }} is running on battery power and has less than {{ $value }} minutes of runtime remaining
           for: 5m
-          keep_firing_for: 90s
           labels:
             severity: critical

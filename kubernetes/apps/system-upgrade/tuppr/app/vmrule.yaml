@@ -14,7 +14,6 @@ spec:
             summary: Tuppr upgrade failed
           expr: tuppr_talos_upgrade_phase{phase="Failed"} == 3
           for: 5m
-          keep_firing_for: 90s
           labels:
             severity: critical
         - alert: TupprUpgradeStuck
@@ -25,7 +24,6 @@ spec:
             tuppr_talos_upgrade_phase{phase="InProgress"} == 1
             and increase(tuppr_talos_upgrade_nodes_completed[30m]) == 0
           for: 30m
-          keep_firing_for: 90s
           labels:
             severity: warning
         - alert: TupprHealthCheckFailing
@@ -34,6 +32,5 @@ spec:
             summary: Tuppr health checks failing
           expr: rate(tuppr_health_check_failures_total[5m]) > 0.1
           for: 2m
-          keep_firing_for: 90s
           labels:
             severity: warning

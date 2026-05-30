@@ -7,7 +7,6 @@ groups:
         expr: |
           sum by (app) (count_over_time({app="qbittorrent"} |~ "(?i)fast resume rejected"[1h])) > 0
         for: 2m
-        keep_firing_for: 90s
         labels:
           severity: critical
           category: vlogs

@@ -12,7 +12,6 @@ spec:
           expr: |
             autobrr_irc_channel_enabled_total != autobrr_irc_channel_monitored_total
           for: 5m
-          keep_firing_for: 90s
           annotations:
             summary: >-
               One or more IRC channels on the {{ $labels.network }} network are enabled but not being monitored

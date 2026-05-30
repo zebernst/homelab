@@ -13,7 +13,6 @@ spec:
           expr: |
             absent(flux_instance_info{exported_namespace="flux-system", name="flux"})
           for: 5m
-          keep_firing_for: 90s
           annotations:
             summary: >
               Flux instance metric is missing
@@ -24,7 +23,6 @@ spec:
           expr: |
             flux_instance_info{exported_namespace="flux-system", name="flux", ready!="True"}
           for: 5m
-          keep_firing_for: 90s
           annotations:
             summary: >
               Flux instance {{ $labels.name }} is not ready
