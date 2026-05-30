@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: external-dns-unifi.rules
-      labels:
-        job: external-dns-unifi
       rules:
         - alert: ExternalDNSUnifiStale
           expr: |

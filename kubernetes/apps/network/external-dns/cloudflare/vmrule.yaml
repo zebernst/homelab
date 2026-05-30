@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: external-dns-cloudflare.rules
-      labels:
-        job: external-dns-cloudflare
       rules:
         - alert: ExternalDNSCloudflareStale
           expr: |

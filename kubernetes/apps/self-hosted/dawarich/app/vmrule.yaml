@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: dawarich.rules
-      labels:
-        job: dawarich
       rules:
         - alert: DawarichLocationSyncStale
           expr: |

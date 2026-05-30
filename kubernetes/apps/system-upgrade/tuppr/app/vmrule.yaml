@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: tuppr.rules
-      labels:
-        job: tuppr
       rules:
         - alert: TupprUpgradeFailed
           annotations:

@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: autobrr.rules
-      labels:
-        job: autobrr
       rules:
         - alert: AutobrrNetworkUnmonitored
           expr: |

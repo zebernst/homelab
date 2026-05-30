@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: cloudnative-pg.rules
-      labels:
-        job: cloudnative-pg
       rules:
         - alert: LongRunningTransaction
           annotations:

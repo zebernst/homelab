@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: blackbox-exporter.rules
-      labels:
-        job: blackbox-exporter
       rules:
         - alert: BlackboxInstanceDown
           expr: |

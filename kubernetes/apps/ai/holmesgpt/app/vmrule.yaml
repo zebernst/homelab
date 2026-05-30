@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: holmesgpt
-      labels:
-        job: holmesgpt
       rules:
         - alert: HolmesHealthCheckFailed
           expr: |

@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: smartctl-exporter.rules
-      labels:
-        job: smartctl-exporter
       rules:
         - alert: SmartDeviceHighTemperature
           expr: |

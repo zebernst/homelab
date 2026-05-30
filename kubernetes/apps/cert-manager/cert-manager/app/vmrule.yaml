@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: cert-manager.rules
-      labels:
-        job: cert-manager
       rules:
         - alert: CertManagerAbsent
           expr: |
@@ -21,8 +19,6 @@ spec:
             severity: critical
 
     - name: certificates
-      labels:
-        job: cert-manager
       rules:
         - alert: CertManagerCertExpirySoon
           expr: |

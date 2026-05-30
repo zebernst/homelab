@@ -3,13 +3,11 @@
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:
-  name: flux
+  name: flux-instance-rules
   namespace: flux-system
 spec:
   groups:
     - name: flux-instance.rules
-      labels:
-        job: flux
       rules:
         - alert: FluxInstanceAbsent
           expr: |
