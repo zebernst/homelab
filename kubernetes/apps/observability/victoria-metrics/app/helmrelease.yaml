@@ -80,14 +80,12 @@ spec:
 
     alertmanager:
       enabled: true
-      useManagedConfig: false
+      useManagedConfig: true
       spec:
-        disableNamespaceMatcher: true
+        # Required when merging chart vmks + standalone VMAlertmanagerConfig; otherwise
+        # the operator forces continue: true on first-level routes and alerts fan out
+        # to multiple receivers (e.g. blackhole + pushover).
         disableRouteContinueEnforce: true
-        selectAllByDefault: false
-        configNamespaceSelector:
-          matchLabels:
-            kubernetes.io/metadata.name: observability
         externalURL: https://alertmanager.zebernst.dev
         storage:
           volumeClaimTemplate:
