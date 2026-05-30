@@ -17,4 +17,3 @@ spec:
               The host {{ $labels.instance }} is down
           labels:
             severity: critical
-            job: blackbox-exporter

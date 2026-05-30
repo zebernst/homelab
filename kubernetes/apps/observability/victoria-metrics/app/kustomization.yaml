@@ -2,8 +2,9 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+components:
+  - ../../../../components/victoria-metrics-default-rules
 resources:
   - externalsecret.yaml
   - helmrelease.yaml
-  - rules/
   - vmalertmanagerconfig.yaml

@@ -14,7 +14,6 @@ spec:
           for: 5m
           labels:
             severity: warning
-            job: holmesgpt
           annotations:
             summary: "HolmesGPT health check failed: {{ $labels.name }}"
             description: >-
@@ -27,7 +26,6 @@ spec:
           for: 5m
           labels:
             severity: warning
-            job: holmesgpt
           annotations:
             summary: "HolmesGPT check errored: {{ $labels.name }}"
             description: >-

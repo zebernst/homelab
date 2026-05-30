@@ -17,4 +17,3 @@ spec:
               ExternalDNS ({{ $labels.job }}) has not synced successfully in the last five minutes
           labels:
             severity: critical
-            job: external-dns-cloudflare

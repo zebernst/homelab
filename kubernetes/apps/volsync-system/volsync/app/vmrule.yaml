@@ -3,7 +3,7 @@
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:
-  name: volsync
+  name: volsync-metrics
 spec:
   groups:
     - name: volsync.rules
@@ -17,7 +17,6 @@ spec:
           for: 5m
           labels:
             severity: critical
-            job: volsync-metrics
 
         - alert: VolSyncVolumeOutOfSync
           expr: |
@@ -28,4 +27,3 @@ spec:
           for: 15m
           labels:
             severity: critical
-            job: volsync-metrics

@@ -41,10 +41,6 @@ spec:
       enabled: true
       defaultTimezone: America/Chicago
 
-    # Default alert rules live in-repo (kubernetes/apps/.../rules, vmrule.yaml) with explicit job labels.
-    defaultRules:
-      create: false
-
     grafana:
       enabled: false
 

@@ -13,7 +13,6 @@ spec:
           for: 2m
           labels:
             severity: critical
-            job: paperless
             context: celery-worker
           annotations:
             summary: Celery worker offline
@@ -24,7 +23,6 @@ spec:
           for: 5m
           labels:
             severity: critical
-            job: paperless
             context: celery-task
           annotations:
             summary: Task Failure Ratio Too High.
@@ -35,7 +33,6 @@ spec:
           for: 5m
           labels:
             severity: critical
-            job: paperless
             context: celery-task
           annotations:
             summary: Average Task Prefetch Time Too High.

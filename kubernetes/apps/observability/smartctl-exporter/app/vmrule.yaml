@@ -17,7 +17,6 @@ spec:
               Mounted drive {{ $labels.device }} on node {{ $labels.node }} ({{ $labels.node_ip }}) has a temperature higher than {{ $value }}°C
           labels:
             severity: critical
-            job: smartctl-exporter
 
         - alert: SmartDeviceTestFailed
           expr: |
@@ -28,7 +27,6 @@ spec:
               Mounted drive {{ $labels.device }} on node {{ $labels.node }} ({{ $labels.node_ip }}) did not pass its SMART test
           labels:
             severity: critical
-            job: smartctl-exporter
 
         - alert: SmartDeviceCriticalWarning
           expr: |
@@ -39,7 +37,6 @@ spec:
               Mounted drive {{ $labels.device }} on node {{ $labels.node }} ({{ $labels.node_ip }}) is in a critical state
           labels:
             severity: critical
-            job: smartctl-exporter
 
         - alert: SmartDeviceMediaErrors
           expr: |
@@ -50,7 +47,6 @@ spec:
               Mounted drive {{ $labels.device }} on node {{ $labels.node }} ({{ $labels.node_ip }}) has media errors
           labels:
             severity: critical
-            job: smartctl-exporter
 
         - alert: SmartDeviceAvailableSpareUnderThreshold
           expr: |
@@ -61,7 +57,6 @@ spec:
               Device {{ $labels.device }} on node {{ $labels.node }} ({{ $labels.node_ip }}) is under available spare threshold
           labels:
             severity: critical
-            job: smartctl-exporter
 
         - alert: SmartDeviceInterfaceSlow
           expr: |
@@ -72,4 +67,3 @@ spec:
           for: 5m
           labels:
             severity: critical
-            job: smartctl-exporter

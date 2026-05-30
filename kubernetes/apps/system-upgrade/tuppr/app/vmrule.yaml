@@ -16,7 +16,6 @@ spec:
           for: 5m
           labels:
             severity: critical
-            job: tuppr
         - alert: TupprUpgradeStuck
           annotations:
             description: Tuppr upgrade {{ $labels.name }} has been in progress for 30m with no node completions.
@@ -27,7 +26,6 @@ spec:
           for: 30m
           labels:
             severity: warning
-            job: tuppr
         - alert: TupprHealthCheckFailing
           annotations:
             description: Tuppr health checks are failing at a high rate, blocking upgrades.
@@ -36,4 +34,3 @@ spec:
           for: 2m
           labels:
             severity: warning
-            job: tuppr
