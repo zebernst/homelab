@@ -1,6 +1,22 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# Sets alert `job` from each VMRule's metadata.name (matches app.kubernetes.io/name in practice).
+# Default alert `job` from VMRule metadata.name on every rule group.
+#
+# Wired per app in that app's Flux Kustomization (`spec.components`), not cluster-wide.
+# `ignoreMissingComponents` only skips missing component *paths*; it does not detect
+# whether a build contains VMRules. Apps without vmrule.yaml must not list this component.
+#
+# Component path depth (relative to `spec.path`):
+#   repeat `../` (segment count of spec.path minus 1) + `components/vmrule`
+# Examples:
+#   kubernetes/apps/ai/holmesgpt/app              -> ../../../../components/vmrule
+#   kubernetes/apps/downloads/sonarr/app/hd       -> ../../../../../components/vmrule
+#
+# Overrides (replacements overwrite existing group `labels.job`; cannot "fill only if empty"):
+# - Per-VMRule job: set metadata.name to the job you want (e.g. volsync-metrics, flux).
+# - Per-group job: strategic-merge patch under `patches:` in the app kustomization.
+# - Per-rule job: labels.job on individual rules (not touched by this component; vmalert
+#   prefers rule labels over group labels).
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 replacements:

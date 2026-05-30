@@ -14,6 +14,8 @@ spec:
       namespace: *ns
   interval: 1h
   retryInterval: 1m
+  components:
+    - ../../../../components/vmrule
   path: kubernetes/apps/observability/blackbox-exporter/app
   prune: true
   sourceRef:
@@ -22,8 +24,7 @@ spec:
     namespace: flux-system
   targetNamespace: *ns
   timeout: 5m
-  wait: true
----
+  wait: true---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

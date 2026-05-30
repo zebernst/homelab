@@ -10,6 +10,9 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/vmrule
+    - ../../../../components/gatus
   dependsOn:
     - name: victoria-metrics-operator
       namespace: *ns

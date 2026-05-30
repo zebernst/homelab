@@ -10,6 +10,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../components/vmrule
   path: kubernetes/apps/system-upgrade/tuppr/app
   prune: true
   sourceRef:

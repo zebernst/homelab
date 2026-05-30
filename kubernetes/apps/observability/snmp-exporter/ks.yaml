@@ -11,6 +11,8 @@ spec:
       app.kubernetes.io/name: *app
   interval: 30m
   retryInterval: 1m
+  components:
+    - ../../../../components/vmrule
   path: kubernetes/apps/observability/snmp-exporter/app
   prune: true
   sourceRef:

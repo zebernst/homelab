@@ -13,6 +13,8 @@ spec:
   dependsOn:
     - name: onepassword
       namespace: external-secrets
+  components:
+    - ../../../../components/vmrule
   path: kubernetes/apps/network/external-dns/cloudflare
   prune: true
   sourceRef:
@@ -38,6 +40,8 @@ spec:
   dependsOn:
     - name: onepassword
       namespace: external-secrets
+  components:
+    - ../../../../components/vmrule
   path: kubernetes/apps/network/external-dns/unifi
   prune: false
   sourceRef:
