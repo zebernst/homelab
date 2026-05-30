@@ -1,3 +1,16 @@
+auths:
+  public_v1:
+    community: {{ .UNIFI_SNMP_COMMUNITY | quote }}
+    security_level: noAuthNoPriv
+    auth_protocol: MD5
+    priv_protocol: DES
+    version: 1
+  public_v2:
+    community: {{ .UNIFI_SNMP_COMMUNITY | quote }}
+    security_level: noAuthNoPriv
+    auth_protocol: MD5
+    priv_protocol: DES
+    version: 2
 modules:
   synology:
     walk:
