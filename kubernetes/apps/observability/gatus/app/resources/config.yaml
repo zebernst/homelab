@@ -8,7 +8,7 @@ endpoints:
   # Flux GitHub receiver rejects unauthenticated probes with 400 on the hashed path.
   # FLUX_WEBHOOK_PATH is derived in gatus-secret from the flux webhook token (Receiver formula).
   - name: flux-webhook
-    group: external
+    group: public
     url: https://flux-webhook.zebernst.dev${FLUX_WEBHOOK_PATH}
     interval: 1m
     client:
