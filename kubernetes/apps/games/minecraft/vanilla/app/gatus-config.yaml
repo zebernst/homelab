@@ -10,5 +10,3 @@ endpoints:
       hide-url: true
       hide-hostname: true
       hide-port: true
-    alerts:
-      - type: pushover
