@@ -82,6 +82,7 @@ spec:
       enabled: true
       useManagedConfig: true
       spec:
+        disableRouteContinueEnforce: true
         selectAllByDefault: false
         configSelector:
           matchLabels:
