@@ -4,7 +4,17 @@ connectivity:
     target: 1.1.1.1:53
     interval: 1m
 
-endpoints: []
+endpoints:
+  # Flux GitHub receiver rejects unauthenticated probes with 400 on the hashed path.
+  # Path is /hook/sha256(token+name+namespace) — set FLUX_WEBHOOK_PATH in 1Password gatus item.
+  - name: flux-webhook
+    group: external
+    url: https://flux-webhook.zebernst.dev${FLUX_WEBHOOK_PATH}
+    interval: 1m
+    client:
+      dns-resolver: tcp://1.1.1.1:53
+    conditions:
+      - "[STATUS] == 400"
 
 metrics: true
 
