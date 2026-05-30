@@ -155,24 +155,6 @@ spec:
               - name: *app
                 port: 3000
 
-
-    serviceMonitor:
-      app:
-        serviceName: *app
-        endpoints:
-          - port: http
-            scheme: http
-            path: /metrics
-            interval: 1m
-            scrapeTimeout: 10s
-            basicAuth:
-              username:
-                name: dawarich-secret
-                key: METRICS_USERNAME
-              password:
-                name: dawarich-secret
-                key: METRICS_PASSWORD
-
     persistence:
       data:
         existingClaim: *app
