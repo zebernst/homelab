@@ -83,10 +83,7 @@ spec:
       useManagedConfig: true
       spec:
         disableRouteContinueEnforce: true
-        selectAllByDefault: false
-        configSelector:
-          matchLabels:
-            alertmanager.config: zebernst
+        selectAllByDefault: true
         externalURL: https://alertmanager.zebernst.dev
         storage:
           volumeClaimTemplate:
