@@ -5,5 +5,5 @@ nameReference:
     fieldSpecs:
       - path: spec/values/persistence/scripts/name
         kind: HelmRelease
-      - path: spec/values/persistence/ui-envoy/name
+      - path: spec/values/persistence/ui-nginx/name
         kind: HelmRelease

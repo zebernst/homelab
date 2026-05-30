@@ -145,15 +145,8 @@ spec:
           ui:
             image:
               # renovate: datasource=docker
-              repository: docker.io/envoyproxy/envoy
-              tag: v1.38.0
-            args:
-              - -c
-              - /etc/envoy/envoy.yaml
-              - --concurrency
-              - "1"
-              - --log-level
-              - info
+              repository: docker.io/library/nginx
+              tag: 1.27.5-alpine
             probes:
               liveness: &uiProbe
                 enabled: true
@@ -161,7 +154,7 @@ spec:
                 spec:
                   httpGet:
                     path: /search.html
-                    port: 8080
+                    port: 80
                   initialDelaySeconds: 0
                   periodSeconds: 30
                   timeoutSeconds: 5
@@ -220,7 +213,6 @@ spec:
         ports:
           http:
             port: 80
-            targetPort: 8080
 
     persistence:
       pgdata:
@@ -267,13 +259,13 @@ spec:
             ui:
               - path: /ui-www
                 readOnly: true
-      ui-envoy:
+      ui-nginx:
         type: configMap
-        name: nominatim-envoy
+        name: nominatim-nginx
         advancedMounts:
           ui:
             ui:
-              - path: /etc/envoy
+              - path: /etc/nginx/conf.d
                 readOnly: true
       import-staging:
         type: emptyDir
