@@ -133,6 +133,8 @@ spec:
       ui:
         annotations:
           reloader.stakater.com/auto: "true"
+        serviceAccount:
+          identifier: app
         initContainers:
           ui-init:
             image:
