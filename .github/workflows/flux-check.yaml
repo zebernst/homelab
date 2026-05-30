@@ -6,9 +6,12 @@ on:
   pull_request:
     branches: ["main"]
     paths: ["kubernetes/**"]
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -16,6 +19,7 @@ permissions:
 
 jobs:
   filter:
+    if: ${{ github.event_name == 'pull_request' }}
     name: Flate - Filter
     runs-on: ubuntu-latest
     outputs:
@@ -28,8 +32,13 @@ jobs:
           patterns: kubernetes/**/*
 
   test:
-    if: ${{ needs.filter.outputs.changed-files != '[]' }}
-    needs: filter
+    needs: [filter]
+    if: >-
+      always() &&
+      (
+        needs.filter.result == 'skipped' ||
+        needs.filter.outputs.changed-files != '[]'
+      )
     name: Flate - Test
     runs-on: ubuntu-latest
     strategy:
@@ -38,40 +47,36 @@ jobs:
       fail-fast: false
     steps:
       - name: Generate Token
+        if: ${{ github.event_name == 'pull_request' }}
         uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Checkout Pull Request Branch
+      - name: Checkout
         uses: actions/checkout@v6
         with:
-          token: "${{ steps.app-token.outputs.token }}"
-          path: pull
-
-      - name: Checkout Default Branch
-        uses: actions/checkout@v6
-        with:
-          token: "${{ steps.app-token.outputs.token }}"
-          ref: "${{ github.event.repository.default_branch }}"
-          path: default
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+          token: ${{ github.event_name == 'pull_request' && steps.app-token.outputs.token || github.token }}
 
       - name: Setup flate
         uses: home-operations/flate/action@0.1.35
         with:
+          base: ${{ github.event_name == 'pull_request' && github.base_ref || '' }}
           cache: true
-          token: "${{ steps.app-token.outputs.token }}"
+          token: ${{ github.event_name == 'pull_request' && steps.app-token.outputs.token || github.token }}
 
       - name: Run flate test
         run: >-
           flate test ${{ matrix.resource }}
-          --path ./pull
-          --path-orig ./default
+          --path ./kubernetes
+          --allow-missing-secrets
 
   diff:
-    if: ${{ needs.filter.outputs.changed-files != '[]' }}
-    needs: filter
+    if: ${{ github.event_name == 'pull_request' && needs.filter.outputs.changed-files != '[]' }}
+    needs: [filter]
     name: Flate - Diff
     runs-on: ubuntu-latest
     permissions:
@@ -89,30 +94,24 @@ jobs:
           app-id: "${{ secrets.BOT_APP_ID }}"
           private-key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Checkout Pull Request Branch
+      - name: Checkout
         uses: actions/checkout@v6
         with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
           token: "${{ steps.app-token.outputs.token }}"
-          path: pull
-
-      - name: Checkout Default Branch
-        uses: actions/checkout@v6
-        with:
-          token: "${{ steps.app-token.outputs.token }}"
-          ref: "${{ github.event.repository.default_branch }}"
-          path: default
 
       - name: Setup flate
         uses: home-operations/flate/action@0.1.35
         with:
+          base: ${{ github.base_ref }}
           cache: true
           token: "${{ steps.app-token.outputs.token }}"
 
       - name: Run flate diff
         run: >-
           flate diff ${{ matrix.resource }}
-          --path ./pull
-          --path-orig ./default
+          --path ./kubernetes
           -o markdown
           > diff.patch
 
@@ -159,6 +158,9 @@ jobs:
     steps:
       - name: Check flate status
         if: >-
-          ${{ needs.filter.outputs.changed-files != '[]' &&
-          (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+          (
+            needs.filter.result == 'skipped' ||
+            needs.filter.outputs.changed-files != '[]'
+          ) &&
+          (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
         run: exit 1
