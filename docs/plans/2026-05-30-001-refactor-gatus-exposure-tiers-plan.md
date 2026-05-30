@@ -9,7 +9,7 @@ date: 2026-05-30
 
 ## Summary
 
-Adopt a **hybrid annotation model** for Gatus monitoring after the gatus-sidecar migration (#1127): Gateway-level annotations define **public** and **internal** HTTPRoute tiers; Service-level annotations define the **cluster** tier. Do **not** reintroduce three kustomize ConfigMap components — that pattern belonged to the removed kiwigrid sidecar and is incompatible with gatus-sidecar’s API discovery model.
+Adopt a **hybrid annotation model** for Gatus monitoring after the gatus-sidecar migration (#1127): Gateway-level annotations define **public** and **internal** HTTPRoute tiers (with automatic **exposure guard** companions on internal routes); Service-level annotations define the **cluster** tier. Do **not** reintroduce three kustomize ConfigMap components — that pattern belonged to the removed kiwigrid sidecar and is incompatible with gatus-sidecar’s API discovery model.
 
 ---
 
@@ -38,7 +38,11 @@ The user wants three exposure levels — **cluster**, **internal**, **public** �
 ### Alerting and semantics
 
 - R5. `GatusEndpointDown` must fire for failed health checks in `public`, `internal`, and `cluster` groups (plus existing special groups like `minecraft` during migration).
-- R6. DNS **exposure guard** checks (success = no public A record) must use a **distinct group name** (`exposure`) so they never collide with internal-tier health checks.
+- R6. Every **internal-tier** HTTPRoute must emit **two** endpoints automatically:
+  1. **Health** — HTTPS probe via cluster DNS, `group: internal`
+  2. **Exposure guard** — DNS probe against `1.1.1.1` for the route hostname; success = no public A record (`len([BODY]) == 0`), `group: exposure`
+  Public and cluster tiers do not get an exposure guard by default (public is intentionally exposed; cluster has no route hostname).
+- R6a. Exposure guard endpoints use a **distinct group** (`exposure`) and **distinct name** (e.g. `{route-name}-exposure`) so they never collide with internal-tier health metrics or alerts.
 - R7. Buddy / static endpoints (`buddy`, manual `flux-webhook`) keep their existing groups and alerting paths unchanged.
 
 ### Operational constraints
@@ -62,9 +66,29 @@ Services have no parent Gateway for inheritance. Cluster-tier monitoring require
 
 If added, it should be a **comment/template reference** or a patch for rare raw-manifest apps — not a ConfigMap generator. Default recommendation: **skip new components**; document the Service annotation snippet in CLAUDE.md.
 
-**KTD4: Rename exposure guard group from `internal` → `exposure`**
+**KTD4: Exposure guard is a companion endpoint, not `guarded: true`**
 
-Reserve `group: internal` for LAN/VPN health. Update `kubernetes/components/gatus-internal/` → rename to `gatus-exposure/` (or delete if replaced by sidecar `guarded: true` on specific routes).
+gatus-sidecar’s `guarded: true` **replaces** the HTTP probe with a DNS-only check — it cannot satisfy R6 (health + exposure together). Internal routes need **two endpoints per HTTPRoute**. The orphaned `kubernetes/components/gatus-internal/` ConfigMap pattern is the correct *probe semantics* but wrong *delivery* (static ConfigMap, wrong group name, unwired). Delete the component once sidecar emits companion endpoints.
+
+**KTD7: Extend gatus-sidecar for automatic internal exposure guards**
+
+0.0.18 has no dual-endpoint support. Implement via **upstream contribution** (preferred) or a **homelab post-processor** init container (interim):
+
+- New Gateway annotation on `internal` (inherited by child HTTPRoutes):
+
+  ```yaml
+  gatus.home-operations.com/exposure-guard: |
+    group: exposure
+    interval: 1m
+    ui:
+      hide-hostname: true
+      hide-url: true
+  ```
+
+- Sidecar behavior when parent Gateway (or route) defines `exposure-guard` and the route is on the internal gateway:
+  - Emit existing HTTP endpoint (health, `group: internal`)
+  - Emit second endpoint named `{httproute-prefix}{name}-exposure` with `url: 1.1.1.1`, `dns.query-name: <hostname>`, `dns.query-type: A`, `conditions: [len([BODY]) == 0]`
+- Per-route opt-out: `gatus.home-operations.com/exposure-guard: "false"` for intentional dual-homed routes where the external Gateway route is the public face and the internal route should not assert “no public DNS” (rare; document when needed).
 
 **KTD5: Add sidecar name prefixes to prevent collisions**
 
@@ -92,7 +116,8 @@ flowchart TB
 
   subgraph tiers["Generated endpoints"]
     PUB["group: public<br/>https://app.zebernst.dev"]
-    LAN["group: internal<br/>https://app.zebernst.dev or *.internal"]
+    LAN["group: internal<br/>https://app.zebernst.dev"]
+    EXP["group: exposure<br/>dns @ 1.1.1.1 → no A record"]
     CLU["group: cluster<br/>tcp/http://app.ns.svc:port"]
   end
 
@@ -100,6 +125,8 @@ flowchart TB
   INT --> HR
   HR --> PUB
   HR --> LAN
+  INT --> EXP
+  HR --> EXP
   SVC --> CLU
 
   subgraph static["Static config (unchanged)"]
@@ -119,14 +146,15 @@ flowchart TB
 - Gateway annotation updates (`external`, `internal`)
 - Gatus sidecar arg cleanup + prefixes
 - VMRule group regex updates
-- Rename/repurpose exposure guard component
+- Automatic exposure guard companion endpoints for internal-gateway HTTPRoutes
+- Delete orphaned `gatus-internal` component after sidecar handles exposure guards
 - Migrate Minecraft `group: minecraft` → `group: cluster` (or keep `minecraft` as alias in VMRule during transition)
 - CLAUDE.md documentation of the three-tier model
 
 **Deferred to follow-up work**
 
 - Tailscale Gateway / Ingress class monitoring (`group: tailscale`)
-- Wiring exposure guard checks to all external-facing apps (separate from health tiers)
+- Exposure guards for cluster-tier Services (no public hostname to assert)
 - Per-route explicit groups for dual-homed apps (e.g. same hostname on internal + external Gateway)
 - Upgrading gatus-sidecar beyond 0.0.18 for future auto-grouping if it ships
 
@@ -168,7 +196,15 @@ gatus.home-operations.com/endpoint: |
     dns-resolver: tcp://kube-dns.kube-system.svc:53
   conditions:
     - "[STATUS] == 200"
+gatus.home-operations.com/exposure-guard: |
+  group: exposure
+  interval: 1m
+  ui:
+    hide-hostname: true
+    hide-url: true
 ```
+
+The `exposure-guard` block requires gatus-sidecar support (U4) — it is inherited to all internal HTTPRoutes and causes a companion DNS endpoint per route.
 
 **Patterns to follow:** Existing gateway annotations; sidecar README “parent for common config, child for per-route conditions”.
 
@@ -247,44 +283,98 @@ gatus.home-operations.com/endpoint: |
 
 ---
 
-### U4. Resolve exposure guard naming collision
+### U4. Automatic exposure guard for internal HTTPRoutes
 
-**Goal:** Separate DNS leak detection from internal-tier health monitoring.
+**Goal:** Every internal-gateway HTTPRoute gets a companion DNS exposure guard without per-app boilerplate.
 
-**Requirements:** R6
+**Requirements:** R6, R6a
+
+**Dependencies:** U1 (internal gateway tier defaults)
 
 **Files:**
 
-- `kubernetes/components/gatus-internal/config.yaml` → rename directory to `kubernetes/components/gatus-exposure/`
-- `kubernetes/components/gatus-exposure/kustomization.yaml` (update ConfigMap name, label to `gatus.home-operations.com/enabled` if kept as static ConfigMap **or** delete component)
-- `kubernetes/apps/observability/gatus/app/vmrule.yaml`
+- `kubernetes/apps/kube-system/cilium/gateway/internal.yaml` — add `gatus.home-operations.com/exposure-guard` annotation
+- `kubernetes/apps/observability/gatus/app/helmrelease.yaml` — pin upgraded sidecar **or** add interim post-processor init container
+- `kubernetes/components/gatus-internal/` — delete after companion endpoints work
+- Upstream: `home-operations/gatus-sidecar` (preferred) — new annotation + dual-endpoint reconcile logic
 
-**Approach (choose one during implementation):**
+**Approach:**
 
-**Option A — Rename + static mount (minimal):** Change `group: internal` → `group: exposure` in component config; mount generated ConfigMaps into Gatus static config path (requires wiring in app ks.yaml files — currently unwired).
+**Preferred — upstream sidecar extension:**
 
-**Option B — Sidecar guarded probes (preferred long-term):** Delete the component; add `guarded: true` to HTTPRoute annotations on apps that must not have public DNS. Guarded probes use `1.1.1.1` DNS check automatically.
+1. Add to internal Gateway:
 
-**Option C — Defer exposure guard:** Delete orphaned component; update VMRule to reference `group="exposure"` only when Option A/B is implemented.
+   ```yaml
+   gatus.home-operations.com/exposure-guard: |
+     group: exposure
+     interval: 1m
+     ui:
+       hide-hostname: true
+       hide-url: true
+   ```
 
-Update VMRule:
+2. Sidecar emits, for each HTTPRoute on `internal` gateway:
+   - `route/{name}` — HTTP health (inherits `group: internal`, kube-dns client from U1)
+   - `route/{name}-exposure` — DNS probe:
 
-```yaml
-# GatusEndpointDown — health tiers
-gatus_results_endpoint_success{group=~"public|internal|cluster|minecraft"} == 0
+     ```yaml
+     name: route/scanopy-exposure
+     group: exposure
+     url: 1.1.1.1
+     dns:
+       query-name: scanopy.zebernst.dev  # from spec.hostnames[0]
+       query-type: A
+     conditions:
+       - "len([BODY]) == 0"
+     ```
 
-# GatusEndpointExposed — exposure guard only
-gatus_results_endpoint_success{group="exposure"} == 0
-```
+3. Bump `gatus-sidecar` image tag in HelmRelease once released.
 
-Remove orphan `services` from regex (nothing produces it today).
+**Interim fallback (if upstream not ready):** Add a lightweight post-processor init container (e.g. `yq`/shell script in repo) that watches `/config/gatus-sidecar.yaml`, duplicates exposure endpoints for every entry with `group: internal`, and rewrites the file before Gatus starts. Remove when upstream ships.
+
+**Do not use `guarded: true`** on internal routes — it replaces HTTP health checks entirely.
 
 **Test scenarios:**
 
-- Internal-tier health failure triggers `GatusEndpointDown`, not `GatusEndpointExposed`.
-- Exposure guard failure (if wired) triggers `GatusEndpointExposed` with correct summary text.
+- Internal route `scanopy` produces two Gatus endpoints: health (`group=internal`, HTTP 200) and exposure (`group=exposure`, no public A record).
+- Public route `kromgo` produces one endpoint only (`group=public`); no exposure companion.
+- App intentionally on both gateways: internal route gets exposure guard; external route does not. If public DNS exists for dual-homed hostname, exposure guard correctly fails → `GatusEndpointExposed`.
+- `*.internal` hostnames (e.g. `open-webui.internal`): exposure guard queries that FQDN on `1.1.1.1`; success when no public record.
 
-**Verification:** Alert expressions match actual metric labels; no alert silence for newly grouped public/internal routes.
+**Verification:** Gatus UI shows paired endpoints for internal apps; `GatusEndpointExposed` fires when a LAN-only app accidentally gains a Cloudflare A record.
+
+---
+
+### U4b. Update VMRule alerting for tier groups
+
+**Goal:** Align alerts with the three health tiers + exposure guard group.
+
+**Requirements:** R5, R6, R6a
+
+**Dependencies:** U4
+
+**Files:**
+
+- `kubernetes/apps/observability/gatus/app/vmrule.yaml`
+
+**Approach:**
+
+```yaml
+# Health check failures
+gatus_results_endpoint_success{group=~"public|internal|cluster|minecraft"} == 0
+
+# Accidental public DNS on LAN-only apps
+gatus_results_endpoint_success{group="exposure"} == 0
+```
+
+Remove orphan `services` and legacy `external` group from regex once static `flux-webhook` endpoint migrates to `group: public`.
+
+**Test scenarios:**
+
+- Internal HTTP failure → `GatusEndpointDown` only.
+- Public A record appears for LAN-only app → `GatusEndpointExposed` only (exposure endpoint fails; health may still pass).
+
+**Verification:** Alert routing matches failure mode; no cross-firing between down vs exposed alerts.
 
 ---
 
@@ -323,14 +413,15 @@ Remove orphan `services` from regex (nothing produces it today).
 |------|------------|
 | Endpoint name prefix change resets Gatus history | Accept one-time metric discontinuity; document in PR |
 | Dual-homed routes (same hostname, two gateways) produce two endpoints | Defer explicit per-route `group:` overrides; monitor for confusing duplicates |
-| Exposure guard still unwired after rename | VMRule `GatusEndpointExposed` stays inert until guard endpoints exist — acceptable |
+| gatus-sidecar lacks dual-endpoint support in 0.0.18 | Upstream PR or interim post-processor; do not ship U1 without U4 path |
+| Dual-homed apps trigger exposure alerts when public DNS is intentional | Document opt-out annotation; external route is the public contract |
 | Depends on PR #1131 internal DNS fix | Merge DNS fix before or with this work |
 
 ---
 
 ## Open Questions
 
-1. **Exposure guard delivery:** Option A (component), B (sidecar `guarded:`), or C (delete for now)? Recommendation: **Option C for this PR**, Option B as follow-up for apps that need leak detection.
+1. **Exposure guard delivery:** Upstream gatus-sidecar PR vs homelab post-processor interim? Recommendation: **file upstream issue/PR first**; use post-processor only if blocked on release timeline.
 2. **Minecraft group migration:** Rename to `cluster` immediately, or keep `minecraft` in VMRule regex permanently as a legacy alias? Recommendation: **migrate to `cluster`** for consistency.
 3. **Tailscale fourth tier:** Add in same effort or defer? Recommendation: **defer** (listed in scope boundaries).
 
