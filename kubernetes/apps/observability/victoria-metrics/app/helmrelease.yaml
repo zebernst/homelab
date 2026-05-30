@@ -85,13 +85,13 @@ spec:
       # every alert alongside pushover and show duplicates in Karma/Pushover.
       config:
         route:
-          group_by: ["alertname", "namespace", "severity"]
+          group_by: ["alertname", "cluster", "job"]
           group_interval: 10m
           group_wait: 1m
           receiver: pushover
           repeat_interval: 12h
           routes:
-            - receiver: "null"
+            - receiver: blackhole
               matchers:
                 - alertname="InfoInhibitor"
             - receiver: heartbeat
@@ -107,7 +107,7 @@ spec:
             target_matchers:
               - severity="warning"
         receivers:
-          - name: "null"
+          - name: blackhole
           - name: heartbeat
             webhook_configs:
               - url_secret:
