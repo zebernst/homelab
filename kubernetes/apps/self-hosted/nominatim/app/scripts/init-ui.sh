@@ -1,7 +1,7 @@
 #!/bin/sh
 set -uo pipefail
 
-VERSION="${NOMINATIM_UI_VERSION:-3.11.0}"
+VERSION="${NOMINATIM_UI_VERSION:?NOMINATIM_UI_VERSION is required}"
 UI_ROOT="${UI_ROOT:-/ui-www}"
 
 apk add --no-cache curl tar

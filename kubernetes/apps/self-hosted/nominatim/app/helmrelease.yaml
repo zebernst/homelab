@@ -54,8 +54,8 @@ spec:
         containers:
           nominatim:
             image:
-              # renovate: datasource=docker
               repository: mediagis/nominatim
+              # renovate: datasource=docker depName=mediagis/nominatim
               tag: "5.3.2"
             command: ["/bin/bash", "/scripts/start.sh"]
             env:
@@ -137,15 +137,17 @@ spec:
           ui-init:
             image:
               repository: docker.io/library/alpine
+              # renovate: datasource=docker depName=library/alpine
               tag: 3.21.3
             command: ["/bin/sh", "/scripts/init-ui.sh"]
             env:
+              # renovate: datasource=github-releases depName=osm-search/nominatim-ui
               NOMINATIM_UI_VERSION: "3.11.0"
         containers:
           ui:
             image:
-              # renovate: datasource=docker
               repository: docker.io/library/nginx
+              # renovate: datasource=docker depName=library/nginx
               tag: 1.27.5-alpine
             probes:
               liveness: &uiProbe
@@ -177,6 +179,7 @@ spec:
           kubectl:
             image:
               repository: registry.k8s.io/kubectl
+              # renovate: datasource=docker depName=registry.k8s.io/kubectl
               tag: v1.34.5
             args:
               - exec
