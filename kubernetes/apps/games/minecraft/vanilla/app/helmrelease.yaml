@@ -130,6 +130,18 @@ spec:
     service:
       vanilla:
         annotations:
+          gatus.home-operations.com/enabled: "true"
+          gatus.home-operations.com/endpoint: |
+            name: vanilla
+            group: minecraft
+            url: tcp://vanilla.games.svc.cluster.local:25565
+            interval: 1m
+            conditions:
+              - "[CONNECTED] == true"
+            ui:
+              hide-url: true
+              hide-hostname: true
+              hide-port: true
           mc-router.itzg.me/defaultServer: "true"
           mc-router.itzg.me/autoScaleUp: "true"
           mc-router.itzg.me/autoScaleDown: "false"

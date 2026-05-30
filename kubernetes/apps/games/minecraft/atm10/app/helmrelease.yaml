@@ -129,6 +129,18 @@ spec:
     service:
       atm10:
         annotations:
+          gatus.home-operations.com/enabled: "true"
+          gatus.home-operations.com/endpoint: |
+            name: all the mods 10
+            group: minecraft
+            url: tcp://atm10.games.svc.cluster.local:25565
+            interval: 1m
+            conditions:
+              - "[CONNECTED] == true"
+            ui:
+              hide-url: true
+              hide-hostname: true
+              hide-port: true
           mc-router.itzg.me/externalServerName: "atm10.zebernst.dev"
           mc-router.itzg.me/autoScaleUp: "true"
           mc-router.itzg.me/autoScaleDown: "false"

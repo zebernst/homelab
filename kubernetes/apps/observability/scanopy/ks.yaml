@@ -11,7 +11,6 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../components/gatus
     - ../../../../components/volsync
   dependsOn:
     - name: cloudnative-pg-cluster
@@ -37,5 +36,4 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_PATH: /api/health
       VOLSYNC_CAPACITY: 5Gi

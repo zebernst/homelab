@@ -19,9 +19,3 @@ configMapGenerator:
       - bluemap/maps/atmons-overworld.conf
       - bluemap/maps/atmons-nether.conf
       - bluemap/maps/atmons-end.conf
-  - name: atmons-gatus-ep
-    files:
-      - config.yaml=gatus-config.yaml
-    options:
-      labels:
-        gatus.io/enabled: "true"

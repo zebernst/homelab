@@ -80,6 +80,14 @@ spec:
           bittorrent-tcp:
             port: *bittorrentPort
             protocol: TCP
+    route:
+      app:
+        hostnames:
+          - qb.zebernst.dev
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
     ingress:
       tailscale:
         className: tailscale

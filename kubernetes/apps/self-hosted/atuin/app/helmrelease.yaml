@@ -77,6 +77,14 @@ spec:
             port: *port
           metrics:
             port: *metricsPort
+    route:
+      app:
+        hostnames:
+          - sh.zebernst.dev
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
     ingress:
       tailscale:
         className: tailscale

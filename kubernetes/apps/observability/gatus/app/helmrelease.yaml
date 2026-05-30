@@ -32,7 +32,9 @@ spec:
             args:
               - --auto-httproute
               - --enable-httproute
+              - --enable-service
               - --gateway-name=external
+              - --gateway-name=internal
             resources: &resources
               requests:
                 cpu: 10m
