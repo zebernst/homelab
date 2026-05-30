@@ -13,9 +13,9 @@ configMapGenerator:
       - scripts/start.sh
       - scripts/maintain-regions.sh
       - scripts/init-ui.sh
-  - name: nominatim-nginx
+  - name: nominatim-envoy
     files:
-      - nginx/default.conf
+      - envoy/envoy.yaml
 generatorOptions:
   annotations:
     kustomize.toolkit.fluxcd.io/substitute: disabled
