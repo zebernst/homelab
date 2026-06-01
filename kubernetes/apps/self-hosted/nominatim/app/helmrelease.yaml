@@ -80,6 +80,8 @@ spec:
               IMPORT_SECONDARY_WIKIPEDIA: "true"
               IMPORT_US_POSTCODES: "true"
               PROJECT_DIR: /nominatim
+              # Required for North America / multi-region imports (created during bootstrap osm2pgsql).
+              NOMINATIM_FLATNODE_FILE: /nominatim/flatnode/flatnode.file
               POSTGRES_SHARED_BUFFERS: 2GB
               POSTGRES_MAINTENANCE_WORK_MEM: 4GB
               POSTGRES_AUTOVACUUM_WORK_MEM: 1GB

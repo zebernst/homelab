@@ -60,8 +60,9 @@ if ! sudo -u postgres pg_isready -q 2>/dev/null; then
 fi
 
 if [ -d /nominatim/flatnode ] && { [ ! -f /nominatim/flatnode/flatnode.file ] || [ ! -s /nominatim/flatnode/flatnode.file ]; }; then
-  echo "[nominatim-maintenance] WARNING: flatnode volume is mounted but flatnode.file is missing or empty."
-  echo "[nominatim-maintenance] Large add-data imports need flatnode configured at initial import; see Nominatim docs."
+  echo "[nominatim-maintenance] ERROR: flatnode.file is missing or empty."
+  echo "[nominatim-maintenance] The database was imported without flatnode; run: task nominatim:reset-for-flatnode"
+  exit 1
 fi
 
 seed_state() {
