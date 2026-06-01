@@ -80,12 +80,17 @@ spec:
               IMPORT_SECONDARY_WIKIPEDIA: "true"
               IMPORT_US_POSTCODES: "true"
               PROJECT_DIR: /nominatim
+              # Required for North America / multi-region imports (created during bootstrap osm2pgsql).
+              NOMINATIM_FLATNODE_FILE: /nominatim/flatnode/flatnode.file
               POSTGRES_SHARED_BUFFERS: 2GB
               POSTGRES_MAINTENANCE_WORK_MEM: 4GB
               POSTGRES_AUTOVACUUM_WORK_MEM: 1GB
               POSTGRES_EFFECTIVE_CACHE_SIZE: 12GB
               GUNICORN_WORKERS: "4"
               NOMINATIM_API_POOL_SIZE: "5"
+              # Daily cron only applies incremental OSC updates; full region PBF imports are opt-in.
+              NOMINATIM_ALLOW_REGION_IMPORT: "false"
+              NOMINATIM_IMPORT_MAX_REGIONS: "1"
             envFrom:
               - secretRef:
                   name: nominatim-secret
@@ -177,6 +182,10 @@ spec:
           concurrencyPolicy: Forbid
           successfulJobsHistory: 1
           failedJobsHistory: 3
+          # Kill stuck kubectl exec sessions (e.g. multi-day add-data) after 12h.
+          activeDeadlineSeconds: 43200
+          ttlSecondsAfterFinished: 86400
+          backoffLimit: 0
         containers:
           kubectl:
             image:

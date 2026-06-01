@@ -1,0 +1,175 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+# Helpers for adding Geofabrik regions after the initial US bootstrap import.
+# Each full region import can take many hours; run one at a time.
+
+vars:
+  NS: self-hosted
+  DEPLOYMENT: nominatim
+  CONTAINER: nominatim
+  PGDATA_CLAIM: nominatim-pgdata
+  FLATNODE_CLAIM: nominatim-flatnode
+  PROJECT_CLAIM: nominatim-project
+  IMPORT_ENV: >-
+    NOMINATIM_ALLOW_REGION_IMPORT=true
+    NOMINATIM_IMPORT_MAX_REGIONS=1
+    NOMINATIM_SKIP_INCREMENTAL=true
+
+tasks:
+
+  default:
+    desc: List Nominatim maintenance tasks
+    cmd: task --list --tasks nominatim
+    silent: true
+
+  check-config:
+    desc: Show Nominatim .env flatnode setting and whether bootstrap used flatnode
+    cmds:
+      - |
+        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- bash -ec '
+          PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
+          echo "=== NOMINATIM_FLATNODE_FILE (container env) ==="
+          echo "${NOMINATIM_FLATNODE_FILE:-<unset>}"
+          echo
+          echo "=== ${PROJECT_DIR}/.env (flatnode line) ==="
+          grep -E "^NOMINATIM_FLATNODE_FILE=" "${PROJECT_DIR}/.env" 2>/dev/null || echo "(not set in .env)"
+          echo
+          echo "=== flatnode.file ==="
+          ls -lh /nominatim/flatnode/flatnode.file 2>/dev/null || echo "missing — bootstrap import did not use flatnode"
+          echo
+          echo "=== osm2pgsql_properties ==="
+          sudo -u postgres psql -d nominatim -c "SELECT property, value FROM osm2pgsql_properties ORDER BY 1;" 2>/dev/null \
+            || echo "(query failed — DB may be down or not initialized)"
+        '
+    preconditions:
+      - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
+      - which kubectl
+
+  status:
+    desc: Show import-finished, flatnode, imported regions, and pending regions
+    cmds:
+      - |
+        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- bash -ec '
+          PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
+          IMPORTED_LIST="${PROJECT_DIR}/imported-regions.txt"
+          IMPORT_FINISHED="/var/lib/postgresql/16/main/import-finished"
+
+          echo "=== import-finished ==="
+          if [ -f "${IMPORT_FINISHED}" ]; then
+            ls -la "${IMPORT_FINISHED}"
+          else
+            echo "missing (bootstrap import may still be running)"
+          fi
+
+          echo
+          echo "=== flatnode (/nominatim/flatnode/flatnode.file) ==="
+          if [ -f /nominatim/flatnode/flatnode.file ]; then
+            ls -lh /nominatim/flatnode/flatnode.file
+          else
+            echo "missing or empty — large add-data imports need flatnode from initial import"
+          fi
+
+          echo
+          echo "=== imported-regions.txt ==="
+          if [ -f "${IMPORTED_LIST}" ]; then
+            cat "${IMPORTED_LIST}"
+          else
+            echo "(not created yet; first cron run seeds from bootstrap region)"
+          fi
+
+          echo
+          echo "=== configured NOMINATIM_REGIONS ==="
+          printf "%s\n" "${NOMINATIM_REGIONS}" | tr ", " "\n" | sed "/^[[:space:]]*$/d"
+
+          echo
+          echo "=== pending (configured but not imported) ==="
+          pending=0
+          while IFS= read -r region; do
+            if ! grep -qxF "${region}" "${IMPORTED_LIST}" 2>/dev/null; then
+              echo "  - ${region}"
+              pending=$((pending + 1))
+            fi
+          done < <(printf "%s\n" "${NOMINATIM_REGIONS}" | tr ", " "\n" | sed "/^[[:space:]]*$/d")
+          if [ "${pending}" -eq 0 ]; then
+            echo "  (none)"
+          fi
+        '
+    preconditions:
+      - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
+      - which kubectl
+
+  reset-for-flatnode:
+    desc: Wipe Postgres + flatnode PVCs and re-run US bootstrap import with flatnode (~24h+)
+    prompt: |-
+      This DELETES all Nominatim search data and re-imports north-america/us from scratch.
+      pgdata and flatnode PVCs are removed; nominatim-project keeps Volsync backups but imported-regions.txt is cleared.
+      After the pod restarts, wait until flatnode.file is ~100GB and /status is healthy before adding regions.
+      Continue?
+    cmds:
+      - kubectl -n {{.NS}} scale deployment/{{.DEPLOYMENT}} --replicas=0
+      - |
+        kubectl -n {{.NS}} wait deployment/{{.DEPLOYMENT}} \
+          --for=jsonpath='{.status.replicas}'=0 --timeout=10m
+      - kubectl -n {{.NS}} delete pvc {{.PGDATA_CLAIM}} {{.FLATNODE_CLAIM}} --ignore-not-found=true --wait=true
+      - |
+        kubectl -n {{.NS}} run nominatim-reset-project \
+          --rm -i --restart=Never \
+          --image=docker.io/library/alpine:3.21 \
+          --overrides='{
+            "spec": {
+              "containers": [{
+                "name": "reset",
+                "image": "docker.io/library/alpine:3.21",
+                "command": ["sh", "-ec", "rm -f /project/imported-regions.txt && rm -rf /project/update && ls -la /project"],
+                "volumeMounts": [{"name": "project", "mountPath": "/project"}]
+              }],
+              "volumes": [{"name": "project", "persistentVolumeClaim": {"claimName": "{{.PROJECT_CLAIM}}"}}]
+            }
+          }'
+      - kubectl -n {{.NS}} scale deployment/{{.DEPLOYMENT}} --replicas=1
+      - |
+        echo "Scaled nominatim back up. Follow bootstrap progress:"
+        echo "  kubectl -n {{.NS}} logs -f deployment/{{.DEPLOYMENT}} -c {{.CONTAINER}}"
+        echo "When import completes, verify flatnode:"
+        echo "  task nominatim:check-config"
+    preconditions:
+      - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
+      - kubectl -n {{.NS}} get pvc {{.PROJECT_CLAIM}}
+      - which kubectl
+
+  import-next:
+    desc: Import the next pending region from NOMINATIM_REGIONS (multi-hour, streams logs)
+    prompt: Import the next missing Geofabrik region into Nominatim? This can take many hours and heavily loads Postgres.
+    cmds:
+      - |
+        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
+          env {{.IMPORT_ENV}} /bin/bash /scripts/maintain-regions.sh
+    preconditions:
+      - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
+      - which kubectl
+
+  import-region:
+    desc: Import one Geofabrik region by path [REGION=north-america/canada]
+    prompt: 'Import region {{.REGION}}? This can take many hours and heavily loads Postgres.'
+    cmds:
+      - |
+        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
+          env {{.IMPORT_ENV}} NOMINATIM_IMPORT_ONLY_REGION={{.REGION}} \
+          /bin/bash /scripts/maintain-regions.sh
+    requires:
+      vars: [REGION]
+    preconditions:
+      - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
+      - which kubectl
+
+  update-incremental:
+    desc: Run incremental OSC updates + reindex for already-imported regions (daily-cron equivalent)
+    cmds:
+      - |
+        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
+          /bin/bash /scripts/maintain-regions.sh
+    preconditions:
+      - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
+      - which kubectl
