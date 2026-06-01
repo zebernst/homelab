@@ -21,6 +21,7 @@ includes:
   bootstrap: .taskfiles/bootstrap
   fission: .taskfiles/fission
   kubernetes: .taskfiles/kubernetes
+  nominatim: .taskfiles/nominatim
   synology: .taskfiles/synology
   talos: .taskfiles/talos
   volsync: .taskfiles/volsync

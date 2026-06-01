@@ -9,6 +9,8 @@ IMPORT_FINISHED="${IMPORT_FINISHED:-/var/lib/postgresql/16/main/import-finished}
 CURL_USER_AGENT="${USER_AGENT:-nominatim-maintenance}"
 ALLOW_REGION_IMPORT="${NOMINATIM_ALLOW_REGION_IMPORT:-false}"
 IMPORT_MAX_REGIONS="${NOMINATIM_IMPORT_MAX_REGIONS:-1}"
+IMPORT_ONLY_REGION="${NOMINATIM_IMPORT_ONLY_REGION:-}"
+SKIP_INCREMENTAL="${NOMINATIM_SKIP_INCREMENTAL:-false}"
 
 truthy() {
   case "${1,,}" in
@@ -29,6 +31,20 @@ mapfile -t DESIRED_REGIONS < <(
 if [ "${#DESIRED_REGIONS[@]}" -eq 0 ]; then
   echo "[nominatim-maintenance] No regions configured; exiting."
   exit 0
+fi
+
+if [ -n "${IMPORT_ONLY_REGION}" ]; then
+  region_known=false
+  for region in "${DESIRED_REGIONS[@]}"; do
+    if [ "${region}" = "${IMPORT_ONLY_REGION}" ]; then
+      region_known=true
+      break
+    fi
+  done
+  if [ "${region_known}" = "false" ]; then
+    echo "[nominatim-maintenance] NOMINATIM_IMPORT_ONLY_REGION=${IMPORT_ONLY_REGION} is not listed in NOMINATIM_REGIONS."
+    exit 1
+  fi
 fi
 
 mkdir -p "${IMPORT_STAGING}" "${PROJECT_DIR}/update"
@@ -81,7 +97,14 @@ import_new_regions() {
 
   local imported=0
   for region in "${DESIRED_REGIONS[@]}"; do
+    if [ -n "${IMPORT_ONLY_REGION}" ] && [ "${region}" != "${IMPORT_ONLY_REGION}" ]; then
+      continue
+    fi
     if grep -qxF "${region}" "${IMPORTED_LIST}"; then
+      if [ -n "${IMPORT_ONLY_REGION}" ] && [ "${region}" = "${IMPORT_ONLY_REGION}" ]; then
+        echo "[nominatim-maintenance] Region ${IMPORT_ONLY_REGION} is already imported."
+        exit 0
+      fi
       continue
     fi
     if [ "${imported}" -ge "${IMPORT_MAX_REGIONS}" ]; then
@@ -105,31 +128,33 @@ import_new_regions() {
 CHANGED=false
 import_new_regions
 
-for region in "${DESIRED_REGIONS[@]}"; do
-  if ! grep -qxF "${region}" "${IMPORTED_LIST}"; then
-    continue
-  fi
+if ! truthy "${SKIP_INCREMENTAL}"; then
+  for region in "${DESIRED_REGIONS[@]}"; do
+    if ! grep -qxF "${region}" "${IMPORTED_LIST}"; then
+      continue
+    fi
 
-  state_file="${PROJECT_DIR}/update/${region}/sequence.state"
-  if [ ! -f "${state_file}" ]; then
-    echo "[nominatim-maintenance] Missing state for ${region}; seeding and continuing."
-    seed_state "${region}"
-    continue
-  fi
+    state_file="${PROJECT_DIR}/update/${region}/sequence.state"
+    if [ ! -f "${state_file}" ]; then
+      echo "[nominatim-maintenance] Missing state for ${region}; seeding and continuing."
+      seed_state "${region}"
+      continue
+    fi
 
-  changes_file="${IMPORT_STAGING}/changes-$(echo "${region}" | tr '/' '-').osc.gz"
-  echo "[nominatim-maintenance] Fetching changes for ${region}"
-  if pyosmium-get-changes \
-      --server "${DOWNURL}/${region}-updates/" \
-      --state-file "${state_file}" \
-      -o "${changes_file}" 2>/dev/null && [ -s "${changes_file}" ]; then
-    sudo -E -u nominatim nominatim add-data \
-      --project-dir "${PROJECT_DIR}" \
-      --diff "${changes_file}"
-    CHANGED=true
-  fi
-  rm -f "${changes_file}"
-done
+    changes_file="${IMPORT_STAGING}/changes-$(echo "${region}" | tr '/' '-').osc.gz"
+    echo "[nominatim-maintenance] Fetching changes for ${region}"
+    if pyosmium-get-changes \
+        --server "${DOWNURL}/${region}-updates/" \
+        --state-file "${state_file}" \
+        -o "${changes_file}" 2>/dev/null && [ -s "${changes_file}" ]; then
+      sudo -E -u nominatim nominatim add-data \
+        --project-dir "${PROJECT_DIR}" \
+        --diff "${changes_file}"
+      CHANGED=true
+    fi
+    rm -f "${changes_file}"
+  done
+fi
 
 if [ "${CHANGED}" = "true" ]; then
   echo "[nominatim-maintenance] Re-indexing after import/update cycle."
