@@ -178,6 +178,8 @@ spec:
       update-osm-db:
         type: cronjob
         cronjob:
+          # Re-enable (suspend: false) after bootstrap / flatnode re-import completes.
+          suspend: true
           schedule: "@daily"
           concurrencyPolicy: Forbid
           successfulJobsHistory: 1
