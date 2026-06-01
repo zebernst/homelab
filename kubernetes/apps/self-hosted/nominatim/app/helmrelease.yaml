@@ -86,6 +86,9 @@ spec:
               POSTGRES_EFFECTIVE_CACHE_SIZE: 12GB
               GUNICORN_WORKERS: "4"
               NOMINATIM_API_POOL_SIZE: "5"
+              # Daily cron only applies incremental OSC updates; full region PBF imports are opt-in.
+              NOMINATIM_ALLOW_REGION_IMPORT: "false"
+              NOMINATIM_IMPORT_MAX_REGIONS: "1"
             envFrom:
               - secretRef:
                   name: nominatim-secret
@@ -177,6 +180,10 @@ spec:
           concurrencyPolicy: Forbid
           successfulJobsHistory: 1
           failedJobsHistory: 3
+          # Kill stuck kubectl exec sessions (e.g. multi-day add-data) after 12h.
+          activeDeadlineSeconds: 43200
+          ttlSecondsAfterFinished: 86400
+          backoffLimit: 0
         containers:
           kubectl:
             image:
