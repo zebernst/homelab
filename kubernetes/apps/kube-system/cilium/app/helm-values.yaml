@@ -55,6 +55,12 @@ localRedirectPolicy: true
 operator:
   replicas: 2
   rollOutPods: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
   prometheus:
     enabled: true
     serviceMonitor:
