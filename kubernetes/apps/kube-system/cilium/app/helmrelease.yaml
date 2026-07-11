@@ -22,6 +22,17 @@ spec:
   values:
     hubble:
       enabled: true
+      tls:
+        auto:
+          # "helm" (chart default) only generates certs once at install time and
+          # never renews them — Flux's periodic HelmRelease reconciles are no-ops
+          # against an unchanged chart, so the certs silently expire after
+          # certValidityDuration with no automatic recovery. "cronJob" adds an
+          # in-cluster CronJob that periodically regenerates certs before they
+          # expire, independent of whether Flux ever runs another helm upgrade.
+          method: cronJob
+          certValidityDuration: 365
+          schedule: "0 0 1 */2 *"
       metrics:
         enabled:
           - dns:query
