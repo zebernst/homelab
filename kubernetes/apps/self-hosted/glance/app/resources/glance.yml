@@ -27,6 +27,8 @@ pages:
                 limit: 4
               - url: https://ciechanow.ski/atom.xml
                 title: Bartosz Ciechanowski
+              - url: https://www.lux.camera/rss
+                title: Lux
               - url: https://samwho.dev/rss.xml
                 title: Sam Rose
               - url: https://thatshubham.com/rss.xml
