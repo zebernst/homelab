@@ -33,6 +33,8 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: dragonfly
+    - name: victoria-metrics-operator
+      namespace: observability
   path: kubernetes/apps/database/dragonfly/cluster
   prune: true
   sourceRef:

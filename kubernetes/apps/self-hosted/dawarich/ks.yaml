@@ -21,6 +21,8 @@ spec:
       namespace: external-secrets
     - name: rook-ceph-cluster
       namespace: rook-ceph
+    - name: victoria-metrics-operator
+      namespace: observability
     - name: volsync
       namespace: volsync-system
   path: kubernetes/apps/self-hosted/dawarich/app
