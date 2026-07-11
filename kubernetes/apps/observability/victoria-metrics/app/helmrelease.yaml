@@ -157,9 +157,9 @@ spec:
         resources:
           requests:
             cpu: 100m
-            memory: 4Gi
+            memory: 6Gi
           limits:
-            memory: 4Gi
+            memory: 6Gi
         storage:
           accessModes:
             - ReadWriteOnce
