@@ -10,6 +10,9 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: victoria-metrics-operator
+      namespace: observability
   path: kubernetes/apps/volsync-system/volsync/app
   prune: true
   sourceRef:
