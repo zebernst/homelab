@@ -57,9 +57,21 @@ spec:
         mgr:
           requests:
             cpu: 500m
-            memory: 512Mi
+            memory: 3Gi
           limits:
-            memory: 2Gi
+            memory: 3Gi
+        mon:
+          requests:
+            cpu: 1000m
+            memory: 3Gi
+          limits:
+            memory: 3Gi
+        osd:
+          requests:
+            cpu: 1000m
+            memory: 6Gi
+          limits:
+            memory: 6Gi
       network:
         provider: host
         addressRanges:
