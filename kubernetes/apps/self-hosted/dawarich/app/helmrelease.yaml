@@ -89,9 +89,9 @@ spec:
             resources:
               requests:
                 cpu: 50m
-                memory: 512Mi
+                memory: 768Mi
               limits:
-                memory: 1Gi
+                memory: 1536Mi
           sidekiq:
             image:
               repository: freikin/dawarich
@@ -114,9 +114,9 @@ spec:
             resources:
               requests:
                 cpu: 50m
-                memory: 256Mi
+                memory: 512Mi
               limits:
-                memory: 1Gi
+                memory: 1536Mi
           redis:
             image:
               repository: docker.io/redis
