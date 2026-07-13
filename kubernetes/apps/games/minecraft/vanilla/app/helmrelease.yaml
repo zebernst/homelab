@@ -32,7 +32,7 @@ spec:
           vanilla:
             image:
               repository: ghcr.io/itzg/minecraft-server
-              tag: 2026.5.2
+              tag: 2026.7.0
             env:
               EULA: "true"
               TZ: America/Chicago
@@ -85,7 +85,7 @@ spec:
           mc-monitor:
             image:
               repository: itzg/mc-monitor
-              tag: 0.16.5@sha256:9ba093b1dd8c12fd1f9126b6b4033f5cdf51fd11d1a27c6598bd4ac6d0962a6c
+              tag: 0.16.11@sha256:2ffab87864ad6c9838f7f4f70c17df71dcb7bb9782b0d31a2eaa0d712f44e8ce
             args: ["export-for-prometheus"]
             env:
               EXPORT_SERVERS: vanilla
@@ -103,7 +103,7 @@ spec:
           bluemap:
             image:
               repository: ghcr.io/bluemap-minecraft/bluemap
-              tag: v5.20
+              tag: v5.22
             args: ["-r", "-u", "-w"]
             env:
               JAVA_TOOL_OPTIONS: "-Xmx1G"
