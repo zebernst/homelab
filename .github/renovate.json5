@@ -10,6 +10,18 @@
     ':semanticCommits',
     ':skipStatusChecks',
     ':timezone(America/Chicago)',
+    // Shared home-operations presets, pinned to a release tag. Renovate's own
+    // renovate-config manager proposes bumps to the pin when new tags ship.
+    'github>home-operations/renovate-presets//managers/annotated.json5#2.1.0',
+    'github>home-operations/renovate-presets//managers/cnpg.json5#2.1.0',
+    'github>home-operations/renovate-presets//managers/oci.json5#2.1.0',
+    'github>home-operations/renovate-presets//managers/talosFactory.json5#2.1.0',
+    'github>home-operations/renovate-presets//overrides/changelogs.json5#2.1.0',
+    'github>home-operations/renovate-presets//overrides/helmfile.json5#2.1.0',
+    'github>home-operations/renovate-presets//overrides/mise.json5#2.1.0',
+    'github>home-operations/renovate-presets//policies/semanticCommits.json5#2.1.0',
+    // Local presets are listed after the shared ones: extends are merged in
+    // order and later sources win, so rules below override the presets above.
     'github>zebernst/homelab//.github/renovate/allowedVersions.json5',
     'github>zebernst/homelab//.github/renovate/autoMerge.json5',
     'github>zebernst/homelab//.github/renovate/customManagers.json5',
@@ -17,7 +29,6 @@
     'github>zebernst/homelab//.github/renovate/groups.json5',
     'github>zebernst/homelab//.github/renovate/labels.json5',
     'github>zebernst/homelab//.github/renovate/packageRules.json5',
-    'github>zebernst/homelab//.github/renovate/semanticCommits.json5',
   ],
   dependencyDashboardTitle: 'Renovate Dashboard 🤖',
   suppressNotifications: [
@@ -41,6 +52,10 @@
   kubernetes: {
     managerFilePatterns: [
       '/(^|/)kubernetes/.+\\.ya?ml$/',
+      // Talos machineconfig contains apiVersion/kind (KubeSchedulerConfiguration),
+      // so the kubernetes manager extracts its image: lines (kubelet, kube-*)
+      // without needing renovate annotations.
+      '/(^|/)talos/.+\\.ya?ml(?:\\.j2)?$/',
     ],
   },
 }

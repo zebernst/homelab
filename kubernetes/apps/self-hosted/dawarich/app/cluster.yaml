@@ -6,7 +6,6 @@ metadata:
   name: dawarich-db
 spec:
   instances: 1
-  # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgis
   imageName: ghcr.io/cloudnative-pg/postgis:17-3.5
   primaryUpdateStrategy: unsupervised
   storage:

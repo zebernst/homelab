@@ -4,7 +4,6 @@ kind: Dragonfly
 metadata:
   name: &cluster hindwing
 spec:
-  # renovate: datasource=docker depName=ghcr.io/dragonflydb/dragonfly
   image: ghcr.io/dragonflydb/dragonfly:v1.37.0
   replicas: 3
   args:

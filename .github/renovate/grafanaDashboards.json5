@@ -10,12 +10,15 @@
   customManagers: [
     {
       customType: "regex",
-      description: "Process Grafana dashboards",
+      description: "Process Grafana dashboards declared as gnetId/revision pairs",
       managerFilePatterns: ["/(^|/)kubernetes/.+\\.ya?ml$/"],
       matchStrings: [
-        "dashboards\\/(?<depName>\\d+)\\/revisions\\/(?<currentValue>\\d+)\\/download",
+        // # renovate: depName="Dashboard Name"
+        // gnetId: 12345
+        // revision: 6
+        'depName="(?<depName>[^"]+)"\\n(?<indentation>\\s+)gnetId: (?<packageName>\\d+)\\n.+revision: (?<currentValue>\\d+)',
       ],
-      autoReplaceStringTemplate: "dashboards/{{depName}}/revisions/{{newValue}}/download",
+      autoReplaceStringTemplate: 'depName="{{{depName}}}"\n{{{indentation}}}gnetId: {{{packageName}}}\n{{{indentation}}}revision: {{{newValue}}}',
       datasourceTemplate: "custom.grafana-dashboards",
       versioningTemplate: "regex:^(?<major>\\d+)$",
     },
