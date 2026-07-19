@@ -108,7 +108,9 @@
     {
       description: "Nominatim",
       groupName: "nominatim",
-      matchFilePaths: ["kubernetes/apps/self-hosted/nominatim/**"],
+      // matchFileNames (not matchFilePaths) — unknown matchers are ignored, and a
+      // groupName rule with no valid matchers applies to every dependency.
+      matchFileNames: ["kubernetes/apps/self-hosted/nominatim/**"],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
