@@ -249,7 +249,8 @@ spec:
       flatnode:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
-        size: 100Gi
+        # osm2pgsql pre-allocates ~8 bytes × max OSM node ID (~100GB for US); 100Gi PVC fills up.
+        size: 200Gi
         storageClass: ceph-block
         advancedMounts:
           nominatim:
