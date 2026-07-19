@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Renovate Config
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths: [".github/renovate.json5", ".github/renovate/**"]
+  push:
+    branches: ["main"]
+    paths: [".github/renovate.json5", ".github/renovate/**"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Renovate Config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Validate
+        run: npx --yes --package renovate -- renovate-config-validator --strict .github/renovate.json5 .github/renovate/*.json5
