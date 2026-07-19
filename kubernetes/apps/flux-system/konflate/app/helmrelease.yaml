@@ -1,0 +1,64 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: konflate
+spec:
+  interval: 15m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    # renovate: datasource=docker depName=ghcr.io/home-operations/charts/konflate
+    tag: 0.4.0
+  url: oci://ghcr.io/home-operations/charts/konflate
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: konflate
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: konflate
+
+  values:
+    config:
+      repo: github://zebernst/homelab
+      # Empty = repo root; Flux paths here are root-relative (kubernetes/...).
+      clusterPath: ""
+      statusChecks: true
+      prComments: true
+      publicUrl: https://konflate.zebernst.dev
+      verifyImages: true
+    secret:
+      existingSecret: konflate-secret
+    httpRoute:
+      enabled: true
+      annotations:
+        gatus.home-operations.com/endpoint: |
+          path: /readyz
+      parentRefs:
+        - name: external
+          namespace: kube-system
+          sectionName: https
+      hostnames:
+        - konflate.zebernst.dev
+    persistence:
+      enabled: true
+      storageClass: ceph-block
+      size: 5Gi
+    monitoring:
+      serviceMonitor:
+        enabled: true
+    priorityClassName: external-facing
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
