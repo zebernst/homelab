@@ -15,12 +15,6 @@
       schedule: ["every 3 months on the first day of the month"],
     },
     {
-      description: ["Disable docker lookups for Talos Factory installer images (owned by the talosFactory custom manager)"],
-      matchDatasources: ["docker"],
-      matchPackageNames: ["/factory\\.talos\\.dev/"],
-      enabled: false,
-    },
-    {
       description: ["Separate minor and patch updates for Talos and kubelet to enforce safe upgrade paths"],
       matchDatasources: ["docker", "custom.talos-factory"],
       matchPackageNames: ["ghcr.io/siderolabs/kubelet", "siderolabs/talos"],
