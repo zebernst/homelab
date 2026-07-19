@@ -20,7 +20,7 @@ spec:
           karma:
             image:
               repository: ghcr.io/prymitive/karma
-              tag: v0.128@sha256:cae0afb8d083756a7a44413480847fa59c072659d909734924a10640e1de600d
+              tag: v0.131@sha256:90a10c5c6793a1923abd807966eba6c20985400d72416c5e159676bd4ed35f46
             env:
               ALERTMANAGER_URI: http://vmalertmanager-vmks.observability.svc.cluster.local:9093
             probes:
