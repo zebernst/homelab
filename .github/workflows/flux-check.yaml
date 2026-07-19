@@ -62,7 +62,7 @@ jobs:
           token: ${{ github.event_name == 'pull_request' && steps.app-token.outputs.token || github.token }}
 
       - name: Setup flate
-        uses: home-operations/flate/action@0.1.35
+        uses: home-operations/flate/action@v0.4.10
         with:
           # Empty base = full-tree reconcile. PR changed-only mode (--base main)
           # skips unchanged HelmRelease dependsOn targets, which surfaces as
@@ -107,7 +107,7 @@ jobs:
           token: "${{ steps.app-token.outputs.token }}"
 
       - name: Setup flate
-        uses: home-operations/flate/action@0.1.35
+        uses: home-operations/flate/action@v0.4.10
         with:
           base: ""
           cache: true

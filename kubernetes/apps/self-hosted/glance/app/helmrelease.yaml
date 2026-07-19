@@ -20,7 +20,7 @@ spec:
           glance:
             image:
               repository: glanceapp/glance
-              tag: v0.8.4@sha256:6df86a7e8868d1eda21f35205134b1962c422957e42a0c44d4717c8e8f741b1a
+              tag: v0.8.5@sha256:32ab73d80f2b8b5fb0735b0431deb36b93fbb6b2fb43592449b0178c8b83e350
             env:
               TZ: America/Chicago
             resources:
@@ -51,7 +51,7 @@ spec:
           k8s-extension:
             image:
               repository: ghcr.io/lukasdietrich/glance-k8s/glance-k8s
-              tag: v0.4.8@sha256:69b0cead3daaff5c2dc37ff3c1da392462821718a65f8205aea6db1d5846ca40
+              tag: v0.5.3@sha256:5c9a5f537935f7579de30b544e3f63919f8b1e7e74ba660ecb9fc9fd84b7dd83
             env:
               TZ: America/Los_Angeles
             securityContext:

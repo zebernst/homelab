@@ -20,7 +20,7 @@ spec:
           web:
             image:
               repository: freikin/dawarich
-              tag: "1.7.9"
+              tag: "1.10.0"
             command: ["web-entrypoint.sh"]
             args:
               - bin/rails
@@ -95,7 +95,7 @@ spec:
           sidekiq:
             image:
               repository: freikin/dawarich
-              tag: "1.7.9"
+              tag: "1.10.0"
             command: ["sidekiq-entrypoint.sh"]
             args: ["sidekiq"]
             env:
