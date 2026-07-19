@@ -27,14 +27,11 @@ spec:
   values:
     config:
       repo: github://zebernst/homelab
-      # Empty = repo root; Flux paths here are root-relative (kubernetes/...).
       clusterPath: ""
       statusChecks: true
       prComments: true
       publicUrl: https://konflate.zebernst.dev
       verifyImages: true
-      # Cap concurrent flate renders — without a CPU limit the chart auto-fans
-      # out to 4 and a Renovate burst OOMs a 1Gi pod.
       maxDiffConcurrency: 2
     secret:
       existingSecret: konflate-secret
