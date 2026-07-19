@@ -110,7 +110,6 @@ jobs:
           cache: true
           token: "${{ steps.app-token.outputs.token }}"
 
-      # PR comments are owned by in-cluster konflate; keep the Actions step summary only.
       - name: Run flate diff
         env:
           FLATE_BASE: ""
