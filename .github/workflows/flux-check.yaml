@@ -122,7 +122,7 @@ jobs:
           flate diff ${{ matrix.resource }} \
             --path ./kubernetes \
             --allow-missing-secrets \
-            -o markdown \
+            -o github \
             > diff.patch 2> diff.err || rc=$?
           if [[ "$rc" -eq 0 ]]; then
             exit 0
