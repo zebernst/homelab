@@ -249,7 +249,7 @@ spec:
       flatnode:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
-        size: 100Gi
+        size: 250Gi
         storageClass: ceph-block
         advancedMounts:
           nominatim:
