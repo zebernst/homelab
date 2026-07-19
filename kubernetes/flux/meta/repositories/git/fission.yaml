@@ -10,4 +10,4 @@ spec:
   url: https://github.com/fission/fission
   ref:
     # datasource=github-releases depName=fission/fission
-    tag: v1.22.0
+    tag: v1.27.0
