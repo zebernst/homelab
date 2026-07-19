@@ -84,9 +84,6 @@ jobs:
     needs: [filter]
     name: Flate - Diff
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
     strategy:
       matrix:
         resource: [helmrelease, kustomization]
@@ -113,6 +110,7 @@ jobs:
           cache: true
           token: "${{ steps.app-token.outputs.token }}"
 
+      # PR comments are owned by in-cluster konflate; keep the Actions step summary only.
       - name: Run flate diff
         env:
           FLATE_BASE: ""
@@ -125,6 +123,12 @@ jobs:
             -o github \
             > diff.patch 2> diff.err || rc=$?
           if [[ "$rc" -eq 0 ]]; then
+            {
+              echo "### Diff"
+              echo '```diff'
+              cat diff.patch
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           if [[ -s diff.patch ]]; then
@@ -142,41 +146,6 @@ jobs:
           fi
           cat diff.err >&2
           exit "$rc"
-
-      - name: Generate Diff
-        id: diff
-        run: |
-          if [ -s diff.patch ]; then
-            echo "has_diff=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_diff=false" >> "$GITHUB_OUTPUT"
-          fi
-
-          {
-            echo "### Diff"
-            echo '```diff'
-            cat diff.patch
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          {
-            echo '```diff'
-            head -c 500000 diff.patch
-            if [ "$(wc -c < diff.patch)" -gt 500000 ]; then
-              echo ""
-              echo "... diff truncated for PR comment ($(wc -c < diff.patch) bytes total). See workflow run summary for full output."
-            fi
-            echo '```'
-          } > diff-comment.md
-
-      - if: ${{ steps.diff.outputs.has_diff == 'true' }}
-        name: Add Comment
-        uses: mshick/add-pr-comment@v3
-        with:
-          repo-token: "${{ steps.app-token.outputs.token }}"
-          message-id: "${{ github.event.pull_request.number }}/kubernetes/${{ matrix.resource }}"
-          message-failure: Diff was not successful
-          message-path: diff-comment.md
 
   flate-success:
     needs: [filter, test, diff]
