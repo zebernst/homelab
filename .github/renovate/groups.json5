@@ -18,16 +18,6 @@
       minimumGroupSize: 5,
     },
     {
-      description: "Talos Group",
-      groupName: "talos",
-      matchDatasources: ["docker"],
-      matchPackageNames: ["/installer/", "/talosctl/"],
-      group: {
-        commitMessageTopic: "{{{groupName}}} group",
-      },
-      minimumGroupSize: 2,
-    },
-    {
       description: "1Password Connect Group",
       groupName: "1password-connect",
       matchDatasources: ["docker"],
@@ -67,7 +57,7 @@
     {
       description: ["Intel Device Plugins Group"],
       groupName: "Intel-Device-Plugins",
-      matchPackagePatterns: ["intel-device-plugins"],
+      matchPackageNames: ["/intel-device-plugins/"],
       matchDatasources: ["helm"],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
@@ -116,11 +106,11 @@
     {
       description: ["Minecraft Group"],
       groupName: "Minecraft",
-      matchPackagePatterns: [
-        "itzg/minecraft-server",
-        "itzg/mc-monitor",
-        "itzg/mc-router",
-        "bluemap-minecraft/bluemap"
+      matchPackageNames: [
+        "/itzg/minecraft-server/",
+        "/itzg/mc-monitor/",
+        "/itzg/mc-router/",
+        "/bluemap-minecraft/bluemap/",
       ],
       matchDatasources: ["docker"],
       group: {

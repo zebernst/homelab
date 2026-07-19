@@ -3,19 +3,14 @@
   customManagers: [
     {
       customType: "regex",
-      description: "Process annotated dependencies",
-      managerFilePatterns: ["/\\.yaml(?:\\.j2)?$/"],
+      description: "Process annotated dependencies referenced by URL (not covered by the home-operations annotated preset)",
+      managerFilePatterns: ["/\\.ya?ml(?:\\.j2)?$/"],
       matchStrings: [
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+ (?<currentValue>[v|\\d]\\S+)"
+        // # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
+        // https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.0/experimental-install.yaml
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+/(?<currentValue>[v\\d][^/]+)/",
       ],
       datasourceTemplate: "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}",
-    },
-    {
-      customType: "regex",
-      description: "Process OCI dependencies",
-      managerFilePatterns: ["/\\.yaml(?:\\.j2)?$/"],
-      matchStrings: ["oci://(?<depName>[^:]+):(?<currentValue>\\S+)"],
-      datasourceTemplate: "docker",
     },
   ],
 }
