@@ -108,7 +108,7 @@
     {
       description: "Nominatim",
       groupName: "nominatim",
-      matchFilePaths: ["kubernetes/apps/self-hosted/nominatim/**"],
+      matchFileNames: ["kubernetes/apps/self-hosted/nominatim/**"],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
