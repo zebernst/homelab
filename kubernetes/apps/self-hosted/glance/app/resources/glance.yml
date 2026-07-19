@@ -35,6 +35,9 @@ pages:
                 title: Shubham Bose
               - url: https://jepsen.io/blog.rss
                 title: Jepsen
+              - url: https://kubernetes.io/feed.xml
+                title: Kubernetes Blog
+                limit: 4
 
       - size: full
         widgets:
