@@ -304,7 +304,7 @@ spec:
           datasource: Prometheus
       hardware:
         synology:
-          # renovate: depname="Synology NAS Details"
+          # renovate: depName="Synology NAS Details"
           gnetId: 14284
           revision: 10
           datasource:
