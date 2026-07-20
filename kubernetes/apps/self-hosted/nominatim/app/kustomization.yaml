@@ -12,6 +12,7 @@ configMapGenerator:
     files:
       - scripts/start.sh
       - scripts/resume-import.sh
+      - scripts/env.defaults
       - scripts/maintain-regions.sh
       - scripts/init-ui.sh
   - name: nominatim-nginx

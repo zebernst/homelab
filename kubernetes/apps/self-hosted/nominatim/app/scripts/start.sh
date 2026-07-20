@@ -50,10 +50,15 @@ if [ -f "${OSMFILE}" ]; then
   fi
 fi
 
+# Project PVC mounts over /nominatim and hides the image's baked-in .env.
+if [ ! -f "${PROJECT_DIR}/.env" ]; then
+  echo "[nominatim] Seeding ${PROJECT_DIR}/.env from /scripts/env.defaults"
+  cp /scripts/env.defaults "${PROJECT_DIR}/.env"
+fi
+
 # If pgdata exists but bootstrap never wrote import-finished, resume instead of
 # letting /app/init.sh DROP DATABASE and wipe osm2pgsql progress.
 if [ ! -f "${IMPORT_FINISHED}" ] && [ -f "${PGDATA}/PG_VERSION" ]; then
-  # config.sh writes PROJECT_DIR/.env (flatnode, replication, style) needed by nominatim.
   /app/config.sh
   resume_rc=0
   /scripts/resume-import.sh || resume_rc=$?
