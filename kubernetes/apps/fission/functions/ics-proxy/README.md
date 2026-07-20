@@ -64,17 +64,18 @@ Fission router ──► HTTPTrigger (/ics/proxy)
                         │
             ┌───────────┴───────────┐
             ▼                       ▼
-    1Password secret            Upstream ICS feed
-    (token, on-call.url)        (JSM on-call schedule)
+    1Password secret            OCI code image
+    (token, on-call.url)        ghcr.io/zebernst/fission-ics-proxy
 ```
 
 | Resource | Purpose |
 |---|---|
 | `externalsecret.yaml` | Syncs `ics-proxy-secret` from 1Password item `ics-proxy` |
-| `package.yaml` | Base64-encoded source archive deployed to Fission |
+| `package.yaml` | Fission Package referencing a digest-pinned OCI code image |
 | `function.yaml` | Fission Function using `python-fastapi` environment |
 | `trigger.yaml` | Maps `GET /ics/proxy` to the function |
 | `httproute.yaml` | Exposes the trigger via the external Gateway at `fn.zebernst.dev` |
+| `Dockerfile` | Builds the code-only OCI image consumed by the Package |
 
 ## Secrets
 
@@ -89,29 +90,23 @@ The ExternalSecret refreshes every 5 minutes. Fission mounts the resulting Kuber
 
 ## Development
 
-Source lives in this directory. Dependencies are managed with [uv](https://docs.astral.sh/uv/) (`pyproject.toml`, `uv.lock`). Runtime dependencies (`httpx`) are bundled into the package; `fastapi` is provided by the Fission `python-fastapi` environment image.
+Source lives in this directory. Dependencies are managed with [uv](https://docs.astral.sh/uv/) (`pyproject.toml`, `uv.lock`). Runtime dependencies (`httpx`) are baked into the OCI code image; `fastapi` is provided by the Fission `python-fastapi` environment image.
 
-After editing Python source, sync the embedded package literal and rebuild on the cluster:
+Packaging is fully GitOps-driven:
 
-```bash
-# Update package.yaml literal and rebuild on cluster
-task fission:sync NAME=ics-proxy
+1. Edit Python source / lockfile in this directory
+2. Merge to `main`
+3. `.github/workflows/fission-function-build.yaml` builds `ghcr.io/zebernst/fission-ics-proxy`, pushes it, and commits the image digest into `package.yaml`
+4. Flux applies the Package; Fission cold-starts from the digest-pinned image
 
-# Verify package.yaml matches source (no cluster changes)
-task fission:check NAME=ics-proxy
-
-# Rebuild on cluster without re-syncing source
-task fission:rebuild NAME=ics-proxy
-```
-
-Pre-commit hooks automatically update `package.yaml` when `.py` files in this directory change.
+No `task fission:sync` / package delete cycle is required for this function.
 
 ### Adding a calendar
 
 1. Add a handler branch in `main.py` (`match calendar:`).
 2. Implement fetch/transform logic in `calendars.py`.
 3. Add any new secret keys to `externalsecret.yaml` and 1Password.
-4. Run `task fission:sync NAME=ics-proxy`.
+4. Merge to `main` and let CI publish the new code image.
 
 ## Files
 
@@ -120,7 +115,8 @@ Pre-commit hooks automatically update `package.yaml` when `.py` files in this di
 | `main.py` | FastAPI entrypoint — auth, routing, response headers |
 | `calendars.py` | Per-calendar fetch and ICS transformation logic |
 | `pyproject.toml` | Python project metadata and dependency constraints |
-| `package.yaml` | Fission Package (generated literal — do not edit by hand) |
+| `Dockerfile` | Code-only image build for the Fission Package |
+| `package.yaml` | Fission Package (OCI image + digest — digest updated by CI) |
 | `function.yaml` | Fission Function spec |
 | `trigger.yaml` | Fission HTTPTrigger spec |
 | `httproute.yaml` | Gateway API route for external ingress |

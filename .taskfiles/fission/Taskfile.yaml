@@ -14,16 +14,21 @@ tasks:
     requires:
       vars: [NAME]
     cmds:
+      - task: _assert-literal
+        vars: { NAME: '{{.NAME}}' }
       - task: _update-literal
         vars: { NAME: '{{.NAME}}' }
       - task: rebuild
         vars: { NAME: '{{.NAME}}' }
 
   sync-all:
-    desc: Sync all packages from source and rebuild on cluster
+    desc: Sync all literal packages from source and rebuild on cluster
     vars:
       NAMES:
-        sh: find '{{.FUNCTIONS_DIR}}' -name "main.py" -exec dirname {} \; | xargs -I{} basename {}
+        sh: |
+          find '{{.FUNCTIONS_DIR}}' -name package.yaml -print0 \
+            | xargs -0 -I{} yq -r 'select(.spec.deployment.type != "oci") | .metadata.name' {} \
+            | awk 'NF'
     cmds:
       - for: { var: NAMES, split: "\n" }
         task: sync
@@ -35,6 +40,8 @@ tasks:
     requires:
       vars: [NAME]
     cmds:
+      - task: _assert-literal
+        vars: { NAME: '{{.NAME}}' }
       - task: _check-literal
         vars: { NAME: '{{.NAME}}' }
 
@@ -125,7 +132,15 @@ tasks:
   hook-fix:
     vars:
       NAMES:
-        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {} | sort -u
+        sh: |
+          echo '{{.CLI_ARGS}}' | tr ' ' '\n' \
+            | xargs -I{} dirname {} | xargs -I{} basename {} | sort -u \
+            | while read -r name; do
+                pkg='{{.FUNCTIONS_DIR}}/'"$name"'/package.yaml'
+                [ -f "$pkg" ] || continue
+                type=$(yq -r '.spec.deployment.type // ""' "$pkg")
+                [ "$type" = "oci" ] || echo "$name"
+              done
     cmds:
       - for: { var: NAMES, split: "\n" }
         task: _update-literal
@@ -139,7 +154,15 @@ tasks:
   hook-check:
     vars:
       NAMES:
-        sh: echo '{{.CLI_ARGS}}' | tr ' ' '\n' | xargs -I{} dirname {} | xargs -I{} basename {} | sort -u
+        sh: |
+          echo '{{.CLI_ARGS}}' | tr ' ' '\n' \
+            | xargs -I{} dirname {} | xargs -I{} basename {} | sort -u \
+            | while read -r name; do
+                pkg='{{.FUNCTIONS_DIR}}/'"$name"'/package.yaml'
+                [ -f "$pkg" ] || continue
+                type=$(yq -r '.spec.deployment.type // ""' "$pkg")
+                [ "$type" = "oci" ] || echo "$name"
+              done
     cmds:
       - for: { var: NAMES, split: "\n" }
         task: _check-literal
@@ -150,6 +173,24 @@ tasks:
       - which zip
 
   # ── Internal ────────────────────────────────────────────────────
+
+  _assert-literal:
+    internal: true
+    silent: true
+    vars:
+      PKG: '{{.FUNCTIONS_DIR}}/{{.NAME}}/package.yaml'
+    requires:
+      vars: [NAME]
+    cmds:
+      - |
+        type=$(yq -r '.spec.deployment.type // ""' '{{.PKG}}')
+        if [ "$type" = "oci" ]; then
+          echo "{{.NAME}} is an OCI package — edit source and let CI build/push; do not sync literals" >&2
+          exit 1
+        fi
+    preconditions:
+      - test -f '{{.PKG}}'
+      - which yq
 
   _update-literal:
     internal: true
