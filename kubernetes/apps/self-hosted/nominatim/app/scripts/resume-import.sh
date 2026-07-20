@@ -91,6 +91,16 @@ ensure_roles() {
   fi
 }
 
+# Linux user (distinct from the Postgres role). mediagis start.sh creates this
+# before init; we resume before that path runs, so create it here for chown/sudo -u.
+ensure_os_user() {
+  if id nominatim >/dev/null 2>&1; then
+    return 0
+  fi
+  log "Creating Linux user nominatim"
+  useradd -m -p "${NOMINATIM_PASSWORD:-}" nominatim
+}
+
 start_postgres() {
   enable_import_conf
   if pg_isready -q 2>/dev/null; then
@@ -366,6 +376,7 @@ if [ ! -f "${PGDATA}/PG_VERSION" ]; then
 fi
 
 acquire_lock
+ensure_os_user
 start_postgres
 ensure_roles
 
