@@ -37,12 +37,27 @@ spec:
     victoria-metrics-operator:
       enabled: false
 
+    external:
+      grafana:
+        host: https://grafana.kite-harmonic.ts.net
+
+    defaultDatasources:
+      victoriametrics:
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            uid: prometheus
+            isDefault: true
+            access: proxy
+
     defaultDashboards:
       enabled: true
-      defaultTimezone: America/Chicago
+      sources:
+        victoriametrics-operator:
+          enabled: true
 
     defaultRules:
-      create: true
+      enabled: true
       alerting:
         spec:
           keep_firing_for: 90s

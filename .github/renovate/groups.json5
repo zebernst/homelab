@@ -114,6 +114,19 @@
       },
     },
     {
+      description: "VictoriaMetrics Helm Charts",
+      groupName: "victoria-metrics",
+      matchDatasources: ["docker"],
+      matchPackageNames: [
+        "/ghcr.io/victoriametrics/helm-charts/victoria-metrics-k8s-stack/",
+        "/ghcr.io/victoriametrics/helm-charts/victoria-metrics-operator/",
+      ],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+    },
+    {
       description: ["Minecraft Group"],
       groupName: "Minecraft",
       matchPackagePatterns: [
