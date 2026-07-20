@@ -14,9 +14,6 @@ spec:
   values:
     controllers:
       dragonfly-operator:
-        # Required by operator-managed NetworkPolicy admin-port peer selector.
-        # Must be on the Pod (controllers.*.pod.labels), not the Deployment
-        # (controllers.*.labels) — app-template puts the latter only on the RS owner.
         pod:
           labels:
             control-plane: controller-manager
