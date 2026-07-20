@@ -145,17 +145,17 @@ spec:
             image:
               repository: docker.io/library/alpine
               # renovate: datasource=docker depName=library/alpine
-              tag: 3.21.3
+              tag: 3.24.1
             command: ["/bin/sh", "/scripts/init-ui.sh"]
             env:
               # renovate: datasource=github-releases depName=osm-search/nominatim-ui
-              NOMINATIM_UI_VERSION: "3.11.0"
+              NOMINATIM_UI_VERSION: "3.12.0"
         containers:
           ui:
             image:
               repository: docker.io/library/nginx
               # renovate: datasource=docker depName=library/nginx
-              tag: 1.27.5-alpine
+              tag: 1.31.3-alpine
             probes:
               liveness: &uiProbe
                 enabled: true
@@ -193,7 +193,7 @@ spec:
             image:
               repository: registry.k8s.io/kubectl
               # renovate: datasource=docker depName=registry.k8s.io/kubectl
-              tag: v1.34.5
+              tag: v1.36.2
             args:
               - exec
               - deploy/nominatim
