@@ -273,10 +273,12 @@ ensure_project_ownership() {
   flatnode_dir="$(dirname "${FLATNODE_FILE}")"
   log "Fixing ownership under ${PROJECT_DIR} (excluding ${flatnode_dir})"
   chown nominatim:nominatim "${PROJECT_DIR}"
+  # -h: start.sh creates staging symlinks into emptyDir; targets are often missing
+  # on resume and plain chown would fail with "cannot dereference".
   find "${PROJECT_DIR}" -mindepth 1 \
     \( -path "${flatnode_dir}" -o -path "${flatnode_dir}/*" \) -prune -o \
     -print0 \
-    | xargs -0 -r chown nominatim:nominatim
+    | xargs -0 -r chown -h nominatim:nominatim
 }
 
 run_continue() {
