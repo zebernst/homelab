@@ -99,8 +99,6 @@ Packaging is fully GitOps-driven:
 3. `.github/workflows/fission-function-build.yaml` builds `ghcr.io/zebernst/fission-ics-proxy`, pushes it, and commits the image digest into `package.yaml`
 4. Flux applies the Package; Fission cold-starts from the digest-pinned image
 
-No `task fission:sync` / package delete cycle is required for this function.
-
 ### Adding a calendar
 
 1. Add a handler branch in `main.py` (`match calendar:`).
