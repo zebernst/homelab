@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Validate
         run: npx --yes --package renovate -- renovate-config-validator --strict .github/renovate.json5 .github/renovate/*.json5
