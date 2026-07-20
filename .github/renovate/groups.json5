@@ -121,7 +121,6 @@
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
-      minimumGroupSize: 2,
     },
     {
       description: ["Minecraft Group"],
