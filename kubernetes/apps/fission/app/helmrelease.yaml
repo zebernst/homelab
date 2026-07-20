@@ -30,6 +30,11 @@ spec:
       enabled: false
     serviceMonitor:
       enabled: true
+    # Let the router manage HTTPRoutes for HTTPTriggers (attach mode).
+    # Triggers set routeConfig.gateway.parentRefs; no single default fits
+    # both the public (external) and private (tailscale) Gateways.
+    gatewayAPI:
+      enabled: true
     webhook:
       certManager:
         enabled: true
