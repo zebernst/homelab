@@ -54,8 +54,8 @@ The upstream JSM feed URL is stored in 1Password as `JSM_ICS_URL` and is never e
 Calendar app
     │
     ▼
-HTTPRoute (fn.zebernst.dev/ics/proxy)
-    │
+Gateway (external)
+    │  HTTPRoute managed by Fission router
     ▼
 Fission router ──► HTTPTrigger (/ics/proxy)
                         │
@@ -73,8 +73,7 @@ Fission router ──► HTTPTrigger (/ics/proxy)
 | `externalsecret.yaml` | Syncs `ics-proxy-secret` from 1Password item `ics-proxy` |
 | `package.yaml` | Base64-encoded source archive deployed to Fission |
 | `function.yaml` | Fission Function using `python-fastapi` environment |
-| `trigger.yaml` | Maps `GET /ics/proxy` to the function |
-| `httproute.yaml` | Exposes the trigger via the external Gateway at `fn.zebernst.dev` |
+| `trigger.yaml` | Maps `GET /ics/proxy` to the function and attaches Gateway API routes |
 
 ## Secrets
 
@@ -122,7 +121,6 @@ Pre-commit hooks automatically update `package.yaml` when `.py` files in this di
 | `pyproject.toml` | Python project metadata and dependency constraints |
 | `package.yaml` | Fission Package (generated literal — do not edit by hand) |
 | `function.yaml` | Fission Function spec |
-| `trigger.yaml` | Fission HTTPTrigger spec |
-| `httproute.yaml` | Gateway API route for external ingress |
+| `trigger.yaml` | Fission HTTPTrigger + Gateway API `routeConfig` |
 | `externalsecret.yaml` | ExternalSecret for 1Password-backed credentials |
 | `kustomization.yaml` | Kustomize entry point for Flux |

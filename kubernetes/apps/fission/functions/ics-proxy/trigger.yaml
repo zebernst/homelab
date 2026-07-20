@@ -10,3 +10,13 @@ spec:
   functionref:
     type: name
     name: ics-proxy
+  routeConfig:
+    provider: gateway
+    hostnames:
+      - fn.zebernst.dev
+    path: /ics/proxy
+    gateway:
+      parentRefs:
+        - name: external
+          namespace: kube-system
+          sectionName: https

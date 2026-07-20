@@ -30,6 +30,10 @@ spec:
       enabled: false
     serviceMonitor:
       enabled: true
+    # Let the router manage HTTPRoutes for HTTPTriggers (attach mode).
+    gatewayAPI:
+      enabled: true
+      defaultParentRef: kube-system/external
     webhook:
       certManager:
         enabled: true
