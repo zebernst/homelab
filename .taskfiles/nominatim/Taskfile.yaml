@@ -139,45 +139,6 @@ tasks:
       - kubectl -n {{.NS}} get pvc {{.PROJECT_CLAIM}}
       - which kubectl
 
-  detect-resume-stage:
-    desc: Read-only — print auto-detected nominatim --continue stage (no mutation)
-    cmds:
-      - |
-        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
-          env DETECT_ONLY=1 /bin/bash /scripts/resume-import.sh
-    preconditions:
-      - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
-      - which kubectl
-
-  resume-import:
-    desc: Resume interrupted bootstrap import (CONTINUE=import-from-file|load-data|indexing|db-postprocess)
-    prompt: |-
-      Run /scripts/resume-import.sh in the nominatim pod?
-      Only do this if the pod is idle/crashlooping — not while osm2pgsql/init is still running.
-      Optional CONTINUE overrides auto-detect (e.g. CONTINUE=load-data).
-      Tip: run `task nominatim:detect-resume-stage` first (read-only).
-    cmds:
-      - |
-        if [ -n "${CONTINUE}" ]; then
-          case "${CONTINUE}" in
-            import-from-file|load-data|indexing|db-postprocess) ;;
-            *)
-              echo "Invalid CONTINUE=${CONTINUE} (allowed: import-from-file|load-data|indexing|db-postprocess)" >&2
-              exit 1
-              ;;
-          esac
-        fi
-        # Exclusive flock inside resume-import.sh serializes against a concurrent entrypoint resume.
-        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
-          env "NOMINATIM_CONTINUE_AT=${CONTINUE}" /bin/bash /scripts/resume-import.sh
-    vars:
-      CONTINUE: '{{.CONTINUE | default ""}}'
-    env:
-      CONTINUE: '{{.CONTINUE | default ""}}'
-    preconditions:
-      - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
-      - which kubectl
-
   import-next:
     desc: Import the next pending region from NOMINATIM_REGIONS (multi-hour, streams logs)
     prompt: Import the next missing Geofabrik region into Nominatim? This can take many hours and heavily loads Postgres.
