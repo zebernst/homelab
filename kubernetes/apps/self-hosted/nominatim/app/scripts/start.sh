@@ -13,6 +13,8 @@ export PBF_URL="${NOMINATIM_DOWNURL:-https://download.geofabrik.de}/${FIRST_REGI
 
 STAGING_DIR="/import-staging"
 PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
+PGDATA="${PGDATA:-/var/lib/postgresql/16/main}"
+IMPORT_FINISHED="${IMPORT_FINISHED:-${PGDATA}/import-finished}"
 mkdir -p "${STAGING_DIR}"
 
 link_staging() {
@@ -41,6 +43,27 @@ if [ -f "${OSMFILE}" ]; then
     echo "Removing stale OSM extract (${LOCAL_SIZE} bytes > remote ${REMOTE_SIZE} bytes): ${OSMFILE}"
     rm -f "${OSMFILE}"
   fi
+fi
+
+# If pgdata exists but bootstrap never wrote import-finished, resume instead of
+# letting /app/init.sh DROP DATABASE and wipe osm2pgsql progress.
+if [ ! -f "${IMPORT_FINISHED}" ] && [ -f "${PGDATA}/PG_VERSION" ]; then
+  # config.sh writes PROJECT_DIR/.env (flatnode, replication, style) needed by nominatim.
+  /app/config.sh
+  resume_rc=0
+  /scripts/resume-import.sh || resume_rc=$?
+  case "${resume_rc}" in
+    0)
+      echo "[nominatim] Resume completed; starting API"
+      ;;
+    2)
+      echo "[nominatim] No resumable import progress; continuing with mediagis init"
+      ;;
+    *)
+      echo "[nominatim] Resume failed (exit ${resume_rc}); refusing to run init.sh (would DROP DATABASE)"
+      exit 1
+      ;;
+  esac
 fi
 
 exec /app/start.sh

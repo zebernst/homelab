@@ -109,9 +109,6 @@ tasks:
       Continue?
     cmds:
       - kubectl -n {{.NS}} scale deployment/{{.DEPLOYMENT}} --replicas=0
-      - |
-        kubectl -n {{.NS}} wait deployment/{{.DEPLOYMENT}} \
-          --for=jsonpath='{.status.replicas}'=0 --timeout=10m
       - kubectl -n {{.NS}} delete pvc {{.PGDATA_CLAIM}} {{.FLATNODE_CLAIM}} --ignore-not-found=true --wait=true
       - |
         kubectl -n {{.NS}} run nominatim-reset-project \
@@ -137,6 +134,27 @@ tasks:
     preconditions:
       - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
       - kubectl -n {{.NS}} get pvc {{.PROJECT_CLAIM}}
+      - which kubectl
+
+  resume-import:
+    desc: Resume interrupted bootstrap import in the running pod (CONTINUE=load-data|indexing|...)
+    prompt: |-
+      Run /scripts/resume-import.sh in the nominatim pod?
+      Only do this if the pod is idle/crashlooping — not while osm2pgsql/init is still running.
+      Optional CONTINUE overrides auto-detect (e.g. CONTINUE=load-data).
+    cmds:
+      - |
+        if [ -n "{{.CONTINUE}}" ]; then
+          kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
+            env NOMINATIM_CONTINUE_AT={{.CONTINUE}} /bin/bash /scripts/resume-import.sh
+        else
+          kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
+            /bin/bash /scripts/resume-import.sh
+        fi
+    vars:
+      CONTINUE: '{{.CONTINUE | default ""}}'
+    preconditions:
+      - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
       - which kubectl
 
   import-next:
