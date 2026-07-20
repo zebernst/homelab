@@ -20,6 +20,3 @@ spec:
         - name: external
           namespace: kube-system
           sectionName: https
-        - name: tailscale
-          namespace: kube-system
-          sectionName: https

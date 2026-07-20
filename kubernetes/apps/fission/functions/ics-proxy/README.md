@@ -54,7 +54,7 @@ The upstream JSM feed URL is stored in 1Password as `JSM_ICS_URL` and is never e
 Calendar app
     │
     ▼
-Gateway (external / tailscale)
+Gateway (external)
     │  HTTPRoute managed by Fission router
     ▼
 Fission router ──► HTTPTrigger (/ics/proxy)
