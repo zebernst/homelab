@@ -117,10 +117,7 @@
       description: "VictoriaMetrics Helm Charts",
       groupName: "victoria-metrics",
       matchDatasources: ["docker"],
-      matchPackageNames: [
-        "/ghcr.io/victoriametrics/helm-charts/victoria-metrics-k8s-stack/",
-        "/ghcr.io/victoriametrics/helm-charts/victoria-metrics-operator/",
-      ],
+      matchPackageNames: ["/ghcr.io/victoriametrics/helm-charts/"],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
