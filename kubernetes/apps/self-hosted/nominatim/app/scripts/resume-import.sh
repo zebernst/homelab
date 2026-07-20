@@ -66,20 +66,28 @@ disable_import_conf() {
   fi
 }
 
+set_role_password() {
+  local role="$1"
+  # Match mediagis init.sh. psql -v / :'pw' is not interpolated reliably with -c here.
+  if [ -z "${NOMINATIM_PASSWORD:-}" ]; then
+    return 0
+  fi
+  sudo -E -u postgres psql -d postgres -c \
+    "ALTER USER \"${role}\" WITH ENCRYPTED PASSWORD '${NOMINATIM_PASSWORD}'"
+}
+
 ensure_roles() {
-  sudo -E -u postgres psql -d postgres -tAc \
-    "SELECT 1 FROM pg_roles WHERE rolname='nominatim'" | grep -q 1 \
-    || sudo -E -u postgres createuser -s nominatim
-  sudo -E -u postgres psql -d postgres -tAc \
-    "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1 \
-    || sudo -E -u postgres createuser -SDR www-data
-  if [ -n "${NOMINATIM_PASSWORD:-}" ]; then
-    sudo -E -u postgres psql -d postgres \
-      -v pw="${NOMINATIM_PASSWORD}" \
-      -c "ALTER USER nominatim WITH ENCRYPTED PASSWORD :'pw'"
-    sudo -E -u postgres psql -d postgres \
-      -v pw="${NOMINATIM_PASSWORD}" \
-      -c "ALTER USER \"www-data\" WITH ENCRYPTED PASSWORD :'pw'"
+  # On resume the roles already exist from the interrupted import; only create/set
+  # passwords when missing so we do not depend on ALTER for the common path.
+  if ! sudo -E -u postgres psql -d postgres -tAc \
+    "SELECT 1 FROM pg_roles WHERE rolname='nominatim'" | grep -q 1; then
+    sudo -E -u postgres createuser -s nominatim
+    set_role_password nominatim
+  fi
+  if ! sudo -E -u postgres psql -d postgres -tAc \
+    "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1; then
+    sudo -E -u postgres createuser -SDR www-data
+    set_role_password www-data
   fi
 }
 
