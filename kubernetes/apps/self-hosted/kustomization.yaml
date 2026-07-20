@@ -10,9 +10,7 @@ resources:
   - dawarich/ks.yaml
   - glance/ks.yaml
   - hajimari/ks.yaml
-  - homebox/ks.yaml
   - it-tools/ks.yaml
-  - mealie/ks.yaml
   - nocodb/ks.yaml
   - nominatim/ks.yaml
   - paperless/ks.yaml
