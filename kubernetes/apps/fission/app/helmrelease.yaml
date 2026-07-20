@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: fission-all
-      version: "1.22.x"
+      version: "1.27.x"
       sourceRef:
         kind: HelmRepository
         name: fission-charts
