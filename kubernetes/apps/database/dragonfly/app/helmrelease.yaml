@@ -24,6 +24,11 @@ spec:
             image:
               repository: ghcr.io/dragonflydb/operator
               tag: v1.6.1@sha256:b11411142935f92ed0ec30a5ddeb31680e09ab66beecb827cb0224f1c4238638
+            env:
+              POD_NAMESPACE:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
             args:
               - --health-probe-bind-address=:8081
               - --metrics-bind-address=:8080
@@ -55,6 +60,7 @@ spec:
             resources:
               requests:
                 cpu: 10m
+                memory: 64Mi
               limits:
                 memory: 128Mi
             securityContext:
