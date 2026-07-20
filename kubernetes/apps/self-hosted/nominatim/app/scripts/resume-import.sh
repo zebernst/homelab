@@ -25,7 +25,8 @@ IMPORT_CONF_DST="/etc/postgresql/16/main/conf.d/postgres-import.conf"
 STARTED_PG=0
 ENABLED_IMPORT_CONF=0
 
-log() { echo "[nominatim-resume] $*"; }
+# stderr so DETECT_ONLY / detect_continue_at can keep stage tokens on stdout only
+log() { echo "[nominatim-resume] $*" >&2; }
 
 psql_true() {
   case "$1" in
@@ -39,9 +40,16 @@ psql_scalar() {
   sudo -E -u postgres psql -d nominatim -Atqc "$1"
 }
 
-db_exists() {
-  sudo -E -u postgres psql -d postgres -Atqc \
-    "SELECT 1 FROM pg_database WHERE datname = 'nominatim'" | grep -q 1
+# Prints "exists" or "missing". Returns 1 on query failure (caller must not treat as missing).
+probe_nominatim_db() {
+  local out
+  out="$(sudo -E -u postgres psql -d postgres -Atqc \
+    "SELECT 1 FROM pg_database WHERE datname = 'nominatim'")" || return 1
+  if [ "${out}" = "1" ]; then
+    echo "exists"
+  else
+    echo "missing"
+  fi
 }
 
 enable_import_conf() {
@@ -180,7 +188,12 @@ detect_continue_at() {
     esac
   fi
 
-  if ! db_exists; then
+  local db_state
+  db_state="$(probe_nominatim_db)" || {
+    log "Failed to query whether nominatim database exists; refusing fresh/DROP"
+    return 1
+  }
+  if [ "${db_state}" = "missing" ]; then
     echo "fresh"
     return 0
   fi
@@ -235,9 +248,22 @@ detect_continue_at() {
   echo "db-postprocess"
 }
 
+# chown project files for the nominatim user without walking the flatnode PVC
+# (~100GB under ${PROJECT_DIR}/flatnode).
+ensure_project_ownership() {
+  local flatnode_dir
+  flatnode_dir="$(dirname "${FLATNODE_FILE}")"
+  log "Fixing ownership under ${PROJECT_DIR} (excluding ${flatnode_dir})"
+  chown nominatim:nominatim "${PROJECT_DIR}"
+  find "${PROJECT_DIR}" -mindepth 1 \
+    \( -path "${flatnode_dir}" -o -path "${flatnode_dir}/*" \) -prune -o \
+    -print0 \
+    | xargs -0 -r chown nominatim:nominatim
+}
+
 run_continue() {
   local stage="$1"
-  chown -R nominatim:nominatim "${PROJECT_DIR}"
+  ensure_project_ownership
 
   case "${stage}" in
     import-from-file)
