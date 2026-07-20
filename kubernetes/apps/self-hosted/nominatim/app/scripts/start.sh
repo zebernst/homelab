@@ -11,7 +11,7 @@ if [ -z "${FIRST_REGION}" ]; then
 fi
 export PBF_URL="${NOMINATIM_DOWNURL:-https://download.geofabrik.de}/${FIRST_REGION}-latest.osm.pbf"
 
-STAGING_DIR="/import-staging"
+STAGING_DIR="${IMPORT_STAGING:-/import-staging}"
 PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
 PGDATA="${PGDATA:-/var/lib/postgresql/16/main}"
 IMPORT_FINISHED="${IMPORT_FINISHED:-${PGDATA}/import-finished}"
@@ -36,12 +36,17 @@ link_staging "us_postcodes.csv.gz"
 link_staging "secondary_importance.sql.gz"
 
 OSMFILE="${STAGING_DIR}/data.osm.pbf"
+PBF_SIZE_MARKER="${PBF_SIZE_MARKER:-${PROJECT_DIR}/.bootstrap-pbf-bytes}"
 if [ -f "${OSMFILE}" ]; then
-  REMOTE_SIZE="$(curl -fsIL "${PBF_URL}" | grep -Fi 'content-length:' | tail -n1 | sed 's/.*:[[:space:]]*//' | tr -d '\r')"
+  REMOTE_SIZE="$(curl -fsIL --connect-timeout 30 --max-time 120 "${PBF_URL}" | grep -Fi 'content-length:' | tail -n1 | sed 's/.*:[[:space:]]*//' | tr -d '\r')"
   LOCAL_SIZE="$(stat -c %s "${OSMFILE}")"
   if [ -n "${REMOTE_SIZE}" ] && [ "${LOCAL_SIZE}" -gt "${REMOTE_SIZE}" ]; then
     echo "Removing stale OSM extract (${LOCAL_SIZE} bytes > remote ${REMOTE_SIZE} bytes): ${OSMFILE}"
     rm -f "${OSMFILE}"
+  elif [ -s "${OSMFILE}" ]; then
+    # Persist size on the project PVC so resume can refuse a skewed -latest re-download after emptyDir loss.
+    mkdir -p "$(dirname "${PBF_SIZE_MARKER}")"
+    printf '%s\n' "${LOCAL_SIZE}" > "${PBF_SIZE_MARKER}"
   fi
 fi
 

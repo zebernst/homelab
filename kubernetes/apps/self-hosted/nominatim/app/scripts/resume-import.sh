@@ -14,29 +14,48 @@ STAGING_DIR="${IMPORT_STAGING:-/import-staging}"
 PGDATA="${PGDATA:-/var/lib/postgresql/16/main}"
 IMPORT_FINISHED="${IMPORT_FINISHED:-${PGDATA}/import-finished}"
 OSMFILE="${PBF_PATH:-${STAGING_DIR}/data.osm.pbf}"
+PBF_SIZE_MARKER="${PBF_SIZE_MARKER:-${PROJECT_DIR}/.bootstrap-pbf-bytes}"
 THREADS="${THREADS:-$(nproc)}"
+FLATNODE_FILE="${NOMINATIM_FLATNODE_FILE:-/nominatim/flatnode/flatnode.file}"
+RESUME_LOCK="${RESUME_LOCK:-${PROJECT_DIR}/.resume-import.lock}"
 IMPORT_CONF_SRC="/etc/postgresql/16/main/conf.d/postgres-import.conf.disabled"
 IMPORT_CONF_DST="/etc/postgresql/16/main/conf.d/postgres-import.conf"
 
+# Lifecycle flags: only reverse what this process changed (safe under kubectl exec).
+STARTED_PG=0
+ENABLED_IMPORT_CONF=0
+
 log() { echo "[nominatim-resume] $*"; }
 
+psql_true() {
+  case "$1" in
+    t | true) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 psql_scalar() {
-  sudo -E -u postgres psql -d nominatim -Atqc "$1" 2>/dev/null || true
+  # Fail closed: never map probe errors to empty/"fresh" (that defers to init.sh DROP DATABASE).
+  sudo -E -u postgres psql -d nominatim -Atqc "$1"
 }
 
 db_exists() {
   sudo -E -u postgres psql -d postgres -Atqc \
-    "SELECT 1 FROM pg_database WHERE datname = 'nominatim'" 2>/dev/null | grep -q 1
+    "SELECT 1 FROM pg_database WHERE datname = 'nominatim'" | grep -q 1
 }
 
 enable_import_conf() {
   if [ -f "${IMPORT_CONF_SRC}" ]; then
     cp "${IMPORT_CONF_SRC}" "${IMPORT_CONF_DST}"
+    ENABLED_IMPORT_CONF=1
   fi
 }
 
 disable_import_conf() {
-  rm -f "${IMPORT_CONF_DST}"
+  if [ "${ENABLED_IMPORT_CONF}" = "1" ]; then
+    rm -f "${IMPORT_CONF_DST}"
+    ENABLED_IMPORT_CONF=0
+  fi
 }
 
 ensure_roles() {
@@ -47,10 +66,12 @@ ensure_roles() {
     "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1 \
     || sudo -E -u postgres createuser -SDR www-data
   if [ -n "${NOMINATIM_PASSWORD:-}" ]; then
-    sudo -E -u postgres psql -d postgres -c \
-      "ALTER USER nominatim WITH ENCRYPTED PASSWORD '${NOMINATIM_PASSWORD}'"
-    sudo -E -u postgres psql -d postgres -c \
-      "ALTER USER \"www-data\" WITH ENCRYPTED PASSWORD '${NOMINATIM_PASSWORD}'"
+    sudo -E -u postgres psql -d postgres \
+      -v pw="${NOMINATIM_PASSWORD}" \
+      -c "ALTER USER nominatim WITH ENCRYPTED PASSWORD :'pw'"
+    sudo -E -u postgres psql -d postgres \
+      -v pw="${NOMINATIM_PASSWORD}" \
+      -c "ALTER USER \"www-data\" WITH ENCRYPTED PASSWORD :'pw'"
   fi
 }
 
@@ -62,6 +83,7 @@ start_postgres() {
   fi
   log "Starting Postgres"
   service postgresql start
+  STARTED_PG=1
   for _ in $(seq 1 60); do
     pg_isready -q && return 0
     sleep 1
@@ -71,23 +93,40 @@ start_postgres() {
 }
 
 stop_postgres() {
-  if pg_isready -q 2>/dev/null; then
+  if [ "${STARTED_PG}" = "1" ] && pg_isready -q 2>/dev/null; then
     log "Stopping Postgres"
     service postgresql stop || true
   fi
   disable_import_conf
 }
 
+record_pbf_size() {
+  local file="$1"
+  if [ -f "${file}" ] && [ -s "${file}" ]; then
+    mkdir -p "$(dirname "${PBF_SIZE_MARKER}")"
+    stat -c %s "${file}" > "${PBF_SIZE_MARKER}"
+    log "Recorded PBF size marker (${PBF_SIZE_MARKER})=$(cat "${PBF_SIZE_MARKER}")"
+  fi
+}
+
+remote_pbf_size() {
+  curl -fsIL --connect-timeout 30 --max-time 120 "${PBF_URL}" \
+    | grep -Fi 'content-length:' | tail -n1 \
+    | sed 's/.*:[[:space:]]*//' | tr -d '\r'
+}
+
 ensure_osm_file() {
   if [ -n "${PBF_PATH:-}" ] && [ -f "${PBF_PATH}" ] && [ -s "${PBF_PATH}" ]; then
     OSMFILE="${PBF_PATH}"
     log "Using PBF_PATH=${OSMFILE}"
+    record_pbf_size "${OSMFILE}"
     return 0
   fi
 
   mkdir -p "${STAGING_DIR}"
   if [ -f "${OSMFILE}" ] && [ -s "${OSMFILE}" ]; then
     log "Using existing OSM extract (${OSMFILE})"
+    record_pbf_size "${OSMFILE}"
     return 0
   fi
 
@@ -96,17 +135,49 @@ ensure_osm_file() {
     return 1
   fi
 
+  # emptyDir often loses the extract across restarts; -latest may differ from the
+  # PBF that produced existing place/flatnode. Refuse skew unless explicitly allowed.
+  if [ -f "${PBF_SIZE_MARKER}" ]; then
+    local expected remote
+    expected="$(tr -d '[:space:]' < "${PBF_SIZE_MARKER}")"
+    remote="$(remote_pbf_size || true)"
+    if [ -n "${expected}" ] && [ -n "${remote}" ] && [ "${expected}" != "${remote}" ] \
+      && [ "${NOMINATIM_ALLOW_PBF_REDOWNLOAD:-}" != "1" ]; then
+      log "Refusing PBF re-download: marker ${expected} bytes != remote ${remote} bytes"
+      log "Set NOMINATIM_ALLOW_PBF_REDOWNLOAD=1 to override, or restore the original extract to ${OSMFILE}"
+      return 1
+    fi
+  elif [ "${NOMINATIM_ALLOW_PBF_REDOWNLOAD:-}" != "1" ]; then
+    log "OSM extract missing and no ${PBF_SIZE_MARKER}; refusing blind -latest re-download"
+    log "Restore data.osm.pbf to ${OSMFILE}, or set NOMINATIM_ALLOW_PBF_REDOWNLOAD=1"
+    return 1
+  fi
+
   log "Re-downloading OSM extract from ${PBF_URL}"
   curl -L -A "${USER_AGENT:-nominatim}" --fail-with-body -C - --create-dirs \
+    --connect-timeout 30 --max-time 21600 \
     -o "${OSMFILE}" "${PBF_URL}"
+  record_pbf_size "${OSMFILE}"
+}
+
+flatnode_nonempty() {
+  [ -n "${FLATNODE_FILE}" ] && [ -f "${FLATNODE_FILE}" ] && [ -s "${FLATNODE_FILE}" ]
 }
 
 # Detect --continue checkpoint from DB state (see nominatim_db/tools/database_import.py
 # and clicmd/setup.py). Prints one of: done|import-from-file|load-data|indexing|db-postprocess|fresh
 detect_continue_at() {
   if [ -n "${NOMINATIM_CONTINUE_AT:-}" ]; then
-    echo "${NOMINATIM_CONTINUE_AT}"
-    return 0
+    case "${NOMINATIM_CONTINUE_AT}" in
+      import-from-file | load-data | indexing | db-postprocess)
+        echo "${NOMINATIM_CONTINUE_AT}"
+        return 0
+        ;;
+      *)
+        log "Invalid NOMINATIM_CONTINUE_AT='${NOMINATIM_CONTINUE_AT}' (allowed: import-from-file|load-data|indexing|db-postprocess)"
+        return 1
+        ;;
+    esac
   fi
 
   if ! db_exists; then
@@ -117,27 +188,29 @@ detect_continue_at() {
   local has_place has_placex_rel placex_loaded indexing_started has_pending has_version
 
   has_place="$(psql_scalar "SELECT COALESCE((SELECT true FROM place LIMIT 1), false)")"
-  if [ "${has_place}" != "t" ] && [ "${has_place}" != "true" ]; then
+  if ! psql_true "${has_place}"; then
     # No successful osm2pgsql output — safer to let init.sh DROP + re-import.
     echo "fresh"
     return 0
   fi
 
+  # place has rows: after osm2pgsql the next stage is load-data (creates/fills placex).
+  # Do NOT auto-select import-from-file — that re-runs osm2pgsql and rebuilds place.
   has_placex_rel="$(psql_scalar "SELECT to_regclass('public.placex') IS NOT NULL")"
-  if [ "${has_placex_rel}" != "t" ] && [ "${has_placex_rel}" != "true" ]; then
-    echo "import-from-file"
+  if ! psql_true "${has_placex_rel}"; then
+    echo "load-data"
     return 0
   fi
 
   placex_loaded="$(psql_scalar "SELECT EXISTS (SELECT 1 FROM placex LIMIT 1)")"
-  if [ "${placex_loaded}" != "t" ] && [ "${placex_loaded}" != "true" ]; then
+  if ! psql_true "${placex_loaded}"; then
     echo "load-data"
     return 0
   fi
 
   has_version="$(psql_scalar \
     "SELECT EXISTS (SELECT 1 FROM nominatim_properties WHERE property = 'database_version')")"
-  if [ "${has_version}" = "t" ] || [ "${has_version}" = "true" ]; then
+  if psql_true "${has_version}"; then
     echo "done"
     return 0
   fi
@@ -145,7 +218,7 @@ detect_continue_at() {
   # indexed_status: 0 = indexed; >0 = pending (load_data insert triggers set 1)
   indexing_started="$(psql_scalar \
     "SELECT EXISTS (SELECT 1 FROM placex WHERE indexed_status = 0 LIMIT 1)")"
-  if [ "${indexing_started}" != "t" ] && [ "${indexing_started}" != "true" ]; then
+  if ! psql_true "${indexing_started}"; then
     # Placex loaded but indexing never committed a row — still in postcodes or pre-index.
     # --continue indexing would skip postcodes; use load-data.
     echo "load-data"
@@ -154,7 +227,7 @@ detect_continue_at() {
 
   has_pending="$(psql_scalar \
     "SELECT EXISTS (SELECT 1 FROM placex WHERE indexed_status > 0 LIMIT 1)")"
-  if [ "${has_pending}" = "t" ] || [ "${has_pending}" = "true" ]; then
+  if psql_true "${has_pending}"; then
     echo "indexing"
     return 0
   fi
@@ -189,7 +262,7 @@ run_continue() {
       ;;
   esac
 
-  # Match init.sh post-import checks (best-effort; import itself is the critical path).
+  # Match init.sh post-import checks (best-effort index; check-database fails closed on pending indexed_status).
   sudo -E -u nominatim nominatim index --threads "${THREADS}" || true
   sudo -E -u nominatim nominatim admin --check-database
 }
@@ -199,10 +272,52 @@ mark_finished() {
   log "Wrote ${IMPORT_FINISHED}"
 }
 
+acquire_lock() {
+  mkdir -p "$(dirname "${RESUME_LOCK}")"
+  # shellcheck disable=SC2094
+  exec 9>"${RESUME_LOCK}"
+  if ! flock -n 9; then
+    log "Another resume-import is already running (lock ${RESUME_LOCK})"
+    return 1
+  fi
+}
+
+release_lock() {
+  flock -u 9 2>/dev/null || true
+}
+
+finish() {
+  local rc="$1"
+  stop_postgres
+  release_lock
+  trap - EXIT
+  exit "${rc}"
+}
+
 cleanup() {
   stop_postgres
+  release_lock
 }
 trap cleanup EXIT
+
+# Read-only probe for operators/agents: print stage and exit (no lock, no mutation).
+if [ "${DETECT_ONLY:-}" = "1" ] || [ "${DETECT_ONLY:-}" = "true" ]; then
+  trap - EXIT
+  if [ -f "${IMPORT_FINISHED}" ]; then
+    echo "done"
+    exit 0
+  fi
+  if [ ! -f "${PGDATA}/PG_VERSION" ]; then
+    echo "fresh"
+    exit 0
+  fi
+  if ! pg_isready -q 2>/dev/null; then
+    log "Postgres is not ready; cannot detect stage"
+    exit 1
+  fi
+  detect_continue_at
+  exit 0
+fi
 
 if [ -f "${IMPORT_FINISHED}" ]; then
   log "import-finished already present; nothing to resume"
@@ -216,8 +331,14 @@ if [ ! -f "${PGDATA}/PG_VERSION" ]; then
   exit 2
 fi
 
+acquire_lock
 start_postgres
 ensure_roles
+
+# Record size of any staging PBF still present so a later emptyDir loss can detect -latest skew.
+if [ -f "${OSMFILE}" ] && [ -s "${OSMFILE}" ] && [ ! -f "${PBF_SIZE_MARKER}" ]; then
+  record_pbf_size "${OSMFILE}"
+fi
 
 stage="$(detect_continue_at)"
 log "Detected stage: ${stage}"
@@ -225,25 +346,24 @@ log "Detected stage: ${stage}"
 case "${stage}" in
   done)
     mark_finished
-    trap - EXIT
-    stop_postgres
-    exit 0
+    finish 0
     ;;
   fresh)
+    if flatnode_nonempty; then
+      log "Stage is fresh but ${FLATNODE_FILE} is non-empty; refusing init.sh (would DROP DATABASE over stale flatnode)"
+      log "Wipe flatnode (task nominatim:reset-for-flatnode) or restore a consistent DB before retrying"
+      finish 1
+    fi
     log "No resumable import progress; deferring to init.sh"
-    trap - EXIT
-    stop_postgres
-    exit 2
+    finish 2
     ;;
   import-from-file | load-data | indexing | db-postprocess)
     run_continue "${stage}"
     mark_finished
-    trap - EXIT
-    stop_postgres
-    exit 0
+    finish 0
     ;;
   *)
     log "Unhandled stage '${stage}'"
-    exit 1
+    finish 1
     ;;
 esac
