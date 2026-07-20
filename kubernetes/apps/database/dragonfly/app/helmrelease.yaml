@@ -14,9 +14,9 @@ spec:
   values:
     controllers:
       dragonfly-operator:
-        # Required by operator-managed NetworkPolicy admin-port peer selector
-        labels:
-          control-plane: controller-manager
+        pod:
+          labels:
+            control-plane: controller-manager
         serviceAccount:
           identifier: *app
         containers:
