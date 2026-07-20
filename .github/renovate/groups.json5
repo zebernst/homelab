@@ -104,6 +104,15 @@
       },
     },
     {
+      description: "Dragonfly Group",
+      groupName: "dragonfly",
+      matchFileNames: ["kubernetes/apps/database/dragonfly/**"],
+      matchDatasources: ["docker", "github-releases"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
       description: "VictoriaMetrics Helm Charts",
       groupName: "victoria-metrics",
       matchDatasources: ["docker"],
