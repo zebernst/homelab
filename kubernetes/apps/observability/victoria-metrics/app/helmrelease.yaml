@@ -40,6 +40,7 @@ spec:
     external:
       grafana:
         host: https://grafana.kite-harmonic.ts.net
+        datasource: Prometheus
 
     defaultDatasources:
       victoriametrics:
