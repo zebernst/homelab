@@ -10,7 +10,7 @@ spec:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
   ref:
-    tag: 0.79.1
+    tag: 0.86.2
   url: oci://ghcr.io/victoriametrics/helm-charts/victoria-metrics-k8s-stack
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
@@ -37,12 +37,28 @@ spec:
     victoria-metrics-operator:
       enabled: false
 
+    external:
+      grafana:
+        host: https://grafana.kite-harmonic.ts.net
+        datasource: Prometheus
+
+    defaultDatasources:
+      victoriametrics:
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            uid: prometheus
+            isDefault: true
+            access: proxy
+
     defaultDashboards:
       enabled: true
-      defaultTimezone: America/Chicago
+      sources:
+        victoriametrics-operator:
+          enabled: true
 
     defaultRules:
-      create: true
+      enabled: true
       alerting:
         spec:
           keep_firing_for: 90s
