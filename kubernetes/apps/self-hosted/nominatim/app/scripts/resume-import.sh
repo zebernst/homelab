@@ -273,8 +273,11 @@ ensure_project_ownership() {
   flatnode_dir="$(dirname "${FLATNODE_FILE}")"
   log "Fixing ownership under ${PROJECT_DIR} (excluding ${flatnode_dir})"
   chown nominatim:nominatim "${PROJECT_DIR}"
+  # Skip dangling symlinks (start.sh points staging names at emptyDir; targets are
+  # often missing on resume and are unused for --continue indexing/load-data).
   find "${PROJECT_DIR}" -mindepth 1 \
     \( -path "${flatnode_dir}" -o -path "${flatnode_dir}/*" \) -prune -o \
+    \( -type l ! -exec test -e {} \; \) -prune -o \
     -print0 \
     | xargs -0 -r chown nominatim:nominatim
 }
