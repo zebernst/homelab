@@ -2,20 +2,27 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
-# Helpers for adding Geofabrik regions after the initial US bootstrap import.
-# Each full region import can take many hours; run one at a time.
-
 vars:
+  # Local task resources
+  NOMINATIM_DIR: '{{.ROOT_DIR}}/.taskfiles/nominatim'
+  RESOURCES_DIR: '{{.NOMINATIM_DIR}}/resources'
+
+  # Cluster targeting
   NS: self-hosted
   DEPLOYMENT: nominatim
   CONTAINER: nominatim
+  CRONJOB: nominatim-update-osm-db
+  KEXEC: kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} --
+
+  # PersistentVolumeClaims
   PGDATA_CLAIM: nominatim-pgdata
   FLATNODE_CLAIM: nominatim-flatnode
   PROJECT_CLAIM: nominatim-project
-  IMPORT_ENV: >-
-    NOMINATIM_ALLOW_REGION_IMPORT=true
-    NOMINATIM_IMPORT_MAX_REGIONS=1
-    NOMINATIM_SKIP_INCREMENTAL=true
+
+  # Region-import Jobs
+  IMPORT_JOB_COMPONENT: nominatim-region-import
+  # Full Geofabrik add-data can run multi-day; kill stuck Jobs after 7d.
+  IMPORT_DEADLINE_SECONDS: "604800"
 
 tasks:
 
@@ -26,76 +33,105 @@ tasks:
 
   check-config:
     desc: Show Nominatim .env flatnode setting and whether bootstrap used flatnode
+    silent: true
     cmds:
-      - |
-        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- bash -ec '
-          PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
-          echo "=== NOMINATIM_FLATNODE_FILE (container env) ==="
-          echo "${NOMINATIM_FLATNODE_FILE:-<unset>}"
-          echo
-          echo "=== ${PROJECT_DIR}/.env (flatnode line) ==="
-          grep -E "^NOMINATIM_FLATNODE_FILE=" "${PROJECT_DIR}/.env" 2>/dev/null || echo "(not set in .env)"
-          echo
-          echo "=== flatnode.file ==="
-          ls -lh /nominatim/flatnode/flatnode.file 2>/dev/null || echo "missing — bootstrap import did not use flatnode"
-          echo
-          echo "=== osm2pgsql_properties ==="
-          sudo -u postgres psql -d nominatim -c "SELECT property, value FROM osm2pgsql_properties ORDER BY 1;" 2>/dev/null \
-            || echo "(query failed — DB may be down or not initialized)"
-        '
+      - "echo 'flatnode: {{.FLATNODE}} ({{.FLATNODE_SIZE}})'"
+      - echo
+      - "echo paths:"
+      - "echo '  env: {{.FLATNODE_ENV}}'"
+      - "echo '  dotenv: {{.FLATNODE_DOTENV}}'"
+      - "echo '  osm2pgsql: {{.FLATNODE_DB}}'"
+      - "echo 'paths_match: {{.PATHS_MATCH}}'"
+      - echo
+      - "echo osm2pgsql:"
+      - "echo '{{.OSM2PGSQL_PROPS}}'"
+    vars:
+      FLATNODE:
+        sh: '{{.KEXEC}} test -s /nominatim/flatnode/flatnode.file && echo true || echo false'
+      FLATNODE_SIZE:
+        sh: >-
+          {{.KEXEC}} ls -lh /nominatim/flatnode/flatnode.file 2>/dev/null
+          | awk '{print $5}' || echo none
+      FLATNODE_ENV:
+        sh: '{{.KEXEC}} printenv NOMINATIM_FLATNODE_FILE 2>/dev/null || echo unset'
+      FLATNODE_DOTENV:
+        sh: >-
+          {{.KEXEC}} grep -E ^NOMINATIM_FLATNODE_FILE= /nominatim/.env 2>/dev/null
+          | cut -d= -f2- || echo unset
+      FLATNODE_DB:
+        sh: >-
+          {{.KEXEC}} sudo -u postgres psql -d nominatim -At
+          -c "SELECT value FROM osm2pgsql_properties WHERE property = 'flat_node_file';"
+          2>/dev/null || echo unset
+      PATHS_MATCH:
+        sh: |
+          if [ "{{.FLATNODE_ENV}}" = "{{.FLATNODE_DOTENV}}" ] \
+            && [ "{{.FLATNODE_ENV}}" = "{{.FLATNODE_DB}}" ] \
+            && [ "{{.FLATNODE_ENV}}" != "unset" ]; then
+            echo true
+          else
+            echo false
+          fi
+      OSM2PGSQL_PROPS:
+        sh: >-
+          {{.KEXEC}} sudo -u postgres psql -d nominatim -At -F': '
+          -c "SELECT property, value FROM osm2pgsql_properties ORDER BY 1;"
+          2>/dev/null | sed 's/^/  /' || echo "  (unavailable)"
     preconditions:
       - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
       - which kubectl
 
   status:
-    desc: Show import-finished, flatnode, imported regions, and pending regions
+    desc: Show import-finished, flatnode, imported regions, pending regions, and import Jobs
+    silent: true
     cmds:
-      - |
-        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- bash -ec '
-          PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
-          IMPORTED_LIST="${PROJECT_DIR}/imported-regions.txt"
-          IMPORT_FINISHED="/var/lib/postgresql/16/main/import-finished"
-
-          echo "=== import-finished ==="
-          if [ -f "${IMPORT_FINISHED}" ]; then
-            ls -la "${IMPORT_FINISHED}"
-          else
-            echo "missing (bootstrap import may still be running)"
-          fi
-
-          echo
-          echo "=== flatnode (/nominatim/flatnode/flatnode.file) ==="
-          if [ -f /nominatim/flatnode/flatnode.file ]; then
-            ls -lh /nominatim/flatnode/flatnode.file
-          else
-            echo "missing or empty — large add-data imports need flatnode from initial import"
-          fi
-
-          echo
-          echo "=== imported-regions.txt ==="
-          if [ -f "${IMPORTED_LIST}" ]; then
-            cat "${IMPORTED_LIST}"
-          else
-            echo "(not created yet; first cron run seeds from bootstrap region)"
-          fi
-
-          echo
-          echo "=== configured NOMINATIM_REGIONS ==="
-          printf "%s\n" "${NOMINATIM_REGIONS}" | tr ", " "\n" | sed "/^[[:space:]]*$/d"
-
-          echo
-          echo "=== pending (configured but not imported) ==="
-          pending=0
-          while IFS= read -r region; do
-            if ! grep -qxF "${region}" "${IMPORTED_LIST}" 2>/dev/null; then
-              echo "  - ${region}"
-              pending=$((pending + 1))
-            fi
-          done < <(printf "%s\n" "${NOMINATIM_REGIONS}" | tr ", " "\n" | sed "/^[[:space:]]*$/d")
-          if [ "${pending}" -eq 0 ]; then
-            echo "  (none)"
-          fi
-        '
+      - "echo 'import_finished: {{.IMPORT_FINISHED}}'"
+      - "echo 'flatnode: {{.FLATNODE}} ({{.FLATNODE_SIZE}})'"
+      - echo
+      - "echo 'imported:'"
+      - "echo '{{.IMPORTED_LIST}}'"
+      - echo
+      - "echo 'pending:'"
+      - "echo '{{.PENDING_LIST}}'"
+      - echo
+      - "echo import_jobs:"
+      - "echo '{{.IMPORT_JOBS}}'"
+    vars:
+      IMPORT_FINISHED:
+        sh: >-
+          {{.KEXEC}} test -f /var/lib/postgresql/16/main/import-finished
+          && echo true || echo false
+      FLATNODE:
+        sh: '{{.KEXEC}} test -s /nominatim/flatnode/flatnode.file && echo true || echo false'
+      FLATNODE_SIZE:
+        sh: >-
+          {{.KEXEC}} ls -lh /nominatim/flatnode/flatnode.file 2>/dev/null
+          | awk '{print $5}' || echo none
+      # Newline-separated Geofabrik paths (NOMINATIM_REGIONS may be comma, space, or newline delimited).
+      _REGIONS:
+        sh: >-
+          {{.KEXEC}} printenv NOMINATIM_REGIONS
+          | tr ', ' '\n' | sed '/^[[:space:]]*$/d'
+      _IMPORTED:
+        sh: '{{.KEXEC}} cat /nominatim/imported-regions.txt 2>/dev/null | sed "/^[[:space:]]*$/d" || true'
+      _PENDING:
+        sh: |
+          printf '%s\n' "{{._REGIONS}}" | while IFS= read -r region; do
+            [ -z "${region}" ] && continue
+            printf '%s\n' "{{._IMPORTED}}" | grep -qxF "${region}" || printf '%s\n' "${region}"
+          done
+      IMPORTED_LIST:
+        sh: |
+          if [ -z "{{._IMPORTED}}" ]; then echo "  (none)"; else printf '%s\n' "{{._IMPORTED}}" | sed 's/^/  - /'; fi
+      PENDING_LIST:
+        sh: |
+          if [ -z "{{._PENDING}}" ]; then echo "  (none)"; else printf '%s\n' "{{._PENDING}}" | sed 's/^/  - /'; fi
+      IMPORT_JOBS:
+        sh: |
+          jobs="$(kubectl -n {{.NS}} get jobs \
+            -l app.kubernetes.io/component={{.IMPORT_JOB_COMPONENT}} \
+            --no-headers 2>/dev/null | awk '{print $1}')"
+          if [ -z "${jobs}" ]; then echo "  (none)"; else printf '%s\n' "${jobs}" | sed 's/^/  - /'; fi
     preconditions:
       - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
       - which kubectl
@@ -106,70 +142,87 @@ tasks:
       This DELETES all Nominatim search data and re-imports north-america/us from scratch.
       pgdata and flatnode PVCs are removed; nominatim-project keeps Volsync backups but imported-regions.txt is cleared.
       After the pod restarts, wait until flatnode.file is ~100GB and /status is healthy before adding regions.
+      Follow: kubectl -n {{.NS}} logs -f deployment/{{.DEPLOYMENT}} -c {{.CONTAINER}}
+      Then: task nominatim:check-config
       Continue?
     cmds:
       - kubectl -n {{.NS}} scale deployment/{{.DEPLOYMENT}} --replicas=0
-      - |
-        kubectl -n {{.NS}} wait deployment/{{.DEPLOYMENT}} \
-          --for=jsonpath='{.status.replicas}'=0 --timeout=10m
+      - kubectl -n {{.NS}} wait deployment/{{.DEPLOYMENT}} --for=jsonpath='{.status.replicas}'=0 --timeout=10m
       - kubectl -n {{.NS}} delete pvc {{.PGDATA_CLAIM}} {{.FLATNODE_CLAIM}} --ignore-not-found=true --wait=true
-      - |
-        kubectl -n {{.NS}} run nominatim-reset-project \
-          --rm -i --restart=Never \
-          --image=docker.io/library/alpine:3.21 \
-          --overrides='{
-            "spec": {
-              "containers": [{
-                "name": "reset",
-                "image": "docker.io/library/alpine:3.21",
-                "command": ["sh", "-ec", "rm -f /project/imported-regions.txt && rm -rf /project/update && ls -la /project"],
-                "volumeMounts": [{"name": "project", "mountPath": "/project"}]
-              }],
-              "volumes": [{"name": "project", "persistentVolumeClaim": {"claimName": "{{.PROJECT_CLAIM}}"}}]
-            }
-          }'
+      - kubectl -n {{.NS}} delete pod/nominatim-reset-project --ignore-not-found=true --wait=true
+      - minijinja-cli {{.RESOURCES_DIR}}/reset-project-pod.yaml.j2 | kubectl apply --filename -
+      - kubectl -n {{.NS}} wait pod/nominatim-reset-project --for=jsonpath='{.status.phase}'=Succeeded --timeout=2m
+      - kubectl -n {{.NS}} logs pod/nominatim-reset-project
+      - kubectl -n {{.NS}} delete pod/nominatim-reset-project --wait=true
       - kubectl -n {{.NS}} scale deployment/{{.DEPLOYMENT}} --replicas=1
-      - |
-        echo "Scaled nominatim back up. Follow bootstrap progress:"
-        echo "  kubectl -n {{.NS}} logs -f deployment/{{.DEPLOYMENT}} -c {{.CONTAINER}}"
-        echo "When import completes, verify flatnode:"
-        echo "  task nominatim:check-config"
+    env:
+      NS: '{{.NS}}'
+      PROJECT_CLAIM: '{{.PROJECT_CLAIM}}'
     preconditions:
+      - test -f {{.RESOURCES_DIR}}/reset-project-pod.yaml.j2
       - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
       - kubectl -n {{.NS}} get pvc {{.PROJECT_CLAIM}}
-      - which kubectl
-
-  import-next:
-    desc: Import the next pending region from NOMINATIM_REGIONS (multi-hour, streams logs)
-    prompt: Import the next missing Geofabrik region into Nominatim? This can take many hours and heavily loads Postgres.
-    cmds:
-      - |
-        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
-          env {{.IMPORT_ENV}} /bin/bash /scripts/maintain-regions.sh
-    preconditions:
-      - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
-      - which kubectl
+      - which kubectl minijinja-cli
 
   import-region:
-    desc: Import one Geofabrik region by path [REGION=north-america/canada]
-    prompt: 'Import region {{.REGION}}? This can take many hours and heavily loads Postgres.'
+    desc: Spawn an in-cluster Job to import a Geofabrik region [REGION=next|north-america/canada]
+    interactive: true
+    prompt: |-
+      Import {{if eq .REGION "next"}}the next pending region{{else}}{{.REGION}}{{end}} via an in-cluster Job?
+      This can take many hours and heavily loads Postgres.
+      Continue?
     cmds:
-      - |
-        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
-          env {{.IMPORT_ENV}} NOMINATIM_IMPORT_ONLY_REGION={{.REGION}} \
-          /bin/bash /scripts/maintain-regions.sh
-    requires:
-      vars: [REGION]
+      - minijinja-cli {{.RESOURCES_DIR}}/import-job.yaml.j2 | kubectl create --filename -
+      - kubectl -n {{.NS}} logs --follow --pod-running-timeout=5m job/{{.JOB_NAME}}
+    env:
+      NS: '{{.NS}}'
+      DEPLOYMENT: '{{.DEPLOYMENT}}'
+      CONTAINER: '{{.CONTAINER}}'
+      REGION: '{{.REGION}}'
+      JOB_NAME: '{{.JOB_NAME}}'
+      IMPORT_JOB_COMPONENT: '{{.IMPORT_JOB_COMPONENT}}'
+      IMPORT_DEADLINE_SECONDS: '{{.IMPORT_DEADLINE_SECONDS}}'
+      KUBECTL_IMAGE: '{{.KUBECTL_IMAGE}}'
+      SERVICE_ACCOUNT: '{{.SERVICE_ACCOUNT}}'
+    vars:
+      REGION: '{{.REGION | default "next"}}'
+      JOB_NAME:
+        sh: |
+          stamp="$(date +%Y%m%d-%H%M%S)"
+          raw="nominatim-import-{{.REGION}}-${stamp}"
+          printf '%s' "${raw}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' | cut -c1-63 | sed 's/-$//'
+      KUBECTL_IMAGE:
+        sh: >-
+          kubectl -n {{.NS}} get cronjob {{.CRONJOB}}
+          -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}'
+      SERVICE_ACCOUNT:
+        sh: >-
+          kubectl -n {{.NS}} get cronjob {{.CRONJOB}}
+          -o jsonpath='{.spec.jobTemplate.spec.template.spec.serviceAccountName}'
+      ACTIVE_IMPORT_JOBS:
+        sh: >-
+          kubectl -n {{.NS}} get jobs
+          -l app.kubernetes.io/component={{.IMPORT_JOB_COMPONENT}}
+          -o jsonpath='{range .items[?(@.status.active)]}{.metadata.name}{"\n"}{end}'
     preconditions:
+      - test -f {{.RESOURCES_DIR}}/import-job.yaml.j2
       - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
-      - which kubectl
+      - kubectl -n {{.NS}} get cronjob {{.CRONJOB}}
+      - sh: test -n "{{.KUBECTL_IMAGE}}" && test -n "{{.SERVICE_ACCOUNT}}"
+        msg: Could not read image/serviceAccount from cronjob/{{.CRONJOB}}
+      - sh: test -z "{{.ACTIVE_IMPORT_JOBS}}"
+        msg: "An import Job is already active:{{.ACTIVE_IMPORT_JOBS}}"
+      - which kubectl minijinja-cli
 
   update-incremental:
-    desc: Run incremental OSC updates + reindex for already-imported regions (daily-cron equivalent)
+    desc: Trigger a one-off Job from the daily OSM update CronJob
+    interactive: true
     cmds:
-      - |
-        kubectl -n {{.NS}} exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
-          /bin/bash /scripts/maintain-regions.sh
+      - kubectl -n {{.NS}} create job --from=cronjob/{{.CRONJOB}} {{.JOB_NAME}}
+      - kubectl -n {{.NS}} logs --follow --pod-running-timeout=5m job/{{.JOB_NAME}}
+    vars:
+      JOB_NAME:
+        sh: echo "nominatim-update-$(date +%Y%m%d-%H%M%S)"
     preconditions:
-      - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
+      - kubectl -n {{.NS}} get cronjob {{.CRONJOB}}
       - which kubectl

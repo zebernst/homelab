@@ -32,8 +32,8 @@ spec:
             - NOMINATIM_ALLOW_REGION_IMPORT=true
             - NOMINATIM_IMPORT_MAX_REGIONS=1
             - NOMINATIM_SKIP_INCREMENTAL=true
-{%- if ENV.IMPORT_ONLY_REGION %}
-            - NOMINATIM_IMPORT_ONLY_REGION={{ ENV.IMPORT_ONLY_REGION }}
+{%- if ENV.REGION and ENV.REGION != "next" %}
+            - NOMINATIM_IMPORT_ONLY_REGION={{ ENV.REGION }}
 {%- endif %}
             - /bin/bash
             - /scripts/maintain-regions.sh
