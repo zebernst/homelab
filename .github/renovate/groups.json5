@@ -98,7 +98,10 @@
     {
       description: "Nominatim",
       groupName: "nominatim",
-      matchFileNames: ["kubernetes/apps/self-hosted/nominatim/**"],
+      matchPackageNames: [
+        "/mediagis/nominatim/",
+        "/osm-search/nominatim-ui/",
+      ],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
