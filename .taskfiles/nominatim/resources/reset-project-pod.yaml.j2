@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nominatim-reset-project
+  namespace: {{ ENV.NS }}
+spec:
+  restartPolicy: Never
+  containers:
+    - name: reset
+      image: docker.io/library/alpine:3.21
+      command:
+        - sh
+        - -ec
+        - rm -f /project/imported-regions.txt && rm -rf /project/update && ls -la /project
+      volumeMounts:
+        - name: project
+          mountPath: /project
+  volumes:
+    - name: project
+      persistentVolumeClaim:
+        claimName: {{ ENV.PROJECT_CLAIM }}
