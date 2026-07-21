@@ -19,7 +19,7 @@ machine:
       serial: S5H9NS0N517111K
     extraKernelArgs:
       - amd_iommu=on            # PCI Passthrough
-    image: factory.talos.dev/installer/0b97c67c1c2feb9a5ae7c196445e624332c6e381c45ef4c84f9c48debd4fa70c:v1.12.4
+    image: factory.talos.dev/installer/0b97c67c1c2feb9a5ae7c196445e624332c6e381c45ef4c84f9c48debd4fa70c:v1.13.7
   kernel:
     modules:
       - name: nvidia
