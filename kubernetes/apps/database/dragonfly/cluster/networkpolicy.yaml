@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/networking.k8s.io/networkpolicy_v1.json
+---
+# The operator-managed "hindwing" NetworkPolicy (networkPolicyEnabled: true) only
+# allows :6379 from pods in the database namespace, cutting off cross-namespace
+# clients (nocodb, paperless) and the redis.internal LoadBalancer. NetworkPolicies
+# are additive, so this restores open ingress on :6379 while the operator policy
+# keeps admin :9999 restricted to the operator and peer pods.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hindwing-redis-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app: hindwing
+      app.kubernetes.io/name: dragonfly
+      app.kubernetes.io/part-of: dragonfly
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - port: 6379
+          protocol: TCP
