@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/barmancloud.cnpg.io/objectstore_v1.json
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: nominatim-db-backup
+spec:
+  retentionPolicy: 30d
+  configuration:
+    destinationPath: s3://cluster-db-backup/nominatim-db/
+    endpointURL: https://s3.us-west-001.backblazeb2.com
+    s3Credentials:
+      accessKeyId:
+        name: nominatim-db-backup-secret
+        key: aws-access-key-id
+      secretAccessKey:
+        name: nominatim-db-backup-secret
+        key: aws-secret-access-key
+    wal:
+      compression: bzip2
+      maxParallel: 8
+    data:
+      compression: bzip2

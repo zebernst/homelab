@@ -12,6 +12,7 @@ resources:
   - hajimari/ks.yaml
   - it-tools/ks.yaml
   - nocodb/ks.yaml
+  - nominatim-db/ks.yaml
   - nominatim/ks.yaml
   - paperless/ks.yaml
   - rxresume/ks.yaml
