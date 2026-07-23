@@ -27,6 +27,32 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: &app cloudnative-pg-barman-plugin
+  namespace: &ns database
+spec:
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: cloudnative-pg
+      namespace: *ns
+    - name: cert-manager
+      namespace: cert-manager
+  interval: 1h
+  path: kubernetes/apps/database/cloudnative-pg/plugin
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: *ns
+  timeout: 5m
+  wait: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: &app cloudnative-pg-cluster
   namespace: &ns database
 spec:
