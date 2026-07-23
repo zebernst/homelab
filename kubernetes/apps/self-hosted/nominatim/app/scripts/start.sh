@@ -11,6 +11,11 @@ if [ -z "${FIRST_REGION}" ]; then
 fi
 export PBF_URL="${NOMINATIM_DOWNURL:-https://download.geofabrik.de}/${FIRST_REGION}-latest.osm.pbf"
 
+# mediagis config.sh defaults IMPORT_STYLE=full and only substitutes __IMPORT_STYLE__
+# once. Force extratags (US bootstrap / upstream default) so add-data matches the DB.
+IMPORT_STYLE="${IMPORT_STYLE:-extratags}"
+export IMPORT_STYLE
+
 STAGING_DIR="${IMPORT_STAGING:-/import-staging}"
 PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
 PGDATA="${PGDATA:-/var/lib/postgresql/16/main}"
@@ -54,6 +59,15 @@ fi
 if [ ! -f "${PROJECT_DIR}/.env" ]; then
   echo "[nominatim] Seeding ${PROJECT_DIR}/.env from /scripts/env.defaults"
   cp /scripts/env.defaults "${PROJECT_DIR}/.env"
+fi
+
+# Upsert after seed: mediagis only replaces __IMPORT_STYLE__ once, so an existing
+# .env with NOMINATIM_IMPORT_STYLE=full would otherwise stick forever.
+ENV_FILE="${PROJECT_DIR}/.env"
+if [ -f "${ENV_FILE}" ] && grep -qE '^NOMINATIM_IMPORT_STYLE=' "${ENV_FILE}"; then
+  sed -i "s|^NOMINATIM_IMPORT_STYLE=.*|NOMINATIM_IMPORT_STYLE=${IMPORT_STYLE}|" "${ENV_FILE}"
+elif [ -f "${ENV_FILE}" ] && grep -q '__IMPORT_STYLE__' "${ENV_FILE}"; then
+  sed -i "s|__IMPORT_STYLE__|${IMPORT_STYLE}|g" "${ENV_FILE}"
 fi
 
 # If pgdata exists but bootstrap never wrote import-finished, resume instead of

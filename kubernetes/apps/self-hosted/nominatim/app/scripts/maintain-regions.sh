@@ -116,7 +116,8 @@ import_new_regions() {
 
     import_file="${IMPORT_STAGING}/$(echo "${region}" | tr '/' '-')-latest.osm.pbf"
     echo "[nominatim-maintenance] Importing new region ${region}"
-    curl -L -A "${CURL_USER_AGENT}" --fail-with-body \
+    # -C - resumes a partial PBF left in emptyDir after a killed download.
+    curl -L -C - -A "${CURL_USER_AGENT}" --fail-with-body \
       "${DOWNURL}/${region}-latest.osm.pbf" -o "${import_file}"
     sudo -E -u nominatim nominatim add-data --project-dir "${PROJECT_DIR}" --file "${import_file}"
     seed_state "${region}"

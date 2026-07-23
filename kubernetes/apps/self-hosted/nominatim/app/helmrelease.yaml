@@ -76,6 +76,7 @@ spec:
               # Disable the image's built-in replication loop; updates are managed by CronJob.
               UPDATE_MODE: "none"
               REPLICATION_URL: ""
+              IMPORT_STYLE: extratags
               IMPORT_WIKIPEDIA: "true"
               IMPORT_SECONDARY_WIKIPEDIA: "true"
               IMPORT_US_POSTCODES: "true"

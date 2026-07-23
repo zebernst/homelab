@@ -1,0 +1,45 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ ENV.JOB_NAME }}
+  namespace: {{ ENV.NS }}
+  labels:
+    app.kubernetes.io/name: nominatim
+    app.kubernetes.io/component: {{ ENV.IMPORT_JOB_COMPONENT }}
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: {{ ENV.IMPORT_DEADLINE_SECONDS }}
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nominatim
+        app.kubernetes.io/component: {{ ENV.IMPORT_JOB_COMPONENT }}
+    spec:
+      serviceAccountName: {{ ENV.SERVICE_ACCOUNT }}
+      restartPolicy: Never
+      containers:
+        - name: kubectl
+          image: {{ ENV.KUBECTL_IMAGE }}
+          args:
+            - exec
+            - deploy/{{ ENV.DEPLOYMENT }}
+            - -c
+            - {{ ENV.CONTAINER }}
+            - --
+            - env
+            - NOMINATIM_ALLOW_REGION_IMPORT=true
+            - NOMINATIM_IMPORT_MAX_REGIONS=1
+            - NOMINATIM_SKIP_INCREMENTAL=true
+{%- if ENV.REGION and ENV.REGION != "next" %}
+            - NOMINATIM_IMPORT_ONLY_REGION={{ ENV.REGION }}
+{%- endif %}
+            - /bin/bash
+            - /scripts/maintain-regions.sh
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
