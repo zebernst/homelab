@@ -76,7 +76,6 @@ spec:
               # Disable the image's built-in replication loop; updates are managed by CronJob.
               UPDATE_MODE: "none"
               REPLICATION_URL: ""
-              # mediagis defaults IMPORT_STYLE=full; match the US bootstrap (extratags) and upstream default.
               IMPORT_STYLE: extratags
               IMPORT_WIKIPEDIA: "true"
               IMPORT_SECONDARY_WIKIPEDIA: "true"
