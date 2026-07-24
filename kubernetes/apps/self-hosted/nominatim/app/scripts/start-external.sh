@@ -92,8 +92,7 @@ if [ ! -f "${IMPORT_FINISHED}" ]; then
   touch "${IMPORT_FINISHED}"
 fi
 
-# Linux user (distinct from the Postgres role). mediagis /app/start.sh creates this
-# before init; we skip that path, so create it here for sudo -u.
+# mediagis init normally creates this OS user; we skip that path.
 if ! id nominatim >/dev/null 2>&1; then
   echo "[nominatim] Creating Linux user nominatim"
   useradd -m -p "${NOMINATIM_PASSWORD:-}" nominatim
