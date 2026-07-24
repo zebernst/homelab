@@ -4,7 +4,8 @@
 # allows :6379 from pods in the database namespace, cutting off cross-namespace
 # clients (nocodb, paperless) and the redis.internal LoadBalancer. NetworkPolicies
 # are additive, so this restores open ingress on :6379 while the operator policy
-# keeps admin :9999 restricted to the operator and peer pods.
+# keeps admin :9999 restricted to the operator and peer pods — plus vmagent,
+# which scrapes Dragonfly metrics on the admin port (see cluster/vmpodscrape.yaml).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -20,4 +21,14 @@ spec:
   ingress:
     - ports:
         - port: 6379
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmagent
+      ports:
+        - port: 9999
           protocol: TCP

@@ -64,8 +64,10 @@ spec:
               RECORD_LOGINS: true
               AUTO_SCALE_UP: "true"
               AUTO_SCALE_DOWN: "true"
+              # Idle long enough that a brief disconnect doesn't tear the server down
               AUTO_SCALE_DOWN_AFTER: "2h"
-              AUTO_SCALE_ASLEEP_MOTD: "Server is sleeping. Connecting will wake it -- please wait a few minutes."
+              AUTO_SCALE_ASLEEP_MOTD: "§eServer is sleeping.§r Join once to wake it, then reconnect in a few minutes."
+              AUTO_SCALE_LOADING_MOTD: "§eServer is starting…§r Modpack boot takes a few minutes — reconnect shortly."
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -115,6 +117,21 @@ spec:
     route:
       api:
         kind: HTTPRoute
+        annotations:
+          # Single Minecraft health signal — backends scale to zero and shouldn't be probed
+          gatus.home-operations.com/endpoint: |
+            name: minecraft
+            group: public
+            url: https://mc-api.zebernst.dev/routes
+            interval: 1m
+            client:
+              dns-resolver: tcp://1.1.1.1:53
+            conditions:
+              - "[STATUS] == 200"
+            ui:
+              hide-url: true
+              hide-hostname: true
+              hide-port: true
         hostnames: ["mc-api.zebernst.dev"]
         parentRefs:
           - name: internal

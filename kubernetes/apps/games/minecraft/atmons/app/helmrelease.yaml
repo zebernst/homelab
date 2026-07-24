@@ -10,6 +10,17 @@ spec:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
+  # Let mc-router own StatefulSet replicas (scale subresource) without Helm
+  # resetting them on every reconcile.
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: StatefulSet
+              name: atmons
+            patch: |
+              - op: remove
+                path: /spec/replicas
 
   values:
     controllers:
@@ -131,21 +142,13 @@ spec:
     service:
       atmons:
         annotations:
-          gatus.home-operations.com/enabled: "true"
-          gatus.home-operations.com/endpoint: |
-            name: all the mons
-            group: public
-            url: tcp://atmons.games.svc.cluster.local:25565
-            interval: 1m
-            conditions:
-              - "[CONNECTED] == true"
-            ui:
-              hide-url: true
-              hide-hostname: true
-              hide-port: true
           mc-router.itzg.me/externalServerName: "atmons.zebernst.dev"
           mc-router.itzg.me/autoScaleUp: "true"
-          mc-router.itzg.me/autoScaleDown: "false"
+          mc-router.itzg.me/autoScaleDown: "true"
+          mc-router.itzg.me/autoScaleAsleepMOTD: "§eAll the Mons is sleeping.§r Join once to wake it, then reconnect in a few minutes."
+          mc-router.itzg.me/autoScaleLoadingMOTD: "§eAll the Mons is starting…§r Modpack boot takes a few minutes — reconnect shortly."
+          # Match startup probe window: initialDelaySeconds(30) + periodSeconds(1)*failureThreshold(300)
+          mc-router.itzg.me/autoScaleWaitTimeout: "5m30s"
         ports:
           game:
             port: 25565

@@ -15,16 +15,6 @@ spec:
           - holmes-operator
   egress:
     # DNS
-    - toServices:
-        - k8sService:
-            serviceName: kube-dns
-            namespace: kube-system
-      toPorts:
-        - ports:
-            - port: "53"
-              protocol: UDP
-            - port: "53"
-              protocol: TCP
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: kube-system
@@ -32,9 +22,10 @@ spec:
       toPorts:
         - ports:
             - port: "53"
-              protocol: UDP
-            - port: "53"
-              protocol: TCP
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
     # Kubernetes API server
     - toEntities:
         - kube-apiserver
@@ -84,8 +75,8 @@ spec:
             - port: "8000"
               protocol: TCP
 ---
-# GitHub MCP server: only allowed to reach api.github.com.
-# All other internet egress is denied.
+# GitHub MCP: egress locked to api.github.com; ingress only from holmes.
+# Chart NetworkPolicy is disabled — owned here.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -94,18 +85,23 @@ spec:
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: github-mcp-server
-  egress:
-    # DNS (required to resolve api.github.com)
-    - toServices:
-        - k8sService:
-            serviceName: kube-dns
-            namespace: kube-system
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: holmes
       toPorts:
         - ports:
-            - port: "53"
-              protocol: UDP
-            - port: "53"
+            - port: "8000"
               protocol: TCP
+    # Required whenever this endpoint has ingress enforcement: DNS replies
+    # arrive sourced as the kube-dns ClusterIP identity (KPR, no pod socket-LB)
+    # and miss conntrack after DNS-proxy interception, so they hit ingress.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+  egress:
+    # Canonical toFQDNs companion: proxy/inspect DNS via kube-dns
     - toEndpoints:
         - matchLabels:
             io.kubernetes.pod.namespace: kube-system
@@ -113,10 +109,10 @@ spec:
       toPorts:
         - ports:
             - port: "53"
-              protocol: UDP
-            - port: "53"
-              protocol: TCP
-    # GitHub API — named egress, no general internet
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
     - toFQDNs:
         - matchName: "api.github.com"
       toPorts:

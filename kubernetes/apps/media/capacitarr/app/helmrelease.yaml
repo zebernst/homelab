@@ -63,6 +63,10 @@ spec:
 
     route:
       capacitarr:
+        annotations:
+          # App requires auth on / (401); probe the unauthenticated health endpoint
+          gatus.home-operations.com/endpoint: |
+            path: /api/v1/health
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"
         parentRefs:
