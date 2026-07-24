@@ -45,6 +45,8 @@ spec:
       max_wal_size: 1GB
   bootstrap:
     pg_basebackup:
+      database: nominatim
+      owner: nominatim
       source: nominatim-legacy
   replica:
     enabled: false
