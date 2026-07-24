@@ -24,6 +24,12 @@ vars:
   # Full Geofabrik add-data can run multi-day; kill stuck Jobs after 7d.
   IMPORT_DEADLINE_SECONDS: "604800"
 
+  # Source-replication prep (CNPG migration, see nominatim-db)
+  PG_SOURCE_SVC: nominatim-pg-source
+  REPL_JOB: nominatim-setup-replication
+  REPL_JOB_COMPONENT: nominatim-pg-replication-setup
+  REPL_ROLE: cnpg_replica
+
 tasks:
 
   default:
@@ -226,3 +232,75 @@ tasks:
     preconditions:
       - kubectl -n {{.NS}} get cronjob {{.CRONJOB}}
       - which kubectl
+
+  pg-source-status:
+    desc: Read-only status for CNPG source-replication prep (Service, setup Job, role, pg_hba, OSM cron)
+    silent: true
+    cmds:
+      - "echo 'source_service: {{.SVC_STATUS}}'"
+      - "echo 'setup_job_suspended: {{.JOB_SUSPENDED}}'"
+      - "echo 'setup_job_status: {{.JOB_STATUS}}'"
+      - "echo 'wal_level: {{.WAL_LEVEL}}'"
+      - "echo 'max_wal_senders: {{.MAX_WAL_SENDERS}}'"
+      - "echo 'repl_role_exists: {{.ROLE_EXISTS}}'"
+      - "echo 'pg_hba_repl_entry: {{.HBA_ENTRY}}'"
+      - "echo 'osm_cronjob_suspended: {{.CRON_SUSPENDED}}'"
+    vars:
+      SVC_STATUS:
+        sh: >-
+          kubectl -n {{.NS}} get svc {{.PG_SOURCE_SVC}}
+          -o jsonpath='{.spec.clusterIP} -> {.spec.ports[0].port}' 2>/dev/null || echo "(not found)"
+      JOB_SUSPENDED:
+        sh: >-
+          kubectl -n {{.NS}} get job {{.REPL_JOB}}
+          -o jsonpath='{.spec.suspend}' 2>/dev/null || echo "(not found)"
+      JOB_STATUS:
+        sh: >-
+          kubectl -n {{.NS}} get job {{.REPL_JOB}}
+          -o jsonpath='succeeded={.status.succeeded} failed={.status.failed} active={.status.active}' 2>/dev/null
+          || echo "(not found)"
+      WAL_LEVEL:
+        sh: '{{.KEXEC}} sudo -u postgres psql -At -c "SHOW wal_level;" 2>/dev/null || echo unknown'
+      MAX_WAL_SENDERS:
+        sh: '{{.KEXEC}} sudo -u postgres psql -At -c "SHOW max_wal_senders;" 2>/dev/null || echo unknown'
+      ROLE_EXISTS:
+        sh: >-
+          {{.KEXEC}} sudo -u postgres psql -At
+          -c "SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{{.REPL_ROLE}}');" 2>/dev/null || echo unknown
+      HBA_ENTRY:
+        sh: >-
+          {{.KEXEC}} sh -c 'grep -F "{{.REPL_ROLE}}" "${PGDATA:-/var/lib/postgresql/16/main}/pg_hba.conf"' 2>/dev/null
+          || echo "(none)"
+      CRON_SUSPENDED:
+        sh: >-
+          kubectl -n {{.NS}} get cronjob {{.CRONJOB}}
+          -o jsonpath='{.spec.suspend}' 2>/dev/null || echo unknown
+    preconditions:
+      - which kubectl
+
+  pg-source-enable-help:
+    desc: Explain how to (GitOps-safely) run the one-shot replication-role/pg_hba setup Job
+    silent: true
+    cmds:
+      - |
+        cat <<'EOF'
+        The role/pg_hba setup for CNPG streaming replication is a Flux-managed Job
+        (kubernetes/apps/self-hosted/nominatim/app/job-setup-replication.yaml), not a
+        Taskfile mutation, so it goes through the same PR/reconcile flow as everything
+        else in this repo.
+
+        To run it once:
+          1. Edit job-setup-replication.yaml: set `spec.suspend: false`.
+          2. Commit and push; wait for Flux to reconcile the nominatim Kustomization.
+          3. Watch it: `task nominatim:pg-source-status`
+             or: kubectl -n self-hosted logs job/{{.REPL_JOB}}
+          4. Once succeeded, set `spec.suspend: true` again and commit (keeps the
+             Job idle so Flux reconciliation never re-triggers it).
+
+        To re-run later (e.g. after rotating the nominatim-replication password),
+        rename the Job (bump a suffix, e.g. nominatim-setup-replication-2) instead of
+        flipping suspend on the same object -- spec.template is immutable once a Job
+        has started.
+
+        This task performs no cluster writes; it only prints instructions.
+        EOF

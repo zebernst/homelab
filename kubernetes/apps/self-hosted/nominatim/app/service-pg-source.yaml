@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nominatim-pg-source
+  labels:
+    app.kubernetes.io/name: nominatim
+    app.kubernetes.io/component: nominatim-pg-source
+spec:
+  # Exposes the embedded Postgres in the nominatim API pod for CNPG
+  # externalClusters streaming replication (kubernetes/apps/self-hosted/nominatim-db).
+  # The app-template HelmRelease's own generated Service only forwards the
+  # API's HTTP port, so this selects the same pod labels separately.
+  selector:
+    app.kubernetes.io/name: nominatim
+    app.kubernetes.io/controller: nominatim
+  ports:
+    - name: postgres
+      port: 5432
+      protocol: TCP
+      targetPort: 5432

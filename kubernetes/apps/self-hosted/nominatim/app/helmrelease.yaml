@@ -180,6 +180,9 @@ spec:
         type: cronjob
         cronjob:
           # Re-enable (suspend: false) after bootstrap / flatnode re-import completes.
+          # Also stays suspended through the CNPG migration (source replication
+          # prep / cutover / soak, see nominatim-db) so OSC updates never race
+          # cnpg_replica's streaming replication of the embedded Postgres.
           suspend: true
           schedule: "@daily"
           concurrencyPolicy: Forbid
