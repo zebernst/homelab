@@ -102,8 +102,9 @@ spec:
                   initialDelaySeconds: 10
                   periodSeconds: 30
                   timeoutSeconds: 10
-                  # refresh --website/--functions + Gunicorn cold start against CNPG
-                  failureThreshold: 40
+                  # ~60m for refresh + Gunicorn before /status answers.
+                  # Measure once after cutover and lower if it's consistently faster.
+                  failureThreshold: 120
               liveness:
                 enabled: true
                 custom: true
