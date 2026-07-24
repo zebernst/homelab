@@ -138,6 +138,17 @@ spec:
                 memory: 16Gi
               limits:
                 memory: 24Gi
+        pod:
+          # Prefer same node as nominatim-db (CNPG has the reverse preference).
+          affinity:
+            podAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        cnpg.io/cluster: nominatim-db
+                    topologyKey: kubernetes.io/hostname
       ui:
         annotations:
           reloader.stakater.com/auto: "true"
