@@ -40,15 +40,13 @@ link_staging "wikimedia-importance.csv.gz"
 link_staging "us_postcodes.csv.gz"
 link_staging "secondary_importance.sql.gz"
 
-# One-time migration: copy legacy pgdata marker onto the project volume.
+# One-time migration: copy legacy pgdata marker onto the project volume when
+# the old PVC is still mounted. After cutover the PVC is unmounted, so fall
+# through and seed the marker once external Postgres is reachable (data already
+# lives in CNPG).
 if [ ! -f "${IMPORT_FINISHED}" ] && [ -f "${PGDATA}/import-finished" ]; then
   echo "[nominatim] Migrating import-finished marker from ${PGDATA} to ${IMPORT_FINISHED}"
   cp -a "${PGDATA}/import-finished" "${IMPORT_FINISHED}"
-fi
-
-if [ ! -f "${IMPORT_FINISHED}" ]; then
-  echo "[nominatim] Import not finished (${IMPORT_FINISHED} missing); refusing to start API"
-  exit 1
 fi
 
 # Project PVC mounts over /nominatim and hides the image's baked-in .env.
@@ -84,6 +82,11 @@ echo "[nominatim] Waiting for PostgreSQL at ${PGHOST}"
 until pg_isready -h "${PGHOST}" -d "${PGDATABASE}" -U "${PGUSER}" -q; do
   sleep 2
 done
+
+if [ ! -f "${IMPORT_FINISHED}" ]; then
+  echo "[nominatim] Seeding ${IMPORT_FINISHED} (external DB cutover; import already in CNPG)"
+  touch "${IMPORT_FINISHED}"
+fi
 
 echo "[nominatim] Refreshing website + SQL functions against external DB"
 sudo -E -u nominatim nominatim refresh --website --functions --project-dir "${PROJECT_DIR}"

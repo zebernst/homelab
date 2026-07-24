@@ -43,23 +43,23 @@ spec:
       checkpoint_timeout: 10min
       checkpoint_completion_target: "0.9"
       max_wal_size: 1GB
+  # Historical: physically cloned from embedded Nominatim (nominatim-legacy).
+  # Bootstrap is not re-run after create; kept so CNPG metrics default to the
+  # nominatim database/owner. replica: removed after promote.
   bootstrap:
     pg_basebackup:
       database: nominatim
       owner: nominatim
       source: nominatim-legacy
-  replica:
-    enabled: false
-    source: nominatim-legacy
+  # Admission stub only — CNPG rejects bootstrap.pg_basebackup.source unless
+  # this name exists. Not used for streaming (replica removed). Points at this
+  # cluster's RW Service so nominatim-pg-source can be pruned.
   externalClusters:
     - name: nominatim-legacy
       connectionParameters:
-        host: nominatim-pg-source.self-hosted.svc
-        user: cnpg_replica
+        host: nominatim-db-rw.self-hosted.svc
+        user: postgres
         dbname: postgres
-      password:
-        name: nominatim-replication
-        key: password
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
