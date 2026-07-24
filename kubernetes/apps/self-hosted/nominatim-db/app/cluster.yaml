@@ -47,7 +47,7 @@ spec:
     pg_basebackup:
       source: nominatim-legacy
   replica:
-    enabled: true
+    enabled: false
     source: nominatim-legacy
   externalClusters:
     - name: nominatim-legacy
