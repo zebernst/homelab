@@ -83,6 +83,11 @@ spec:
               PROJECT_DIR: /nominatim
               # Required for North America / multi-region imports (created during bootstrap osm2pgsql).
               NOMINATIM_FLATNODE_FILE: /nominatim/flatnode/flatnode.file
+              # In-cluster DB traffic is already plaintext; skip SSL/GSS negotiation
+              # so pg_isready and the worker pool stop logging "could not accept SSL
+              # connection: EOF" on the shared CNPG cluster.
+              PGSSLMODE: disable
+              PGGSSENCMODE: disable
               GUNICORN_WORKERS: "4"
               NOMINATIM_API_POOL_SIZE: "5"
               # Daily cron only applies incremental OSC updates; full region PBF imports are opt-in.
