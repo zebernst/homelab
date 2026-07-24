@@ -304,3 +304,50 @@ tasks:
 
         This task performs no cluster writes; it only prints instructions.
         EOF
+
+  cnpg-status:
+    desc: Read-only CNPG nominatim-db phase, instances, and ScheduledBackup status
+    silent: true
+    cmds:
+      - "echo 'cluster: {{.CLUSTER_STATUS}}'"
+      - "echo 'replica_enabled: {{.REPLICA_ENABLED}}'"
+      - "echo 'instances: {{.INSTANCES}}'"
+      - "echo 'scheduled_backup: {{.SBACKUP}}'"
+      - "echo 'cutover_runbook: docs/runbooks/nominatim-cnpg-cutover.md'"
+    vars:
+      CLUSTER_STATUS:
+        sh: >-
+          kubectl -n {{.NS}} get cluster.postgresql.cnpg.io nominatim-db
+          -o jsonpath='{.status.phase}' 2>/dev/null || echo "(not found)"
+      REPLICA_ENABLED:
+        sh: >-
+          kubectl -n {{.NS}} get cluster.postgresql.cnpg.io nominatim-db
+          -o jsonpath='{.spec.replica.enabled}' 2>/dev/null || echo "(not found)"
+      INSTANCES:
+        sh: >-
+          kubectl -n {{.NS}} get pods -l cnpg.io/cluster=nominatim-db
+          -o wide 2>/dev/null || echo "(none)"
+      SBACKUP:
+        sh: >-
+          kubectl -n {{.NS}} get scheduledbackup.postgresql.cnpg.io nominatim-db
+          -o jsonpath='schedule={.spec.schedule} immediate={.spec.immediate} method={.spec.method}' 2>/dev/null
+          || echo "(not found)"
+    preconditions:
+      - which kubectl
+
+  cutover-help:
+    desc: Print pointer to the CNPG cutover runbook (no cluster writes)
+    silent: true
+    cmds:
+      - |
+        cat <<'EOF'
+        Follow docs/runbooks/nominatim-cnpg-cutover.md.
+
+        Prep (mergeable anytime): plugin, nominatim-db replica Cluster, source Service,
+        suspended setup Job, start-external.sh in ConfigMap.
+
+        Cutover (ops window, separate git commit): promote replica, then atomically flip
+        ExternalSecret DSN keys + HelmRelease to start-external.sh (see runbook Phase D).
+
+        This task performs no cluster writes.
+        EOF
