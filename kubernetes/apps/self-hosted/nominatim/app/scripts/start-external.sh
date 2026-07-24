@@ -61,14 +61,6 @@ elif [ -f "${ENV_FILE}" ] && grep -q '__IMPORT_STYLE__' "${ENV_FILE}"; then
   sed -i "s|__IMPORT_STYLE__|${IMPORT_STYLE}|g" "${ENV_FILE}"
 fi
 
-# Scrub durable DSN so PVC/.env never retains a password after rotation.
-if grep -qE '^NOMINATIM_DATABASE_DSN=' "${ENV_FILE}"; then
-  echo "[nominatim] Removing NOMINATIM_DATABASE_DSN from ${ENV_FILE} (use process env)"
-  tmp_env="$(mktemp)"
-  grep -vE '^NOMINATIM_DATABASE_DSN=' "${ENV_FILE}" > "${tmp_env}" || true
-  mv "${tmp_env}" "${ENV_FILE}"
-fi
-
 if [ -n "${NOMINATIM_FLATNODE_FILE:-}" ]; then
   if grep -qE '^NOMINATIM_FLATNODE_FILE=' "${ENV_FILE}"; then
     sed -i "s|^NOMINATIM_FLATNODE_FILE=.*|NOMINATIM_FLATNODE_FILE=${NOMINATIM_FLATNODE_FILE}|" "${ENV_FILE}"
