@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.34.0/service.json
 ---
 apiVersion: v1
 kind: Service
@@ -9,8 +10,6 @@ metadata:
 spec:
   # Exposes the embedded Postgres in the nominatim API pod for CNPG
   # externalClusters streaming replication (kubernetes/apps/self-hosted/nominatim-db).
-  # The app-template HelmRelease's own generated Service only forwards the
-  # API's HTTP port, so this selects the same pod labels separately.
   selector:
     app.kubernetes.io/name: nominatim
     app.kubernetes.io/controller: nominatim

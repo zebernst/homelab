@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.34.0/job-batch-v1.json
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -39,15 +40,9 @@ metadata:
     app.kubernetes.io/name: nominatim
     app.kubernetes.io/component: nominatim-pg-replication-setup
 spec:
-  # GitOps-safe replacement for an imperative `kubectl exec ... CREATE ROLE` /
-  # pg_hba edit: default suspended so Flux reconciling this manifest never
-  # runs it on its own. To run: commit `suspend: false` (see
-  # `task nominatim:pg-source-status` / `task -w` docs), wait for completion,
-  # then commit `suspend: true` again for cleanliness. `spec.template` is
-  # immutable once a Job has run, so a later re-run (e.g. after rotating
-  # `nominatim-replication`) requires renaming this Job (bump a suffix) in
-  # git rather than re-flipping `suspend` on the same object. The target
-  # script (scripts/setup-replication.sh) is idempotent either way.
+  # Default suspended so Flux never auto-runs role/pg_hba setup.
+  # Enable once via git (`suspend: false`), then re-suspend after success.
+  # To re-run later, rename the Job (template is immutable after start).
   suspend: true
   backoffLimit: 0
   ttlSecondsAfterFinished: 86400
@@ -61,7 +56,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: kubectl
-          image: registry.k8s.io/kubectl:v1.36.2
+          image: registry.k8s.io/kubectl:v1.34.5
           command:
             - /bin/sh
             - -c

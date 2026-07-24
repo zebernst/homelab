@@ -2,9 +2,7 @@
 # Runs *inside* the nominatim container (invoked via `kubectl exec` from the
 # nominatim-setup-replication Job; see ../job-setup-replication.yaml).
 #
-# GitOps-safe replacement for imperative `kubectl exec ... CREATE ROLE` /
-# pg_hba edits: this script is idempotent so the (normally suspended) Job can
-# be re-run safely after a password rotation without side effects.
+# Idempotent: safe to re-run after rotating nominatim-replication password.
 set -euo pipefail
 
 PGDATA="${PGDATA:-/var/lib/postgresql/16/main}"
@@ -17,16 +15,20 @@ REPL_CIDR="${REPL_CIDR:-10.244.0.0/16}"
 HBA_LINE="host replication ${REPL_USER} ${REPL_CIDR} scram-sha-256"
 
 echo "[setup-replication] Ensuring role ${REPL_USER} exists with REPLICATION LOGIN"
-sudo -u postgres psql -v ON_ERROR_STOP=1 -v repl_user="${REPL_USER}" -v repl_password="${REPL_PASSWORD}" <<'SQL'
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'repl_user') THEN
-    EXECUTE format('CREATE ROLE %I WITH REPLICATION LOGIN PASSWORD %L', :'repl_user', :'repl_password');
-  ELSE
-    EXECUTE format('ALTER ROLE %I WITH REPLICATION LOGIN PASSWORD %L', :'repl_user', :'repl_password');
-  END IF;
-END
-$$;
+# Use psql variables + \gexec so substitution works (variables do not expand
+# inside dollar-quoted DO $$ blocks).
+sudo -u postgres psql -v ON_ERROR_STOP=1 \
+  -v repl_user="${REPL_USER}" \
+  -v repl_password="${REPL_PASSWORD}" <<'SQL'
+SELECT format(
+  CASE
+    WHEN EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'repl_user')
+      THEN 'ALTER ROLE %I WITH REPLICATION LOGIN PASSWORD %L'
+    ELSE 'CREATE ROLE %I WITH REPLICATION LOGIN PASSWORD %L'
+  END,
+  :'repl_user',
+  :'repl_password'
+)\gexec
 SQL
 
 echo "[setup-replication] Ensuring pg_hba.conf allows replication from ${REPL_CIDR}"
