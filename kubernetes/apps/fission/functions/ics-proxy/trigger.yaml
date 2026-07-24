@@ -15,6 +15,11 @@ spec:
     hostnames:
       - fn.zebernst.dev
     path: /ics/proxy
+    # Bare probe without ?calendar= returns 400 by design (same pattern as flux-webhook)
+    annotations:
+      gatus.home-operations.com/endpoint: |
+        conditions:
+          - "[STATUS] == 400"
     gateway:
       parentRefs:
         - name: external
