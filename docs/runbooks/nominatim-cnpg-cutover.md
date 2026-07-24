@@ -19,29 +19,29 @@ encoding as committed Jobs.
 
 - [ ] 1Password item `nominatim-db` has `POSTGRES_SUPER_USER`, `POSTGRES_SUPER_PASS`, `REPLICATION_PASS`
 - [ ] 1Password `nominatim` / `NOMINATIM_PASSWORD` matches the cloned `nominatim` DB role
-- [ ] OSM update CronJob remains `suspend: true` (`task nominatim:pg-source-status`)
+- [ ] OSM update CronJob remains `suspend: true` (`task nominatim-cnpg:pg-source-status`)
 
 ## Phase A — Source replication prep (Taskfile, one-off)
 
-1. `task nominatim:pg-source-status` — CronJob suspended; Service present after Flux.
-2. `task nominatim:setup-replication` — creates/updates the `cnpg_replica` role,
+1. `task nominatim-cnpg:pg-source-status` — CronJob suspended; Service present after Flux.
+2. `task nominatim-cnpg:setup-replication` — creates/updates the `cnpg_replica` role,
    appends the pg_hba entry, reloads config (idempotent; script lives under
-   `.taskfiles/nominatim/resources/` and is piped into the pod via stdin).
-3. `task nominatim:repl-preflight` — throwaway pod runs `pg_isready` +
+   `.taskfiles/nominatim-cnpg/resources/` and is piped into the pod via stdin).
+3. `task nominatim-cnpg:repl-preflight` — throwaway pod runs `pg_isready` +
    `IDENTIFY_SYSTEM` against `nominatim-pg-source.self-hosted.svc`.
 
 ## Phase B — Replica bootstrap
 
 1. Confirm Cluster `nominatim-db` completed `pg_basebackup` and is streaming
-   (`task nominatim:cnpg-status`).
-2. Wait until replication lag ≈ 0 (`task nominatim:repl-lag`).
+   (`task nominatim-cnpg:cnpg-status`).
+2. Wait until replication lag ≈ 0 (`task nominatim-cnpg:repl-lag`).
 3. Soft affinity should prefer the nominatim API/flatnode node.
 
 ## Phase C — Promote
 
-1. `task nominatim:cutover-scale-down` — suspends the Flux HelmRelease and scales
+1. `task nominatim-cnpg:cutover-scale-down` — suspends the Flux HelmRelease and scales
    the nominatim API to 0 for the window.
-2. Wait for lag 0 again (`task nominatim:repl-lag`).
+2. Wait for lag 0 again (`task nominatim-cnpg:repl-lag`).
 3. In `kubernetes/apps/self-hosted/nominatim-db/app/cluster.yaml` set:
    ```yaml
    replica:
@@ -84,7 +84,7 @@ PGPASSWORD: "{{ .NOMINATIM_PASSWORD }}"
 
 ### 3. Restore replicas
 
-Push the commit, then `task nominatim:cutover-scale-up` (scales the API back to 1
+Push the commit, then `task nominatim-cnpg:cutover-scale-up` (scales the API back to 1
 and resumes the Flux HelmRelease so the cutover values roll out).
 
 ### 4. Verify
@@ -105,10 +105,9 @@ confirm plugin backup Completes. Then set `immediate: false` again if desired.
 
 1. Soak until ≥ one successful daily/plugin backup; CronJob still suspended.
 2. Cleanup PR: remove `nominatim-pg-source` Service; remove `persistence.pgdata`
-   from the HelmRelease; delete PVC `nominatim-pgdata` only after explicit
-   confirmation. Drop the migration Taskfile tasks (`setup-replication`,
-   `repl-preflight`, `repl-lag`, `cutover-*`) or keep `repl-lag`/`cnpg-status`
-   as ongoing observability helpers.
+   from the HelmRelease; delete PVC `nominatim-pgdata` only after explicit confirmation.
+   Delete `.taskfiles/nominatim-cnpg/` and remove its include from the root
+   `Taskfile.yaml`.
 
 ## Rollback
 

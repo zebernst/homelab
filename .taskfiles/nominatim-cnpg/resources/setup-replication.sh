@@ -1,6 +1,6 @@
 #!/bin/bash
 # Runs *inside* the nominatim container. Piped in by
-# `task nominatim:setup-replication` (not mounted via ConfigMap).
+# `task nominatim-cnpg:setup-replication` (not mounted via ConfigMap).
 #
 # Idempotent: safe to re-run after rotating nominatim-replication password.
 set -euo pipefail
