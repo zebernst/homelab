@@ -276,7 +276,7 @@ tasks:
       - >-
         kubectl -n {{.NS}} exec -i deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} --
         env REPL_USER={{.REPL_ROLE}} REPL_CIDR={{.REPL_CIDR}} REPL_PASSWORD="{{.REPL_PASSWORD}}"
-        bash /scripts/setup-replication.sh
+        bash -s < {{.RESOURCES_DIR}}/setup-replication.sh
       - task: pg-source-status
     vars:
       REPL_PASSWORD:
@@ -285,6 +285,7 @@ tasks:
       - which kubectl
       - kubectl -n {{.NS}} get secret {{.REPL_SECRET}}
       - kubectl -n {{.NS}} get deploy {{.DEPLOYMENT}}
+      - test -f {{.RESOURCES_DIR}}/setup-replication.sh
 
   repl-preflight:
     desc: "One-off: verify replication connectivity to nominatim-pg-source from a throwaway pod"

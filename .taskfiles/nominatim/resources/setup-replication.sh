@@ -1,6 +1,6 @@
 #!/bin/bash
-# Runs *inside* the nominatim container. One-off migration step invoked from
-# the operator's machine via `task nominatim:setup-replication`.
+# Runs *inside* the nominatim container. Piped in by
+# `task nominatim:setup-replication` (not mounted via ConfigMap).
 #
 # Idempotent: safe to re-run after rotating nominatim-replication password.
 set -euo pipefail

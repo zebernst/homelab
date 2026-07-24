@@ -25,8 +25,8 @@ encoding as committed Jobs.
 
 1. `task nominatim:pg-source-status` — CronJob suspended; Service present after Flux.
 2. `task nominatim:setup-replication` — creates/updates the `cnpg_replica` role,
-   appends the pg_hba entry, reloads config (idempotent; script lives in the
-   `nominatim-scripts` ConfigMap).
+   appends the pg_hba entry, reloads config (idempotent; script lives under
+   `.taskfiles/nominatim/resources/` and is piped into the pod via stdin).
 3. `task nominatim:repl-preflight` — throwaway pod runs `pg_isready` +
    `IDENTIFY_SYSTEM` against `nominatim-pg-source.self-hosted.svc`.
 
@@ -104,11 +104,11 @@ confirm plugin backup Completes. Then set `immediate: false` again if desired.
 ## Phase E — Soak and cleanup
 
 1. Soak until ≥ one successful daily/plugin backup; CronJob still suspended.
-2. Cleanup PR: remove `nominatim-pg-source` Service and `setup-replication.sh`
-   from the ConfigMap; remove `persistence.pgdata` from the HelmRelease; delete PVC
-   `nominatim-pgdata` only after explicit confirmation. Drop the migration Taskfile
-   tasks (`setup-replication`, `repl-preflight`, `repl-lag`, `cutover-*`) or keep
-   `repl-lag`/`cnpg-status` as ongoing observability helpers.
+2. Cleanup PR: remove `nominatim-pg-source` Service; remove `persistence.pgdata`
+   from the HelmRelease; delete PVC `nominatim-pgdata` only after explicit
+   confirmation. Drop the migration Taskfile tasks (`setup-replication`,
+   `repl-preflight`, `repl-lag`, `cutover-*`) or keep `repl-lag`/`cnpg-status`
+   as ongoing observability helpers.
 
 ## Rollback
 
