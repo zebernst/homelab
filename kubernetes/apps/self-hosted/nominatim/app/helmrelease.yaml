@@ -229,14 +229,18 @@ spec:
             port: 80
 
     persistence:
-      # Kept defined (unmounted) through soak so Helm/Flux do not prune the
-      # legacy embedded Postgres PVC. Remove persistence.pgdata after soak.
+      # Legacy embedded Postgres data; kept through soak. Remove
+      # persistence.pgdata after soak.
       pgdata:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 400Gi
         storageClass: ceph-block
-        advancedMounts: {}
+        advancedMounts:
+          nominatim:
+            nominatim:
+              - path: /var/lib/postgresql/16/main
+                subPath: pgdata
       project:
         existingClaim: nominatim-project
         advancedMounts:
