@@ -99,7 +99,8 @@ if ! id nominatim >/dev/null 2>&1; then
 fi
 
 echo "[nominatim] Refreshing SQL functions against external DB"
-sudo -E -u nominatim nominatim refresh --functions --project-dir "${PROJECT_DIR}"
+# -H: set HOME to the nominatim user (sudo -E alone keeps HOME=/root).
+sudo -H -E -u nominatim nominatim refresh --functions --project-dir "${PROJECT_DIR}"
 
 if [ -z "${GUNICORN_WORKERS:-}" ]; then
   GUNICORN_WORKERS="$(nproc)"
@@ -108,7 +109,7 @@ fi
 echo "[nominatim] Starting Gunicorn on :8080 with ${GUNICORN_WORKERS} workers (foreground)"
 cd "${PROJECT_DIR}"
 # Foreground (no --daemon): container PID must be the API process under Kubernetes.
-exec sudo -E -u nominatim gunicorn \
+exec sudo -H -E -u nominatim gunicorn \
   --bind :8080 \
   --workers "${GUNICORN_WORKERS}" \
   --enable-stdio-inheritance \
