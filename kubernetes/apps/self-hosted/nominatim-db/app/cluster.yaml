@@ -32,34 +32,24 @@ spec:
                 app.kubernetes.io/controller: nominatim
             topologyKey: kubernetes.io/hostname
   postgresql:
+    # Nominatim tuning: https://nominatim.org/release-docs/latest/admin/Installation/#tuning-the-postgresql-database
+    # Deliberately omitted: wal_level=minimal / max_wal_senders=0 (incompatible with CNPG WAL archiving + Barman).
     parameters:
-      max_connections: "100"
-      shared_buffers: 2GB
-      maintenance_work_mem: 4GB
-      autovacuum_work_mem: 1GB
-      effective_cache_size: 12GB
-      work_mem: 50MB
-      synchronous_commit: "off"
-      checkpoint_timeout: 10min
-      checkpoint_completion_target: "0.9"
-      max_wal_size: 1GB
-  # Historical: physically cloned from embedded Nominatim (nominatim-legacy).
-  # Bootstrap is not re-run after create; kept so CNPG metrics default to the
-  # nominatim database/owner. replica: removed after promote.
+      max_connections: "100"                 # Cap concurrent clients; API pool + imports share this envelope
+      shared_buffers: 2GB                    # Shared page cache; matches Nominatim's recommended 2GB
+      maintenance_work_mem: 4GB              # VACUUM/CREATE INDEX/osm2pgsql; docs ~10GB on 128GB hosts — scaled to ~24–28Gi pod
+      autovacuum_work_mem: 1GB               # Per-autovacuum worker; docs suggest 2GB — lowered so vacuum doesn't starve imports
+      effective_cache_size: 12GB             # Planner hint for OS+PG cache (~half of pod RAM); not in Nominatim's list
+      work_mem: 50MB                         # Per-sort/hash memory; matches Nominatim's 50MB guidance
+      synchronous_commit: "off"              # Skip WAL flush wait per commit; Nominatim tradeoff for import/update throughput
+      checkpoint_timeout: 10min              # Time between checkpoints; docs suggest 60min — shorter for recovery/WAL under Barman
+      checkpoint_completion_target: "0.9"    # Spread checkpoint I/O over most of the interval; matches Nominatim
+      max_wal_size: 1GB                      # Soft WAL size before forced checkpoint; matches Nominatim's 1GB
+      random_page_cost: "1.0"                # Non-sequential read cost; 1.0 for SSD/NVMe (Nominatim default assumes fast disk)
   bootstrap:
-    pg_basebackup:
+    initdb:
       database: nominatim
       owner: nominatim
-      source: nominatim-legacy
-  # Admission stub only — CNPG rejects bootstrap.pg_basebackup.source unless
-  # this name exists. Not used for streaming (replica removed). Points at this
-  # cluster's RW Service so nominatim-pg-source can be pruned.
-  externalClusters:
-    - name: nominatim-legacy
-      connectionParameters:
-        host: nominatim-db-rw.self-hosted.svc
-        user: postgres
-        dbname: postgres
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true

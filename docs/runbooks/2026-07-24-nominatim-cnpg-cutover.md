@@ -130,9 +130,9 @@ briefly feeds a CNPG DSN into the old local-Postgres startup path):
   - Keep the `pgdata` PVC defined but **unmounted** (`advancedMounts: {}`) so
   Helm does not delete the old data during soak
 
-3. Drop `replica` streaming from `nominatim-db`, stub `externalClusters` so
-  `bootstrap.pg_basebackup.source: nominatim-legacy` still passes admission
-  (no longer points at `nominatim-pg-source`), and remove that Service.
+3. Drop `replica` / `externalClusters` from `nominatim-db`, rewrite bootstrap
+  to `initdb` identity (`database`/`owner: nominatim`) so metrics still target
+  the right DB, and remove Service `nominatim-pg-source`.
 
 Push, then bring the API back:
 
