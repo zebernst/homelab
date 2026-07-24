@@ -1,116 +1,184 @@
-# Nominatim → CloudNativePG cutover runbook
+# Nominatim → CloudNativePG cutover
 
-Durable state is IaC (git → Flux): the `nominatim-db` Cluster/ObjectStore/secrets,
-the source Service, and the Phase D app cutover commit. One-off migration steps
-(role setup, preflight, scaling for the cutover window) are local Taskfile
-executions from the operator's machine — they are short-lived and not worth
-encoding as committed Jobs.
+## Goal
 
-## Split
+Move Nominatim’s PostgreSQL database (~176 GB) out of the `mediagis/nominatim`
+container into a dedicated CloudNativePG cluster (`nominatim-db`), then point
+the Nominatim API at that cluster.
 
-| Phase | Mechanism | When |
-|-------|-----------|------|
-| Prep manifests | Git → Flux: Barman plugin, `nominatim-db` Cluster (replica), source Service, `start-external.sh` in ConfigMap (unused) | Merge anytime |
-| One-off setup | Taskfile: `setup-replication`, `repl-preflight` | After prep merge |
-| Cutover | Taskfile scale-down + git: promote `replica.enabled: false`, flip HelmRelease + ExternalSecret DSN (Phase D) | Ops window after lag ≈ 0 |
-| Cleanup | Git: remove source Service + replication script; delete unmounted `nominatim-pgdata` | After soak + recovery test |
+Until cutover finishes, Nominatim keeps serving from its **embedded** Postgres
+on the `nominatim-pgdata` PVC. After cutover, Postgres runs only in CNPG;
+Nominatim is an API (and OSM update) client.
 
-## Preconditions
+## How the migration works
 
-- [ ] 1Password item `nominatim-db` has `POSTGRES_SUPER_USER`, `POSTGRES_SUPER_PASS`, `REPLICATION_PASS`
-- [ ] 1Password `nominatim` / `NOMINATIM_PASSWORD` matches the cloned `nominatim` DB role
-- [ ] OSM update CronJob remains `suspend: true` (`task nominatim-cnpg:pg-source-status`)
+1. **Replicate.** CNPG takes a physical copy of the live DB (`pg_basebackup`)
+  and streams WAL from the embedded Postgres until it is caught up.
+2. **Promote.** Stop the API briefly, promote the CNPG copy to primary.
+3. **Point the app.** Redeploy Nominatim with an external DB connection
+  (`start-external.sh`) instead of starting local Postgres.
+4. **Soak, then delete the old PVC.** Keep `nominatim-pgdata` until backups and
+  a recovery check look good.
 
-## Phase A — Source replication prep (Taskfile, one-off)
+OSM update CronJobs stay **suspended** for the whole migration so incremental
+updates do not race the replica.
 
-1. `task nominatim-cnpg:pg-source-status` — CronJob suspended; Service present after Flux.
-2. `task nominatim-cnpg:setup-replication` — creates/updates the `cnpg_replica` role,
-   appends the pg_hba entry, reloads config (idempotent; script lives under
-   `.taskfiles/nominatim-cnpg/resources/` and is piped into the pod via stdin).
-3. `task nominatim-cnpg:repl-preflight` — throwaway pod runs `pg_isready` +
-   `IDENTIFY_SYSTEM` against `nominatim-pg-source.self-hosted.svc`.
+## What to use when
 
-## Phase B — Replica bootstrap
 
-1. Confirm Cluster `nominatim-db` completed `pg_basebackup` and is streaming
-   (`task nominatim-cnpg:cnpg-status`).
-2. Wait until replication lag ≈ 0 (`task nominatim-cnpg:repl-lag`).
-3. Soft affinity should prefer the nominatim API/flatnode node.
+| Kind                   | Where                   | Examples                                                                                           |
+| ---------------------- | ----------------------- | -------------------------------------------------------------------------------------------------- |
+| Durable cluster state  | Git → Flux              | `nominatim-db` Cluster, ObjectStore, secrets, `nominatim-pg-source` Service, app cutover manifests |
+| One-off operator steps | `task nominatim-cnpg:*` | Create replication role, preflight, lag check, scale API for the cutover window                    |
 
-## Phase C — Promote
 
-1. `task nominatim-cnpg:cutover-scale-down` — suspends the Flux HelmRelease and scales
-   the nominatim API to 0 for the window.
-2. Wait for lag 0 again (`task nominatim-cnpg:repl-lag`).
-3. In `kubernetes/apps/self-hosted/nominatim-db/app/cluster.yaml` set:
-   ```yaml
-   replica:
-     enabled: false
-   ```
-   (remove or leave `source` per CNPG docs after promote.) Commit, push.
-4. Verify PostGIS on primary:
-   ```bash
-   kubectl -n self-hosted exec nominatim-db-1 -c postgres -- \
-     psql -U postgres -d nominatim -c 'SELECT postgis_full_version();'
-   ```
+After cleanup, delete `.taskfiles/nominatim-cnpg/` and its include in the root
+`Taskfile.yaml`.
 
-## Phase D — App cutover (follow-up commit during ops window)
+## Prerequisites
 
-Apply all of the following in **one** commit so Flux does not briefly inject DSN into
-`start.sh`:
-
-### 1. ExternalSecret (`app/externalsecret.yaml`)
-
-Add to `target.template.data` (keep `NOMINATIM_PASSWORD`):
-
-```yaml
-NOMINATIM_DATABASE_DSN: "pgsql:dbname=nominatim;host=nominatim-db-rw.self-hosted.svc;user=nominatim;password={{ .NOMINATIM_PASSWORD }}"
-PGHOST: nominatim-db-rw.self-hosted.svc
-PGDATABASE: nominatim
-PGUSER: nominatim
-PGPASSWORD: "{{ .NOMINATIM_PASSWORD }}"
-```
-
-### 2. HelmRelease (`app/helmrelease.yaml`)
-
-- `command: ["/bin/bash", "/scripts/start-external.sh"]`
-- Remove `POSTGRES_SHARED_BUFFERS` / `POSTGRES_MAINTENANCE_WORK_MEM` /
-  `POSTGRES_AUTOVACUUM_WORK_MEM` / `POSTGRES_EFFECTIVE_CACHE_SIZE`
-- Resources: e.g. requests `memory: 4Gi`, limits `memory: 8Gi` (API-only)
-- Startup `failureThreshold: 40` (no multi-day import on boot)
-- Keep CronJob `suspend: true`
-- **Retain** `persistence.pgdata` PVC but set `advancedMounts: {}` so Helm does not
-  delete the claim through soak
-
-### 3. Restore replicas
-
-Push the commit, then `task nominatim-cnpg:cutover-scale-up` (scales the API back to 1
-and resumes the Flux HelmRelease so the cutover values roll out).
-
-### 4. Verify
+- Prep PR merged (Barman plugin, `nominatim-db` app, source Service,
+`start-external.sh` in the Nominatim ConfigMap but **not** yet the Deployment
+command).
+- 1Password item `nominatim-db`: `POSTGRES_SUPER_USER`, `POSTGRES_SUPER_PASS`,
+`REPLICATION_PASS`.
+- 1Password item `nominatim`: `NOMINATIM_PASSWORD` matches the `nominatim` DB
+role (unchanged by the physical clone).
+- OSM update CronJob still suspended.
 
 ```bash
-kubectl -n self-hosted exec deploy/nominatim -c nominatim -- curl -fsS http://127.0.0.1:8080/status
-kubectl -n self-hosted exec deploy/nominatim -c nominatim -- \
-  sudo -E -u nominatim nominatim admin --check-database --project-dir /nominatim
-# search, reverse, UI
+task nominatim-cnpg:pg-source-status
+task nominatim-cnpg:help
 ```
 
-### 5. Backup
+---
 
-Set `ScheduledBackup` `immediate: true` once (or add a one-shot Backup) via git;
-confirm plugin backup Completes. Then set `immediate: false` again if desired.
 
-## Phase E — Soak and cleanup
 
-1. Soak until ≥ one successful daily/plugin backup; CronJob still suspended.
-2. Cleanup PR: remove `nominatim-pg-source` Service; remove `persistence.pgdata`
-   from the HelmRelease; delete PVC `nominatim-pgdata` only after explicit confirmation.
-   Delete `.taskfiles/nominatim-cnpg/` and remove its include from the root
-   `Taskfile.yaml`.
+## 1. Allow CNPG to stream from embedded Postgres
+
+Creates the `cnpg_replica` role and a `pg_hba` rule on the Nominatim pod’s
+Postgres, then checks connectivity through Service `nominatim-pg-source`.
+
+```bash
+task nominatim-cnpg:setup-replication
+task nominatim-cnpg:repl-preflight
+```
+
+Both are safe to re-run.
+
+## 2. Wait for the replica to catch up
+
+Flux should already be creating Cluster `nominatim-db` as a standalone replica
+of the embedded DB.
+
+```bash
+task nominatim-cnpg:cnpg-status   # expect a healthy streaming replica
+task nominatim-cnpg:repl-lag      # wait until lag is ~0
+```
+
+The base backup of ~176 GB can take a long time. Do not promote until lag is
+essentially zero.
+
+## 3. Promote CNPG (maintenance window)
+
+Stop writes from the API, promote the replica, confirm PostGIS.
+
+```bash
+task nominatim-cnpg:cutover-scale-down   # suspend HelmRelease + scale API to 0
+task nominatim-cnpg:repl-lag             # confirm still ~0
+```
+
+In git, set the cluster to primary and push:
+
+```yaml
+# kubernetes/apps/self-hosted/nominatim-db/app/cluster.yaml
+replica:
+  enabled: false
+```
+
+After Flux applies that:
+
+```bash
+kubectl -n self-hosted exec nominatim-db-1 -c postgres -- \
+  psql -U postgres -d nominatim -c 'SELECT postgis_full_version();'
+```
+
+Leave the API at 0 replicas until the next step lands.
+
+## 4. Point Nominatim at CNPG
+
+Ship **one** git commit that does all of the following together (so Flux never
+briefly feeds a CNPG DSN into the old local-Postgres startup path):
+
+1. **ExternalSecret** (`kubernetes/apps/self-hosted/nominatim/app/externalsecret.yaml`)
+  Keep `NOMINATIM_PASSWORD`. Add:
+2. **HelmRelease** (`kubernetes/apps/self-hosted/nominatim/app/helmrelease.yaml`)
+  - Command: `/scripts/start-external.sh` (not `/scripts/start.sh`)
+  - Remove embedded `POSTGRES_*` tuning env vars
+  - Lower API memory (Postgres is no longer in this pod; e.g. ~4–8Gi)
+  - Keep the OSM CronJob suspended
+  - Keep the `pgdata` PVC defined but **unmounted** (`advancedMounts: {}`) so
+  Helm does not delete the old data during soak
+
+Push, then bring the API back:
+
+```bash
+task nominatim-cnpg:cutover-scale-up
+```
+
+Smoke-test:
+
+```bash
+kubectl -n self-hosted exec deploy/nominatim -c nominatim -- \
+  curl -fsS http://127.0.0.1:8080/status
+
+kubectl -n self-hosted exec deploy/nominatim -c nominatim -- \
+  sudo -E -u nominatim nominatim admin --check-database --project-dir /nominatim
+```
+
+Also hit search, reverse, and the UI.
+
+## 5. First backup and soak
+
+Trigger a successful Barman/plugin backup (e.g. set ScheduledBackup
+`immediate: true` once via git, confirm Completed, then turn it back off if you
+want). Keep the OSM CronJob suspended until you are happy.
+
+Soak through at least one successful scheduled backup.
+
+## 6. Cleanup (separate PR, after soak)
+
+Only after you trust CNPG + backups:
+
+1. Remove Service `nominatim-pg-source` (and any leftover replication-only
+  wiring you no longer need).
+2. Remove `persistence.pgdata` from the HelmRelease.
+3. Delete PVC `nominatim-pgdata` **only with an explicit go-ahead**.
+4. Delete `.taskfiles/nominatim-cnpg/` and its include in the root `Taskfile.yaml`.
+5. Re-enable the OSM update CronJob when ready for incremental updates again.
+
+---
+
+
 
 ## Rollback
 
-- **Before promote:** keep `replica.enabled: true`; app stays on `start.sh` + pgdata.
-- **After promote / before soak ends:** prefer Barman restore to a new Cluster; remounting
-  stale `nominatim-pgdata` is last resort.
+**Before promote** (`replica.enabled: true`): leave the app on `start.sh` and
+the embedded PVC. You can abandon or recreate the CNPG cluster.
+
+**After promote, during soak:** prefer restoring from a Barman backup onto a
+new CNPG cluster. Remounting the old `nominatim-pgdata` is a last resort — it
+will be stale relative to anything written on CNPG after promote.
+
+## Related paths
+
+
+| Path                                                                  | Role                                        |
+| --------------------------------------------------------------------- | ------------------------------------------- |
+| `kubernetes/apps/self-hosted/nominatim-db/`                           | CNPG Cluster, ObjectStore, backups, secrets |
+| `kubernetes/apps/self-hosted/nominatim/app/service-pg-source.yaml`    | Temporary Service to embedded Postgres      |
+| `kubernetes/apps/self-hosted/nominatim/app/scripts/start-external.sh` | External-DB entrypoint (used after step 4)  |
+| `.taskfiles/nominatim-cnpg/`                                          | Temporary operator tasks for this migration |
+
+
