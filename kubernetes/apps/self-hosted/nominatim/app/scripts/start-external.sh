@@ -98,8 +98,8 @@ if ! id nominatim >/dev/null 2>&1; then
   useradd -m -p "${NOMINATIM_PASSWORD:-}" nominatim
 fi
 
-echo "[nominatim] Refreshing website + SQL functions against external DB"
-sudo -E -u nominatim nominatim refresh --website --functions --project-dir "${PROJECT_DIR}"
+echo "[nominatim] Refreshing SQL functions against external DB"
+sudo -E -u nominatim nominatim refresh --functions --project-dir "${PROJECT_DIR}"
 
 if [ -z "${GUNICORN_WORKERS:-}" ]; then
   GUNICORN_WORKERS="$(nproc)"
