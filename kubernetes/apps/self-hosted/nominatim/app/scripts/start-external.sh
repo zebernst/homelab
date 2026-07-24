@@ -92,6 +92,12 @@ if [ ! -f "${IMPORT_FINISHED}" ]; then
   touch "${IMPORT_FINISHED}"
 fi
 
+# mediagis init normally creates this OS user; we skip that path.
+if ! id nominatim >/dev/null 2>&1; then
+  echo "[nominatim] Creating Linux user nominatim"
+  useradd -m -p "${NOMINATIM_PASSWORD:-}" nominatim
+fi
+
 echo "[nominatim] Refreshing website + SQL functions against external DB"
 sudo -E -u nominatim nominatim refresh --website --functions --project-dir "${PROJECT_DIR}"
 
