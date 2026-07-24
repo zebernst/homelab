@@ -8,7 +8,6 @@ resources:
   - helmrelease.yaml
   - httproute.yaml
   - service-pg-source.yaml
-  - job-setup-replication.yaml
 configMapGenerator:
   - name: nominatim-scripts
     files:

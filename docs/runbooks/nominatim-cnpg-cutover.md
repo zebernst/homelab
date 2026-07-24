@@ -1,16 +1,19 @@
 # Nominatim → CloudNativePG cutover runbook
 
-GitOps-only: every cluster change is a git commit for Flux. Do not `kubectl apply`,
-`kubectl patch`, or imperative `flux reconcile` as deploy. Read-only `kubectl get` /
-`logs` / `exec` for verification is fine.
+Durable state is IaC (git → Flux): the `nominatim-db` Cluster/ObjectStore/secrets,
+the source Service, and the Phase D app cutover commit. One-off migration steps
+(role setup, preflight, scaling for the cutover window) are local Taskfile
+executions from the operator's machine — they are short-lived and not worth
+encoding as committed Jobs.
 
 ## Split
 
-| Phase | What lands in git | When |
-|-------|-------------------|------|
-| Prep | Barman plugin, `nominatim-db` Cluster (replica), source Service, suspended setup Job, `start-external.sh` in ConfigMap (unused), this runbook | Merge anytime |
-| Cutover | Promote `replica.enabled: false`; flip HelmRelease + ExternalSecret DSN (Phase D below) | Ops window after streaming lag ≈ 0 |
-| Cleanup | Remove source Service/Job; delete unmounted `nominatim-pgdata` | After soak + recovery test |
+| Phase | Mechanism | When |
+|-------|-----------|------|
+| Prep manifests | Git → Flux: Barman plugin, `nominatim-db` Cluster (replica), source Service, `start-external.sh` in ConfigMap (unused) | Merge anytime |
+| One-off setup | Taskfile: `setup-replication`, `repl-preflight` | After prep merge |
+| Cutover | Taskfile scale-down + git: promote `replica.enabled: false`, flip HelmRelease + ExternalSecret DSN (Phase D) | Ops window after lag ≈ 0 |
+| Cleanup | Git: remove source Service + replication script; delete unmounted `nominatim-pgdata` | After soak + recovery test |
 
 ## Preconditions
 
@@ -18,24 +21,27 @@ GitOps-only: every cluster change is a git commit for Flux. Do not `kubectl appl
 - [ ] 1Password `nominatim` / `NOMINATIM_PASSWORD` matches the cloned `nominatim` DB role
 - [ ] OSM update CronJob remains `suspend: true` (`task nominatim:pg-source-status`)
 
-## Phase A — Source replication prep
+## Phase A — Source replication prep (Taskfile, one-off)
 
 1. `task nominatim:pg-source-status` — CronJob suspended; Service present after Flux.
-2. Enable setup Job: set `spec.suspend: false` in
-   `kubernetes/apps/self-hosted/nominatim/app/job-setup-replication.yaml`, commit, push.
-3. Wait for Job success; re-suspend (`suspend: true`), commit.
-4. Optional: `pg_isready` / `IDENTIFY_SYSTEM` against `nominatim-pg-source.self-hosted.svc`.
+2. `task nominatim:setup-replication` — creates/updates the `cnpg_replica` role,
+   appends the pg_hba entry, reloads config (idempotent; script lives in the
+   `nominatim-scripts` ConfigMap).
+3. `task nominatim:repl-preflight` — throwaway pod runs `pg_isready` +
+   `IDENTIFY_SYSTEM` against `nominatim-pg-source.self-hosted.svc`.
 
 ## Phase B — Replica bootstrap
 
-1. Confirm Cluster `nominatim-db` completed `pg_basebackup` and is streaming.
-2. Wait until replication lag ≈ 0.
+1. Confirm Cluster `nominatim-db` completed `pg_basebackup` and is streaming
+   (`task nominatim:cnpg-status`).
+2. Wait until replication lag ≈ 0 (`task nominatim:repl-lag`).
 3. Soft affinity should prefer the nominatim API/flatnode node.
 
 ## Phase C — Promote
 
-1. Scale nominatim Deployment to 0 via git (temporary `replicas: 0` on the controller), commit.
-2. Wait for lag 0 again.
+1. `task nominatim:cutover-scale-down` — suspends the Flux HelmRelease and scales
+   the nominatim API to 0 for the window.
+2. Wait for lag 0 again (`task nominatim:repl-lag`).
 3. In `kubernetes/apps/self-hosted/nominatim-db/app/cluster.yaml` set:
    ```yaml
    replica:
@@ -78,7 +84,8 @@ PGPASSWORD: "{{ .NOMINATIM_PASSWORD }}"
 
 ### 3. Restore replicas
 
-Set Deployment replicas back to 1 in the same commit if scaled down in Phase C.
+Push the commit, then `task nominatim:cutover-scale-up` (scales the API back to 1
+and resumes the Flux HelmRelease so the cutover values roll out).
 
 ### 4. Verify
 
@@ -97,9 +104,11 @@ confirm plugin backup Completes. Then set `immediate: false` again if desired.
 ## Phase E — Soak and cleanup
 
 1. Soak until ≥ one successful daily/plugin backup; CronJob still suspended.
-2. Cleanup PR: remove `nominatim-pg-source`, setup Job/RBAC, replication script;
-   remove `persistence.pgdata` from HelmRelease; delete PVC `nominatim-pgdata` only
-   after explicit confirmation.
+2. Cleanup PR: remove `nominatim-pg-source` Service and `setup-replication.sh`
+   from the ConfigMap; remove `persistence.pgdata` from the HelmRelease; delete PVC
+   `nominatim-pgdata` only after explicit confirmation. Drop the migration Taskfile
+   tasks (`setup-replication`, `repl-preflight`, `repl-lag`, `cutover-*`) or keep
+   `repl-lag`/`cnpg-status` as ongoing observability helpers.
 
 ## Rollback
 

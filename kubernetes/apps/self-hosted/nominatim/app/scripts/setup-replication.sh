@@ -1,6 +1,6 @@
 #!/bin/bash
-# Runs *inside* the nominatim container (invoked via `kubectl exec` from the
-# nominatim-setup-replication Job; see ../job-setup-replication.yaml).
+# Runs *inside* the nominatim container. One-off migration step invoked from
+# the operator's machine via `task nominatim:setup-replication`.
 #
 # Idempotent: safe to re-run after rotating nominatim-replication password.
 set -euo pipefail
