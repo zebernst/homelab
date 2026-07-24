@@ -60,7 +60,7 @@ machine:
       - name: thunderbolt
       - name: thunderbolt_net
   kubelet:
-    image: ghcr.io/siderolabs/kubelet:v1.34.5
+    image: ghcr.io/siderolabs/kubelet:v1.36.3
     extraConfig:
       featureGates:
         UserNamespacesSupport: true
@@ -142,14 +142,14 @@ cluster:
     key: op://Secrets/talos/CLUSTER_AGGREGATOR_CA_KEY
   allowSchedulingOnControlPlanes: true
   apiServer:
-    image: registry.k8s.io/kube-apiserver:v1.34.5
+    image: registry.k8s.io/kube-apiserver:v1.36.3
     extraArgs:
       enable-aggregator-routing: true
       feature-gates: UserNamespacesSupport=true,UserNamespacesPodSecurityStandards=true
     certSANs: ["k8s.internal"]
     disablePodSecurityPolicy: true
   controllerManager:
-    image: registry.k8s.io/kube-controller-manager:v1.34.5
+    image: registry.k8s.io/kube-controller-manager:v1.36.3
     extraArgs:
       bind-address: 0.0.0.0
   coreDNS:
@@ -163,10 +163,10 @@ cluster:
       listen-metrics-urls: http://0.0.0.0:2381
   proxy:
     disabled: true
-    image: registry.k8s.io/kube-proxy:v1.34.5
+    image: registry.k8s.io/kube-proxy:v1.36.3
   secretboxEncryptionSecret: op://Secrets/talos/CLUSTER_SECRETBOX_ENCRYPTION_SECRET
   scheduler:
-    image: registry.k8s.io/kube-scheduler:v1.34.5
+    image: registry.k8s.io/kube-scheduler:v1.36.3
     extraArgs:
       bind-address: 0.0.0.0
     config:
