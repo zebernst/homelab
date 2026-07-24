@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tetragon
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: tetragon
+      version: 1.3.0
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
+        namespace: flux-system
+
+  values:
+    tetragon:
+      prometheus:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+
+    tetragonOperator:
+      prometheus:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+
+    dashboards:
+      enabled: true
