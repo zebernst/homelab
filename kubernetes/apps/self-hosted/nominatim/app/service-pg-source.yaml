@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.34.0/service.json
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nominatim-pg-source
+  labels:
+    app.kubernetes.io/name: nominatim
+    app.kubernetes.io/component: nominatim-pg-source
+spec:
+  # Exposes the embedded Postgres in the nominatim API pod for CNPG
+  # externalClusters streaming replication (kubernetes/apps/self-hosted/nominatim-db).
+  selector:
+    app.kubernetes.io/name: nominatim
+    app.kubernetes.io/controller: nominatim
+  ports:
+    - name: postgres
+      port: 5432
+      protocol: TCP
+      targetPort: 5432

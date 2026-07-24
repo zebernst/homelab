@@ -7,6 +7,7 @@ resources:
   - externalsecret.yaml
   - helmrelease.yaml
   - httproute.yaml
+  - service-pg-source.yaml
 configMapGenerator:
   - name: nominatim-scripts
     files:
@@ -15,6 +16,7 @@ configMapGenerator:
       - scripts/env.defaults
       - scripts/maintain-regions.sh
       - scripts/init-ui.sh
+      - scripts/start-external.sh
   - name: nominatim-nginx
     files:
       - nginx/default.conf

@@ -99,7 +99,7 @@ tasks:
     vars:
       IMPORT_FINISHED:
         sh: >-
-          {{.KEXEC}} test -f /var/lib/postgresql/16/main/import-finished
+          {{.KEXEC}} sh -c 'test -f /nominatim/import-finished || test -f /var/lib/postgresql/16/main/import-finished'
           && echo true || echo false
       FLATNODE:
         sh: '{{.KEXEC}} test -s /nominatim/flatnode/flatnode.file && echo true || echo false'

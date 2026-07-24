@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/cluster_v1.json
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: nominatim-db
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgis:16-3.4
+  primaryUpdateStrategy: unsupervised
+  enableSuperuserAccess: true
+  superuserSecret:
+    name: nominatim-db-secret
+  storage:
+    size: 400Gi
+    storageClass: ceph-block
+  resources:
+    requests:
+      cpu: "2"
+      memory: 24Gi
+    limits:
+      memory: 28Gi
+  affinity:
+    # Prefer same node as Nominatim API/flatnode (not UI / import Jobs).
+    additionalPodAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: nominatim
+                app.kubernetes.io/controller: nominatim
+            topologyKey: kubernetes.io/hostname
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: 2GB
+      maintenance_work_mem: 4GB
+      autovacuum_work_mem: 1GB
+      effective_cache_size: 12GB
+      work_mem: 50MB
+      synchronous_commit: "off"
+      checkpoint_timeout: 10min
+      checkpoint_completion_target: "0.9"
+      max_wal_size: 1GB
+  bootstrap:
+    pg_basebackup:
+      source: nominatim-legacy
+  replica:
+    enabled: true
+    source: nominatim-legacy
+  externalClusters:
+    - name: nominatim-legacy
+      connectionParameters:
+        host: nominatim-pg-source.self-hosted.svc
+        user: cnpg_replica
+        dbname: postgres
+      password:
+        name: nominatim-replication
+        key: password
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: nominatim-db-backup
+        serverName: nominatim-db-v1
+  monitoring:
+    enablePodMonitor: true

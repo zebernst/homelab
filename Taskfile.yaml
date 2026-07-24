@@ -22,6 +22,7 @@ includes:
   fission: .taskfiles/fission
   kubernetes: .taskfiles/kubernetes
   nominatim: .taskfiles/nominatim
+  nominatim-cnpg: .taskfiles/nominatim-cnpg
   synology: .taskfiles/synology
   talos: .taskfiles/talos
   volsync: .taskfiles/volsync
