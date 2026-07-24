@@ -18,6 +18,7 @@ configMapGenerator:
       - scripts/maintain-regions.sh
       - scripts/init-ui.sh
       - scripts/setup-replication.sh
+      - scripts/start-external.sh
   - name: nominatim-nginx
     files:
       - nginx/default.conf

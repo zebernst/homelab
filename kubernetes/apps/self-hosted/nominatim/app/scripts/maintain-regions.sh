@@ -6,7 +6,11 @@ PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
 IMPORTED_LIST="${PROJECT_DIR}/imported-regions.txt"
 IMPORT_STAGING="${IMPORT_STAGING:-/import-staging}"
 PGDATA="${PGDATA:-/var/lib/postgresql/16/main}"
-IMPORT_FINISHED="${IMPORT_FINISHED:-${PGDATA}/import-finished}"
+# Prefer project-volume marker (CNPG external-DB path); fall back to legacy pgdata.
+IMPORT_FINISHED="${IMPORT_FINISHED:-${PROJECT_DIR}/import-finished}"
+if [ ! -f "${IMPORT_FINISHED}" ] && [ -f "${PGDATA}/import-finished" ]; then
+  IMPORT_FINISHED="${PGDATA}/import-finished"
+fi
 CURL_USER_AGENT="${USER_AGENT:-nominatim-maintenance}"
 ALLOW_REGION_IMPORT="${NOMINATIM_ALLOW_REGION_IMPORT:-false}"
 IMPORT_MAX_REGIONS="${NOMINATIM_IMPORT_MAX_REGIONS:-1}"
@@ -55,8 +59,13 @@ if [ ! -f "${IMPORT_FINISHED}" ]; then
   exit 0
 fi
 
-if ! sudo -u postgres pg_isready -q 2>/dev/null; then
-  echo "[nominatim-maintenance] PostgreSQL is not ready; exiting."
+if [ -n "${PGHOST:-}" ]; then
+  if ! pg_isready -h "${PGHOST}" -d "${PGDATABASE:-nominatim}" -U "${PGUSER:-nominatim}" -q 2>/dev/null; then
+    echo "[nominatim-maintenance] PostgreSQL at ${PGHOST} is not ready; exiting."
+    exit 1
+  fi
+elif ! sudo -u postgres pg_isready -q 2>/dev/null; then
+  echo "[nominatim-maintenance] Local PostgreSQL is not ready; exiting."
   exit 1
 fi
 
