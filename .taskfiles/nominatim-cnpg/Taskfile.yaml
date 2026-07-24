@@ -14,6 +14,10 @@ vars:
   REPL_SECRET: nominatim-replication
   # Cluster pod CIDR (talos/machineconfig.yaml.j2 podSubnets)
   REPL_CIDR: 10.244.0.0/16
+  SOURCE_PVC: nominatim-pgdata
+  SOURCE_PGDATA: /var/lib/postgresql/16/main
+  CNPG_PVC: nominatim-db-1
+  CNPG_PGDATA: /var/lib/postgresql/data/pgdata
 
 tasks:
   default:
@@ -46,8 +50,8 @@ tasks:
           -c "SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{{.REPL_ROLE}}');" 2>/dev/null || echo unknown
       HBA_ENTRY:
         sh: >-
-          {{.KEXEC}} sh -c 'grep -F "{{.REPL_ROLE}}" "${PGDATA:-/var/lib/postgresql/16/main}/pg_hba.conf"' 2>/dev/null
-          || echo "(none)"
+          {{.KEXEC}} sh -c 'HBA="$(sudo -u postgres psql -At -c "SHOW hba_file;" | tr -d "[:space:]")";
+          grep -F "{{.REPL_ROLE}}" "${HBA}" 2>/dev/null' || echo "(none)"
       CRON_SUSPENDED:
         sh: >-
           kubectl -n {{.NS}} get cronjob {{.CRONJOB}}
@@ -60,14 +64,14 @@ tasks:
     interactive: true
     prompt: This mutates the embedded Postgres in deploy/nominatim (role, pg_hba, reload). Continue?
     cmds:
-      - >-
-        kubectl -n {{.NS}} exec -i deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} --
-        env REPL_USER={{.REPL_ROLE}} REPL_CIDR={{.REPL_CIDR}} REPL_PASSWORD="{{.REPL_PASSWORD}}"
-        bash -s < {{.RESOURCES_DIR}}/setup-replication.sh
+      - |
+        set -euo pipefail
+        pass="$(kubectl -n {{.NS}} get secret {{.REPL_SECRET}} -o jsonpath='{.data.password}' | base64 -d)"
+        # Pass secret via env on this shell only; do not interpolate into the argv string.
+        kubectl -n {{.NS}} exec -i deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
+          env REPL_USER={{.REPL_ROLE}} REPL_CIDR={{.REPL_CIDR}} REPL_PASSWORD="${pass}" \
+          bash -s < {{.RESOURCES_DIR}}/setup-replication.sh
       - task: pg-source-status
-    vars:
-      REPL_PASSWORD:
-        sh: kubectl -n {{.NS}} get secret {{.REPL_SECRET}} -o jsonpath='{.data.password}' | base64 -d
     preconditions:
       - which kubectl
       - kubectl -n {{.NS}} get secret {{.REPL_SECRET}}
@@ -78,30 +82,80 @@ tasks:
     desc: "One-off: verify source replication from a throwaway pod"
     interactive: true
     cmds:
-      - >-
-        kubectl -n {{.NS}} run nominatim-repl-preflight --rm -i --restart=Never
-        --image=ghcr.io/cloudnative-pg/postgresql:16
-        --env=PGPASSWORD="{{.REPL_PASSWORD}}" --command --
-        bash -c 'pg_isready -h {{.PG_SOURCE_SVC}}.{{.NS}}.svc -p 5432 -U {{.REPL_ROLE}}
-        && psql "host={{.PG_SOURCE_SVC}}.{{.NS}}.svc user={{.REPL_ROLE}} dbname=postgres replication=database"
-        -c "IDENTIFY_SYSTEM;"'
-    vars:
-      REPL_PASSWORD:
-        sh: kubectl -n {{.NS}} get secret {{.REPL_SECRET}} -o jsonpath='{.data.password}' | base64 -d
+      - |
+        set -euo pipefail
+        pass="$(kubectl -n {{.NS}} get secret {{.REPL_SECRET}} -o jsonpath='{.data.password}' | base64 -d)"
+        kubectl -n {{.NS}} run nominatim-repl-preflight --rm -i --restart=Never \
+          --image=ghcr.io/cloudnative-pg/postgresql:16 \
+          --env="PGPASSWORD=${pass}" --command -- bash -ec \
+          'pg_isready -h {{.PG_SOURCE_SVC}}.{{.NS}}.svc -p 5432 -U {{.REPL_ROLE}}
+           psql "host={{.PG_SOURCE_SVC}}.{{.NS}}.svc user={{.REPL_ROLE}} dbname=postgres replication=database" -c "IDENTIFY_SYSTEM;"'
     preconditions:
       - which kubectl
       - kubectl -n {{.NS}} get secret {{.REPL_SECRET}}
       - kubectl -n {{.NS}} get svc {{.PG_SOURCE_SVC}}
 
-  repl-lag:
-    desc: Show streaming replication lag from embedded Postgres (read-only)
+  pgdata-sizes:
+    desc: Compare source vs CNPG pgdata used/capacity (basebackup progress)
     silent: true
     cmds:
+      - |
+        set -euo pipefail
+        ns="{{.NS}}"
+        src_pvc="{{.SOURCE_PVC}}"
+        cnpg_pvc="{{.CNPG_PVC}}"
+        src_path="{{.SOURCE_PGDATA}}"
+        cnpg_path="{{.CNPG_PGDATA}}"
+
+        src_cap="$(kubectl -n "${ns}" get pvc "${src_pvc}" -o jsonpath='{.status.capacity.storage}' 2>/dev/null || echo '?')"
+        cnpg_cap="$(kubectl -n "${ns}" get pvc "${cnpg_pvc}" -o jsonpath='{.status.capacity.storage}' 2>/dev/null || echo '?')"
+
+        src_used_b="$(kubectl -n "${ns}" exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
+          du -sb "${src_path}" 2>/dev/null | awk '{print $1}')" || src_used_b=""
+        src_used_h="$(kubectl -n "${ns}" exec deploy/{{.DEPLOYMENT}} -c {{.CONTAINER}} -- \
+          du -sh "${src_path}" 2>/dev/null | awk '{print $1}')" || src_used_h="?"
+
+        cnpg_pod="$(kubectl -n "${ns}" get pods -l cnpg.io/cluster=nominatim-db \
+          --field-selector=status.phase=Running \
+          -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)"
+        cnpg_used_b=""
+        cnpg_used_h="?"
+        if [ -n "${cnpg_pod}" ]; then
+          # pgbasebackup job and instance pods both use the postgres data mount.
+          cnpg_ctr="$(kubectl -n "${ns}" get pod "${cnpg_pod}" -o jsonpath='{.spec.containers[0].name}')"
+          cnpg_used_b="$(kubectl -n "${ns}" exec "${cnpg_pod}" -c "${cnpg_ctr}" -- \
+            du -sb "${cnpg_path}" 2>/dev/null | awk '{print $1}')" || cnpg_used_b=""
+          cnpg_used_h="$(kubectl -n "${ns}" exec "${cnpg_pod}" -c "${cnpg_ctr}" -- \
+            du -sh "${cnpg_path}" 2>/dev/null | awk '{print $1}')" || cnpg_used_h="?"
+        fi
+
+        pct="?"
+        if [ -n "${src_used_b}" ] && [ -n "${cnpg_used_b}" ] && [ "${src_used_b}" -gt 0 ] 2>/dev/null; then
+          pct="$(awk -v a="${cnpg_used_b}" -v b="${src_used_b}" 'BEGIN { printf "%.1f", (a*100)/b }')"
+        fi
+
+        echo "pgdata_source: ${src_used_h} used / ${src_cap} cap  (pvc/${src_pvc})"
+        echo "pgdata_cnpg:   ${cnpg_used_h} used / ${cnpg_cap} cap  (pvc/${cnpg_pvc}${cnpg_pod:+ @ ${cnpg_pod}})"
+        echo "basebackup:    ${pct}% of source size"
+    preconditions:
+      - which kubectl
+
+  repl-lag:
+    desc: Show streaming / basebackup progress from embedded Postgres (read-only)
+    silent: true
+    cmds:
+      - task: pgdata-sizes
+      - echo
       - >-
-        {{.KEXEC}} sudo -u postgres psql -At -F': '
-        -c "SELECT application_name, state, sync_state,
-        pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), replay_lsn)) AS replay_lag
-        FROM pg_stat_replication;"
+        {{.KEXEC}} sudo -u postgres psql -P pager=off -c
+        "SELECT coalesce(nullif(application_name, ''), '(none)') AS app,
+         state, sync_state, client_addr,
+         pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), sent_lsn)) AS sent_lag,
+         CASE WHEN replay_lsn IS NULL THEN 'n/a (basebackup)'
+              ELSE pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), replay_lsn))
+         END AS replay_lag,
+         backend_start
+         FROM pg_stat_replication ORDER BY backend_start;"
     preconditions:
       - which kubectl
 
@@ -113,7 +167,8 @@ tasks:
       - "echo 'replica_enabled: {{.REPLICA_ENABLED}}'"
       - "echo 'instances: {{.INSTANCES}}'"
       - "echo 'scheduled_backup: {{.SBACKUP}}'"
-      - "echo 'cutover_runbook: docs/runbooks/nominatim-cnpg-cutover.md'"
+      - task: pgdata-sizes
+      - "echo 'cutover_runbook: docs/runbooks/2026-07-24-nominatim-cnpg-cutover.md'"
     vars:
       CLUSTER_STATUS:
         sh: >-
@@ -161,15 +216,14 @@ tasks:
     cmds:
       - |
         cat <<'EOF'
-        Follow docs/runbooks/nominatim-cnpg-cutover.md.
+        Runbook: docs/runbooks/2026-07-24-nominatim-cnpg-cutover.md
 
-        One-off setup/cutover steps:
           task nominatim-cnpg:setup-replication
           task nominatim-cnpg:repl-preflight
           task nominatim-cnpg:repl-lag
+          task nominatim-cnpg:cnpg-status
           task nominatim-cnpg:cutover-scale-down
           task nominatim-cnpg:cutover-scale-up
 
-        Durable state remains managed by Flux.
-        Delete .taskfiles/nominatim-cnpg and its root include after migration cleanup.
+        After soak/cleanup, delete .taskfiles/nominatim-cnpg and its root include.
         EOF
