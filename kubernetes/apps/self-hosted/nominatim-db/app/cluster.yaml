@@ -50,6 +50,16 @@ spec:
     initdb:
       database: nominatim
       owner: nominatim
+      secret:
+        name: nominatim-db-app-user
+  managed:
+    roles:
+      - name: nominatim
+        ensure: present
+        login: true
+        comment: Nominatim application role
+        passwordSecret:
+          name: nominatim-db-app-user
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
