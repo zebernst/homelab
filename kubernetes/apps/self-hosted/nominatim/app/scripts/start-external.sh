@@ -92,6 +92,13 @@ if [ ! -f "${IMPORT_FINISHED}" ]; then
   touch "${IMPORT_FINISHED}"
 fi
 
+# Linux user (distinct from the Postgres role). mediagis /app/start.sh creates this
+# before init; we skip that path, so create it here for sudo -u.
+if ! id nominatim >/dev/null 2>&1; then
+  echo "[nominatim] Creating Linux user nominatim"
+  useradd -m -p "${NOMINATIM_PASSWORD:-}" nominatim
+fi
+
 echo "[nominatim] Refreshing website + SQL functions against external DB"
 sudo -E -u nominatim nominatim refresh --website --functions --project-dir "${PROJECT_DIR}"
 
