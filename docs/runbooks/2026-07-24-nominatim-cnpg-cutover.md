@@ -26,10 +26,10 @@ updates do not race the replica.
 ## What to use when
 
 
-| Kind                   | Where                   | Examples                                                                                           |
-| ---------------------- | ----------------------- | -------------------------------------------------------------------------------------------------- |
-| Durable cluster state  | Git → Flux              | `nominatim-db` Cluster, ObjectStore, secrets, `nominatim-pg-source` Service, app cutover manifests |
-| One-off operator steps | `task nominatim-cnpg:*` | Create replication role, preflight, lag check, scale API for the cutover window                    |
+| Kind                   | Where                   | Examples                                                                        |
+| ---------------------- | ----------------------- | ------------------------------------------------------------------------------- |
+| Durable cluster state  | Git → Flux              | `nominatim-db` Cluster, ObjectStore, secrets, app cutover manifests             |
+| One-off operator steps | `task nominatim-cnpg:*` | Create replication role, preflight, lag check, scale API for the cutover window |
 
 
 After cleanup, delete `.taskfiles/nominatim-cnpg/` and its include in the root
@@ -113,6 +113,15 @@ briefly feeds a CNPG DSN into the old local-Postgres startup path):
 
 1. **ExternalSecret** (`kubernetes/apps/self-hosted/nominatim/app/externalsecret.yaml`)
   Keep `NOMINATIM_PASSWORD`. Add:
+
+   ```yaml
+   NOMINATIM_DATABASE_DSN: "pgsql:dbname=nominatim;host=nominatim-db-rw.self-hosted.svc;user=nominatim;password={{ .NOMINATIM_PASSWORD }}"
+   PGHOST: nominatim-db-rw.self-hosted.svc
+   PGDATABASE: nominatim
+   PGUSER: nominatim
+   PGPASSWORD: "{{ .NOMINATIM_PASSWORD }}"
+   ```
+
 2. **HelmRelease** (`kubernetes/apps/self-hosted/nominatim/app/helmrelease.yaml`)
   - Command: `/scripts/start-external.sh` (not `/scripts/start.sh`)
   - Remove embedded `POSTGRES_*` tuning env vars
@@ -120,6 +129,10 @@ briefly feeds a CNPG DSN into the old local-Postgres startup path):
   - Keep the OSM CronJob suspended
   - Keep the `pgdata` PVC defined but **unmounted** (`advancedMounts: {}`) so
   Helm does not delete the old data during soak
+
+3. Drop `replica` / `externalClusters` from `nominatim-db`, rewrite bootstrap
+  to `initdb` identity (`database`/`owner: nominatim`) so metrics still target
+  the right DB, and remove Service `nominatim-pg-source`.
 
 Push, then bring the API back:
 
@@ -151,12 +164,10 @@ Soak through at least one successful scheduled backup.
 
 Only after you trust CNPG + backups:
 
-1. Remove Service `nominatim-pg-source` (and any leftover replication-only
-  wiring you no longer need).
-2. Remove `persistence.pgdata` from the HelmRelease.
-3. Delete PVC `nominatim-pgdata` **only with an explicit go-ahead**.
-4. Delete `.taskfiles/nominatim-cnpg/` and its include in the root `Taskfile.yaml`.
-5. Re-enable the OSM update CronJob when ready for incremental updates again.
+1. Remove `persistence.pgdata` from the HelmRelease.
+2. Delete PVC `nominatim-pgdata` **only with an explicit go-ahead**.
+3. Delete `.taskfiles/nominatim-cnpg/` and its include in the root `Taskfile.yaml`.
+4. Re-enable the OSM update CronJob when ready for incremental updates again.
 
 ---
 
@@ -177,7 +188,6 @@ will be stale relative to anything written on CNPG after promote.
 | Path                                                                  | Role                                        |
 | --------------------------------------------------------------------- | ------------------------------------------- |
 | `kubernetes/apps/self-hosted/nominatim-db/`                           | CNPG Cluster, ObjectStore, backups, secrets |
-| `kubernetes/apps/self-hosted/nominatim/app/service-pg-source.yaml`    | Temporary Service to embedded Postgres      |
 | `kubernetes/apps/self-hosted/nominatim/app/scripts/start-external.sh` | External-DB entrypoint (used after step 4)  |
 | `.taskfiles/nominatim-cnpg/`                                          | Temporary operator tasks for this migration |
 

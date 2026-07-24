@@ -6,8 +6,8 @@ metadata:
   name: nominatim-db
 spec:
   schedule: "@daily"
-  # Keep false until after promotion (replica.enabled: false); avoid plugin
-  # backups racing basebackup/streaming from nominatim-legacy.
+  # Set true once via git after cutover to force the first plugin backup, then
+  # leave false (or keep true if you prefer an immediate on every reconcile).
   immediate: false
   backupOwnerReference: self
   method: plugin

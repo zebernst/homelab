@@ -57,7 +57,7 @@ spec:
               repository: mediagis/nominatim
               # renovate: datasource=docker depName=mediagis/nominatim
               tag: "5.3.2"
-            command: ["/bin/bash", "/scripts/start.sh"]
+            command: ["/bin/bash", "/scripts/start-external.sh"]
             env:
               # Geofabrik region paths (newline, space, or comma separated).
               NOMINATIM_REGIONS: |-
@@ -83,10 +83,6 @@ spec:
               PROJECT_DIR: /nominatim
               # Required for North America / multi-region imports (created during bootstrap osm2pgsql).
               NOMINATIM_FLATNODE_FILE: /nominatim/flatnode/flatnode.file
-              POSTGRES_SHARED_BUFFERS: 2GB
-              POSTGRES_MAINTENANCE_WORK_MEM: 4GB
-              POSTGRES_AUTOVACUUM_WORK_MEM: 1GB
-              POSTGRES_EFFECTIVE_CACHE_SIZE: 12GB
               GUNICORN_WORKERS: "4"
               NOMINATIM_API_POOL_SIZE: "5"
               # Daily cron only applies incremental OSC updates; full region PBF imports are opt-in.
@@ -106,8 +102,9 @@ spec:
                   initialDelaySeconds: 10
                   periodSeconds: 30
                   timeoutSeconds: 10
-                  # US import + index takes up to ~24h; allow 30h
-                  failureThreshold: 3600
+                  # ~60m for refresh + Gunicorn before /status answers.
+                  # Measure once after cutover and lower if it's consistently faster.
+                  failureThreshold: 120
               liveness:
                 enabled: true
                 custom: true
@@ -133,9 +130,9 @@ spec:
             resources:
               requests:
                 cpu: 500m
-                memory: 32Gi
+                memory: 4Gi
               limits:
-                memory: 32Gi
+                memory: 8Gi
       ui:
         annotations:
           reloader.stakater.com/auto: "true"
@@ -179,10 +176,7 @@ spec:
       update-osm-db:
         type: cronjob
         cronjob:
-          # Re-enable (suspend: false) after bootstrap / flatnode re-import completes.
-          # Also stays suspended through the CNPG migration (source replication
-          # prep / cutover / soak, see nominatim-db) so OSC updates never race
-          # cnpg_replica's streaming replication of the embedded Postgres.
+          # Re-enable (suspend: false) after CNPG soak + first successful backup.
           suspend: true
           schedule: "@daily"
           concurrencyPolicy: Forbid
@@ -235,6 +229,8 @@ spec:
             port: 80
 
     persistence:
+      # Legacy embedded Postgres data; kept through soak. Remove
+      # persistence.pgdata after soak.
       pgdata:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce

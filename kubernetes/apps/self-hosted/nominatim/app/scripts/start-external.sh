@@ -1,10 +1,7 @@
 #!/bin/bash
 # External-DB entrypoint: never starts local Postgres / never runs /app/init.sh.
 # Wired as the Deployment command in the CNPG cutover (Task 6).
-set -uo pipefail
-if [ "${DEBUG:-}" = "true" ] || [ "${DEBUG:-}" = "1" ]; then
-  set -e
-fi
+set -euo pipefail
 
 PROJECT_DIR="${PROJECT_DIR:-/nominatim}"
 STAGING_DIR="${IMPORT_STAGING:-/import-staging}"
@@ -18,6 +15,8 @@ PGDATA="${PGDATA:-/var/lib/postgresql/16/main}"
 : "${PGUSER:?PGUSER is required}"
 : "${PGPASSWORD:?PGPASSWORD is required}"
 
+# Prefer process env (ExternalSecret) over any durable .env DSN — never write
+# the password-bearing DSN onto the project PVC.
 export NOMINATIM_DATABASE_DSN PGHOST PGDATABASE PGUSER PGPASSWORD
 
 mkdir -p "${STAGING_DIR}" "${PROJECT_DIR}"
@@ -40,18 +39,15 @@ link_staging "wikimedia-importance.csv.gz"
 link_staging "us_postcodes.csv.gz"
 link_staging "secondary_importance.sql.gz"
 
-# One-time migration: copy legacy pgdata marker onto the project volume.
+# One-time migration: copy legacy pgdata marker onto the project volume when
+# the old PVC is still mounted.
 if [ ! -f "${IMPORT_FINISHED}" ] && [ -f "${PGDATA}/import-finished" ]; then
   echo "[nominatim] Migrating import-finished marker from ${PGDATA} to ${IMPORT_FINISHED}"
   cp -a "${PGDATA}/import-finished" "${IMPORT_FINISHED}"
 fi
 
-if [ ! -f "${IMPORT_FINISHED}" ]; then
-  echo "[nominatim] Import not finished (${IMPORT_FINISHED} missing); refusing to start API"
-  exit 1
-fi
-
 # Project PVC mounts over /nominatim and hides the image's baked-in .env.
+# Seed non-secret defaults only; strip any password-bearing DSN if present.
 if [ ! -f "${PROJECT_DIR}/.env" ]; then
   echo "[nominatim] Seeding ${PROJECT_DIR}/.env from /scripts/env.defaults"
   cp /scripts/env.defaults "${PROJECT_DIR}/.env"
@@ -65,13 +61,6 @@ elif [ -f "${ENV_FILE}" ] && grep -q '__IMPORT_STYLE__' "${ENV_FILE}"; then
   sed -i "s|__IMPORT_STYLE__|${IMPORT_STYLE}|g" "${ENV_FILE}"
 fi
 
-# Keep .env DSN in sync with the ExternalSecret-injected env (Nominatim reads both).
-# Avoid sed — passwords may contain sed metacharacters.
-tmp_env="$(mktemp)"
-grep -vE '^NOMINATIM_DATABASE_DSN=' "${ENV_FILE}" > "${tmp_env}" || true
-printf 'NOMINATIM_DATABASE_DSN=%s\n' "${NOMINATIM_DATABASE_DSN}" >> "${tmp_env}"
-mv "${tmp_env}" "${ENV_FILE}"
-
 if [ -n "${NOMINATIM_FLATNODE_FILE:-}" ]; then
   if grep -qE '^NOMINATIM_FLATNODE_FILE=' "${ENV_FILE}"; then
     sed -i "s|^NOMINATIM_FLATNODE_FILE=.*|NOMINATIM_FLATNODE_FILE=${NOMINATIM_FLATNODE_FILE}|" "${ENV_FILE}"
@@ -84,6 +73,24 @@ echo "[nominatim] Waiting for PostgreSQL at ${PGHOST}"
 until pg_isready -h "${PGHOST}" -d "${PGDATABASE}" -U "${PGUSER}" -q; do
   sleep 2
 done
+
+# Fail closed: only seed the project marker when CNPG actually has Nominatim data.
+if [ ! -f "${IMPORT_FINISHED}" ]; then
+  echo "[nominatim] Verifying nominatim schema on ${PGHOST}/${PGDATABASE} before seeding import-finished"
+  has_placex="$(psql -h "${PGHOST}" -d "${PGDATABASE}" -U "${PGUSER}" -Atqc \
+    "SELECT EXISTS (
+       SELECT 1
+       FROM pg_catalog.pg_class c
+       JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+       WHERE n.nspname = 'public' AND c.relname = 'placex' AND c.relkind = 'r'
+     );")"
+  if [ "${has_placex}" != "t" ]; then
+    echo "[nominatim] ERROR: public.placex missing on ${PGHOST}; refusing to seed import-finished" >&2
+    exit 1
+  fi
+  echo "[nominatim] Seeding ${IMPORT_FINISHED}"
+  touch "${IMPORT_FINISHED}"
+fi
 
 echo "[nominatim] Refreshing website + SQL functions against external DB"
 sudo -E -u nominatim nominatim refresh --website --functions --project-dir "${PROJECT_DIR}"
