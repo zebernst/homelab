@@ -5,6 +5,7 @@ kind: Kustomization
 components:
   - ../../../../components/vmrule
 resources:
+  - ciliumnetworkpolicy.yaml
   - helmrelease.yaml
   - vmrule.yaml
 configMapGenerator:
