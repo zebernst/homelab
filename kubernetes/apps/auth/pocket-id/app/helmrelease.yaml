@@ -154,7 +154,7 @@ spec:
                 port: *port
       canonical:
         hostnames:
-          - id.jptr.zebernst.dev
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:
           - name: tailscale
             namespace: kube-system
