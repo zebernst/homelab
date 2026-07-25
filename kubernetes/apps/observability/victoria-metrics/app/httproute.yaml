@@ -5,6 +5,10 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: vmui-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: vmui
+      group: observability
 spec:
   hostnames:
     - vmui.jptr.zebernst.dev
@@ -21,6 +25,10 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: alertmanager-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: alertmanager
+      group: observability
 spec:
   hostnames:
     - alertmanager.jptr.zebernst.dev
@@ -37,6 +45,10 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: vmalert-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: vmalert
+      group: observability
 spec:
   hostnames:
     - vmalert.jptr.zebernst.dev
@@ -53,6 +65,10 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: vmagent-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: vmagent
+      group: observability
 spec:
   hostnames:
     - vmagent.jptr.zebernst.dev

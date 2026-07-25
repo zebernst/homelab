@@ -107,6 +107,10 @@ spec:
               - *tsHost
     route:
       canonical:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

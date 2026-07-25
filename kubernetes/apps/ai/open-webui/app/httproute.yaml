@@ -28,6 +28,10 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: open-webui-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: open-webui-jptr
+      group: ai
 spec:
   hostnames:
     - open-webui.jptr.zebernst.dev
