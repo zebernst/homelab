@@ -117,7 +117,7 @@ spec:
           - name: internal
             namespace: kube-system
             sectionName: https
-      canon:
+      canonical:
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

@@ -94,7 +94,7 @@ spec:
           - backendRefs:
               - name: *app
                 port: *port
-      canon:
+      canonical:
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

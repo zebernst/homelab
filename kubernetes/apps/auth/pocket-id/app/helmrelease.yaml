@@ -152,7 +152,7 @@ spec:
           - backendRefs:
               - name: *app
                 port: *port
-      canon:
+      canonical:
         hostnames:
           - id.jptr.zebernst.dev
         parentRefs:

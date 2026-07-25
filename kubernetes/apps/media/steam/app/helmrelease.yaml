@@ -106,7 +106,7 @@ spec:
           - hosts:
               - *tsHost
     route:
-      canon:
+      canonical:
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:
