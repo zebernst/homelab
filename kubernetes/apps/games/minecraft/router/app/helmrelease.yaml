@@ -87,6 +87,19 @@ spec:
         type: LoadBalancer
         annotations:
           lbipam.cilium.io/ips: 192.168.20.65
+          # Single Minecraft health signal — backends scale to zero and shouldn't be probed
+          gatus.home-operations.com/enabled: "true"
+          gatus.home-operations.com/endpoint: |
+            name: minecraft
+            group: public
+            url: http://mc-router.games.svc.cluster.local:8080/routes
+            interval: 1m
+            conditions:
+              - "[STATUS] == 200"
+            ui:
+              hide-url: true
+              hide-hostname: true
+              hide-port: true
         ports:
           java:
             port: *port
@@ -118,20 +131,8 @@ spec:
       api:
         kind: HTTPRoute
         annotations:
-          # Single Minecraft health signal — backends scale to zero and shouldn't be probed
-          gatus.home-operations.com/endpoint: |
-            name: minecraft
-            group: public
-            url: https://mc-api.zebernst.dev/routes
-            interval: 1m
-            client:
-              dns-resolver: tcp://1.1.1.1:53
-            conditions:
-              - "[STATUS] == 200"
-            ui:
-              hide-url: true
-              hide-hostname: true
-              hide-port: true
+          # Health is on the Service above; don't also probe via the HTTPRoute
+          gatus.home-operations.com/enabled: "false"
         hostnames: ["mc-api.zebernst.dev"]
         parentRefs:
           - name: internal
