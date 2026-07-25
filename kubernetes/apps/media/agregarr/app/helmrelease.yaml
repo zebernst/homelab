@@ -63,17 +63,17 @@ spec:
             port: *port
 
     route:
-      internal:
+      canonical:
         annotations:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
         hostnames:
-          - agregarr.zebernst.dev
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:
-          - name: internal
+          - name: tailscale
             namespace: kube-system
-            sectionName: https
+            sectionName: https-canon
 
     persistence:
       config:

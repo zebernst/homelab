@@ -106,6 +106,7 @@ spec:
             interval: 1m
             scrapeTimeout: 10s
     route:
+      # Staged OIDC cutover: LAN stays primary redirect; Pocket ID must allow both callbacks
       qui:
         annotations:
           gatus.home-operations.com/endpoint: |

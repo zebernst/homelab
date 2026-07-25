@@ -62,7 +62,7 @@ spec:
             port: *port
 
     route:
-      capacitarr:
+      canonical:
         annotations:
           # App requires auth on / (401); probe the unauthenticated health endpoint
           gatus.home-operations.com/endpoint: |
@@ -70,11 +70,11 @@ spec:
             group: "{{ .Release.Namespace }}"
             path: /api/v1/health
         hostnames:
-          - "{{ .Release.Name }}.zebernst.dev"
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:
-          - name: internal
+          - name: tailscale
             namespace: kube-system
-            sectionName: https
+            sectionName: https-canon
         rules:
           # SSE endpoint — no timeout so the connection stays open
           - matches:

@@ -3,14 +3,18 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: paperless-ai
+  name: paperless-ai-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: paperless-ai
+      group: ai
 spec:
   hostnames:
-    - paperless-ai.internal
+    - paperless-ai.jptr.zebernst.dev
   parentRefs:
-    - name: internal
+    - name: tailscale
       namespace: kube-system
-      sectionName: https-internal
+      sectionName: https-canon
   rules:
     - backendRefs:
         - name: paperless-ai

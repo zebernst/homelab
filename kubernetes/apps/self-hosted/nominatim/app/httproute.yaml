@@ -3,14 +3,18 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: nominatim
+  name: nominatim-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: nominatim
+      group: self-hosted
 spec:
   hostnames:
-    - nominatim.zebernst.dev
+    - nominatim.jptr.zebernst.dev
   parentRefs:
-    - name: internal
+    - name: tailscale
       namespace: kube-system
-      sectionName: https
+      sectionName: https-canon
   rules:
     # Static UI assets under /ui
     - matches:
