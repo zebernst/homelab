@@ -34,10 +34,7 @@ spec:
         check_for_plugin_updates: false
         reporting_enabled: false
       auth.anonymous:
-        enabled: true
-        org_id: 1
-        org_name: Main Org.
-        org_role: Viewer
+        enabled: false
       auth.generic_oauth:
         enabled: true
         name: Pocket ID
