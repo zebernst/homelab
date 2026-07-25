@@ -3,19 +3,19 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: paperless-ai-canonical
+  name: hubble-ui-canonical
   annotations:
     gatus.home-operations.com/endpoint: |
-      name: paperless-ai
-      group: ai
+      name: hubble
+      group: kube-system
 spec:
   hostnames:
-    - paperless-ai.jptr.zebernst.dev
+    - hubble.jptr.zebernst.dev
   parentRefs:
     - name: tailscale
       namespace: kube-system
       sectionName: https-canon
   rules:
     - backendRefs:
-        - name: paperless-ai
-          port: 3000
+        - name: hubble-ui
+          port: 80

@@ -105,19 +105,6 @@ spec:
             port: *port
           api:
             port: 8080
-    ingress:
-      mc-router:
-        className: external
-        annotations:
-          external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
-          external-dns.alpha.kubernetes.io/target: ipv4.zebernst.dev
-        hosts:
-          - host: "minecraft.zebernst.dev"
-            paths:
-              - path: /
-                service:
-                  identifier: *app
-                  port: java
     serviceMonitor:
       mc-router:
         serviceName: *app

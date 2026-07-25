@@ -32,6 +32,7 @@ spec:
             env:
               TZ: America/Chicago
               SCANOPY_LOG_LEVEL: info
+              # Staged OIDC cutover: LAN stays primary; Pocket ID must allow both callbacks
               SCANOPY_PUBLIC_URL: https://scanopy.zebernst.dev
               SCANOPY_WEB_EXTERNAL_PATH: /app/static
               SCANOPY_USE_SECURE_SESSION_COOKIES: "true"
@@ -70,6 +71,7 @@ spec:
           http:
             port: *port
     route:
+      # Staged OIDC cutover: LAN stays primary; Pocket ID must allow both callbacks
       scanopy:
         annotations:
           gatus.home-operations.com/endpoint: |
@@ -82,6 +84,22 @@ spec:
           - name: internal
             namespace: kube-system
             sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
+      canonical:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}-jptr"
+            group: "{{ .Release.Namespace }}"
+            path: /api/health
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
         rules:
           - backendRefs:
               - name: *app

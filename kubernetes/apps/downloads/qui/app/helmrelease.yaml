@@ -106,6 +106,7 @@ spec:
             interval: 1m
             scrapeTimeout: 10s
     route:
+      # Staged OIDC cutover: LAN stays primary redirect; Pocket ID must allow both callbacks
       qui:
         annotations:
           gatus.home-operations.com/endpoint: |
@@ -117,6 +118,17 @@ spec:
           - name: internal
             namespace: kube-system
             sectionName: https
+      canonical:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}-jptr"
+            group: "{{ .Release.Namespace }}"
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
     persistence:
       config:
         existingClaim: *app

@@ -39,7 +39,7 @@ spec:
 
     external:
       grafana:
-        host: https://grafana.kite-harmonic.ts.net
+        host: https://grafana.jptr.zebernst.dev
         datasource: Prometheus
 
     defaultDatasources:
@@ -108,7 +108,7 @@ spec:
         # the operator forces continue: true on first-level routes and alerts fan out
         # to multiple receivers (e.g. blackhole + pushover).
         disableRouteContinueEnforce: true
-        externalURL: https://alertmanager.zebernst.dev
+        externalURL: https://alertmanager.jptr.zebernst.dev
         storage:
           volumeClaimTemplate:
             spec:
@@ -191,20 +191,6 @@ spec:
         tls:
           - hosts:
               - victoria-metrics.kite-harmonic.ts.net
-      route:
-        enabled: true
-        apiVersion: gateway.networking.k8s.io/v1
-        kind: HTTPRoute
-        annotations:
-          gatus.home-operations.com/endpoint: |
-            name: victoria-metrics
-            group: observability
-        hostnames:
-          - victoria-metrics.zebernst.dev
-        parentRefs:
-          - name: internal
-            namespace: kube-system
-            sectionName: https
 
     vmalert:
       enabled: true

@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+---
+# VMUI (vmsingle)
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: vmui-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: vmui
+      group: observability
+spec:
+  hostnames:
+    - vmui.jptr.zebernst.dev
+  parentRefs:
+    - name: tailscale
+      namespace: kube-system
+      sectionName: https-canon
+  rules:
+    - backendRefs:
+        - name: vmsingle-vmks
+          port: 8428
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: alertmanager-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: alertmanager
+      group: observability
+spec:
+  hostnames:
+    - alertmanager.jptr.zebernst.dev
+  parentRefs:
+    - name: tailscale
+      namespace: kube-system
+      sectionName: https-canon
+  rules:
+    - backendRefs:
+        - name: vmalertmanager-vmks
+          port: 9093
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: vmalert-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: vmalert
+      group: observability
+spec:
+  hostnames:
+    - vmalert.jptr.zebernst.dev
+  parentRefs:
+    - name: tailscale
+      namespace: kube-system
+      sectionName: https-canon
+  rules:
+    - backendRefs:
+        - name: vmalert-vmks
+          port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: vmagent-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: vmagent
+      group: observability
+spec:
+  hostnames:
+    - vmagent.jptr.zebernst.dev
+  parentRefs:
+    - name: tailscale
+      namespace: kube-system
+      sectionName: https-canon
+  rules:
+    - backendRefs:
+        - name: vmagent-vmks
+          port: 8429
