@@ -27,7 +27,7 @@ metadata:
   annotations:
     gatus.home-operations.com/endpoint: |
       client:
-        dns-resolver: tcp://dns-jptr.network.svc.cluster.local:53
+        dns-resolver: tcp://coredns-gateway.network.svc.cluster.local:53
       conditions:
         - "[STATUS] == 200"
   labels:
