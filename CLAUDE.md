@@ -203,13 +203,19 @@ Useful kubectl plugins (via krew/aqua):
 
 ### Gatus exposure tiers
 
-Gatus endpoint discovery uses `gatus-sidecar` in `kubernetes/apps/observability/gatus/`. Tier defaults live on Gateways; per-app overrides should only set route-specific fields (`path:`, `enabled: "false"`, custom `url:`).
+Gatus runs as **two instances**, each with its own `gatus-sidecar`:
+- Public (`kubernetes/apps/observability/gatus/external/`, Release `gatus-external`) discovers the `external` Gateway only. Published at `status.zebernst.dev` (+ companion `status.jptr.zebernst.dev`). Never lists private inventory.
+- Private (`kubernetes/apps/observability/gatus/private/`, Release `gatus`) discovers `internal` (→ `lan` after the rename) + `tailscale` Gateways plus opt-in cluster Services, plus buddy endpoints. Published only at `gatus.jptr.zebernst.dev` (tailnet).
 
-| Tier | Resource | Group | DNS resolver |
-|------|----------|-------|--------------|
-| **Public** | HTTPRoute → `external` Gateway | `public` | `1.1.1.1` (inherited from Gateway) |
-| **Internal** | HTTPRoute → `internal` Gateway | `internal` | `kube-dns` (inherited from Gateway) |
-| **Cluster** | Service (opt-in) | `cluster` | in-cluster (auto `*.svc` URL) |
+Tier defaults live on Gateways; per-app overrides should only set route-specific fields (`path:`, `enabled: "false"`, custom `url:`).
+
+| Tier | Instance | Resource | Group | DNS resolver |
+|------|----------|----------|-------|--------------|
+| **Public** | public (`gatus-external`) | HTTPRoute → `external` Gateway | `public` | `1.1.1.1` (inherited from Gateway) |
+| **Internal/LAN** | `gatus` | HTTPRoute → `internal`/`lan` Gateway | `internal` (→ `lan`) | `kube-dns` (inherited from Gateway) |
+| **Private** | `gatus` | HTTPRoute → `tailscale` Gateway (`*.jptr`) | `private` | `dns-jptr` k8s_gateway (inherited from Gateway) |
+| **Cluster** | `gatus` | Service (opt-in) | `cluster` | in-cluster (auto `*.svc` URL) |
+| **Buddy** | `gatus` | Static endpoints (`buddy.yaml`) | `buddy` | — |
 
 Cluster-tier Services require explicit opt-in:
 

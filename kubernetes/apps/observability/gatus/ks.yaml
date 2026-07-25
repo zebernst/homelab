@@ -3,6 +3,42 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: &app gatus-external
+  namespace: &ns observability
+spec:
+  targetNamespace: *ns
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: victoria-metrics-operator
+      namespace: *ns
+    - name: cloudnative-pg-cluster
+      namespace: database
+    - name: onepassword
+      namespace: external-secrets
+  path: kubernetes/apps/observability/gatus/external
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: false
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  postBuild:
+    substitute:
+      GATUS_WEB_PORT: "80"
+      INIT_POSTGRES_DBNAME: gatus_external
+      INIT_POSTGRES_HOST: redspot-rw.database.svc.cluster.local
+      INIT_POSTGRES_PASS: gatus
+      INIT_POSTGRES_USER: gatus
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: &app gatus
   namespace: &ns observability
 spec:
@@ -17,7 +53,9 @@ spec:
       namespace: database
     - name: onepassword
       namespace: external-secrets
-  path: kubernetes/apps/observability/gatus/app
+    - name: k8s-gateway
+      namespace: network
+  path: kubernetes/apps/observability/gatus/private
   prune: true
   sourceRef:
     kind: GitRepository

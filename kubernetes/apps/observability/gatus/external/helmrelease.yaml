@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app gatus
+  name: &app gatus-external
 spec:
   interval: 30m
   chartRef:
@@ -13,7 +13,7 @@ spec:
 
   values:
     controllers:
-      gatus:
+      gatus-external:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -23,7 +23,7 @@ spec:
               tag: 17
             envFrom: &envFrom
               - secretRef:
-                  name: gatus-secret
+                  name: gatus-external-secret
           gatus-sidecar:
             dependsOn: init-db
             image:
@@ -31,11 +31,8 @@ spec:
               tag: 0.3.6@sha256:195e761e2fcf65bc959bea55f2ed15cdada44cc6653af6dc117b6241b010015b
             args:
               - --auto-httproute
-              - --enable-service
               - --gateway-name=external
-              - --gateway-name=internal
               - --prefix-httproute=route/
-              - --prefix-service=svc/
             resources: &resources
               requests:
                 cpu: 10m
@@ -82,7 +79,7 @@ spec:
         runAsUser: 568
         runAsGroup: 568
     service:
-      gatus:
+      gatus-external:
         ports:
           http:
             port: *port
@@ -96,11 +93,20 @@ spec:
           - name: external
             namespace: kube-system
             sectionName: https
+      canon:
+        annotations:
+          gatus.home-operations.com/enabled: "false"
+        hostnames:
+          - status.jptr.zebernst.dev
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
     serviceAccount:
-      gatus:
+      gatus-external:
         enabled: true
     serviceMonitor:
-      gatus:
+      gatus-external:
         serviceName: *app
         endpoints:
           - port: http
@@ -113,11 +119,8 @@ spec:
         type: emptyDir
       config-file:
         type: configMap
-        name: gatus-configmap
+        name: gatus-external-configmap
         globalMounts:
-          - path: /config/buddy.yaml
-            subPath: buddy.yaml
-            readOnly: true
           - path: /config/config.yaml
             subPath: config.yaml
             readOnly: true

@@ -3,14 +3,14 @@
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:
-  name: gatus
+  name: gatus-external
 spec:
   groups:
-    - name: gatus.rules
+    - name: gatus-external.rules
       rules:
         - alert: GatusEndpointDown
           expr: |
-            gatus_results_endpoint_success{group=~"public|internal|cluster"} == 0
+            gatus_results_endpoint_success{group=~"public"} == 0
           for: 5m
           annotations:
             summary: >-
