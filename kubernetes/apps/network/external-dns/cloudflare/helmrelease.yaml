@@ -38,6 +38,7 @@ spec:
       - --gateway-label-filter=external-dns.alpha.kubernetes.io/registry=cloudflare
       - --ignore-ingress-tls-spec
       - --ingress-class=external
+      - --exclude-domains=jptr.zebernst.dev
     triggerLoopOnEvent: true
     policy: sync
     sources: ["crd", "ingress", "gateway-httproute", "gateway-tlsroute"]

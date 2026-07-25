@@ -75,3 +75,10 @@ spec:
           - name: external
             namespace: kube-system
             sectionName: https
+      canonical:
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon

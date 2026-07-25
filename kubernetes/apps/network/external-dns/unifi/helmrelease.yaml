@@ -60,6 +60,7 @@ spec:
       - --ignore-ingress-tls-spec
       - --ingress-class=internal
       - --gateway-label-filter=external-dns.alpha.kubernetes.io/registry=unifi
+      - --exclude-domains=jptr.zebernst.dev
     triggerLoopOnEvent: true
     policy: sync
     sources: ["ingress", "service", "gateway-httproute", "gateway-tlsroute"]

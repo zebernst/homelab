@@ -10,5 +10,6 @@ resources:
   - echo-server/ks.yaml
   - external-dns/ks.yaml
   - ingress-nginx/ks.yaml
+  - k8s-gateway/ks.yaml
   - smtp-relay/ks.yaml
   - tailscale-operator/ks.yaml

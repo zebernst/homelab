@@ -44,3 +44,15 @@ spec:
           - kind: Secret
             name: zebernst-dev-tls
             namespace: cert-manager
+    - name: https-canon
+      protocol: HTTPS
+      port: 443
+      hostname: "*.jptr.zebernst.dev"
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: jptr-zebernst-dev-tls
+            namespace: cert-manager

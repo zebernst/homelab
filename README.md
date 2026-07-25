@@ -58,9 +58,8 @@ There is a template at [onedr0p/cluster-template](https://github.com/onedr0p/clu
 - [cert-manager](https://github.com/cert-manager/cert-manager): Manage SSL certificates for services in my cluster.
 - [cilium](https://github.com/cilium/cilium): eBPF-based networking for my workloads.
 - [cloudflared](https://github.com/cloudflare/cloudflared): Enables Cloudflare secure access to my services.
-- [external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically syncs ingress DNS records to a DNS provider.
+- [external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically syncs Gateway/HTTPRoute DNS records to a DNS provider.
 - [external-secrets](https://github.com/external-secrets/external-secrets): Managed Kubernetes secrets using [1Password Connect](https://github.com/1Password/connect).
-- [ingress-nginx](https://github.com/kubernetes/ingress-nginx): Kubernetes ingress controller using NGINX as a reverse proxy and load balancer.
 - [rook](https://github.com/rook/rook): Distributed block, file, and object storage for stateful workloads.
 - [spegel](https://github.com/spegel-org/spegel): Stateless cluster-local OCI registry mirror.
 - [volsync](https://github.com/backube/volsync): Backup and recovery of persistent volume claims.
@@ -112,17 +111,25 @@ graph TD;
   <img src="docs/assets/network-diagram.excalidraw.svg" align="center" width="600px" alt="network"/>
 </details>
 
-Apps hosted on my cluster are exposed using any combination of three different methods, depending on their use-case, security requirements, and intended audience. All three methods utilise fully encrypted HTTPS connections – TLS certificates are automatically provisioned and renewed by [Cert Manager](https://cert-manager.io) for each application.
+Apps hosted on my cluster are exposed using any combination of three different methods, depending on their use-case, security requirements, and intended audience. HTTP is fronted by [Cilium Gateway API](https://docs.cilium.io/en/latest/network/servicemesh/gateway-api/); all three paths use fully encrypted HTTPS with TLS certificates automatically provisioned and renewed by [Cert Manager](https://cert-manager.io).
 
 ### Local Network
 
 The first and easiest way that an app can be exposed is strictly on my local network. This is most often used for apps and services that have to do with home automation – given that every smart home device is on my local network, there is no need to expose e.g. a supporting service like MQTT any further than that.
 
-Local deployments are accomplished by creating an Ingress of type `internal`, which will register a virtual IP for the service in a designated subnet (advertised via BGP) and provision a DNS record on the router with  the [ExternalDNS webhook provider for UniFi](https://github.com/kashalls/external-dns-unifi-webhook).
+Local deployments attach an HTTPRoute to the `internal` Gateway, which registers a virtual IP in a designated subnet (advertised via BGP) and provisions a DNS record on the router with the [ExternalDNS webhook provider for UniFi](https://github.com/kashalls/external-dns-unifi-webhook).
 
 ### Privately Exposed (Tailscale)
 
-The second and most common way that an app can be exposed is via [Tailscale](https://tailscale.com/kb/1236/kubernetes-operator). Creating an Ingress with the `tailscale` class will expose the application to my Tailnet, and [automagically](https://tailscale.com/kb/1081/magicdns) configure DNS records. Most self-hosted apps and dashboards are exposed using this Ingress class, so that they are accessible on my personal devices at a consistent URL no matter if I'm at home or abroad.
+The second and most common way that an app can be exposed is via [Tailscale](https://tailscale.com/kb/1236/kubernetes-operator). Canonical private hostnames live under `$APP.jptr.zebernst.dev` on the Cilium `tailscale` Gateway (`https-canon` listener). Apex `*.zebernst.dev` stays available for vanity URLs.
+
+DNS for `jptr.zebernst.dev` is answered in-cluster by CoreDNS [k8s_gateway](https://github.com/k8s-gateway/k8s_gateway) (Service `coredns-gateway`, Tailscale MagicDNS hostname `jupiter-dns`). Tailscale split DNS for that zone points at `jupiter-dns`; UniFi and Cloudflare ExternalDNS both exclude `jptr.zebernst.dev` so they never publish competing records.
+
+| Zone | Nameserver | Purpose |
+|------|------------|---------|
+| `zebernst.dev` | UDM Pro (via Tailscale split DNS) | Apex / LAN records synced by ExternalDNS → UniFi |
+| `.internal` | UDM Pro (via Tailscale split DNS) | LAN-only hostnames on the VIP Gateway |
+| `jptr.zebernst.dev` | `jupiter-dns` (`coredns-gateway` in-cluster) | Canonical private zone; answers with the Tailscale Gateway address |
 
 Tailscale also serves as a Kubernetes auth proxy, which I use in conjunction with the [Nautik](https://nautik.io/) iOS app to monitor and administer my Kubernetes cluster on-the-go.
 
@@ -130,7 +137,7 @@ Tailscale also serves as a Kubernetes auth proxy, which I use in conjunction wit
 
 The final and least common way to expose an app is via `cloudflared`, the [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) daemon. By routing all external traffic through Cloudflare's infrastructure, I gain the benefits of their global security infrastructure (notably DDoS protection). This is generally used for webhook endpoints which require access from the wider Internet, though I do expose a select few apps for friends and family.
 
-Creating an `external` Ingress will trigger using [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to provision a CNAME DNS record on Cloudflare which points at the Cloudflare Tunnel endpoint. The tunnel routes traffic securely into my cluster, where the ingress controller further routes it to the destination Service.
+Creating an HTTPRoute on the `external` Gateway triggers [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to provision a CNAME on Cloudflare pointing at the Cloudflare Tunnel endpoint. The tunnel routes traffic securely into the cluster, where Cilium further routes it to the destination Service.
 
 ---
 
