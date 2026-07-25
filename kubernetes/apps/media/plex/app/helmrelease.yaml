@@ -130,13 +130,13 @@ spec:
                   - name: X-Plex-Device-Name
                     type: RegularExpression
                     value: ".+"
-          # Redirect unidentified root requests to the Plex landing page.
+          # Redirect unidentified root to /web/index.html (Plex's /web hop downgrades to http).
           - filters:
               - type: RequestRedirect
                 requestRedirect:
                   path:
                     type: ReplaceFullPath
-                    replaceFullPath: /web
+                    replaceFullPath: /web/index.html
                   statusCode: 302
             matches:
               - path:
@@ -151,6 +151,7 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+            path: /web/index.html
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

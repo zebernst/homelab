@@ -17,5 +17,5 @@ spec:
       sectionName: https-canon
   rules:
     - backendRefs:
-        - name: victoria-logs
+        - name: victoria-logs-server
           port: 9428
