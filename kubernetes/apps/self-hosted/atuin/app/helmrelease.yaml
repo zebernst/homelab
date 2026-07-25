@@ -78,17 +78,6 @@ spec:
           metrics:
             port: *metricsPort
     route:
-      app:
-        annotations:
-          gatus.home-operations.com/endpoint: |
-            name: "{{ .Release.Name }}"
-            group: "{{ .Release.Namespace }}"
-        hostnames:
-          - sh.zebernst.dev
-        parentRefs:
-          - name: external
-            namespace: kube-system
-            sectionName: https
       canonical:
         annotations:
           gatus.home-operations.com/endpoint: |
