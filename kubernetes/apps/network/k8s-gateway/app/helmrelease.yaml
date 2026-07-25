@@ -31,4 +31,4 @@ spec:
       loadBalancerClass: tailscale
       useTcp: true
       annotations:
-        tailscale.com/hostname: dns-jptr
+        tailscale.com/hostname: jupiter-dns

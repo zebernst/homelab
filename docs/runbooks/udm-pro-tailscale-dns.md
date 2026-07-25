@@ -18,20 +18,20 @@ Do this **after** `dns-jptr` has a stable Tailscale IP (Flux has reconciled `net
 
    ```sh
    kubectl -n network get svc dns-jptr -o wide
-   # or: Tailscale admin → Machines → dns-jptr
+   # or: Tailscale admin → Machines → jupiter-dns
    ```
 
 2. In the [Tailscale DNS admin](https://login.tailscale.com/admin/dns) → **Nameservers** → **Split DNS**:
    - Domain: `jptr.zebernst.dev`
-   - Nameserver: the `dns-jptr` Tailscale IPv4 (and IPv6 if present)
+   - Nameserver: the `jupiter-dns` Tailscale IPv4 (and IPv6 if present)
    - Ensure UDP **and** TCP port 53 reach the Service (`useTcp: true` on the HelmRelease)
 
 3. Record the nameserver IPs here once stable:
 
    | Role | Address | Notes |
    |------|---------|-------|
-   | `dns-jptr` IPv4 | _TBD after first reconcile_ | Update on U8 when DNS moves to `tailscale-l4` |
-   | `dns-jptr` IPv6 | _TBD_ | Optional |
+   | `jupiter-dns` IPv4 | _TBD after first reconcile_ | Update on U8 when DNS moves to `tailscale-l4` |
+   | `jupiter-dns` IPv6 | _TBD_ | Optional |
 
 4. **GATE-DNS** before deleting any `*.ts.net` Ingresses:
    - `dig +short @<dns-jptr-ip> echo-server.jptr.zebernst.dev` (UDP)
