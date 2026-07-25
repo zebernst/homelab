@@ -13,3 +13,18 @@ spec:
   dnsNames:
     - zebernst.dev
     - "*.zebernst.dev"
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: jptr-zebernst-dev
+spec:
+  secretName: jptr-zebernst-dev-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: jptr.zebernst.dev
+  dnsNames:
+    - jptr.zebernst.dev
+    - "*.jptr.zebernst.dev"

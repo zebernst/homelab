@@ -1,6 +1,52 @@
-# UDM Pro: DNS over Tailscale stops working
+# UDM Pro / Tailscale DNS
 
-## Context
+## Split DNS layout
+
+| Zone | Nameserver | Purpose |
+|------|------------|---------|
+| `zebernst.dev` | UDM Pro (via Tailscale) | Apex vanity / LAN records synced by ExternalDNS → UniFi |
+| `.internal` | UDM Pro (via Tailscale) | LAN-only hostnames on the VIP `internal`/`lan` Gateway |
+| `jptr.zebernst.dev` | Cluster Service `dns-jptr` (Tailscale LB) | Canonical private zone; CoreDNS **k8s_gateway** answers with the Tailscale Gateway address |
+
+ExternalDNS UniFi and Cloudflare both set `--exclude-domains=jptr.zebernst.dev` so they never publish competing `jptr` records.
+
+## Configure Tailscale split DNS for `jptr.zebernst.dev`
+
+Do this **after** `dns-jptr` has a stable Tailscale IP (Flux has reconciled `network/k8s-gateway`).
+
+1. Get the Tailscale address of the DNS Service:
+
+   ```sh
+   kubectl -n network get svc dns-jptr -o wide
+   # or: Tailscale admin → Machines → dns-jptr
+   ```
+
+2. In the [Tailscale DNS admin](https://login.tailscale.com/admin/dns) → **Nameservers** → **Split DNS**:
+   - Domain: `jptr.zebernst.dev`
+   - Nameserver: the `dns-jptr` Tailscale IPv4 (and IPv6 if present)
+   - Ensure UDP **and** TCP port 53 reach the Service (`useTcp: true` on the HelmRelease)
+
+3. Record the nameserver IPs here once stable:
+
+   | Role | Address | Notes |
+   |------|---------|-------|
+   | `dns-jptr` IPv4 | _TBD after first reconcile_ | Update on U8 when DNS moves to `tailscale-l4` |
+   | `dns-jptr` IPv6 | _TBD_ | Optional |
+
+4. **GATE-DNS** before deleting any `*.ts.net` Ingresses:
+   - `dig +short @<dns-jptr-ip> echo-server.jptr.zebernst.dev` (UDP)
+   - `dig +tcp +short @<dns-jptr-ip> echo-server.jptr.zebernst.dev` (TCP)
+   - Answers must be the **Tailscale Gateway** IP (not a hostname-only / useless answer)
+   - `curl -fsS https://echo-server.jptr.zebernst.dev/healthz` from an off-LAN tailnet client
+   - UniFi has **no** `jptr.zebernst.dev` records
+
+Rollback during dual-run: remove the Tailscale split-DNS entry first while `*.ts.net` Ingresses still exist.
+
+---
+
+## UDM Pro: DNS over Tailscale stops working (apex / `.internal`)
+
+### Context
 
 Tailscale split DNS is configured to resolve `zebernst.dev` and `.internal` domains using the UDM Pro as the nameserver. This allows tailnet clients (phones, laptops off-site, etc.) to reach internally-hosted apps by name — DNS records for those apps are synced to the UDM Pro's dnsmasq via ExternalDNS.
 
@@ -13,7 +59,7 @@ When this is working correctly, a query for e.g. `myapp.zebernst.dev` from a tai
 
 **Cause:** dnsmasq on UniFi OS only listens on traditional bridge interfaces (br0, br32, etc.) as defined in the auto-generated `/run/dnsmasq.dns.conf.d/main.conf`. The `tailscale0` interface is not included, so DNS requests arriving from tailnet clients are silently dropped.
 
-## Immediate fix
+### Immediate fix
 
 SSH into the UDM Pro and restart the service that injects the tailscale0 dnsmasq config:
 
@@ -23,7 +69,7 @@ systemctl restart tailscale-dnsmasq
 
 Verify DNS is resolving again from a tailnet client.
 
-## How it works
+### How it works
 
 A custom oneshot systemd service (`tailscale-dnsmasq.service`) runs after `tailscaled` starts. It executes `/data/on_boot.d/20-tailscale-dnsmasq.sh`, which:
 
@@ -34,7 +80,7 @@ A custom oneshot systemd service (`tailscale-dnsmasq.service`) runs after `tails
 
 This service is enabled and persists across reboots, but can stop being effective if UniFi OS regenerates its dnsmasq config and overwrites the interface list.
 
-## Re-deploying from scratch
+### Re-deploying from scratch
 
 If the service or boot script is missing (e.g. after a UDM Pro firmware reset), recreate it:
 
@@ -82,6 +128,6 @@ systemctl enable --now tailscale-dnsmasq
 systemctl status tailscale-dnsmasq
 ```
 
-## References
+### References
 
 - [SierraSoftworks/tailscale-unifi#122](https://github.com/SierraSoftworks/tailscale-unifi/issues/122)
