@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app k8s-gateway
+  name: &app coredns-canonical
   namespace: &ns network
 spec:
   targetNamespace: *ns
@@ -15,7 +15,7 @@ spec:
       namespace: kube-system
     - name: tailscale-operator
       namespace: network
-  path: kubernetes/apps/network/k8s-gateway/app
+  path: kubernetes/apps/network/coredns-canonical/app
   prune: true
   sourceRef:
     kind: GitRepository

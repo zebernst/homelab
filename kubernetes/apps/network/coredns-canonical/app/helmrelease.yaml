@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app k8s-gateway
+  name: &app coredns-canonical
 spec:
   interval: 30m
   chart:
@@ -16,7 +16,7 @@ spec:
         namespace: flux-system
 
   values:
-    fullnameOverride: dns-jptr
+    fullnameOverride: coredns-canonical
     domain: jptr.zebernst.dev
     watchedResources:
       - HTTPRoute
