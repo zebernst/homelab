@@ -89,19 +89,6 @@ spec:
           - name: tailscale
             namespace: kube-system
             sectionName: https-canon
-    ingress:
-      tailscale:
-        className: tailscale
-        hosts:
-          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
-            paths:
-              - path: /
-                service:
-                  identifier: *app
-                  port: http
-        tls:
-          - hosts:
-              - *tsHost
     serviceMonitor:
       app:
         endpoints:

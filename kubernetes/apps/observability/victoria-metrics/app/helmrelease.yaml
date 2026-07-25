@@ -117,13 +117,7 @@ spec:
                 requests:
                   storage: 1Gi
       ingress:
-        enabled: true
-        ingressClassName: tailscale
-        hosts:
-          - alertmanager.kite-harmonic.ts.net
-        tls:
-          - hosts:
-              - alertmanager.kite-harmonic.ts.net
+        enabled: false
 
     vmagent:
       enabled: true
@@ -184,13 +178,7 @@ spec:
             requests:
               storage: 50Gi
       ingress:
-        enabled: true
-        ingressClassName: tailscale
-        hosts:
-          - victoria-metrics.kite-harmonic.ts.net
-        tls:
-          - hosts:
-              - victoria-metrics.kite-harmonic.ts.net
+        enabled: false
 
     vmalert:
       enabled: true

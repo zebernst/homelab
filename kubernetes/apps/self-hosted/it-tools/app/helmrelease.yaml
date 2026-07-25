@@ -43,19 +43,6 @@ spec:
         ports:
           http:
             port: 8080
-    ingress:
-      tailscale:
-        className: tailscale
-        hosts:
-          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
-            paths:
-              - path: /
-                service:
-                  identifier: *app
-                  port: http
-        tls:
-          - hosts:
-              - *tsHost
     route:
       canonical:
         annotations:

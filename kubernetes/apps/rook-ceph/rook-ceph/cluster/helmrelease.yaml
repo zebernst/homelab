@@ -20,14 +20,6 @@ spec:
     monitoring:
       enabled: true
       createPrometheusRules: true
-    ingress:
-      dashboard:
-        ingressClassName: tailscale
-        host:
-          name: &host "rook.kite-harmonic.ts.net"
-          path: /
-        tls:
-          - hosts: [ *host ]
     toolbox:
       enabled: true
     cephClusterSpec:
