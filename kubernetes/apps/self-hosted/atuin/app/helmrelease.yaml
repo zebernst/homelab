@@ -89,6 +89,13 @@ spec:
           - name: external
             namespace: kube-system
             sectionName: https
+      canon:
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
     ingress:
       tailscale:
         className: tailscale

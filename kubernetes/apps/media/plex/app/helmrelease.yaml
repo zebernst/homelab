@@ -26,7 +26,7 @@ spec:
               tag: 1.43.3.10828@sha256:0c0b6899339503af17cb190b25af6acf10f0030e2820985e16ee14ef428f49d7
             env:
               TZ: America/Chicago
-              PLEX_ADVERTISE_URL: https://plex.zebernst.dev:443,http://192.168.20.5:32400,http://[::ffff:c0a8:1405]:32400,http://plex.kite-harmonic.ts.net:32400
+              PLEX_ADVERTISE_URL: https://plex.zebernst.dev:443,https://plex.jptr.zebernst.dev:443,http://192.168.20.5:32400,http://[::ffff:c0a8:1405]:32400
               PLEX_NO_AUTH_NETWORKS: 10.0.0.0/8
             probes:
               liveness: &probe
@@ -98,7 +98,7 @@ spec:
           - name: external
             namespace: kube-system
             sectionName: https
-        rules:
+        rules: &plexRules
           # Remove the 'Range' header from streaming requests.
           - backendRefs:
               - identifier: *app
@@ -111,35 +111,49 @@ spec:
               - path:
                   type: PathPrefix
                   value: /library/streams
-          # Redirect root requests to the Plex landing page
-          # commented until https://github.com/bjw-s-labs/helm-charts/issues/486 is fixed.
-#          - filters:
-#              - type: RequestRedirect
-#                requestRedirect:
-#                  path:
-#                    type: ReplaceFullPath
-#                    replaceFullPath: /web
-#                  statusCode:
-#                    302
-#            matches:
-#              - headers:
-#                  - type: Exact
-#                    name: X-Plex-Device-Name
-#                    value: ""
-#                path:
-#                  type: Exact
-#                  value: /
-#              - queryParams:
-#                  - type: Exact
-#                    name: X-Plex-Device-Name
-#                    value: ""
-#                path:
-#                  type: Exact
-#                  value: /
+          # Keep Plex clients at root when they identify themselves by header or query.
+          - backendRefs:
+              - identifier: *app
+                port: *port
+            matches:
+              - headers:
+                  - name: X-Plex-Device-Name
+                    type: RegularExpression
+                    value: ".+"
+                path:
+                  type: Exact
+                  value: /
+              - path:
+                  type: Exact
+                  value: /
+                queryParams:
+                  - name: X-Plex-Device-Name
+                    type: RegularExpression
+                    value: ".+"
+          # Redirect unidentified root requests to the Plex landing page.
+          - filters:
+              - type: RequestRedirect
+                requestRedirect:
+                  path:
+                    type: ReplaceFullPath
+                    replaceFullPath: /web
+                  statusCode: 302
+            matches:
+              - path:
+                  type: Exact
+                  value: /
           # Catch-all for everything else
           - backendRefs:
               - identifier: *app
                 port: *port
+      canon:
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
+        rules: *plexRules
     persistence:
       config:
         existingClaim: plex

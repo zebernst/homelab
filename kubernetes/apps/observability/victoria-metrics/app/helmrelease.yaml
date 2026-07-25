@@ -39,7 +39,7 @@ spec:
 
     external:
       grafana:
-        host: https://grafana.kite-harmonic.ts.net
+        host: https://grafana.jptr.zebernst.dev
         datasource: Prometheus
 
     defaultDatasources:
@@ -201,10 +201,14 @@ spec:
             group: observability
         hostnames:
           - victoria-metrics.zebernst.dev
+          - victoria-metrics.jptr.zebernst.dev
         parentRefs:
           - name: internal
             namespace: kube-system
             sectionName: https
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
 
     vmalert:
       enabled: true

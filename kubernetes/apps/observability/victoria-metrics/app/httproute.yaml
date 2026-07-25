@@ -3,19 +3,15 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: ollama
-  annotations:
-    gatus.home-operations.com/endpoint: |
-      name: ollama
-      group: ai
+  name: alertmanager-canon
 spec:
   hostnames:
-    - ollama.jptr.zebernst.dev
+    - alertmanager.jptr.zebernst.dev
   parentRefs:
     - name: tailscale
       namespace: kube-system
       sectionName: https-canon
   rules:
     - backendRefs:
-        - name: ollama
-          port: 11434
+        - name: vmalertmanager-vmks
+          port: 9093

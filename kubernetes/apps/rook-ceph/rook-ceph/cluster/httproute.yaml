@@ -3,19 +3,15 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: ollama
-  annotations:
-    gatus.home-operations.com/endpoint: |
-      name: ollama
-      group: ai
+  name: rook-ceph-dashboard-canon
 spec:
   hostnames:
-    - ollama.jptr.zebernst.dev
+    - rook.jptr.zebernst.dev
   parentRefs:
     - name: tailscale
       namespace: kube-system
       sectionName: https-canon
   rules:
     - backendRefs:
-        - name: ollama
-          port: 11434
+        - name: rook-ceph-mgr-dashboard
+          port: 7000

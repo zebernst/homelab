@@ -152,6 +152,17 @@ spec:
           - backendRefs:
               - name: *app
                 port: *port
+      canon:
+        hostnames:
+          - id.jptr.zebernst.dev
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
 
 
     serviceMonitor:

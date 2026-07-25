@@ -61,6 +61,14 @@ spec:
         tls:
           - hosts:
               - *tsHost
+    route:
+      canon:
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
     persistence:
       books:
         type: nfs

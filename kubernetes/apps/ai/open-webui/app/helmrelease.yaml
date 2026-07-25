@@ -26,7 +26,7 @@ spec:
       enabled: false
     extraEnvVars:
       - name: CORS_ALLOW_ORIGIN
-        value: "https://open-webui.internal;https://open-webui.zebernst.dev;https://open-webui.kite-harmonic.ts.net;http://open-webui.ai.svc.cluster.local"
+        value: "https://open-webui.internal;https://open-webui.jptr.zebernst.dev;http://open-webui.ai.svc.cluster.local"
     ollamaUrls:
       - http://ollama.ai.svc.cluster.local:11434
     persistence:

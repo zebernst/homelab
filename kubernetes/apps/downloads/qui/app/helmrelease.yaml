@@ -117,6 +117,13 @@ spec:
           - name: internal
             namespace: kube-system
             sectionName: https
+      canon:
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
     persistence:
       config:
         existingClaim: *app

@@ -94,6 +94,13 @@ spec:
           - backendRefs:
               - name: *app
                 port: *port
+      canon:
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
     persistence:
       config:
         existingClaim: *app
