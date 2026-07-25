@@ -1,0 +1,126 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app gatus-external
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      gatus-external:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: 17
+            envFrom: &envFrom
+              - secretRef:
+                  name: gatus-external-secret
+          gatus-sidecar:
+            dependsOn: init-db
+            image:
+              repository: ghcr.io/home-operations/gatus-sidecar
+              tag: 0.3.6@sha256:195e761e2fcf65bc959bea55f2ed15cdada44cc6653af6dc117b6241b010015b
+            args:
+              - --auto-httproute
+              - --gateway-name=external
+              - --prefix-httproute=route/
+            resources: &resources
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
+            restartPolicy: Always
+        containers:
+          gatus:
+            image:
+              repository: ghcr.io/twin/gatus
+              tag: v5.36.0@sha256:c5f210d095fa78e6efaa20ffeb14803f2ba4f10615e16a6d12087697149617f0
+            env:
+              TZ: America/Chicago
+              GATUS_CONFIG_PATH: /config
+              GATUS_DELAY_START_SECONDS: 5
+              GATUS_WEB_PORT: &port 80
+            envFrom: *envFrom
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources: *resources
+    defaultPodOptions:
+      automountServiceAccountToken: true
+      priorityClassName: external-facing
+      dnsConfig:
+        options:
+          - { name: ndots, value: "1" }
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+    service:
+      gatus-external:
+        ports:
+          http:
+            port: *port
+    route:
+      gatus:
+        annotations:
+          gatus.home-operations.com/enabled: "false"
+        hostnames:
+          - status.zebernst.dev
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+      canonical:
+        annotations:
+          gatus.home-operations.com/enabled: "false"
+        hostnames:
+          - status.jptr.zebernst.dev
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
+    serviceAccount:
+      gatus-external:
+        enabled: true
+    serviceMonitor:
+      gatus-external:
+        serviceName: *app
+        endpoints:
+          - port: http
+            scheme: http
+            path: /metrics
+            interval: 1m
+            scrapeTimeout: 10s
+    persistence:
+      config:
+        type: emptyDir
+      config-file:
+        type: configMap
+        name: gatus-external-configmap
+        globalMounts:
+          - path: /config/config.yaml
+            subPath: config.yaml
+            readOnly: true

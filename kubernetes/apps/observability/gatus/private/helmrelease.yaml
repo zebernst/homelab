@@ -32,8 +32,8 @@ spec:
             args:
               - --auto-httproute
               - --enable-service
-              - --gateway-name=external
               - --gateway-name=internal
+              - --gateway-name=tailscale
               - --prefix-httproute=route/
               - --prefix-service=svc/
             resources: &resources
@@ -87,15 +87,15 @@ spec:
           http:
             port: *port
     route:
-      gatus:
+      canonical:
         annotations:
           gatus.home-operations.com/enabled: "false"
         hostnames:
-          - status.zebernst.dev
+          - gatus.jptr.zebernst.dev
         parentRefs:
-          - name: external
+          - name: tailscale
             namespace: kube-system
-            sectionName: https
+            sectionName: https-canon
     serviceAccount:
       gatus:
         enabled: true

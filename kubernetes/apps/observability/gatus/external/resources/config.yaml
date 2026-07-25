@@ -1,0 +1,38 @@
+---
+connectivity:
+  checker:
+    target: 1.1.1.1:53
+    interval: 1m
+
+endpoints:
+  # Flux GitHub receiver rejects unauthenticated probes with 400 on the hashed path.
+  # FLUX_WEBHOOK_PATH is derived in gatus-external-secret from the flux webhook token (Receiver formula).
+  - name: flux-webhook
+    group: public
+    url: https://flux-webhook.zebernst.dev${FLUX_WEBHOOK_PATH}
+    interval: 1m
+    client:
+      dns-resolver: tcp://1.1.1.1:53
+    conditions:
+      - "[STATUS] == 400"
+
+metrics: true
+
+storage:
+  type: postgres
+  path: postgres://${INIT_POSTGRES_USER}:${INIT_POSTGRES_PASS}@${INIT_POSTGRES_HOST}:5432/${INIT_POSTGRES_DBNAME}?sslmode=disable
+  caching: true
+
+ui:
+  title: Status | Gatus
+  header: Status
+  logo: https://github.com/user-attachments/assets/0248f379-cc4a-4a59-a400-014a750c61fa
+  link: https://github.com/zebernst
+  buttons:
+    - name: Github
+      link: https://github.com/zebernst
+    - name: Homelab
+      link: https://github.com/zebernst/homelab
+
+web:
+  port: ${GATUS_WEB_PORT}
