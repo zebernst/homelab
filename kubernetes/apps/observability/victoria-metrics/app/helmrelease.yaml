@@ -195,6 +195,10 @@ spec:
         enabled: true
         apiVersion: gateway.networking.k8s.io/v1
         kind: HTTPRoute
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: victoria-metrics
+            group: observability
         hostnames:
           - victoria-metrics.zebernst.dev
         parentRefs:

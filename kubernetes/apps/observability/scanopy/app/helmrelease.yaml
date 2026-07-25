@@ -73,6 +73,8 @@ spec:
       scanopy:
         annotations:
           gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
             path: /api/health
         hostnames:
           - scanopy.zebernst.dev

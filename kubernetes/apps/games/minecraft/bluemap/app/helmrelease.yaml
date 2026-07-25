@@ -85,6 +85,10 @@ spec:
 
     route:
       external:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
         hostnames: ["worldmap.zebernst.dev"]
         parentRefs:
           - name: external

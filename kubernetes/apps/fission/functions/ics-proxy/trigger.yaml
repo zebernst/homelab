@@ -18,6 +18,8 @@ spec:
     # Bare probe without ?calendar= returns 400 by design (same pattern as flux-webhook)
     annotations:
       gatus.home-operations.com/endpoint: |
+        name: ics-proxy
+        group: fission
         conditions:
           - "[STATUS] == 400"
     gateway:

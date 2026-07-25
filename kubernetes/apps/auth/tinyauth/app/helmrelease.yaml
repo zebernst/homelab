@@ -63,6 +63,10 @@ spec:
 
     route:
       external:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
         hostnames:
           - auth.zebernst.dev
         parentRefs:

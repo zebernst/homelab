@@ -32,7 +32,6 @@ spec:
             args:
               - --auto-httproute
               - --gateway-name=external
-              - --prefix-httproute=route/
             resources: &resources
               requests:
                 cpu: 10m
@@ -97,7 +96,7 @@ spec:
         annotations:
           gatus.home-operations.com/enabled: "false"
         hostnames:
-          - status.jptr.zebernst.dev
+          - gatus-ext.jptr.zebernst.dev
         parentRefs:
           - name: tailscale
             namespace: kube-system

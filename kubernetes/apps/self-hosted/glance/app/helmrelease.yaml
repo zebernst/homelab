@@ -92,6 +92,10 @@ spec:
             port: 8080
     route:
       glance:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
         hostnames:
           - glance.zebernst.dev
         parentRefs:

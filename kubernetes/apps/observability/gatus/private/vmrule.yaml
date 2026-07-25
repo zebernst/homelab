@@ -1,5 +1,5 @@
----
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmrule_v1beta1.json
+---
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:
@@ -10,10 +10,10 @@ spec:
       rules:
         - alert: GatusEndpointDown
           expr: |
-            gatus_results_endpoint_success{group=~"internal|private|cluster|buddy"} == 0
+            gatus_results_endpoint_success == 0
           for: 5m
           annotations:
             summary: >-
-              The {{ $labels.name }} endpoint is down
+              The {{ $labels.group }}/{{ $labels.name }} endpoint is down
           labels:
             severity: critical
