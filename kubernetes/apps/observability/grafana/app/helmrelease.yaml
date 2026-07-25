@@ -49,7 +49,9 @@ spec:
         use_pkce: true
         use_refresh_token: true
         allow_sign_up: true
-        role_attribute_path: contains(groups[*], 'admins') && 'Admin' || contains(groups[*], 'grafana-editors') && 'Editor' || contains(groups[*], 'grafana-viewers') && 'Viewer'
+        role_attribute_path: contains(groups[*], 'admins') && 'GrafanaAdmin' || contains(groups[*], 'grafana-editors') && 'Editor' || contains(groups[*], 'grafana-viewers') && 'Viewer'
+        # required for GrafanaAdmin (server admin); without it, admins only get org Admin
+        allow_assign_grafana_admin: true
         # reject OIDC logins that aren't in any of the mapped groups
         role_attribute_strict: true
       # Tailscale identity headers still authenticate the legacy ts.net Ingress path
