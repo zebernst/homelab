@@ -10,7 +10,7 @@ spec:
       rules:
         - alert: GatusEndpointDown
           expr: |
-            gatus_results_endpoint_success == 0
+            gatus_results_endpoint_success{job="gatus-external"} == 0
           for: 5m
           annotations:
             summary: >-
