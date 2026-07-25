@@ -237,33 +237,6 @@ spec:
         - pods=[*]
         - deployments=[*]
         - persistentvolumeclaims=[*]
-      rbac:
-        extraRules:
-          - apiGroups: ["holmesgpt.dev"]
-            resources: ["healthchecks", "scheduledhealthchecks"]
-            verbs: ["list", "watch"]
-      customResourceState:
-        enabled: true
-        config:
-          spec:
-            resources:
-              - groupVersionKind:
-                  group: holmesgpt.dev
-                  version: v1alpha1
-                  kind: ScheduledHealthCheck
-                labelsFromPath:
-                  name: [metadata, name]
-                  exported_namespace: [metadata, namespace]
-                metrics:
-                  - name: scheduled_health_check_last_result_info
-                    help: "Last result of a HolmesGPT scheduled health check"
-                    each:
-                      type: Info
-                      info:
-                        labelsFromPath:
-                          name: [metadata, name]
-                          exported_namespace: [metadata, namespace]
-                          result: [status, lastResult]
       vmScrape:
         enabled: true
         spec:
