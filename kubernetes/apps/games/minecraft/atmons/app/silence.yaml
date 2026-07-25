@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.giantswarm.io/silence_v1alpha1.json
+---
+# Silence ScrapePoolHasNoTargets while this server is scaled to zero.
+# scrape_job format from vmagent: serviceScrape/<namespace>/<ServiceMonitor>/<endpointIndex>
+apiVersion: monitoring.giantswarm.io/v1alpha1
+kind: Silence
+metadata:
+  name: ${APP}-autoscaling
+spec:
+  matchers:
+    - name: alertname
+      value: ScrapePoolHasNoTargets
+      isRegex: false
+    - name: scrape_job
+      value: serviceScrape/.*/${APP}/.*
+      isRegex: true
