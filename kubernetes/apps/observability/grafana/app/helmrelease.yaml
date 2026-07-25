@@ -21,13 +21,13 @@ spec:
       type: Recreate
     admin:
       existingSecret: grafana-admin-secret
+    envFromSecret: grafana-oidc-secret
     env:
       GF_DATE_FORMATS_USE_BROWSER_LOCALE: true
       GF_EXPLORE_ENABLED: true
       GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: natel-discrete-panel,pr0ps-trackmap-panel,panodata-map-panel
       GF_SECURITY_ANGULAR_SUPPORT_ENABLED: true
-      # Dual-run: keep ts.net root until OIDC cutover; jptr HTTPRoute is companion
-      GF_SERVER_ROOT_URL: https://grafana.kite-harmonic.ts.net
+      GF_SERVER_ROOT_URL: https://grafana.jptr.zebernst.dev
     grafana.ini:
       analytics:
         check_for_updates: false
@@ -38,6 +38,20 @@ spec:
         org_id: 1
         org_name: Main Org.
         org_role: Viewer
+      auth.generic_oauth:
+        enabled: true
+        name: Pocket ID
+        icon: signin
+        scopes: openid profile email
+        auth_url: https://id.zebernst.dev/authorize
+        token_url: https://id.zebernst.dev/api/oidc/token
+        api_url: https://id.zebernst.dev/api/oidc/userinfo
+        use_pkce: true
+        use_refresh_token: true
+        allow_sign_up: true
+        # single-user homelab: every OIDC login is an admin
+        role_attribute_path: "'Admin'"
+      # Tailscale identity headers still authenticate the legacy ts.net Ingress path
       auth.proxy:
         enabled: true
         whitelist: 10.244.0.0/16  # pod cidr
