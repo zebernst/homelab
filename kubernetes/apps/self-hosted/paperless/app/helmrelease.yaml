@@ -35,6 +35,10 @@ spec:
             env:
               # Configure application
               PAPERLESS_URL: "https://{{ .Release.Name }}.kite-harmonic.ts.net"
+              # Dual-run jptr companion (OIDC / Gateway cutover verification)
+              PAPERLESS_CSRF_TRUSTED_ORIGINS: "https://{{ .Release.Name }}.jptr.zebernst.dev,https://{{ .Release.Name }}.kite-harmonic.ts.net"
+              PAPERLESS_ALLOWED_HOSTS: "{{ .Release.Name }}.jptr.zebernst.dev,{{ .Release.Name }}.kite-harmonic.ts.net"
+              PAPERLESS_CORS_ALLOWED_HOSTS: "https://{{ .Release.Name }}.jptr.zebernst.dev,https://{{ .Release.Name }}.kite-harmonic.ts.net"
               PAPERLESS_PORT: &port "8000"
               PAPERLESS_TIME_ZONE: "America/Chicago"
               PAPERLESS_WEBSERVER_WORKERS: "2"
@@ -136,6 +140,19 @@ spec:
           - hosts:
               - *tsHost
 
+    route:
+      # Dual-run with Tailscale Ingress until OIDC cutover drops ts.net
+      canonical:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
 
     serviceMonitor:
       app:
