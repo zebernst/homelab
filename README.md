@@ -123,13 +123,13 @@ Local deployments attach an HTTPRoute to the `internal` Gateway, which registers
 
 The second and most common way that an app can be exposed is via [Tailscale](https://tailscale.com/kb/1236/kubernetes-operator). Canonical private hostnames live under `$APP.jptr.zebernst.dev` on the Cilium `tailscale` Gateway (`https-canon` listener). Apex `*.zebernst.dev` stays available for vanity URLs.
 
-DNS for `jptr.zebernst.dev` is answered in-cluster by CoreDNS [k8s_gateway](https://github.com/k8s-gateway/k8s_gateway) (Service `coredns-canonical`, Tailscale MagicDNS hostname `jupiter-dns`). Tailscale split DNS for that zone points at `jupiter-dns`; UniFi and Cloudflare ExternalDNS both exclude `jptr.zebernst.dev` so they never publish competing records.
+DNS for `jptr.zebernst.dev` is answered in-cluster by CoreDNS [k8s_gateway](https://github.com/k8s-gateway/k8s_gateway) (Service `coredns-gateway`, Tailscale MagicDNS hostname `jupiter-dns`). Tailscale split DNS for that zone points at `jupiter-dns`; UniFi and Cloudflare ExternalDNS both exclude `jptr.zebernst.dev` so they never publish competing records.
 
 | Zone | Nameserver | Purpose |
 |------|------------|---------|
 | `zebernst.dev` | UDM Pro (via Tailscale split DNS) | Apex / LAN records synced by ExternalDNS → UniFi |
 | `.internal` | UDM Pro (via Tailscale split DNS) | LAN-only hostnames on the VIP Gateway |
-| `jptr.zebernst.dev` | `jupiter-dns` (`coredns-canonical` in-cluster) | Canonical private zone; answers with the Tailscale Gateway address |
+| `jptr.zebernst.dev` | `jupiter-dns` (`coredns-gateway` in-cluster) | Canonical private zone; answers with the Tailscale Gateway address |
 
 Tailscale also serves as a Kubernetes auth proxy, which I use in conjunction with the [Nautik](https://nautik.io/) iOS app to monitor and administer my Kubernetes cluster on-the-go.
 
