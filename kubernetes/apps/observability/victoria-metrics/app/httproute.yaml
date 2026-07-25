@@ -1,5 +1,22 @@
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
 ---
+# VMUI (vmsingle)
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: victoria-metrics-canonical
+spec:
+  hostnames:
+    - victoria-metrics.jptr.zebernst.dev
+  parentRefs:
+    - name: tailscale
+      namespace: kube-system
+      sectionName: https-canon
+  rules:
+    - backendRefs:
+        - name: vmsingle-vmks
+          port: 8428
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -15,3 +32,35 @@ spec:
     - backendRefs:
         - name: vmalertmanager-vmks
           port: 9093
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: vmalert-canonical
+spec:
+  hostnames:
+    - vmalert.jptr.zebernst.dev
+  parentRefs:
+    - name: tailscale
+      namespace: kube-system
+      sectionName: https-canon
+  rules:
+    - backendRefs:
+        - name: vmalert-vmks
+          port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: vmagent-canonical
+spec:
+  hostnames:
+    - vmagent.jptr.zebernst.dev
+  parentRefs:
+    - name: tailscale
+      namespace: kube-system
+      sectionName: https-canon
+  rules:
+    - backendRefs:
+        - name: vmagent-vmks
+          port: 8429

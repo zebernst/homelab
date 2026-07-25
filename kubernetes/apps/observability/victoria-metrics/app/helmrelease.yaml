@@ -201,14 +201,10 @@ spec:
             group: observability
         hostnames:
           - victoria-metrics.zebernst.dev
-          - victoria-metrics.jptr.zebernst.dev
         parentRefs:
           - name: internal
             namespace: kube-system
             sectionName: https
-          - name: tailscale
-            namespace: kube-system
-            sectionName: https-canon
 
     vmalert:
       enabled: true

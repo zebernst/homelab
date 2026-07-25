@@ -6,7 +6,7 @@ metadata:
   name: victoria-logs-canonical
 spec:
   hostnames:
-    - logs.jptr.zebernst.dev
+    - victoria-logs.jptr.zebernst.dev
   parentRefs:
     - name: tailscale
       namespace: kube-system
