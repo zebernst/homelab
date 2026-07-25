@@ -87,7 +87,7 @@ spec:
           http:
             port: *port
     route:
-      canon:
+      canonical:
         annotations:
           gatus.home-operations.com/enabled: "false"
         hostnames:
