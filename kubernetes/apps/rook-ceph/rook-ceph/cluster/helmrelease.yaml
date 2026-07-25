@@ -195,6 +195,10 @@ spec:
           region: us-east-1
       route:
         enabled: true
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: s3
+            group: rook-ceph
         host:
           name: s3.zebernst.dev
           path: /

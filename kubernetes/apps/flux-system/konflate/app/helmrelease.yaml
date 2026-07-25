@@ -39,6 +39,8 @@ spec:
       enabled: true
       annotations:
         gatus.home-operations.com/endpoint: |
+          name: konflate
+          group: flux-system
           path: /readyz
       parentRefs:
         - name: external

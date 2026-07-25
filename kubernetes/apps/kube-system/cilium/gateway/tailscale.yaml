@@ -26,7 +26,6 @@ metadata:
   name: tailscale
   annotations:
     gatus.home-operations.com/endpoint: |
-      group: private
       client:
         dns-resolver: tcp://dns-jptr.network.svc.cluster.local:53
       conditions:

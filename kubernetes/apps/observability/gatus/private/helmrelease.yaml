@@ -34,8 +34,6 @@ spec:
               - --enable-service
               - --gateway-name=internal
               - --gateway-name=tailscale
-              - --prefix-httproute=route/
-              - --prefix-service=svc/
             resources: &resources
               requests:
                 cpu: 10m

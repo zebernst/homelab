@@ -89,6 +89,8 @@ spec:
       plex:
         annotations:
           gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
             path: /web/index.html
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"

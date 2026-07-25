@@ -67,6 +67,8 @@ spec:
       app:
         annotations:
           gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
             path: /api/v1/status
         hostnames:
           - "requests.zebernst.dev"

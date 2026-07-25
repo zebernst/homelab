@@ -68,6 +68,8 @@ spec:
       app:
         annotations:
           gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
             path: /talos_version
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"

@@ -79,6 +79,10 @@ spec:
             port: *metricsPort
     route:
       app:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
         hostnames:
           - sh.zebernst.dev
         parentRefs:

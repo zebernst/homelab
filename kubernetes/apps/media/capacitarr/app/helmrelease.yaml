@@ -66,6 +66,8 @@ spec:
         annotations:
           # App requires auth on / (401); probe the unauthenticated health endpoint
           gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
             path: /api/v1/health
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"

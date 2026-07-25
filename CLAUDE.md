@@ -204,25 +204,37 @@ Useful kubectl plugins (via krew/aqua):
 ### Gatus exposure tiers
 
 Gatus runs as **two instances**, each with its own `gatus-sidecar`:
-- Public (`kubernetes/apps/observability/gatus/external/`, Release `gatus-external`) discovers the `external` Gateway only. Published at `status.zebernst.dev` (+ companion `status.jptr.zebernst.dev`). Never lists private inventory.
+- Public (`kubernetes/apps/observability/gatus/external/`, Release `gatus-external`) discovers the `external` Gateway only. Published at `status.zebernst.dev` (+ companion `gatus-ext.jptr.zebernst.dev`). Never lists private inventory.
 - Private (`kubernetes/apps/observability/gatus/private/`, Release `gatus`) discovers `internal` (→ `lan` after the rename) + `tailscale` Gateways plus opt-in cluster Services, plus buddy endpoints. Published only at `gatus.jptr.zebernst.dev` (tailnet).
 
-Tier defaults live on Gateways; per-app overrides should only set route-specific fields (`path:`, `enabled: "false"`, custom `url:`).
+Gateway annotations supply shared probe defaults (`client`, `conditions`). Per-route `gatus.home-operations.com/endpoint` sets Gatus fields (`name`, `group`, `ui`, `path`, … — see [Gatus endpoints](https://github.com/TwiN/gatus#endpoints)). **Group by Kubernetes namespace** on both instances; exposure tier is implied by which instance discovered the route (no `public`/`internal`/`private` groups).
 
 | Tier | Instance | Resource | Group | DNS resolver |
 |------|----------|----------|-------|--------------|
-| **Public** | public (`gatus-external`) | HTTPRoute → `external` Gateway | `public` | `1.1.1.1` (inherited from Gateway) |
-| **Internal/LAN** | `gatus` | HTTPRoute → `internal`/`lan` Gateway | `internal` (→ `lan`) | `kube-dns` (inherited from Gateway) |
-| **Private** | `gatus` | HTTPRoute → `tailscale` Gateway (`*.jptr`) | `private` | `dns-jptr` k8s_gateway (inherited from Gateway) |
-| **Cluster** | `gatus` | Service (opt-in) | `cluster` | in-cluster (auto `*.svc` URL) |
+| **Public** | `gatus-external` | HTTPRoute → `external` Gateway | `<namespace>` | `1.1.1.1` (inherited from Gateway) |
+| **Internal/LAN** | `gatus` | HTTPRoute → `internal`/`lan` Gateway | `<namespace>` | `kube-dns` (inherited from Gateway) |
+| **Private** | `gatus` | HTTPRoute → `tailscale` Gateway (`*.jptr`) | `<namespace>` | `dns-jptr` / `coredns-gateway` (inherited from Gateway) |
+| **Cluster** | `gatus` | Service (opt-in) | `<namespace>` | in-cluster (auto `*.svc` URL) |
 | **Buddy** | `gatus` | Static endpoints (`buddy.yaml`) | `buddy` | — |
+
+Typical per-route annotation (app-template):
+
+```yaml
+gatus.home-operations.com/endpoint: |
+  name: "{{ .Release.Name }}"
+  group: "{{ .Release.Namespace }}"
+  # path: /health   # optional probe path
+  # ui:             # optional; see Gatus endpoint UI options
+  #   hide-hostname: true
+```
 
 Cluster-tier Services require explicit opt-in:
 
 ```yaml
 gatus.home-operations.com/enabled: "true"
 gatus.home-operations.com/endpoint: |
-  group: cluster
+  name: myapp
+  group: "{{ .Release.Namespace }}"  # or hardcode the namespace
   # url: tcp://myapp.namespace.svc:8080  # optional override
 ```
 

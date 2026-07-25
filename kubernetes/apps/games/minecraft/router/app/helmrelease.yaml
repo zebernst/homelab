@@ -91,7 +91,7 @@ spec:
           gatus.home-operations.com/enabled: "true"
           gatus.home-operations.com/endpoint: |
             name: minecraft
-            group: public
+            group: games
             url: http://mc-router.games.svc.cluster.local:8080/routes
             interval: 1m
             conditions:
