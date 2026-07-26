@@ -34,13 +34,3 @@ spec:
       serviceMonitor:
         enabled: true
       retentionPeriod: 90d
-      ingress:
-        enabled: true
-        ingressClassName: internal
-        hosts:
-          - name: &host logs.zebernst.dev
-            path:
-              - /
-            port: http
-        tls:
-          - hosts: [*host]

@@ -3,10 +3,30 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: victoria-logs-canonical
+  name: victoria-logs
   annotations:
     gatus.home-operations.com/endpoint: |
       name: victoria-logs
+      group: observability
+spec:
+  hostnames:
+    - logs.zebernst.dev
+  parentRefs:
+    - name: internal
+      namespace: kube-system
+      sectionName: https
+  rules:
+    - backendRefs:
+        - name: victoria-logs-server
+          port: 9428
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: victoria-logs-canonical
+  annotations:
+    gatus.home-operations.com/endpoint: |
+      name: victoria-logs-jptr
       group: observability
 spec:
   hostnames:
