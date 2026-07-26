@@ -71,8 +71,6 @@ spec:
     service:
       atuin:
         controller: *app
-        labels:
-          experimental.homelab.zebernst.dev/canonical-labels: "true"
         ports:
           http:
             primary: true
