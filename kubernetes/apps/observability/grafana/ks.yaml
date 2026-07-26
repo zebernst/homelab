@@ -28,8 +28,6 @@ spec:
   postBuild:
     substitute:
       APP: grafana
-      OP_USER: POSTGRES_USER
-      OP_PASS: POSTGRES_PASS
   healthCheckExprs:
     - apiVersion: external-secrets.io/v1
       kind: ExternalSecret

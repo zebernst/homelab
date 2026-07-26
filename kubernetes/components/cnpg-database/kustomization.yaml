@@ -12,9 +12,9 @@
 #
 # Substitutions:
 #   APP                  role + database name (required)
-#   OP_USER              1Password property for the role username (required)
-#   OP_PASS              1Password property for the role password (required)
 #   OP_ITEM              1Password item holding the credentials (default: ${APP})
+#   OP_USER              1Password property for the role username (default: POSTGRES_USER)
+#   OP_PASS              1Password property for the role password (default: POSTGRES_PASS)
 #   CNPG_CLUSTER         target cluster (default: redspot)
 #   CNPG_RECLAIM         retain|delete when resources are deleted (default: retain)
 #
