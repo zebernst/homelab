@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmrule_v1beta1.json
+# Adapted from Kuadrant gateway-api-state-metrics example alert rules
+# (config/examples/rules/alert-rules.yaml)
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: gateway-api
+spec:
+  groups:
+    - name: gateway-api.rules
+      rules:
+        - alert: GatewayUnhealthy
+          expr: |
+            (gatewayapi_gateway_status{type="Accepted"} == 0) or (gatewayapi_gateway_status{type="Programmed"} == 0)
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Gateway {{ $labels.namespace }}/{{ $labels.name }} is unhealthy — Accepted or Programmed condition is not True
+
+        - alert: GatewayInsecureListener
+          # http/http-internal listeners are intentional: they only serve the
+          # https-redirect HTTPRoute. Alert on any other plaintext listener.
+          expr: |
+            gatewayapi_gateway_listener_info{protocol="HTTP", listener_name!~"http|http-internal"}
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Gateway {{ $labels.namespace }}/{{ $labels.name }} has an unexpected plaintext listener {{ $labels.listener_name }} ({{ $labels.protocol }}/{{ $labels.port }})
