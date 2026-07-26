@@ -11,5 +11,7 @@ spec:
     url: blackbox-exporter.observability.svc.cluster.local:9115
   targets:
     static:
+      labels:
+        namespace: observability
       targets:
         - nas.internal:2049

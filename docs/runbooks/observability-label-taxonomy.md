@@ -32,9 +32,11 @@ do not imply a collector failure.
 - Metrics from Services without the experimental flag remain exporter- and
   target-specific. No canonical labels are added unless the discovered Service
   carries the experimental flag described below.
-- Static `VMProbe` targets do not have Kubernetes discovery metadata. Only
-  explicitly configured target labels and the metrics-wide `cluster` label are
-  reliable for those targets.
+- Static `VMProbe` targets do not have Kubernetes discovery metadata. App
+  probes set truthful `targets.static.labels` (`namespace`, `app`) in Git.
+  Heterogeneous probes (e.g. `devices`, `nfs`) set `namespace` only — never
+  invent `pod`/`container` or Flux provenance. The metrics-wide `cluster`
+  label still applies.
 - Flux-native labels exist only on top-level Flux-managed objects. They are not
   automatically copied into Pod templates, so `flux_kustomization` and
   `helmrelease` are commonly unavailable on container-log Pods.
