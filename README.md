@@ -117,18 +117,18 @@ Apps hosted on my cluster are exposed using any combination of three different m
 
 The first and easiest way that an app can be exposed is strictly on my local network. This is most often used for apps and services that have to do with home automation – given that every smart home device is on my local network, there is no need to expose e.g. a supporting service like MQTT any further than that.
 
-Local deployments attach an HTTPRoute to the `internal` Gateway, which registers a virtual IP in a designated subnet (advertised via BGP) and provisions a DNS record on the router with the [ExternalDNS webhook provider for UniFi](https://github.com/kashalls/external-dns-unifi-webhook).
+Local deployments attach an HTTPRoute to the `lan` Gateway, which registers a virtual IP in a designated subnet (advertised via BGP) and provisions a DNS record on the router with the [ExternalDNS webhook provider for UniFi](https://github.com/kashalls/external-dns-unifi-webhook).
 
 ### Privately Exposed (Tailscale)
 
-The second and most common way that an app can be exposed is via [Tailscale](https://tailscale.com/kb/1236/kubernetes-operator). Canonical private hostnames live under `$APP.jptr.zebernst.dev` on the Cilium `tailscale` Gateway (`https-canon` listener). Apex `*.zebernst.dev` stays available for vanity URLs.
+The second and most common way that an app can be exposed is via [Tailscale](https://tailscale.com/kb/1236/kubernetes-operator). Canonical private hostnames live under `$APP.jptr.zebernst.dev` on the Cilium `tailscale` Gateway (`https-canon` listener).
 
 DNS for `jptr.zebernst.dev` is answered in-cluster by CoreDNS [k8s_gateway](https://github.com/k8s-gateway/k8s_gateway) (Service `coredns-gateway`, Tailscale MagicDNS hostname `jupiter-dns`). Tailscale split DNS for that zone points at `jupiter-dns`; UniFi and Cloudflare ExternalDNS both exclude `jptr.zebernst.dev` so they never publish competing records.
 
 | Zone | Nameserver | Purpose |
 |------|------------|---------|
 | `zebernst.dev` | UDM Pro (via Tailscale split DNS) | Apex / LAN records synced by ExternalDNS → UniFi |
-| `.internal` | UDM Pro (via Tailscale split DNS) | LAN-only hostnames on the VIP Gateway |
+| `.internal` | UDM Pro (via Tailscale split DNS) | LAN-only hostnames (Services / LoadBalancers, not Gateway routes) |
 | `jptr.zebernst.dev` | `jupiter-dns` (`coredns-gateway` in-cluster) | Canonical private zone; answers with the Tailscale Gateway address |
 
 Tailscale also serves as a Kubernetes auth proxy, which I use in conjunction with the [Nautik](https://nautik.io/) iOS app to monitor and administer my Kubernetes cluster on-the-go.

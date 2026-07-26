@@ -5,6 +5,6 @@ kind: Kustomization
 resources:
   - external.yaml
   - hubble.yaml
-  - internal.yaml
+  - lan.yaml
   - redirect.yaml
   - tailscale.yaml

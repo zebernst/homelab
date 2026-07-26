@@ -166,8 +166,8 @@ After bootstrap, Flux takes over and manages all subsequent deployments.
 ### Networking & Ingress
 
 Three ingress methods are used:
-- **internal**: Local network only, uses BGP-advertised VIPs with ExternalDNS for UniFi
-- **tailscale**: Private access via Tailscale, automatic MagicDNS
+- **lan**: Local network only, uses BGP-advertised VIPs with ExternalDNS for UniFi
+- **tailscale**: Private access via Tailscale (`*.jptr.zebernst.dev`)
 - **external**: Public access via Cloudflare Tunnel (cloudflared), with ExternalDNS managing CNAME records
 
 ### Storage
@@ -205,14 +205,14 @@ Useful kubectl plugins (via krew/aqua):
 
 Gatus runs as **two instances**, each with its own `gatus-sidecar`:
 - Public (`kubernetes/apps/observability/gatus/external/`, Release `gatus-external`) discovers the `external` Gateway only. Published at `status.zebernst.dev` (+ companion `gatus-ext.jptr.zebernst.dev`). Never lists private inventory.
-- Private (`kubernetes/apps/observability/gatus/private/`, Release `gatus`) discovers `internal` (→ `lan` after the rename) + `tailscale` Gateways plus opt-in cluster Services, plus buddy endpoints. Published only at `gatus.jptr.zebernst.dev` (tailnet).
+- Private (`kubernetes/apps/observability/gatus/private/`, Release `gatus`) discovers `lan` + `tailscale` Gateways plus opt-in cluster Services, plus buddy endpoints. Published only at `gatus.jptr.zebernst.dev` (tailnet).
 
-Gateway annotations supply shared probe defaults (`client`, `conditions`). Per-route `gatus.home-operations.com/endpoint` sets Gatus fields (`name`, `group`, `ui`, `path`, … — see [Gatus endpoints](https://github.com/TwiN/gatus#endpoints)). **Group by Kubernetes namespace** on both instances; exposure tier is implied by which instance discovered the route (no `public`/`internal`/`private` groups).
+Gateway annotations supply shared probe defaults (`client`, `conditions`). Per-route `gatus.home-operations.com/endpoint` sets Gatus fields (`name`, `group`, `ui`, `path`, … — see [Gatus endpoints](https://github.com/TwiN/gatus#endpoints)). **Group by Kubernetes namespace** on both instances; exposure tier is implied by which instance discovered the route (no `public`/`lan`/`private` groups).
 
 | Tier | Instance | Resource | Group | DNS resolver |
 |------|----------|----------|-------|--------------|
 | **Public** | `gatus-external` | HTTPRoute → `external` Gateway | `<namespace>` | `1.1.1.1` (inherited from Gateway) |
-| **Internal/LAN** | `gatus` | HTTPRoute → `internal`/`lan` Gateway | `<namespace>` | `kube-dns` (inherited from Gateway) |
+| **LAN** | `gatus` | HTTPRoute → `lan` Gateway | `<namespace>` | `kube-dns` (inherited from Gateway) |
 | **Private** | `gatus` | HTTPRoute → `tailscale` Gateway (`*.jptr`) | `<namespace>` | `dns-jptr` / `coredns-gateway` (inherited from Gateway) |
 | **Cluster** | `gatus` | Service (opt-in) | `<namespace>` | in-cluster (auto `*.svc` URL) |
 | **Buddy** | `gatus` | Static endpoints (`buddy.yaml`) | `buddy` | — |

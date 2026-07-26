@@ -12,7 +12,7 @@ spec:
   hostnames:
     - logs.zebernst.dev
   parentRefs:
-    - name: internal
+    - name: lan
       namespace: kube-system
       sectionName: https
   rules:

@@ -122,7 +122,7 @@ spec:
           gatus.home-operations.com/enabled: "false"
         hostnames: ["mc-api.zebernst.dev"]
         parentRefs:
-          - name: internal
+          - name: lan
             namespace: kube-system
             sectionName: https
         rules:
