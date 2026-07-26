@@ -20,6 +20,40 @@ spec:
             summary: >-
               Gateway {{ $labels.namespace }}/{{ $labels.name }} is unhealthy — Accepted or Programmed condition is not True
 
+        - alert: GatewayClassNotAccepted
+          expr: |
+            gatewayapi_gatewayclass_status{type="Accepted"} == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              GatewayClass {{ $labels.name }} is not Accepted — no controller is managing Gateways of this class
+
+        # Listener-level alerts rely on the per-listener condition gauges added
+        # locally to the CustomResourceState config. A Gateway can be Programmed
+        # while one of its listeners is broken, so these are not redundant with
+        # GatewayUnhealthy above.
+        - alert: GatewayListenerNotProgrammed
+          expr: |
+            (gatewayapi_gateway_status_listener_accepted == 0) or (gatewayapi_gateway_status_listener_programmed == 0)
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Listener {{ $labels.listener_name }} on Gateway {{ $labels.namespace }}/{{ $labels.name }} is not accepted or not programmed — it is not serving traffic
+
+        - alert: GatewayListenerUnresolvedRefs
+          expr: |
+            gatewayapi_gateway_status_listener_resolved_refs == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Listener {{ $labels.listener_name }} on Gateway {{ $labels.namespace }}/{{ $labels.name }} has unresolvable references — the TLS certificate Secret is missing or its ReferenceGrant is absent
+
         - alert: GatewayInsecureListener
           # http/http-internal listeners are intentional: they only serve the
           # https-redirect HTTPRoute. Alert on any other plaintext listener.

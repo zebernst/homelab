@@ -84,6 +84,36 @@ data:
                 labelsFromPath:
                   listener_name: ["name"]
                 valueFrom: ["attachedRoutes"]
+          # Local addition (not upstream): per-listener condition gauges. A Gateway
+          # can be Programmed while an individual listener fails, e.g. a missing
+          # TLS certificate Secret sets ResolvedRefs=False on that listener only.
+          - name: "status_listener_accepted"
+            help: "Accepted condition of each Gateway listener (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, listeners]
+                labelsFromPath:
+                  listener_name: ["name"]
+                valueFrom: ["conditions", "[type=Accepted]", "status"]
+          - name: "status_listener_programmed"
+            help: "Programmed condition of each Gateway listener (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, listeners]
+                labelsFromPath:
+                  listener_name: ["name"]
+                valueFrom: ["conditions", "[type=Programmed]", "status"]
+          - name: "status_listener_resolved_refs"
+            help: "ResolvedRefs condition of each Gateway listener (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, listeners]
+                labelsFromPath:
+                  listener_name: ["name"]
+                valueFrom: ["conditions", "[type=ResolvedRefs]", "status"]
           - name: "status_address_info"
             help: "Gateway address types and values"
             each:
