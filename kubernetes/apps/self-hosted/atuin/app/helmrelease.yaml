@@ -95,7 +95,6 @@ spec:
       app:
         endpoints:
           - port: metrics
-            honorLabels: true
     persistence:
       config:
         type: emptyDir

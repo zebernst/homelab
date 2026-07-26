@@ -129,8 +129,8 @@ spec:
           cluster: jupiter
         # Enforce sample-wins for taxonomy identity labels. The operator only
         # exposes overrideHonorLabels→false (target wins / exported_*), so restore
-        # conflicting exporter labels before remote write. No-op when honorLabels
-        # is already true or when the sample never emitted the label.
+        # conflicting exporter labels before remote write. No-op when the sample
+        # never emitted the label.
         inlineRelabelConfig:
           - sourceLabels: [exported_namespace]
             regex: (.+)
@@ -367,7 +367,6 @@ spec:
           jobLabel: jobLabel
           endpoints:
             - port: metrics
-              honorLabels: true
               relabelConfigs:
                 - action: replace
                   regex: (.*)

@@ -108,7 +108,6 @@ spec:
             path: /metrics
             interval: 1m
             scrapeTimeout: 10s
-            honorLabels: true
     persistence:
       config:
         type: emptyDir
