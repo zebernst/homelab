@@ -29,8 +29,17 @@ tasks:
       - kubectl node-shell --version
       - which kubectl
 
+  sync-secret:
+    desc: Force-sync an ExternalSecret [NS=required] [APP=required]
+    cmd: kubectl --namespace {{.NS}} annotate externalsecret {{.APP}} force-sync="{{now | unixEpoch}}" --overwrite
+    requires:
+      vars: [NS, APP]
+    preconditions:
+      - kubectl --namespace {{.NS}} get externalsecret {{.APP}}
+      - which kubectl
+
   sync-secrets:
-    desc: Sync all ExternalSecrets
+    desc: Force-sync all ExternalSecrets
     cmds:
       - for: { var: SECRETS, split: "\n" }
         cmd: kubectl --namespace {{splitList "," .ITEM | first}} annotate externalsecret {{splitList "," .ITEM | last}} force-sync="{{now | unixEpoch}}" --overwrite
