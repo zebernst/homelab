@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmrule_v1beta1.json
-# Adapted from Kuadrant gateway-api-state-metrics example alert rules
-# (config/examples/rules/alert-rules.yaml)
+# Adapted from Kuadrant gateway-api-state-metrics example alert rules:
+# https://github.com/Kuadrant/gateway-api-state-metrics/blob/main/config/examples/rules/alert-rules.yaml
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
 metadata:

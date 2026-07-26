@@ -216,6 +216,7 @@ spec:
         - deployments=[*]
         - persistentvolumeclaims=[*]
       # Gateway API State Metrics (Kuadrant CRS) — feeds Grafana dashboards 19432–19573
+      # https://github.com/Kuadrant/gateway-api-state-metrics
       customResourceState:
         enabled: true
         create: false
