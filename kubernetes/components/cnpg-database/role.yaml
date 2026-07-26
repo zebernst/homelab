@@ -10,7 +10,6 @@ spec:
     name: ${CNPG_CLUSTER:=redspot}
   comment: ${APP} application role
   login: true
-  # DatabaseRole has no `ensure`; removal is governed by the reclaim policy
   databaseRoleReclaimPolicy: ${CNPG_RECLAIM:=retain}
   passwordSecret:
     name: ${APP}-db-role
