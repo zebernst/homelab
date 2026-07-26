@@ -1,8 +1,9 @@
 # Observability label taxonomy
 
 Container logs in VictoriaLogs use the normalized labels below. Metrics in
-VictoriaMetrics retain exporter labels by default, with a marker-gated pilot
-that promotes Kubernetes discovery metadata for selected application Services.
+VictoriaMetrics retain exporter labels by default, with an experimental
+flag-gated pilot that promotes Kubernetes discovery metadata for selected
+application Services.
 
 ## Normalized log labels
 
@@ -30,7 +31,7 @@ do not imply a collector failure.
 - The `cluster` vmagent external label is attached to stored metrics.
 - Metrics from Services outside the pilot remain exporter- and target-specific.
   No canonical labels are added unless the discovered Service carries the
-  pilot marker described below.
+  experimental flag described below.
 - Static `VMProbe` targets do not have Kubernetes discovery metadata. Only
   explicitly configured target labels and the metrics-wide `cluster` label are
   reliable for those targets.
@@ -38,15 +39,15 @@ do not imply a collector failure.
   automatically copied into Pod templates, so `flux_kustomization` and
   `helmrelease` are commonly unavailable on container-log Pods.
 
-## Opt-in metrics target labels
+## Experimental metrics target labels
 
-The application metrics pilot is enabled only for Services labeled
-`observability.home-operations.com/canonical-target-labels: "true"`. The
-current pilot Services are `atuin`, `paperless`, `gatus`, and `dawarich`.
-Static `VMProbe` targets, kubelet and cAdvisor, kube-state-metrics,
-node-exporter, and every non-opted Service remain unaffected.
+The application metrics pilot is gated by the experimental Service flag
+`experimental.homelab.zebernst.dev/canonical-labels: "true"`. The current
+pilot Services are `atuin`, `paperless`, `gatus`, and `dawarich`. Static
+`VMProbe` targets, kubelet and cAdvisor, kube-state-metrics, node-exporter,
+and every Service without that flag remain unaffected.
 
-For opted-in Service-backed targets, vmagent promotes metadata that exists at
+For flagged Service-backed targets, vmagent promotes metadata that exists at
 discovery time:
 
 - `namespace` from the Kubernetes namespace.
@@ -105,7 +106,7 @@ sum by (pod, container) (
 )
 ```
 
-An opted-in application target can be selected with promoted target labels:
+A flagged application target can be selected with promoted target labels:
 
 ```promql
 up{

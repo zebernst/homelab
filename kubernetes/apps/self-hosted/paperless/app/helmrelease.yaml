@@ -123,7 +123,7 @@ spec:
       paperless:
         controller: *app
         labels:
-          observability.home-operations.com/canonical-target-labels: "true"
+          experimental.homelab.zebernst.dev/canonical-labels: "true"
         ports:
           http:
             port: *port

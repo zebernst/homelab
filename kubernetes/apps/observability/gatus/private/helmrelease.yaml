@@ -82,7 +82,7 @@ spec:
     service:
       gatus:
         labels:
-          observability.home-operations.com/canonical-target-labels: "true"
+          experimental.homelab.zebernst.dev/canonical-labels: "true"
         ports:
           http:
             port: *port
