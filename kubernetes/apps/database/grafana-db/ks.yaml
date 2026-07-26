@@ -3,28 +3,34 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app grafana
-  namespace: &ns observability
+  name: &app grafana-db
+  namespace: &ns database
 spec:
+  targetNamespace: *ns
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: grafana-db
-      namespace: database
+    - name: cloudnative-pg-cluster
+      namespace: *ns
     - name: onepassword
       namespace: external-secrets
+  healthCheckExprs:
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: DatabaseRole
+      failed: status.applied == false
+      current: status.applied == true
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Database
+      failed: status.applied == false
+      current: status.applied == true
   interval: 30m
   retryInterval: 1m
-  path: kubernetes/apps/observability/grafana/app
+  path: kubernetes/apps/database/grafana-db/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: *ns
   timeout: 5m
-  wait: false
-  postBuild:
-    substitute:
-      APP: *app
+  wait: true

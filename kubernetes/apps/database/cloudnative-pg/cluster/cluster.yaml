@@ -19,13 +19,6 @@ spec:
     parameters:
       max_connections: "200"
       shared_buffers: 256MB
-  managed:
-    roles:
-      - name: grafana
-        ensure: present
-        login: true
-        passwordSecret:
-          name: grafana-db-role
   resources:
     requests:
       cpu: 200m

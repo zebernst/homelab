@@ -10,3 +10,4 @@ spec:
   name: grafana
   owner: grafana
   ensure: present
+  databaseReclaimPolicy: retain
