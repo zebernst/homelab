@@ -123,6 +123,85 @@ Do not assume `flux_kustomization` exists on these Helm-rendered Services.
 Native cAdvisor metrics are outside the pilot and should continue to use their
 native labels, as in the container CPU query above.
 
+## Grafana Correlations (logs ↔ metrics)
+
+Grafana [Correlations](https://grafana.com/docs/grafana/latest/administration/correlations/)
+turn a field on one Explore result into a query (or URL) on another datasource.
+Use them to jump between VictoriaLogs and Prometheus using the taxonomy labels
+above — not to invent Flux ownership when `helmrelease` /
+`flux_kustomization` are absent.
+
+Provisioned datasource UIDs in this cluster:
+
+| Datasource   | UID           |
+|--------------|---------------|
+| Prometheus   | `prometheus`  |
+| VictoriaLogs | `victorialogs` |
+
+### Preferred links
+
+Build correlations on labels that are usually present after the Fluent Bit
+rename:
+
+| Direction | Source field(s) | Target idea |
+|-----------|-----------------|-------------|
+| Logs → metrics | `app`, optionally `namespace` / `pod` / `container` | PromQL on cAdvisor or a flagged app series filtered by those labels |
+| Metrics → logs | `namespace`, `pod`, and/or `app` | LogsQL stream filter `{namespace="…",app="…"}` (add `pod` when present) |
+
+Avoid anchoring Correlations on `helmrelease` or `flux_kustomization` for
+**log** rows. Those fields are commonly missing on Pod logs, so the link will
+not appear. On **flagged metrics** targets they may be present and can be used
+as an optional secondary link later.
+
+### Create in the UI
+
+1. Open Grafana → **Administration** → **Plugins and data** → **Correlations**
+   (or use the Correlations editor in **Explore**).
+2. **Source**: VictoriaLogs (`victorialogs`) or Prometheus (`prometheus`).
+3. **Results field**: the taxonomy label to click (for example `app` or `pod`).
+4. **Type**: Query.
+5. **Target**: the other datasource UID from the table above.
+6. **Target query**: substitute the clicked field with `${app}` / `${namespace}`
+   / `${pod}` (Grafana exposes source fields as variables). Keep the Explore
+   time range; do not hard-code absolute times.
+
+Example **logs → metrics** target (cAdvisor CPU for the clicked app’s
+namespace — adjust filters to what the log row actually has):
+
+```promql
+sum by (pod, container) (
+  rate(container_cpu_usage_seconds_total{
+    cluster="jupiter",
+    namespace="${namespace}",
+    pod="${pod}",
+    container!="",
+    container!="POD"
+  }[5m])
+)
+```
+
+Example **metrics → logs** target:
+
+```text
+{namespace="${namespace}", pod="${pod}"}
+```
+
+When the metric series has `app` (pilot / flagged Services), prefer:
+
+```text
+{namespace="${namespace}", app="${app}"}
+```
+
+After saving, open **Explore**, run a query that returns those fields, expand a
+log line or table row, and use the correlation link (opens split Explore).
+
+### Provisioning later
+
+Correlations can also be declared under a provisioned datasource’s
+`jsonData.correlations` (or the datasource `correlations:` list in Grafana
+provisioning). Prefer Git-managed provisioning once the UI shapes are proven;
+the runbook contract (which fields → which query) stays the same either way.
+
 ## Scope boundaries
 
 This taxonomy does not cover tracing, synthesized workload or controller
@@ -133,3 +212,5 @@ identity, or admission/per-workload patches that add Pod-level Flux provenance.
 - [VictoriaLogs LogsQL](https://docs.victoriametrics.com/victorialogs/logsql/)
 - [VictoriaLogs Grafana integration](https://docs.victoriametrics.com/victorialogs/integrations/grafana/)
 - [Prometheus querying basics](https://prometheus.io/docs/prometheus/latest/querying/basics/)
+- [Grafana Correlations](https://grafana.com/docs/grafana/latest/administration/correlations/)
+- [Create a correlation](https://grafana.com/docs/grafana/latest/administration/correlations/create-a-new-correlation/)
