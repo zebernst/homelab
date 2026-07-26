@@ -130,15 +130,32 @@ Do not assume `flux_kustomization` exists on these Helm-rendered Services.
 Native cAdvisor metrics are outside the experimental gate and should continue
 to use their native labels, as in the container CPU query above.
 
+## Grafana logs dashboard
+
+The **Logs taxonomy** dashboard (folder `Logs`, uid `logs-taxonomy`) is
+provisioned via ConfigMap `grafana-logs-taxonomy-dashboard` and the Grafana
+dashboard sidecar. Variables cascade on canonical stream fields only:
+
+`namespace` → `app` → `pod` / `container` / `stream`, plus an optional
+textbox `search` appended as a LogsQL fragment (leave empty for no extra
+filter).
+
+Panel queries use `{namespace="$namespace", app="$app", …}` (VictoriaLogs
+expands multi-value variables via `in(...)`) — never Fluent Bit intermediate
+`k_*` paths.
+
 ## Grafana Correlations (logs ↔ metrics)
 
 Grafana [Correlations](https://grafana.com/docs/grafana/latest/administration/correlations/)
-turn a field on one Explore result into a query (or URL) on another datasource.
-Use them to jump between VictoriaLogs and Prometheus on the taxonomy labels
-that are routinely present after the Fluent Bit rename: `app`, `namespace`,
-`pod`, and `container`.
+turn a field on one Explore result into a query on another datasource. They are
+provisioned on the Prometheus and VictoriaLogs datasources in
+`kubernetes/apps/observability/grafana/app/helmrelease.yaml` for the taxonomy
+labels that are routinely present after the Fluent Bit rename: `app`,
+`namespace`, and `pod`. Links only appear when every `${var}` in the target
+query is present on the clicked row — do not require `helmrelease` /
+`flux_kustomization` on log rows.
 
-Provisioned datasource UIDs in this cluster:
+Provisioned datasource UIDs:
 
 | Datasource   | UID           |
 |--------------|---------------|
@@ -147,59 +164,24 @@ Provisioned datasource UIDs in this cluster:
 
 ### Preferred links
 
-| Direction | Source field(s) | Target idea |
-|-----------|-----------------|-------------|
-| Logs → metrics | `app`, with `namespace` / `pod` / `container` when present | PromQL on cAdvisor or a flagged app series filtered by those labels |
-| Metrics → logs | `namespace`, `pod`, and/or `app` | LogsQL stream filter such as `{namespace="…", app="…"}` or `{namespace="…", pod="…"}` |
+| Direction | Source field | Target |
+|-----------|--------------|--------|
+| Logs → metrics | `pod` | cAdvisor CPU for `${namespace}` / `${pod}` |
+| Logs → metrics | `app` | `up{namespace, app}` (flagged Services) |
+| Logs → metrics | `namespace` | `up{namespace, app!=""}` |
+| Metrics → logs | `pod` / `app` / `namespace` | LogsQL stream filter on those labels |
 
-### Create in the UI
+### Verify in Explore
 
-1. Open Grafana → **Administration** → **Plugins and data** → **Correlations**
-   (or use the Correlations editor in **Explore**).
-2. **Source**: VictoriaLogs (`victorialogs`) or Prometheus (`prometheus`).
-3. **Results field**: the taxonomy label to click (for example `app` or `pod`).
-4. **Type**: Query.
-5. **Target**: the other datasource UID from the table above.
-6. **Target query**: substitute the clicked field with `${app}` / `${namespace}`
-   / `${pod}` (Grafana exposes source fields as variables). Keep the Explore
-   time range.
+1. Open **Explore** → VictoriaLogs, run `{app="atuin"}` (or any app with
+   recent logs).
+2. Expand a log line and use the correlation link on `pod` / `app` /
+   `namespace` (opens split Explore on Prometheus).
+3. From a Prometheus table/series with those labels, use the reverse links
+   into VictoriaLogs.
 
-Example **logs → metrics** target (cAdvisor CPU for the clicked row — match
-filters to fields present on that row):
-
-```promql
-sum by (pod, container) (
-  rate(container_cpu_usage_seconds_total{
-    cluster="jupiter",
-    namespace="${namespace}",
-    pod="${pod}",
-    container!="",
-    container!="POD"
-  }[5m])
-)
-```
-
-Example **metrics → logs** target:
-
-```text
-{namespace="${namespace}", pod="${pod}"}
-```
-
-When the metric series has `app` (flagged Services):
-
-```text
-{namespace="${namespace}", app="${app}"}
-```
-
-After saving, open **Explore**, run a query that returns those fields, expand a
-log line or table row, and use the correlation link (opens split Explore).
-
-### Provisioning later
-
-Correlations can also be declared under a provisioned datasource’s
-`jsonData.correlations` (or the datasource `correlations:` list in Grafana
-provisioning). Prefer Git-managed provisioning once the UI shapes are proven;
-the runbook contract (which fields → which query) stays the same either way.
+To change the links, edit the datasource `correlations:` blocks in Git rather
+than recreating them only in the UI.
 
 ## VictoriaLogs alert rules (vmalert)
 

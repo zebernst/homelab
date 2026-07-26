@@ -6,3 +6,14 @@ resources:
   - externalsecret.yaml
   - helmrelease.yaml
   - httproute.yaml
+configMapGenerator:
+  - name: grafana-logs-taxonomy-dashboard
+    files:
+      - logs-taxonomy.json=resources/logs-taxonomy.json
+    options:
+      annotations:
+        grafana_folder: "Logs"
+      labels:
+        grafana_dashboard: "true"
+generatorOptions:
+  disableNameSuffixHash: true
