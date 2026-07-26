@@ -70,7 +70,7 @@ spec:
         intel.feature.node.kubernetes.io/gpu: "true"
     service:
       plex:
-        # L4 front doors: lan-l4-plex + tailscale-l4 (TCPRoute)
+        # L4 front doors: lan-l4-plex + plex-tailscale (TCPRoute)
         ports:
           http:
             port: &port 32400

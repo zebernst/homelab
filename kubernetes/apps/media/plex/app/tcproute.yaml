@@ -7,7 +7,6 @@ metadata:
 spec:
   parentRefs:
     - name: lan-l4-plex
-      namespace: kube-system
       sectionName: plex
   rules:
     - backendRefs:
@@ -21,8 +20,7 @@ metadata:
   name: plex-tailscale
 spec:
   parentRefs:
-    - name: tailscale-l4
-      namespace: kube-system
+    - name: plex-tailscale
       sectionName: plex
   rules:
     - backendRefs:

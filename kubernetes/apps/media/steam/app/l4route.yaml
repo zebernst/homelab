@@ -7,7 +7,6 @@ metadata:
 spec:
   parentRefs:
     - name: lan-l4-steam
-      namespace: kube-system
       sectionName: https
   rules:
     - backendRefs:
@@ -21,7 +20,6 @@ metadata:
 spec:
   parentRefs:
     - name: lan-l4-steam
-      namespace: kube-system
       sectionName: http
   rules:
     - backendRefs:
@@ -35,7 +33,6 @@ metadata:
 spec:
   parentRefs:
     - name: lan-l4-steam
-      namespace: kube-system
       sectionName: web-ui
   rules:
     - backendRefs:
@@ -49,7 +46,6 @@ metadata:
 spec:
   parentRefs:
     - name: lan-l4-steam
-      namespace: kube-system
       sectionName: rtsp
   rules:
     - backendRefs:
@@ -64,7 +60,6 @@ metadata:
 spec:
   parentRefs:
     - name: lan-l4-steam
-      namespace: kube-system
       sectionName: video
   rules:
     - backendRefs:
@@ -78,7 +73,6 @@ metadata:
 spec:
   parentRefs:
     - name: lan-l4-steam
-      namespace: kube-system
       sectionName: control
   rules:
     - backendRefs:
@@ -92,7 +86,6 @@ metadata:
 spec:
   parentRefs:
     - name: lan-l4-steam
-      namespace: kube-system
       sectionName: audio
   rules:
     - backendRefs:

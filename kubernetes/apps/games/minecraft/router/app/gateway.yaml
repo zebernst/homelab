@@ -2,20 +2,20 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: lan-l4-qbittorrent
+  name: lan-l4-minecraft
   labels:
     external-dns.alpha.kubernetes.io/registry: unifi
 spec:
   gatewayClassName: cilium
   addresses:
     - type: IPAddress
-      value: 192.168.20.14
+      value: 192.168.20.65
     - type: IPAddress
-      value: ::ffff:192.168.20.14
+      value: ::ffff:192.168.20.65
   listeners:
-    - name: bittorrent
+    - name: java
       protocol: TCP
-      port: 61267
+      port: 25565
       allowedRoutes:
         namespaces:
-          from: All
+          from: Same

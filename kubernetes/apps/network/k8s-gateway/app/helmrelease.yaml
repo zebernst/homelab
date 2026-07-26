@@ -27,7 +27,7 @@ spec:
     replicaCount: 2
     priorityClassName: network-critical
     service:
-      # L4 front door: tailscale-l4 (TCPRoute/UDPRoute on :53). MagicDNS
+      # L4 front door: # jupiter-dns Gateway (TCPRoute/UDPRoute on :53). MagicDNS
       # hostname jupiter-dns lives on the Gateway so split DNS is unchanged.
       type: ClusterIP
       useTcp: true

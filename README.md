@@ -119,19 +119,19 @@ The first and easiest way that an app can be exposed is strictly on my local net
 
 Local deployments attach an HTTPRoute to the `lan` Gateway, which registers a virtual IP in a designated subnet (advertised via BGP) and provisions a DNS record on the router with the [ExternalDNS webhook provider for UniFi](https://github.com/kashalls/external-dns-unifi-webhook).
 
-TCP/UDP services that need a stable LAN address (Plex, Minecraft, Sunshine, qBittorrent) use dedicated L4 Gateways (`lan-l4-*`) with `TCPRoute`/`UDPRoute`. Cilium cannot mix L4 listeners with HTTP/HTTPS on the same Gateway, so each VIP gets its own Gateway and one listener per port.
+TCP/UDP services that need a stable LAN address (Plex, Minecraft, Sunshine, qBittorrent) define a dedicated L4 Gateway next to the app, with `TCPRoute`/`UDPRoute` attaching to it. Shared HTTP Gateways (`lan` / `external` / `tailscale`) stay under Cilium; app-specific L4 Gateways live with the app because each preserves that app's VIP. Cilium cannot mix L4 listeners with HTTP/HTTPS on the same Gateway, so each VIP gets its own Gateway and one listener per port.
 
 ### Privately Exposed (Tailscale)
 
 The second and most common way that an app can be exposed is via [Tailscale](https://tailscale.com/kb/1236/kubernetes-operator). Canonical private hostnames live under `$APP.jptr.zebernst.dev` on the Cilium `tailscale` Gateway (`https-canon` listener).
 
-DNS for `jptr.zebernst.dev` is answered in-cluster by CoreDNS [k8s_gateway](https://github.com/k8s-gateway/k8s_gateway) (Service `coredns-gateway`). Queries arrive via the `tailscale-l4` Gateway (MagicDNS hostname `jupiter-dns`, ports 53/TCP+UDP). Tailscale split DNS for that zone points at `jupiter-dns`; UniFi and Cloudflare ExternalDNS both exclude `jptr.zebernst.dev` so they never publish competing records. The same `tailscale-l4` Gateway also carries Plex's native TCP port for tailnet clients.
+DNS for `jptr.zebernst.dev` is answered in-cluster by CoreDNS [k8s_gateway](https://github.com/k8s-gateway/k8s_gateway) (Service `coredns-gateway`). Queries arrive via the `jupiter-dns` L4 Gateway co-located with k8s-gateway (MagicDNS hostname `jupiter-dns`, ports 53/TCP+UDP). Tailscale split DNS for that zone points at `jupiter-dns`; UniFi and Cloudflare ExternalDNS both exclude `jptr.zebernst.dev` so they never publish competing records. App-native Tailscale L4 (e.g. Plex `:32400`) uses a per-app `cilium-ts` Gateway with its own MagicDNS hostname.
 
 | Zone | Nameserver | Purpose |
 |------|------------|---------|
 | `zebernst.dev` | UDM Pro (via Tailscale split DNS) | Apex / LAN records synced by ExternalDNS → UniFi |
 | `.internal` | UDM Pro (via Tailscale split DNS) | LAN-only hostnames (Services / LoadBalancers, not Gateway routes) |
-| `jptr.zebernst.dev` | `jupiter-dns` (`tailscale-l4` → `coredns-gateway`) | Canonical private zone; answers with the Tailscale L7 Gateway address |
+| `jptr.zebernst.dev` | `jupiter-dns` (`jupiter-dns` Gateway → `coredns-gateway`) | Canonical private zone; answers with the Tailscale L7 Gateway address |
 
 Tailscale also serves as a Kubernetes auth proxy, which I use in conjunction with the [Nautik](https://nautik.io/) iOS app to monitor and administer my Kubernetes cluster on-the-go.
 

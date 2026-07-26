@@ -6,8 +6,7 @@ metadata:
   name: coredns-gateway
 spec:
   parentRefs:
-    - name: tailscale-l4
-      namespace: kube-system
+    - name: jupiter-dns
       sectionName: dns-tcp
   rules:
     - backendRefs:
@@ -21,8 +20,7 @@ metadata:
   name: coredns-gateway
 spec:
   parentRefs:
-    - name: tailscale-l4
-      namespace: kube-system
+    - name: jupiter-dns
       sectionName: dns-udp
   rules:
     - backendRefs:

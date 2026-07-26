@@ -20,40 +20,40 @@ spec:
       port: 47984
       allowedRoutes:
         namespaces:
-          from: All
+          from: Same
     - name: http
       protocol: TCP
       port: 47989
       allowedRoutes:
         namespaces:
-          from: All
+          from: Same
     - name: web-ui
       protocol: TCP
       port: 47990
       allowedRoutes:
         namespaces:
-          from: All
+          from: Same
     - name: rtsp
       protocol: TCP
       port: 48010
       allowedRoutes:
         namespaces:
-          from: All
+          from: Same
     - name: video
       protocol: UDP
       port: 47998
       allowedRoutes:
         namespaces:
-          from: All
+          from: Same
     - name: control
       protocol: UDP
       port: 47999
       allowedRoutes:
         namespaces:
-          from: All
+          from: Same
     - name: audio
       protocol: UDP
       port: 48000
       allowedRoutes:
         namespaces:
-          from: All
+          from: Same

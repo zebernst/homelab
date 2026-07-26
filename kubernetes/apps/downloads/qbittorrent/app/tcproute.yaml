@@ -7,7 +7,6 @@ metadata:
 spec:
   parentRefs:
     - name: lan-l4-qbittorrent
-      namespace: kube-system
       sectionName: bittorrent
   rules:
     - backendRefs:
