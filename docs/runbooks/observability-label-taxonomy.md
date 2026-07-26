@@ -2,8 +2,8 @@
 
 Container logs in VictoriaLogs use the normalized labels below. Metrics in
 VictoriaMetrics retain exporter labels by default, with an experimental
-flag-gated pilot that promotes Kubernetes discovery metadata for selected
-application Services.
+Service flag that promotes Kubernetes discovery metadata for selected
+application scrapes.
 
 ## Normalized log labels
 
@@ -29,9 +29,9 @@ do not imply a collector failure.
 - Logs normalize fields from Fluent Bit's Kubernetes-enriched record. Query the
   canonical names above, not Fluent Bit's intermediate nested record paths.
 - The `cluster` vmagent external label is attached to stored metrics.
-- Metrics from Services outside the pilot remain exporter- and target-specific.
-  No canonical labels are added unless the discovered Service carries the
-  experimental flag described below.
+- Metrics from Services without the experimental flag remain exporter- and
+  target-specific. No canonical labels are added unless the discovered Service
+  carries the experimental flag described below.
 - Static `VMProbe` targets do not have Kubernetes discovery metadata. Only
   explicitly configured target labels and the metrics-wide `cluster` label are
   reliable for those targets.
@@ -41,11 +41,18 @@ do not imply a collector failure.
 
 ## Experimental metrics target labels
 
-The application metrics pilot is gated by the experimental Service flag
-`experimental.homelab.zebernst.dev/canonical-labels: "true"`. The current
-pilot Services are `atuin`, `paperless`, `gatus`, and `dawarich`. Static
-`VMProbe` targets, kubelet and cAdvisor, kube-state-metrics, node-exporter,
-and every Service without that flag remain unaffected.
+Application metrics taxonomy labels are gated by the experimental Service flag
+`experimental.homelab.zebernst.dev/canonical-labels: "true"`. Flagged Services
+today:
+
+| Namespace | Services |
+|-----------|----------|
+| `self-hosted` | `atuin`, `paperless`, `dawarich` |
+| `observability` | `gatus`, `gatus-external` |
+| `downloads` | `autobrr`, `bazarr`, `bazarr-uhd`, `lidarr`, `prowlarr`, `qui`, `radarr`, `radarr-uhd`, `sonarr`, `sonarr-uhd`, `unpackerr` |
+
+Static `VMProbe` targets, kubelet and cAdvisor, kube-state-metrics,
+node-exporter, and every Service without that flag remain unaffected.
 
 For flagged Service-backed targets, vmagent promotes metadata that exists at
 discovery time:
@@ -120,8 +127,8 @@ up{
 ```
 
 Do not assume `flux_kustomization` exists on these Helm-rendered Services.
-Native cAdvisor metrics are outside the pilot and should continue to use their
-native labels, as in the container CPU query above.
+Native cAdvisor metrics are outside the experimental gate and should continue
+to use their native labels, as in the container CPU query above.
 
 ## Grafana Correlations (logs ↔ metrics)
 
@@ -178,7 +185,7 @@ Example **metrics → logs** target:
 {namespace="${namespace}", pod="${pod}"}
 ```
 
-When the metric series has `app` (pilot / flagged Services):
+When the metric series has `app` (flagged Services):
 
 ```text
 {namespace="${namespace}", app="${app}"}

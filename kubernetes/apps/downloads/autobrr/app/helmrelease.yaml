@@ -69,6 +69,8 @@ spec:
     service:
       autobrr:
         controller: *app
+        labels:
+          experimental.homelab.zebernst.dev/canonical-labels: "true"
         ports:
           http:
             port: *port
