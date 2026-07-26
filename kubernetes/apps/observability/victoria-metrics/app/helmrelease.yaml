@@ -127,6 +127,128 @@ spec:
         priorityClassName: control-plane-critical
         externalLabels:
           cluster: jupiter
+        globalScrapeRelabelConfigs:
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_namespace
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: namespace
+          # Service app labels are ordered from lowest to highest precedence.
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_service_label_k8s_app
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: app
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_service_label_app
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: app
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_service_label_app_kubernetes_io_name
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: app
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_service_label_app_kubernetes_io_instance
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: app_instance
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_service_label_app_kubernetes_io_component
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: component
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_service_label_app_kubernetes_io_part_of
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: part_of
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_service_label_helm_toolkit_fluxcd_io_name
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: helmrelease
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_service_label_kustomize_toolkit_fluxcd_io_name
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: flux_kustomization
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_pod_name
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: pod
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_pod_container_name
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: container
+          # Pod app labels run after Service labels so Pod metadata wins.
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_pod_label_k8s_app
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: app
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_pod_label_app
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: app
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: app
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_pod_label_app_kubernetes_io_instance
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: app_instance
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_pod_label_app_kubernetes_io_component
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: component
+          - action: replace
+            sourceLabels:
+              - __meta_kubernetes_service_label_observability_home_operations_com_canonical_target_labels
+              - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
+            regex: true;(.+)
+            replacement: $1
+            targetLabel: part_of
         extraArgs:
           promscrape.dropOriginalLabels: "true"
           promscrape.maxScrapeSize: 50MiB

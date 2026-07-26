@@ -81,6 +81,8 @@ spec:
         runAsGroup: 568
     service:
       gatus:
+        labels:
+          observability.home-operations.com/canonical-target-labels: "true"
         ports:
           http:
             port: *port

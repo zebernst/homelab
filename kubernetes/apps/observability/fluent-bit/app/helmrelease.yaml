@@ -76,9 +76,18 @@ spec:
         [FILTER]
           name modify
           match kubernetes.*
-          rename k_labels_app.kubernetes.io/name app
-          rename k_labels_app app
-          rename k_labels_k8s-app app
+          hard_rename k_namespace_name namespace
+          hard_rename k_pod_name pod
+          hard_rename k_container_name container
+          hard_rename k_labels_k8s-app app
+          hard_rename k_labels_app app
+          hard_rename k_labels_app.kubernetes.io/name app
+          hard_rename k_labels_app.kubernetes.io/instance app_instance
+          hard_rename k_labels_app.kubernetes.io/component component
+          hard_rename k_labels_app.kubernetes.io/part-of part_of
+          hard_rename k_labels_kustomize.toolkit.fluxcd.io/name flux_kustomization
+          hard_rename k_labels_helm.toolkit.fluxcd.io/name helmrelease
+          remove_wildcard k_*
 
       customParsers: |-
         [PARSER]
@@ -94,7 +103,7 @@ spec:
           match kubernetes.*
           host victoria-logs-server.observability.svc.cluster.local
           port 9428
-          uri /insert/jsonline?_stream_fields=stream,k_namespace_name,k_pod_name,app&_msg_field=log&_time_field=date
+          uri /insert/jsonline?_stream_fields=namespace,pod,container,app,app_instance,component,part_of,flux_kustomization,helmrelease,stream&_msg_field=log&_time_field=date
           format json_lines
           json_date_format iso8601
           compress gzip

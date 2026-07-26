@@ -71,6 +71,8 @@ spec:
     service:
       atuin:
         controller: *app
+        labels:
+          observability.home-operations.com/canonical-target-labels: "true"
         ports:
           http:
             primary: true
