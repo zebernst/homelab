@@ -1,18 +1,35 @@
-# One-shot cutover helper — NOT wired into kustomization/Flux.
-# Apply manually during the hostpath migration window (see PR description).
+# One-shot VolSync rsyncTLS copy of nominatim-flatnode (Ceph) → hostpath on europa.
+# Not wired into Flux — apply manually during cutover.
 #
-# Copies Ceph flatnode → OpenEBS hostpath on europa while Nominatim is scaled down.
+# Why VolSync (not a Job):
+#   - Source uses copyMethod: Snapshot → Ceph VolumeSnapshot + restore PVC (frozen PiT)
+#   - Destination is openebs-hostpath (no snapshots) via destinationPVC + Direct
+#   - Same-namespace ClusterIP; rsyncTLS preferred over deprecated SSH rsync
 #
-# After the Job succeeds, swap claims (PVCs cannot be renamed):
-#   1. PV=$(kubectl -n self-hosted get pvc nominatim-flatnode-hostpath -o jsonpath='{.spec.volumeName}')
-#   2. kubectl patch pv "$PV" -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
-#   3. kubectl -n self-hosted delete pvc nominatim-flatnode-hostpath nominatim-flatnode
-#   4. kubectl patch pv "$PV" --type merge -p '{"spec":{"claimRef":null}}'
-#   5. Create PVC nominatim-flatnode (openebs-hostpath, 250Gi) with volumeName: $PV
-#      so Flux/Helm keep using the nominatim-flatnode claim name without a second copy.
-#   6. Scale Nominatim back up on europa
+# Prerequisites / cutover:
+#   1. Scale nominatim Deployment to 0 (and finish/cancel any import Job using flatnode)
+#   2. Create PSK once (stunnel format identity:hex — key must be named psk.txt):
+#        KEY="1:$(openssl rand -hex 32)"
+#        kubectl -n self-hosted create secret generic nominatim-flatnode-mig-psk \
+#          --from-literal=psk.txt="$KEY"
+#   3. Apply this file (PVC + ReplicationDestination + ReplicationSource)
+#   4. Wait for destination endpoint, then wire source address from status:
+#        ADDR=$(kubectl -n self-hosted get replicationdestination nominatim-flatnode-hostpath \
+#          -o jsonpath='{.status.rsyncTLS.address}')
+#        kubectl -n self-hosted patch replicationsource nominatim-flatnode-ceph --type merge \
+#          -p "{\"spec\":{\"rsyncTLS\":{\"address\":\"${ADDR}\"}}}"
+#   5. Trigger sync:
+#        kubectl -n self-hosted annotate replicationsource nominatim-flatnode-ceph \
+#          volsync.backube/manual="$(date +%s)" --overwrite
+#   6. Wait for LatestMoverStatus Successful / lastSyncTime on the ReplicationSource
+#   7. Rebind so the app claim name stays nominatim-flatnode:
+#        - Delete ReplicationSource + ReplicationDestination (stop movers)
+#        - Patch both PVs reclaimPolicy=Retain; delete claim nominatim-flatnode
+#          and nominatim-flatnode-hostpath; recreate nominatim-flatnode bound to
+#          the hostpath PV (volumeName); delete/release old Ceph PV when done
+#   8. Scale nominatim back up (API already nodeSelector europa + flatnode SC hostpath)
 #
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/v1/persistentvolumeclaim.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationdestination_v1alpha1.json
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -21,69 +38,68 @@ metadata:
   namespace: self-hosted
   labels:
     app.kubernetes.io/name: nominatim
-    app.kubernetes.io/component: flatnode-migration
+    app.kubernetes.io/component: flatnode-migrate
 spec:
   accessModes: ["ReadWriteOnce"]
   storageClassName: openebs-hostpath
   resources:
     requests:
-      storage: 250Gi
+      storage: 50Gi
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/batch/job_v1.json
-apiVersion: batch/v1
-kind: Job
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
 metadata:
-  name: nominatim-flatnode-to-hostpath
+  name: nominatim-flatnode-hostpath
   namespace: self-hosted
   labels:
     app.kubernetes.io/name: nominatim
-    app.kubernetes.io/component: flatnode-migration
+    app.kubernetes.io/component: flatnode-migrate
 spec:
-  backoffLimit: 1
-  ttlSecondsAfterFinished: 86400
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: nominatim
-        app.kubernetes.io/component: flatnode-migration
-    spec:
-      restartPolicy: Never
-      nodeSelector:
-        kubernetes.io/hostname: europa
-      tolerations:
-        - key: nvidia.com/gpu
-          operator: Exists
-          effect: PreferNoSchedule
-      containers:
-        - name: rsync
-          image: docker.io/library/alpine:3.24.1
-          command:
-            - /bin/sh
-            - -ec
-            - |
-              apk add --no-cache rsync
-              echo "source=$(du -sh /src | awk '{print $1}')"
-              rsync -aHAX --info=progress2 /src/ /dst/
-              echo "dest=$(du -sh /dst | awk '{print $1}')"
-              # Expect flatnode.file under subPath layout used by the HelmRelease.
-              ls -lh /dst/flatnode /dst/flatnode/flatnode.file
-          volumeMounts:
-            - name: src
-              mountPath: /src
-              readOnly: true
-            - name: dst
-              mountPath: /dst
-          resources:
-            requests:
-              cpu: "1"
-              memory: 1Gi
-            limits:
-              memory: 2Gi
-      volumes:
-        - name: src
-          persistentVolumeClaim:
-            claimName: nominatim-flatnode
-            readOnly: true
-        - name: dst
-          persistentVolumeClaim:
-            claimName: nominatim-flatnode-hostpath
+  rsyncTLS:
+    # Pre-created hostpath PVC (WaitForFirstConsumer → binds when mover lands on europa)
+    destinationPVC: nominatim-flatnode-hostpath
+    copyMethod: Direct
+    keySecret: nominatim-flatnode-mig-psk
+    serviceType: ClusterIP
+    moverAffinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values: ["europa"]
+    # Match project VolSync movers; chown flatnode after cutover if nominatim UID differs
+    moverSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationsource_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: nominatim-flatnode-ceph
+  namespace: self-hosted
+  labels:
+    app.kubernetes.io/name: nominatim
+    app.kubernetes.io/component: flatnode-migrate
+spec:
+  sourcePVC: nominatim-flatnode
+  # Manual only — annotate to fire (see header). Patch .spec.rsyncTLS.address first.
+  trigger:
+    manual: "0"
+  rsyncTLS:
+    # Frozen source: Ceph CSI snapshot → temp restore PVC → rsync
+    copyMethod: Snapshot
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    accessModes: ["ReadWriteOnce"]
+    capacity: 50Gi
+    keySecret: nominatim-flatnode-mig-psk
+    # address: set from ReplicationDestination.status.rsyncTLS.address (step 4)
+    # Source snapshot PVC is Ceph (any node). Leave mover unpinned.
+    moverSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
