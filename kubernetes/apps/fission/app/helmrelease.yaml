@@ -18,7 +18,7 @@ spec:
   values:
     defaultNamespace: fission
     pullPolicy: Always
-    routerServiceType: LoadBalancer
+    routerServiceType: ClusterIP
     analytics: false
     persistence:
       enabled: true
