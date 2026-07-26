@@ -41,23 +41,28 @@ do not imply a collector failure.
   automatically copied into Pod templates, so `flux_kustomization` and
   `helmrelease` are commonly unavailable on container-log Pods.
 
-## Experimental metrics target labels
+## Metrics target labels (Service scrapes)
 
-Application metrics taxonomy labels are gated by the experimental Service flag
-`experimental.homelab.zebernst.dev/canonical-labels: "true"`. Flagged Services
-today:
+Application metrics taxonomy enrichment is **default-on** for Service-backed
+scrapes. vmagent promotes discovery metadata onto taxonomy labels whenever
+`__meta_kubernetes_service_name` is present, unless the Service opts out with:
+
+```yaml
+observability.homelab.zebernst.dev/canonical-labels: "false"
+```
+
+Current opt-outs (exporter Services whose identity is the scraper, not the
+series subject):
 
 | Namespace | Services |
 |-----------|----------|
-| `self-hosted` | `atuin`, `paperless`, `dawarich` |
-| `observability` | `gatus`, `gatus-external` |
-| `downloads` | `autobrr`, `bazarr`, `bazarr-uhd`, `lidarr`, `prowlarr`, `qui`, `radarr`, `radarr-uhd`, `sonarr`, `sonarr-uhd`, `unpackerr` |
+| `observability` | `kube-state-metrics`, `node-exporter` |
 
-Static `VMProbe` targets, kubelet and cAdvisor, kube-state-metrics,
-node-exporter, and every Service without that flag remain unaffected.
+Static `VMProbe` targets, kubelet, and cAdvisor are not Service scrapes, so they
+remain unaffected by this path.
 
-For flagged Service-backed targets, vmagent promotes metadata that exists at
-discovery time:
+For Service-backed targets (without opt-out), vmagent promotes metadata that
+exists at discovery time:
 
 - `namespace` from the Kubernetes namespace.
 - `pod` and `container` from Pod discovery metadata, when present.

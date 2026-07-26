@@ -79,8 +79,6 @@ spec:
         runAsGroup: 568
     service:
       gatus-external:
-        labels:
-          experimental.homelab.zebernst.dev/canonical-labels: "true"
         ports:
           http:
             port: *port

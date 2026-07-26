@@ -104,8 +104,6 @@ spec:
       bazarr-uhd:
         controller: *app
         forceRename: *app
-        labels:
-          experimental.homelab.zebernst.dev/canonical-labels: "true"
         ports:
           http:
             port: *port

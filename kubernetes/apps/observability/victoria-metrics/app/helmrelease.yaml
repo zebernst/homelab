@@ -173,124 +173,141 @@ spec:
         globalScrapeRelabelConfigs:
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_namespace
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: namespace
           # Service app labels are ordered from lowest to highest precedence.
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_service_label_k8s_app
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: app
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_service_label_app
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: app
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_service_label_app_kubernetes_io_name
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: app
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_service_label_app_kubernetes_io_instance
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: app_instance
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_service_label_app_kubernetes_io_component
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: component
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_service_label_app_kubernetes_io_part_of
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: part_of
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_service_label_helm_toolkit_fluxcd_io_name
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: helmrelease
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_service_label_kustomize_toolkit_fluxcd_io_name
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: flux_kustomization
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_pod_name
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: pod
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_pod_container_name
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: container
           # Pod app labels run after Service labels so Pod metadata wins.
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_pod_label_k8s_app
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: app
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_pod_label_app
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: app
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_pod_label_app_kubernetes_io_name
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: app
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_pod_label_app_kubernetes_io_instance
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: app_instance
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_pod_label_app_kubernetes_io_component
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: component
           - action: replace
             sourceLabels:
-              - __meta_kubernetes_service_label_experimental_homelab_zebernst_dev_canonical_labels
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_service_label_observability_homelab_zebernst_dev_canonical_labels
               - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
-            regex: true;(.+)
-            replacement: $1
+            regex: (.+);(|true);(.+)
+            replacement: $3
             targetLabel: part_of
         extraArgs:
           promscrape.dropOriginalLabels: "true"
@@ -361,6 +378,9 @@ spec:
 
     prometheus-node-exporter:
       fullnameOverride: node-exporter
+      service:
+        labels:
+          observability.homelab.zebernst.dev/canonical-labels: "false"
       vmScrape:
         enabled: true
         spec:
@@ -376,6 +396,8 @@ spec:
 
     kube-state-metrics:
       fullnameOverride: kube-state-metrics
+      customLabels:
+        observability.homelab.zebernst.dev/canonical-labels: "false"
       # Explicit allowlist (not [*]). Still drops high-cardinality controller noise:
       # pod-template-hash, controller-revision-hash, controller-uid, job/batch UIDs,
       # apps.kubernetes.io/pod-index, statefulset.kubernetes.io/pod-name,
