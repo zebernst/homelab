@@ -190,6 +190,13 @@ spec:
           gnetId: 15038
           revision: 3
           datasource: Prometheus
+        # Community Cilium overview — complements the upstream agent/operator dashboards
+        cilium-network:
+          # renovate: depName="Cilium Network Monitoring"
+          gnetId: 24056
+          revision: 1
+          datasource:
+            - { name: DS_PROMETHEUS, value: Prometheus }
         cilium-agent:
           url: https://raw.githubusercontent.com/cilium/cilium/refs/heads/main/install/kubernetes/cilium/files/cilium-agent/dashboards/cilium-dashboard.json
           datasource:
@@ -198,6 +205,49 @@ spec:
           url: https://raw.githubusercontent.com/cilium/cilium/refs/heads/main/install/kubernetes/cilium/files/cilium-operator/dashboards/cilium-operator-dashboard.json
           datasource:
             - { name: DS_PROMETHEUS, value: Prometheus }
+        # Cilium Gateway API / L7 terminates in cilium-envoy; scrape already enabled
+        cilium-envoy:
+          # renovate: depName="Envoy Proxy Monitoring gRPC"
+          gnetId: 23239
+          revision: 1
+          datasource:
+            - { name: DS_AFRANET_PROMETHEUS, value: Prometheus }
+        # Kuadrant gateway-api-state-metrics (kube-state-metrics CustomResourceState)
+        gateway-api-gatewayclasses:
+          # renovate: depName="Gateway API State / GatewayClasses"
+          gnetId: 19432
+          revision: 2
+          datasource: Prometheus
+        gateway-api-gateways:
+          # renovate: depName="Gateway API State / Gateways"
+          gnetId: 19433
+          revision: 2
+          datasource: Prometheus
+        gateway-api-httproutes:
+          # renovate: depName="Gateway API State / HTTPRoutes"
+          gnetId: 19434
+          revision: 2
+          datasource: Prometheus
+        gateway-api-grpcroutes:
+          # renovate: depName="Gateway API State / GRPCRoutes"
+          gnetId: 19570
+          revision: 1
+          datasource: Prometheus
+        gateway-api-tcproutes:
+          # renovate: depName="Gateway API State / TCPRoutes"
+          gnetId: 19571
+          revision: 1
+          datasource: Prometheus
+        gateway-api-tlsroutes:
+          # renovate: depName="Gateway API State / TLSRoutes"
+          gnetId: 19572
+          revision: 1
+          datasource: Prometheus
+        gateway-api-udproutes:
+          # renovate: depName="Gateway API State / UDPRoutes"
+          gnetId: 19573
+          revision: 1
+          datasource: Prometheus
         hubble:
           url: https://raw.githubusercontent.com/cilium/cilium/refs/heads/main/install/kubernetes/cilium/files/hubble/dashboards/hubble-dashboard.json
           datasource:

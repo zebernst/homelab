@@ -1,0 +1,105 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmrule_v1beta1.json
+# Adapted from Kuadrant gateway-api-state-metrics example alert rules:
+# https://github.com/Kuadrant/gateway-api-state-metrics/blob/main/config/examples/rules/alert-rules.yaml
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: gateway-api
+spec:
+  groups:
+    - name: gateway-api.rules
+      rules:
+        - alert: GatewayUnhealthy
+          expr: |
+            (gatewayapi_gateway_status{type="Accepted"} == 0) or (gatewayapi_gateway_status{type="Programmed"} == 0)
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Gateway {{ $labels.namespace }}/{{ $labels.name }} is unhealthy — Accepted or Programmed condition is not True
+
+        - alert: GatewayClassNotAccepted
+          expr: |
+            gatewayapi_gatewayclass_status{type="Accepted"} == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              GatewayClass {{ $labels.name }} is not Accepted — no controller is managing Gateways of this class
+
+        # Listener-level alerts rely on the per-listener condition gauges added
+        # locally to the CustomResourceState config. A Gateway can be Programmed
+        # while one of its listeners is broken, so these are not redundant with
+        # GatewayUnhealthy above.
+        - alert: GatewayListenerNotProgrammed
+          expr: |
+            (gatewayapi_gateway_status_listener_accepted == 0) or (gatewayapi_gateway_status_listener_programmed == 0)
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Listener {{ $labels.listener_name }} on Gateway {{ $labels.namespace }}/{{ $labels.name }} is not accepted or not programmed — it is not serving traffic
+
+        - alert: GatewayListenerUnresolvedRefs
+          expr: |
+            gatewayapi_gateway_status_listener_resolved_refs == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Listener {{ $labels.listener_name }} on Gateway {{ $labels.namespace }}/{{ $labels.name }} has unresolvable references — the TLS certificate Secret is missing or its ReferenceGrant is absent
+
+        - alert: GatewayInsecureListener
+          # http/http-internal listeners are intentional: they only serve the
+          # https-redirect HTTPRoute. Alert on any other plaintext listener.
+          expr: |
+            gatewayapi_gateway_listener_info{protocol="HTTP", listener_name!~"http|http-internal"}
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Gateway {{ $labels.namespace }}/{{ $labels.name }} has an unexpected plaintext listener {{ $labels.listener_name }} ({{ $labels.protocol }}/{{ $labels.port }})
+
+        # Route-level alerts rely on the per-parent condition gauges added
+        # locally to the CustomResourceState config; upstream only exposes
+        # status_parent_info, which cannot distinguish attached from rejected.
+        - alert: GatewayRouteNotAccepted
+          expr: |
+            {__name__=~"gatewayapi_.+route_status_parent_accepted"} == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              {{ $labels.customresource_kind }} {{ $labels.namespace }}/{{ $labels.name }} was rejected by Gateway {{ $labels.parent_namespace }}/{{ $labels.parent_name }} (listener {{ $labels.parent_section_name }}) — the hostname or listener does not match
+
+        - alert: GatewayRouteUnresolvedRefs
+          expr: |
+            {__name__=~"gatewayapi_.+route_status_parent_resolved_refs"} == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              {{ $labels.customresource_kind }} {{ $labels.namespace }}/{{ $labels.name }} has unresolvable backendRefs — the backing Service is missing or a cross-namespace ReferenceGrant is absent
+
+        - alert: GatewayRouteOrphaned
+          # A parentRef in spec with no matching entry in status means no
+          # controller ever claimed the route (wrong Gateway name/namespace,
+          # or the Gateway does not exist).
+          expr: |
+            {__name__=~"gatewayapi_.+route_parent_info"}
+              unless on (customresource_kind, namespace, name, parent_name, parent_namespace, parent_section_name)
+            {__name__=~"gatewayapi_.+route_status_parent_accepted"}
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              {{ $labels.customresource_kind }} {{ $labels.namespace }}/{{ $labels.name }} references Gateway {{ $labels.parent_namespace }}/{{ $labels.parent_name }} but no controller has claimed it
