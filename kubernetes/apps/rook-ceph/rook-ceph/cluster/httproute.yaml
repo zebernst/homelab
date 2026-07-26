@@ -5,9 +5,14 @@ kind: HTTPRoute
 metadata:
   name: rook-ceph-dashboard-canonical
   annotations:
+    # Probe the ClusterIP: Cilium Envoy same-node hairpin to this hostNetwork
+    # mgr backend times out (upstream connect timeout → 503). Vanity URL still
+    # works for Tailscale clients and for in-cluster clients on other nodes.
+    # See cilium/cilium#44529.
     gatus.home-operations.com/endpoint: |
       name: rook
       group: rook-ceph
+      url: http://rook-ceph-mgr-dashboard.rook-ceph.svc:7000
 spec:
   hostnames:
     - rook.jptr.zebernst.dev
