@@ -11,5 +11,5 @@ groups:
           severity: critical
           category: vlogs
         annotations:
-          app: "{{ $labels.container }}"
-          summary: "{{ $labels.container }} has a torrent with fast resume rejected"
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} has a torrent with fast resume rejected"
