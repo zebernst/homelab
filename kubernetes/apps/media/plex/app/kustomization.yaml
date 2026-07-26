@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - pvc.yaml
   - helmrelease.yaml
+  - tcproute.yaml
 configMapGenerator:
   - name: plex-vmalert-rules
     files:

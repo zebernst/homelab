@@ -7,6 +7,7 @@ resources:
   - helmrelease.yaml
   - vmprobe.yaml
   - pvc.yaml
+  - l4route.yaml
 configMapGenerator:
   - name: steam-init-scripts
     files:

@@ -6,6 +6,7 @@ resources:
   - externalsecret.yaml
   - helmrelease.yaml
   - vmprobe.yaml
+  - tcproute.yaml
 configMapGenerator:
   - name: qbittorrent-vmalert-rules
     files:

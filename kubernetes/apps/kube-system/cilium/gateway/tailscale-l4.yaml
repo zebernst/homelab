@@ -1,0 +1,36 @@
+---
+# Consolidated Tailscale L4 front door. Keeps MagicDNS hostname jupiter-dns so
+# existing Tailscale split DNS for jptr.zebernst.dev needs no admin change.
+# Plex native clients over the tailnet use this same address on :32400.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: tailscale-l4
+  labels:
+    external-dns.alpha.kubernetes.io/registry: unifi
+spec:
+  gatewayClassName: cilium-ts
+  infrastructure:
+    annotations:
+      # Preserve the transitional dns-jptr Tailscale hostname so split DNS
+      # already pointing at jupiter-dns continues to work after cutover.
+      tailscale.com/hostname: jupiter-dns
+  listeners:
+    - name: dns-tcp
+      protocol: TCP
+      port: 53
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: dns-udp
+      protocol: UDP
+      port: 53
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: plex
+      protocol: TCP
+      port: 32400
+      allowedRoutes:
+        namespaces:
+          from: All

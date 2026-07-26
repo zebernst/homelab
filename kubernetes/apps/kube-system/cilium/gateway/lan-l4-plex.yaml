@@ -1,0 +1,23 @@
+---
+# Dedicated L4 Gateway — Cilium cannot mix TCP/UDP listeners with HTTP/HTTPS
+# on the same Gateway. VIP preserved from the former plex LoadBalancer.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: lan-l4-plex
+  labels:
+    external-dns.alpha.kubernetes.io/registry: unifi
+spec:
+  gatewayClassName: cilium
+  addresses:
+    - type: IPAddress
+      value: 192.168.20.5
+    - type: IPAddress
+      value: ::ffff:192.168.20.5
+  listeners:
+    - name: plex
+      protocol: TCP
+      port: 32400
+      allowedRoutes:
+        namespaces:
+          from: All
