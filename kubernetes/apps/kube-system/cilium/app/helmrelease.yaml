@@ -53,11 +53,6 @@ spec:
       ui:
         enabled: true
         rollOutPods: true
-        ingress:
-          className: tailscale
-          hosts: [&host "{{ .Release.Name }}.kite-harmonic.ts.net"]
-          tls:
-            - hosts: [*host]
     operator:
       prometheus:
         enabled: true

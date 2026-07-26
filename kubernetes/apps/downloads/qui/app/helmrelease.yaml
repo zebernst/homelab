@@ -27,7 +27,7 @@ spec:
               QUI__PORT: &port 80
               QUI__OIDC_ENABLED: true
               QUI__OIDC_ISSUER: https://id.zebernst.dev/
-              QUI__OIDC_REDIRECT_URL: https://qui.zebernst.dev/api/auth/oidc/callback
+              QUI__OIDC_REDIRECT_URL: https://qui.jptr.zebernst.dev/api/auth/oidc/callback
               QUI__OIDC_DISABLE_BUILT_IN_LOGIN: true
               QUI__METRICS_ENABLED: true
               QUI__METRICS_HOST: 0.0.0.0
@@ -83,19 +83,6 @@ spec:
             port: *port
           metrics:
             port: *metricsPort
-    ingress:
-      tailscale:
-        className: tailscale
-        hosts:
-          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
-            paths:
-              - path: /
-                service:
-                  identifier: *app
-                  port: http
-        tls:
-          - hosts:
-              - *tsHost
     serviceMonitor:
       qui:
         serviceName: *app
@@ -106,22 +93,10 @@ spec:
             interval: 1m
             scrapeTimeout: 10s
     route:
-      # Staged OIDC cutover: LAN stays primary redirect; Pocket ID must allow both callbacks
-      qui:
-        annotations:
-          gatus.home-operations.com/endpoint: |
-            name: "{{ .Release.Name }}"
-            group: "{{ .Release.Namespace }}"
-        hostnames:
-          - "{{ .Release.Name }}.zebernst.dev"
-        parentRefs:
-          - name: internal
-            namespace: kube-system
-            sectionName: https
       canonical:
         annotations:
           gatus.home-operations.com/endpoint: |
-            name: "{{ .Release.Name }}-jptr"
+            name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"

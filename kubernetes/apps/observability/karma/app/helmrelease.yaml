@@ -50,19 +50,6 @@ spec:
         runAsNonRoot: true
         runAsUser: 568
         runAsGroup: 568
-    ingress:
-      tailscale:
-        className: tailscale
-        hosts:
-          - host: &tsHost karma.kite-harmonic.ts.net
-            paths:
-              - path: /
-                service:
-                  identifier: *app
-                  port: http
-        tls:
-          - hosts:
-              - *tsHost
     route:
       canonical:
         annotations:

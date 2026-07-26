@@ -107,20 +107,6 @@ spec:
           metrics:
             port: *metricsPort
 
-    ingress:
-      tailscale:
-        className: tailscale
-        hosts:
-          - host: &tsHost "pocket-id.kite-harmonic.ts.net"
-            paths:
-              - path: /
-                service:
-                  identifier: *app
-                  port: http
-        tls:
-          - hosts:
-              - *tsHost
-
     route:
       internal:
         annotations:
@@ -167,7 +153,6 @@ spec:
           - backendRefs:
               - name: *app
                 port: *port
-
 
     serviceMonitor:
       app:

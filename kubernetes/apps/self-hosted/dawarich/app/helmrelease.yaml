@@ -33,7 +33,7 @@ spec:
               RAILS_ENV: production
               RAILS_LOG_TO_STDOUT: "true"
               RAILS_SERVE_STATIC_FILES: "true"
-              APPLICATION_HOSTS: "timeline.zebernst.dev,timeline.jptr.zebernst.dev,localhost,127.0.0.1"
+              APPLICATION_HOSTS: "timeline.jptr.zebernst.dev,localhost,127.0.0.1"
               APPLICATION_PROTOCOL: https
               TIME_ZONE: America/Chicago
               SELF_HOSTED: "true"
@@ -42,8 +42,7 @@ spec:
               SIDEKIQ_METRICS_URL: http://127.0.0.1:9394/metrics
               OIDC_ISSUER: https://id.zebernst.dev
               OIDC_PROVIDER_NAME: Pocket ID
-              # Staged cutover: LAN stays primary; Pocket ID must allow both callbacks
-              OIDC_REDIRECT_URI: https://timeline.zebernst.dev/users/auth/openid_connect/callback
+              OIDC_REDIRECT_URI: https://timeline.jptr.zebernst.dev/users/auth/openid_connect/callback
               OIDC_AUTO_REGISTER: "true"
               ALLOW_EMAIL_PASSWORD_REGISTRATION: "false"
               ALLOW_EMAIL_PASSWORD_LOGIN: "false"
@@ -144,26 +143,10 @@ spec:
             port: 3000
 
     route:
-      # Staged OIDC cutover: LAN stays primary redirect; Pocket ID must allow both callbacks
-      app:
-        annotations:
-          gatus.home-operations.com/endpoint: |
-            name: "{{ .Release.Name }}"
-            group: "{{ .Release.Namespace }}"
-        hostnames:
-          - timeline.zebernst.dev
-        parentRefs:
-          - name: internal
-            namespace: kube-system
-            sectionName: https
-        rules:
-          - backendRefs:
-              - name: *app
-                port: 3000
       canonical:
         annotations:
           gatus.home-operations.com/endpoint: |
-            name: "{{ .Release.Name }}-jptr"
+            name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
         hostnames:
           - timeline.jptr.zebernst.dev

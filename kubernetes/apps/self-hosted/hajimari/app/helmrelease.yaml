@@ -34,18 +34,6 @@ spec:
       defaultEnable: true
       namespaceSelector:
         any: true
-    ingress:
-      main:
-        enabled: true
-        ingressClassName: tailscale
-        hosts:
-          - host: &tsHost "{{ .Release.Name }}.kite-harmonic.ts.net"
-            paths:
-              - path: /
-                pathType: Prefix
-        tls:
-          - hosts:
-              - *tsHost
     podAnnotations:
       configmap.reloader.stakater.com/reload: hajimari-settings
     persistence:

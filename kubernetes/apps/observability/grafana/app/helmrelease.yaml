@@ -380,11 +380,7 @@ spec:
     serviceMonitor:
       enabled: true
     ingress:
-      enabled: true
-      ingressClassName: tailscale
-      hosts: [&host grafana.kite-harmonic.ts.net]
-      tls:
-        - hosts: [*host]
+      enabled: false
     persistence:
       enabled: false
     testFramework:
