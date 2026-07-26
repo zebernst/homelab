@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "homelab",
+  "project_id": "47fd17b8-c410-439b-a618-21e8e7985ef6"
+}
