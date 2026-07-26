@@ -55,10 +55,10 @@ spec:
               Listener {{ $labels.listener_name }} on Gateway {{ $labels.namespace }}/{{ $labels.name }} has unresolvable references — the TLS certificate Secret is missing or its ReferenceGrant is absent
 
         - alert: GatewayInsecureListener
-          # http/http-internal listeners are intentional: they only serve the
-          # https-redirect HTTPRoute. Alert on any other plaintext listener.
+          # The http listeners on lan/external only serve the https-redirect
+          # HTTPRoute. Alert on any other plaintext listener.
           expr: |
-            gatewayapi_gateway_listener_info{protocol="HTTP", listener_name!~"http|http-internal"}
+            gatewayapi_gateway_listener_info{protocol="HTTP", listener_name!="http"}
           for: 10m
           labels:
             severity: warning

@@ -32,7 +32,7 @@ spec:
             args:
               - --auto-httproute
               - --enable-service
-              - --gateway-name=internal
+              - --gateway-name=lan
               - --gateway-name=tailscale
             resources: &resources
               requests:

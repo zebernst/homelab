@@ -2,9 +2,9 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: internal
+  name: lan
   annotations:
-    external-dns.alpha.kubernetes.io/target: &hostname gw-internal.zebernst.dev
+    external-dns.alpha.kubernetes.io/target: &hostname gw-lan.zebernst.dev
     gatus.home-operations.com/endpoint: |
       client:
         dns-resolver: tcp://kube-dns.kube-system.svc:53
@@ -41,23 +41,4 @@ spec:
         certificateRefs:
           - kind: Secret
             name: zebernst-dev-tls
-            namespace: cert-manager
-    - name: http-internal
-      protocol: HTTP
-      port: 80
-      hostname: "*.internal"
-      allowedRoutes:
-        namespaces:
-          from: All
-    - name: https-internal
-      protocol: HTTPS
-      port: 443
-      hostname: "*.internal"
-      allowedRoutes:
-        namespaces:
-          from: All
-      tls:
-        certificateRefs:
-          - kind: Secret
-            name: internal-tls
             namespace: cert-manager
