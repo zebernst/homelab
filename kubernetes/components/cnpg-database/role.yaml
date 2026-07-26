@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/databaserole_v1.json
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: DatabaseRole
+metadata:
+  name: ${DB_NAME}
+spec:
+  name: ${DB_NAME}
+  cluster:
+    name: ${CNPG_CLUSTER:=redspot}
+  comment: ${DB_NAME} application role
+  login: true
+  # DatabaseRole has no `ensure`; removal is governed by the reclaim policy
+  databaseRoleReclaimPolicy: ${CNPG_RECLAIM:=retain}
+  passwordSecret:
+    name: ${DB_NAME}-db-role

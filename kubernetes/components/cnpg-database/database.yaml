@@ -1,12 +1,13 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/database_v1.json
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:
-  name: "${APP}"
+  name: ${DB_NAME}
 spec:
+  name: ${DB_NAME}
+  owner: ${DB_NAME}
   cluster:
-    name: "${CNPG_CLUSTER:=redspot}"
-  name: "${APP}"
-  owner: "${APP}"
+    name: ${CNPG_CLUSTER:=redspot}
   ensure: present
-  databaseReclaimPolicy: "${CNPG_RECLAIM:=retain}"
+  databaseReclaimPolicy: ${CNPG_RECLAIM:=retain}

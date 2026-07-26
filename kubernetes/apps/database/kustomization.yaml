@@ -8,5 +8,4 @@ components:
 resources:
   - cloudnative-pg/ks.yaml
   - dragonfly/ks.yaml
-  - grafana-db/ks.yaml
   - mariadb/ks.yaml

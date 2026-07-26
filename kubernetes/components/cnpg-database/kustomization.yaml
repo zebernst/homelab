@@ -1,24 +1,27 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 ---
-# Declarative CNPG database + role for a tenant on a shared cluster.
+# Declarative CNPG database + role for a tenant on a shared cluster (CNPG >= 1.30).
 #
-# Provisions, via the CloudNativePG Database/DatabaseRole CRDs (CNPG >= 1.30):
-#   - a login role ${APP}
-#   - a database ${APP} owned by that role
-#   - a basic-auth Secret ${APP}-db-role holding the role password
+# Provisions:
+#   - login role ${DB_NAME}
+#   - database ${DB_NAME} owned by that role
+#   - basic-auth Secret ${DB_NAME}-db-role (username/password for the role)
 #
-# Include from a Flux Kustomization that targets the `database` namespace (the
-# Cluster, CRDs, and Secret must be co-located). Required substitution: APP.
+# Include from a Flux Kustomization that targetNamespace: database (Cluster,
+# Database, DatabaseRole, and password Secret must be co-located).
 #
 # Substitutions:
-#   APP                    role/database/secret name (also the 1Password item)
-#   CNPG_CLUSTER           target cluster (default: redspot)
-#   CNPG_RECLAIM           retain|delete on resource deletion (default: retain)
+#   DB_NAME              role + database name (required)
+#   OP_USER              1Password property for the role username (required)
+#   OP_PASS              1Password property for the role password (required)
+#   CNPG_CLUSTER         target cluster (default: redspot)
+#   CNPG_RECLAIM         retain|delete when resources are deleted (default: retain)
 #
-# The 1Password item named ${APP} must expose a `POSTGRES_PASS` field.
+# The 1Password item named ${DB_NAME} must expose properties ${OP_USER} and
+# ${OP_PASS}. The username value must match ${DB_NAME} (CNPG role name).
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 resources:
-  - externalsecret.yaml
-  - databaserole.yaml
   - database.yaml
+  - role.yaml
+  - externalsecret.yaml
