@@ -1,6 +1,7 @@
 ---
 groups:
   - name: cross-seed
+    type: vlogs
     rules:
       - alert: CrossSeedDatabaseMalformed
         expr: |
@@ -8,17 +9,17 @@ groups:
         for: 2m
         labels:
           severity: critical
-          category: logs
+          category: vlogs
         annotations:
-          app: "{{ $labels.container }}"
-          summary: "{{ $labels.container }} is experiencing database issues"
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} is experiencing database issues"
       - alert: CrossSeedFailedToInject
         expr: |
           sum by (app) (count_over_time({app="cross-seed"} |~ "(?i)failed to inject"[1h])) > 0
         for: 2m
         labels:
           severity: critical
-          category: logs
+          category: vlogs
         annotations:
-          app: "{{ $labels.container }}"
-          summary: "{{ $labels.container }} failed to inject a torrent"
+          app: "{{ $labels.app }}"
+          summary: "{{ $labels.app }} failed to inject a torrent"

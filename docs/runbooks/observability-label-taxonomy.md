@@ -194,6 +194,37 @@ Correlations can also be declared under a provisioned datasource’s
 provisioning). Prefer Git-managed provisioning once the UI shapes are proven;
 the runbook contract (which fields → which query) stays the same either way.
 
+## VictoriaLogs alert rules (vmalert)
+
+Log-based rules live in ConfigMaps labeled `vmalert.io/rule: "true"` and are
+loaded by the logs `vmalert` instance (`--rule.defaultRuleType=vlogs`). Still
+set the group field explicitly:
+
+```yaml
+groups:
+  - name: example
+    type: vlogs
+    rules:
+      - alert: ExampleAppError
+        expr: |
+          sum by (app) (count_over_time({app="example"} |~ "(?i)error"[5m])) > 0
+        labels:
+          severity: critical
+          category: vlogs
+        annotations:
+          summary: "{{ $labels.app }} is logging errors"
+```
+
+Conventions:
+
+- Prefer stream filters on canonical labels (`app`, `namespace`, `container`,
+  `pod`), not Fluent Bit intermediate paths (`k_*` / nested record keys).
+- Aggregate (`sum by` / `stats by`) only on labels you need in annotations.
+  After `sum by (app)`, only `$labels.app` exists — do not reference
+  `$labels.container` or other dropped dimensions.
+- Use `category: vlogs` (not `category: logs`) so log alerts stay distinct from
+  metrics rules in Alertmanager routing and silence filters.
+
 ## Scope boundaries
 
 This taxonomy does not cover tracing, synthesized workload or controller

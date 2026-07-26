@@ -1,6 +1,7 @@
 ---
 groups:
   - name: autobrr
+    type: vlogs
     rules:
       - alert: AutobrrNetworkUnhealthy
         expr: |
@@ -8,7 +9,7 @@ groups:
         for: 2m
         labels:
           severity: critical
-          category: logs
+          category: vlogs
         annotations:
           app: "{{ $labels.app }}"
           summary: "{{ $labels.app }} has a unhealthy network"
