@@ -108,7 +108,7 @@ spec:
             port: *metricsPort
 
     route:
-      lan:
+      id:
         annotations:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
@@ -119,18 +119,6 @@ spec:
           - name: lan
             namespace: kube-system
             sectionName: https
-        rules:
-          - backendRefs:
-              - name: *app
-                port: *port
-      external:
-        annotations:
-          gatus.home-operations.com/endpoint: |
-            name: "{{ .Release.Name }}"
-            group: "{{ .Release.Namespace }}"
-        hostnames:
-          - id.zebernst.dev
-        parentRefs:
           - name: external
             namespace: kube-system
             sectionName: https
