@@ -83,20 +83,32 @@ remote write, so stored metrics keep sample identity. Do not rely on
 ## kube-state-metrics label allowlist
 
 `kube_pod_labels` / `kube_deployment_labels` / `kube_persistentvolumeclaim_labels`
-only export an allowlisted set of Kubernetes labels (not `[*]`). The allowlist
-matches the taxonomy plus Flux ownership and CNPG PVC cluster identity:
+only export an allowlisted set of Kubernetes labels (not `[*]`).
 
-- `app.kubernetes.io/name`, `app.kubernetes.io/instance`,
-  `app.kubernetes.io/component`, `app.kubernetes.io/part-of`
-- `app`, `k8s-app` (pods/deployments)
-- `helm.toolkit.fluxcd.io/name`, `kustomize.toolkit.fluxcd.io/name`
-- `cnpg.io/cluster` (PVCs)
+**Keep**
 
-High-cardinality controller hashes and UIDs (`pod-template-hash`,
-`controller-uid`, job UIDs, per-pod StatefulSet names, …) are intentionally
-omitted. Join workload ownership through these allowlisted `label_*` fields (or
-use the experimental Service metrics gate / log taxonomy) rather than expecting
-every Kubernetes label on the series.
+- Taxonomy: `app.kubernetes.io/{name,instance,component,part-of}`, `app`, `k8s-app`
+- Chart/pkg: `app.kubernetes.io/{managed-by,version,created-by,controller}`,
+  `helm.sh/chart`, `chart`, `release`
+- Flux: `helm.toolkit.fluxcd.io/{name,namespace}`,
+  `kustomize.toolkit.fluxcd.io/{name,namespace}`,
+  `fluxcd.controlplane.io/{name,namespace}`
+- CNPG: `cnpg.io/cluster`, `instanceName`, `instanceRole`, `podRole` / `pvcRole`
+- Rook/Ceph: `rook_cluster`, `rook-version`, `ceph_daemon_type`, `ceph-version`,
+  `rook.io/operator-namespace`, `rook_file_system`, `rook_object_store`,
+  `device-class`, `failure-domain`
+- Other useful one-offs: `role`, `component`, `tier`, `svc`, Tailscale parent
+  labels, Fission `functionName` / `functionNamespace` / env name+ns,
+  `io.cilium/app`, OpenEBS component, a few control-plane helpers
+- PVCs also: `volsync.backube/cleanup`, Prometheus Operator PVC labels
+
+**Drop (still)**
+
+High-cardinality controller noise and IDs: `pod-template-hash`,
+`controller-revision-hash`, `controller-uid`, batch/job UIDs,
+`apps.kubernetes.io/pod-index`, `statefulset.kubernetes.io/pod-name`,
+`functionUid`, `environmentUid`, `ceph_daemon_id` / `ceph-osd-id`,
+`topology-location-*`, Helm `heritage`, and other one-off churn keys.
 
 Kubelet scrapes separately drop `uid` / container `id` labels — leave those
 drops in place when editing VictoriaMetrics values.
