@@ -22,8 +22,8 @@ spec:
       rules:
         - alert: CertManagerCertExpirySoon
           expr: |
-            avg by (exported_namespace, namespace, name) (certmanager_certificate_expiration_timestamp_seconds - time()) < (21 * 24 * 3600)
-            and on (exported_namespace, namespace, name)
+            avg by (namespace, name) (certmanager_certificate_expiration_timestamp_seconds - time()) < (21 * 24 * 3600)
+            and on (namespace, name)
             certmanager_certificate_expiration_timestamp_seconds - certmanager_certificate_renewal_timestamp_seconds > (7 * 24 * 3600)
           for: 5m
           annotations:
@@ -34,8 +34,8 @@ spec:
 
         - alert: CertManagerShortLivedCertExpirySoon
           expr: |
-            avg by (exported_namespace, namespace, name) (certmanager_certificate_expiration_timestamp_seconds - time()) < (1 * 3600)
-            and on (exported_namespace, namespace, name)
+            avg by (namespace, name) (certmanager_certificate_expiration_timestamp_seconds - time()) < (1 * 3600)
+            and on (namespace, name)
             certmanager_certificate_expiration_timestamp_seconds - certmanager_certificate_renewal_timestamp_seconds <= (7 * 24 * 3600)
           for: 5m
           annotations:
@@ -46,7 +46,7 @@ spec:
 
         - alert: CertManagerCertNotReady
           expr: |
-            max by (name, exported_namespace, namespace, condition) (certmanager_certificate_ready_status{condition!="True"} == 1)
+            max by (name, namespace, condition) (certmanager_certificate_ready_status{condition!="True"} == 1)
           for: 5m
           annotations:
             summary: >-

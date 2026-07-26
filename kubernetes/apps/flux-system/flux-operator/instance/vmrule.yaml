@@ -11,7 +11,7 @@ spec:
       rules:
         - alert: FluxInstanceAbsent
           expr: |
-            absent(flux_instance_info{exported_namespace="flux-system", name="flux"})
+            absent(flux_instance_info{namespace="flux-system", name="flux"})
           for: 5m
           annotations:
             summary: >
@@ -21,7 +21,7 @@ spec:
 
         - alert: FluxInstanceNotReady
           expr: |
-            flux_instance_info{exported_namespace="flux-system", name="flux", ready!="True"}
+            flux_instance_info{namespace="flux-system", name="flux", ready!="True"}
           for: 5m
           annotations:
             summary: >
@@ -35,7 +35,7 @@ spec:
           for: 5m
           annotations:
             summary: >-
-              HelmRelease {{ $labels.name }} in {{ $labels.exported_namespace }} is not ready
+              HelmRelease {{ $labels.name }} in {{ $labels.namespace }} is not ready
           labels:
             severity: critical
 
@@ -45,6 +45,6 @@ spec:
           for: 5m
           annotations:
             summary: >-
-              Kustomization {{ $labels.name }} in {{ $labels.exported_namespace }} is not ready
+              Kustomization {{ $labels.name }} in {{ $labels.namespace }} is not ready
           labels:
             severity: critical

@@ -127,6 +127,49 @@ spec:
         priorityClassName: control-plane-critical
         externalLabels:
           cluster: jupiter
+        # Enforce sample-wins for taxonomy identity labels. The operator only
+        # exposes overrideHonorLabels→false (target wins / exported_*), so restore
+        # conflicting exporter labels before remote write. No-op when honorLabels
+        # is already true or when the sample never emitted the label.
+        inlineRelabelConfig:
+          - sourceLabels: [exported_namespace]
+            regex: (.+)
+            replacement: $1
+            targetLabel: namespace
+          - sourceLabels: [exported_pod]
+            regex: (.+)
+            replacement: $1
+            targetLabel: pod
+          - sourceLabels: [exported_container]
+            regex: (.+)
+            replacement: $1
+            targetLabel: container
+          - sourceLabels: [exported_app]
+            regex: (.+)
+            replacement: $1
+            targetLabel: app
+          - sourceLabels: [exported_app_instance]
+            regex: (.+)
+            replacement: $1
+            targetLabel: app_instance
+          - sourceLabels: [exported_component]
+            regex: (.+)
+            replacement: $1
+            targetLabel: component
+          - sourceLabels: [exported_part_of]
+            regex: (.+)
+            replacement: $1
+            targetLabel: part_of
+          - sourceLabels: [exported_helmrelease]
+            regex: (.+)
+            replacement: $1
+            targetLabel: helmrelease
+          - sourceLabels: [exported_flux_kustomization]
+            regex: (.+)
+            replacement: $1
+            targetLabel: flux_kustomization
+          - action: labeldrop
+            regex: exported_(namespace|pod|container|app|app_instance|component|part_of|helmrelease|flux_kustomization)
         globalScrapeRelabelConfigs:
           - action: replace
             sourceLabels:
@@ -324,6 +367,7 @@ spec:
           jobLabel: jobLabel
           endpoints:
             - port: metrics
+              honorLabels: true
               relabelConfigs:
                 - action: replace
                   regex: (.*)

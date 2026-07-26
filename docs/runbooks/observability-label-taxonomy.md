@@ -65,9 +65,11 @@ discovery time:
 
 Missing source metadata stays absent. The relabeling does not synthesize
 workload or controller identity and does not forge Flux ownership labels.
-Target labels intentionally win collisions. With the default
-`honorLabels: false`, a conflicting exporter label is retained as
-`exported_<label>`; this pilot does not change `honorLabels`.
+
+Target labels are fill-in only. On conflict with sample labels, the sample
+wins (`honorLabels: true` where set, and a cluster-wide remote-write restore
+of `exported_<label>` → `<label>` for the taxonomy identity set). Do not rely
+on `exported_namespace` / `exported_pod` / etc. in alerts or dashboards.
 
 ## Incident queries
 

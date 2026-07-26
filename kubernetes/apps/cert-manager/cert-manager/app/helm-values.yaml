@@ -12,3 +12,4 @@ prometheus:
   enabled: true
   servicemonitor:
     enabled: true
+    honorLabels: true
