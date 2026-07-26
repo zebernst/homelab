@@ -26,7 +26,7 @@ spec:
               QUI__HOST: 0.0.0.0
               QUI__PORT: &port 80
               QUI__OIDC_ENABLED: true
-              QUI__OIDC_ISSUER: https://id.zebernst.dev/
+              QUI__OIDC_ISSUER: https://id.zebernst.dev
               QUI__OIDC_REDIRECT_URL: https://qui.jptr.zebernst.dev/api/auth/oidc/callback
               QUI__OIDC_DISABLE_BUILT_IN_LOGIN: true
               QUI__METRICS_ENABLED: true
