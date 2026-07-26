@@ -3,6 +3,50 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: &db atuin-db
+  namespace: &ns self-hosted
+spec:
+  targetNamespace: database
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *db
+  dependsOn:
+    - name: cloudnative-pg-cluster
+      namespace: database
+    - name: onepassword
+      namespace: external-secrets
+  path: kubernetes/apps/self-hosted/atuin/database
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  postBuild:
+    substitute:
+      DB_NAME: atuin
+      OP_USER: ATUIN_POSTGRES_USER
+      OP_PASS: ATUIN_POSTGRES_PASS
+  healthCheckExprs:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: DatabaseRole
+      failed: has(status.applied) && !status.applied
+      current: has(status.applied) && status.applied && status.observedGeneration == metadata.generation
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Database
+      failed: has(status.applied) && !status.applied
+      current: has(status.applied) && status.applied && status.observedGeneration == metadata.generation
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: &app atuin
   namespace: &ns self-hosted
 spec:
@@ -11,8 +55,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: cloudnative-pg-cluster
-      namespace: database
+    - name: atuin-db
     - name: onepassword
       namespace: external-secrets
   path: kubernetes/apps/self-hosted/atuin/app
