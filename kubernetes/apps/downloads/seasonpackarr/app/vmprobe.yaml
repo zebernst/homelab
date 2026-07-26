@@ -11,5 +11,8 @@ spec:
     url: blackbox-exporter.observability.svc.cluster.local:9115
   targets:
     static:
+      labels:
+        namespace: downloads
+        app: seasonpackarr
       targets:
         - http://seasonpackarr.downloads.svc.cluster.local/api/healthz/readiness

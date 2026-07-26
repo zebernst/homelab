@@ -11,5 +11,8 @@ spec:
     url: blackbox-exporter.observability.svc.cluster.local:9115
   targets:
     static:
+      labels:
+        namespace: media
+        app: booklore
       targets:
         - booklore.media.svc.cluster.local:6060

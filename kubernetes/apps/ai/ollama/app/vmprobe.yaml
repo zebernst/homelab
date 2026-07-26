@@ -11,5 +11,8 @@ spec:
     url: blackbox-exporter.observability.svc.cluster.local:9115
   targets:
     static:
+      labels:
+        namespace: ai
+        app: ollama
       targets:
         - http://ollama.ai.svc.cluster.local:11434/api/tags
