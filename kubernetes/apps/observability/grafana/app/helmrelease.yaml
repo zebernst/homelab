@@ -190,12 +190,6 @@ spec:
           gnetId: 15038
           revision: 3
           datasource: Prometheus
-        nginx:
-          url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/nginx.json
-          datasource: Prometheus
-        nginx-request-handling-performance:
-          url: https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/grafana/dashboards/request-handling-performance.json
-          datasource: Prometheus
         cilium-agent:
           url: https://raw.githubusercontent.com/cilium/cilium/refs/heads/main/install/kubernetes/cilium/files/cilium-agent/dashboards/cilium-dashboard.json
           datasource:
