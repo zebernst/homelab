@@ -217,6 +217,38 @@ data:
                   parent_namespace: ["parentRef", "namespace"]
                   parent_section_name: ["parentRef", "sectionName"]
                   parent_port: ["parentRef", "port"]
+          # Local addition (not upstream): per-parent condition gauges so route
+          # attachment failures are alertable, not just observable.
+          - name: "status_parent_accepted"
+            help: "Accepted condition of the httproute for each parent reference (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, parents]
+                labelsFromPath:
+                  controller_name: ["controllerName"]
+                  parent_group: ["parentRef", "group"]
+                  parent_kind: ["parentRef", "kind"]
+                  parent_name: ["parentRef", "name"]
+                  parent_namespace: ["parentRef", "namespace"]
+                  parent_section_name: ["parentRef", "sectionName"]
+                  parent_port: ["parentRef", "port"]
+                valueFrom: ["conditions", "[type=Accepted]", "status"]
+          - name: "status_parent_resolved_refs"
+            help: "ResolvedRefs condition of the httproute for each parent reference (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, parents]
+                labelsFromPath:
+                  controller_name: ["controllerName"]
+                  parent_group: ["parentRef", "group"]
+                  parent_kind: ["parentRef", "kind"]
+                  parent_name: ["parentRef", "name"]
+                  parent_namespace: ["parentRef", "namespace"]
+                  parent_section_name: ["parentRef", "sectionName"]
+                  parent_port: ["parentRef", "port"]
+                valueFrom: ["conditions", "[type=ResolvedRefs]", "status"]
         - groupVersionKind:
             group: gateway.networking.k8s.io
             kind: "GRPCRoute"
@@ -286,6 +318,38 @@ data:
                   parent_namespace: ["parentRef", "namespace"]
                   parent_section_name: ["parentRef", "sectionName"]
                   parent_port: ["parentRef", "port"]
+          # Local addition (not upstream): per-parent condition gauges so route
+          # attachment failures are alertable, not just observable.
+          - name: "status_parent_accepted"
+            help: "Accepted condition of the grpcroute for each parent reference (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, parents]
+                labelsFromPath:
+                  controller_name: ["controllerName"]
+                  parent_group: ["parentRef", "group"]
+                  parent_kind: ["parentRef", "kind"]
+                  parent_name: ["parentRef", "name"]
+                  parent_namespace: ["parentRef", "namespace"]
+                  parent_section_name: ["parentRef", "sectionName"]
+                  parent_port: ["parentRef", "port"]
+                valueFrom: ["conditions", "[type=Accepted]", "status"]
+          - name: "status_parent_resolved_refs"
+            help: "ResolvedRefs condition of the grpcroute for each parent reference (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, parents]
+                labelsFromPath:
+                  controller_name: ["controllerName"]
+                  parent_group: ["parentRef", "group"]
+                  parent_kind: ["parentRef", "kind"]
+                  parent_name: ["parentRef", "name"]
+                  parent_namespace: ["parentRef", "namespace"]
+                  parent_section_name: ["parentRef", "sectionName"]
+                  parent_port: ["parentRef", "port"]
+                valueFrom: ["conditions", "[type=ResolvedRefs]", "status"]
         - groupVersionKind:
             group: gateway.networking.k8s.io
             kind: "TCPRoute"
@@ -347,6 +411,38 @@ data:
                   parent_namespace: ["parentRef", "namespace"]
                   parent_section_name: ["parentRef", "sectionName"]
                   parent_port: ["parentRef", "port"]
+          # Local addition (not upstream): per-parent condition gauges so route
+          # attachment failures are alertable, not just observable.
+          - name: "status_parent_accepted"
+            help: "Accepted condition of the tcproute for each parent reference (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, parents]
+                labelsFromPath:
+                  controller_name: ["controllerName"]
+                  parent_group: ["parentRef", "group"]
+                  parent_kind: ["parentRef", "kind"]
+                  parent_name: ["parentRef", "name"]
+                  parent_namespace: ["parentRef", "namespace"]
+                  parent_section_name: ["parentRef", "sectionName"]
+                  parent_port: ["parentRef", "port"]
+                valueFrom: ["conditions", "[type=Accepted]", "status"]
+          - name: "status_parent_resolved_refs"
+            help: "ResolvedRefs condition of the tcproute for each parent reference (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, parents]
+                labelsFromPath:
+                  controller_name: ["controllerName"]
+                  parent_group: ["parentRef", "group"]
+                  parent_kind: ["parentRef", "kind"]
+                  parent_name: ["parentRef", "name"]
+                  parent_namespace: ["parentRef", "namespace"]
+                  parent_section_name: ["parentRef", "sectionName"]
+                  parent_port: ["parentRef", "port"]
+                valueFrom: ["conditions", "[type=ResolvedRefs]", "status"]
         - groupVersionKind:
             group: gateway.networking.k8s.io
             kind: "TLSRoute"
@@ -416,6 +512,38 @@ data:
                   parent_namespace: ["parentRef", "namespace"]
                   parent_section_name: ["parentRef", "sectionName"]
                   parent_port: ["parentRef", "port"]
+          # Local addition (not upstream): per-parent condition gauges so route
+          # attachment failures are alertable, not just observable.
+          - name: "status_parent_accepted"
+            help: "Accepted condition of the tlsroute for each parent reference (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, parents]
+                labelsFromPath:
+                  controller_name: ["controllerName"]
+                  parent_group: ["parentRef", "group"]
+                  parent_kind: ["parentRef", "kind"]
+                  parent_name: ["parentRef", "name"]
+                  parent_namespace: ["parentRef", "namespace"]
+                  parent_section_name: ["parentRef", "sectionName"]
+                  parent_port: ["parentRef", "port"]
+                valueFrom: ["conditions", "[type=Accepted]", "status"]
+          - name: "status_parent_resolved_refs"
+            help: "ResolvedRefs condition of the tlsroute for each parent reference (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, parents]
+                labelsFromPath:
+                  controller_name: ["controllerName"]
+                  parent_group: ["parentRef", "group"]
+                  parent_kind: ["parentRef", "kind"]
+                  parent_name: ["parentRef", "name"]
+                  parent_namespace: ["parentRef", "namespace"]
+                  parent_section_name: ["parentRef", "sectionName"]
+                  parent_port: ["parentRef", "port"]
+                valueFrom: ["conditions", "[type=ResolvedRefs]", "status"]
         - groupVersionKind:
             group: gateway.networking.k8s.io
             kind: "UDPRoute"
@@ -477,6 +605,38 @@ data:
                   parent_namespace: ["parentRef", "namespace"]
                   parent_section_name: ["parentRef", "sectionName"]
                   parent_port: ["parentRef", "port"]
+          # Local addition (not upstream): per-parent condition gauges so route
+          # attachment failures are alertable, not just observable.
+          - name: "status_parent_accepted"
+            help: "Accepted condition of the udproute for each parent reference (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, parents]
+                labelsFromPath:
+                  controller_name: ["controllerName"]
+                  parent_group: ["parentRef", "group"]
+                  parent_kind: ["parentRef", "kind"]
+                  parent_name: ["parentRef", "name"]
+                  parent_namespace: ["parentRef", "namespace"]
+                  parent_section_name: ["parentRef", "sectionName"]
+                  parent_port: ["parentRef", "port"]
+                valueFrom: ["conditions", "[type=Accepted]", "status"]
+          - name: "status_parent_resolved_refs"
+            help: "ResolvedRefs condition of the udproute for each parent reference (1 = True)"
+            each:
+              type: Gauge
+              gauge:
+                path: [status, parents]
+                labelsFromPath:
+                  controller_name: ["controllerName"]
+                  parent_group: ["parentRef", "group"]
+                  parent_kind: ["parentRef", "kind"]
+                  parent_name: ["parentRef", "name"]
+                  parent_namespace: ["parentRef", "namespace"]
+                  parent_section_name: ["parentRef", "sectionName"]
+                  parent_port: ["parentRef", "port"]
+                valueFrom: ["conditions", "[type=ResolvedRefs]", "status"]
         - groupVersionKind:
             group: gateway.networking.k8s.io
             kind: "BackendTLSPolicy"

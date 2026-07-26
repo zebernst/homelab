@@ -31,3 +31,41 @@ spec:
           annotations:
             summary: >-
               Gateway {{ $labels.namespace }}/{{ $labels.name }} has an unexpected plaintext listener {{ $labels.listener_name }} ({{ $labels.protocol }}/{{ $labels.port }})
+
+        # Route-level alerts rely on the per-parent condition gauges added
+        # locally to the CustomResourceState config; upstream only exposes
+        # status_parent_info, which cannot distinguish attached from rejected.
+        - alert: GatewayRouteNotAccepted
+          expr: |
+            {__name__=~"gatewayapi_.+route_status_parent_accepted"} == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              {{ $labels.customresource_kind }} {{ $labels.namespace }}/{{ $labels.name }} was rejected by Gateway {{ $labels.parent_namespace }}/{{ $labels.parent_name }} (listener {{ $labels.parent_section_name }}) — the hostname or listener does not match
+
+        - alert: GatewayRouteUnresolvedRefs
+          expr: |
+            {__name__=~"gatewayapi_.+route_status_parent_resolved_refs"} == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              {{ $labels.customresource_kind }} {{ $labels.namespace }}/{{ $labels.name }} has unresolvable backendRefs — the backing Service is missing or a cross-namespace ReferenceGrant is absent
+
+        - alert: GatewayRouteOrphaned
+          # A parentRef in spec with no matching entry in status means no
+          # controller ever claimed the route (wrong Gateway name/namespace,
+          # or the Gateway does not exist).
+          expr: |
+            {__name__=~"gatewayapi_.+route_parent_info"}
+              unless on (customresource_kind, namespace, name, parent_name, parent_namespace, parent_section_name)
+            {__name__=~"gatewayapi_.+route_status_parent_accepted"}
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              {{ $labels.customresource_kind }} {{ $labels.namespace }}/{{ $labels.name }} references Gateway {{ $labels.parent_namespace }}/{{ $labels.parent_name }} but no controller has claimed it
