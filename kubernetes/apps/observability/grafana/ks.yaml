@@ -3,6 +3,48 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: &db grafana-db
+  namespace: &ns observability
+spec:
+  targetNamespace: database
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *db
+  dependsOn:
+    - name: cloudnative-pg-cluster
+      namespace: database
+    - name: onepassword
+      namespace: external-secrets
+  path: kubernetes/apps/observability/grafana/database
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  postBuild:
+    substitute:
+      APP: grafana
+  healthCheckExprs:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: DatabaseRole
+      failed: has(status.applied) && !status.applied
+      current: has(status.applied) && status.applied && status.observedGeneration == metadata.generation
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Database
+      failed: has(status.applied) && !status.applied
+      current: has(status.applied) && status.applied && status.observedGeneration == metadata.generation
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: &app grafana
   namespace: &ns observability
 spec:
@@ -10,6 +52,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
+    - name: grafana-db
     - name: onepassword
       namespace: external-secrets
   interval: 30m

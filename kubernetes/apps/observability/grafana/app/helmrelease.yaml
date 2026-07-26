@@ -19,22 +19,41 @@ spec:
     priorityClassName: control-plane-critical
     deploymentStrategy:
       type: Recreate
+    podAnnotations:
+      reloader.stakater.com/auto: "true"
     admin:
       existingSecret: grafana-admin-secret
     envFromSecret: grafana-oidc-secret
+    envFromSecrets:
+      - name: grafana-db-secret
     env:
       GF_DATE_FORMATS_USE_BROWSER_LOCALE: true
       GF_EXPLORE_ENABLED: true
       GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: natel-discrete-panel,pr0ps-trackmap-panel,panodata-map-panel
       GF_SECURITY_ANGULAR_SUPPORT_ENABLED: true
       GF_SERVER_ROOT_URL: https://grafana.jptr.zebernst.dev
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
     grafana.ini:
       analytics:
         check_for_updates: false
         check_for_plugin_updates: false
+        feedback_links_enabled: false
         reporting_enabled: false
+      auth:
+        disable_login_form: true
+        login_maximum_inactive_lifetime_duration: 7d
+        login_maximum_lifetime_duration: 30d
+        token_rotation_interval_minutes: 10
       auth.anonymous:
         enabled: false
+      auth.basic:
+        enabled: true
+        password_policy: true
       auth.generic_oauth:
         enabled: true
         name: Pocket ID
@@ -60,6 +79,21 @@ spec:
         role_attribute_strict: true
       news:
         news_feed_enabled: false
+      plugins:
+        plugin_admin_enabled: false
+      public_dashboards:
+        enabled: false
+      security:
+        brute_force_login_protection_max_attempts: 5
+        cookie_samesite: lax
+        cookie_secure: true
+        content_security_policy: true
+        disable_brute_force_login_protection: false
+        disable_gravatar: true
+        disable_ip_address_login_protection: false
+        strict_transport_security: true
+        strict_transport_security_max_age_seconds: 86400
+
     datasources:
       datasources.yaml:
         apiVersion: 1

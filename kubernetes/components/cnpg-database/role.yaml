@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/databaserole_v1.json
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: DatabaseRole
+metadata:
+  name: ${APP}
+spec:
+  name: ${APP}
+  cluster:
+    name: ${CNPG_CLUSTER:=redspot}
+  comment: ${APP} application role
+  login: true
+  databaseRoleReclaimPolicy: ${CNPG_RECLAIM:=retain}
+  passwordSecret:
+    name: ${APP}-db-role
