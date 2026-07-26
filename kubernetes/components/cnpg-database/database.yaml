@@ -1,0 +1,12 @@
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: "${APP}"
+spec:
+  cluster:
+    name: "${CNPG_CLUSTER:=redspot}"
+  name: "${APP}"
+  owner: "${APP}"
+  ensure: present
+  databaseReclaimPolicy: "${CNPG_RECLAIM:=retain}"
