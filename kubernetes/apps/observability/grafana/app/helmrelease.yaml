@@ -212,6 +212,42 @@ spec:
           revision: 1
           datasource:
             - { name: DS_AFRANET_PROMETHEUS, value: Prometheus }
+        # Kuadrant gateway-api-state-metrics (kube-state-metrics CustomResourceState)
+        gateway-api-gatewayclasses:
+          # renovate: depName="Gateway API State / GatewayClasses"
+          gnetId: 19432
+          revision: 2
+          datasource: Prometheus
+        gateway-api-gateways:
+          # renovate: depName="Gateway API State / Gateways"
+          gnetId: 19433
+          revision: 2
+          datasource: Prometheus
+        gateway-api-httproutes:
+          # renovate: depName="Gateway API State / HTTPRoutes"
+          gnetId: 19434
+          revision: 2
+          datasource: Prometheus
+        gateway-api-grpcroutes:
+          # renovate: depName="Gateway API State / GRPCRoutes"
+          gnetId: 19570
+          revision: 1
+          datasource: Prometheus
+        gateway-api-tcproutes:
+          # renovate: depName="Gateway API State / TCPRoutes"
+          gnetId: 19571
+          revision: 1
+          datasource: Prometheus
+        gateway-api-tlsroutes:
+          # renovate: depName="Gateway API State / TLSRoutes"
+          gnetId: 19572
+          revision: 1
+          datasource: Prometheus
+        gateway-api-udproutes:
+          # renovate: depName="Gateway API State / UDPRoutes"
+          gnetId: 19573
+          revision: 1
+          datasource: Prometheus
         hubble:
           url: https://raw.githubusercontent.com/cilium/cilium/refs/heads/main/install/kubernetes/cilium/files/hubble/dashboards/hubble-dashboard.json
           datasource:

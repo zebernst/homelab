@@ -215,6 +215,25 @@ spec:
         - pods=[*]
         - deployments=[*]
         - persistentvolumeclaims=[*]
+      # Gateway API State Metrics (Kuadrant CRS) — feeds Grafana dashboards 19432–19573
+      customResourceState:
+        enabled: true
+        create: false
+        name: kube-state-metrics-gateway-api
+        key: config.yaml
+      rbac:
+        extraRules:
+          - apiGroups: ["gateway.networking.k8s.io"]
+            resources:
+              - gateways
+              - gatewayclasses
+              - httproutes
+              - grpcroutes
+              - tcproutes
+              - tlsroutes
+              - udproutes
+              - backendtlspolicies
+            verbs: ["list", "watch"]
       vmScrape:
         enabled: true
         spec:
