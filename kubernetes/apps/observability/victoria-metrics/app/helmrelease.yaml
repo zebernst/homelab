@@ -376,10 +376,15 @@ spec:
 
     kube-state-metrics:
       fullnameOverride: kube-state-metrics
+      # Explicit allowlist (not [*]). Still drops high-cardinality controller noise:
+      # pod-template-hash, controller-revision-hash, controller-uid, job/batch UIDs,
+      # apps.kubernetes.io/pod-index, statefulset.kubernetes.io/pod-name,
+      # functionUid / environmentUid, topology-location-host, etc.
       metricLabelsAllowlist:
-        - pods=[*]
-        - deployments=[*]
-        - persistentvolumeclaims=[*]
+        # taxonomy + chart/pkg + Flux + CNPG/Rook/Tailscale/Fission/Cilium one-offs
+        - pods=[app.kubernetes.io/name,app.kubernetes.io/instance,app.kubernetes.io/component,app.kubernetes.io/part-of,app.kubernetes.io/managed-by,app.kubernetes.io/version,app.kubernetes.io/created-by,app.kubernetes.io/controller,app,k8s-app,helm.sh/chart,chart,release,helm.toolkit.fluxcd.io/name,helm.toolkit.fluxcd.io/namespace,kustomize.toolkit.fluxcd.io/name,kustomize.toolkit.fluxcd.io/namespace,fluxcd.controlplane.io/name,fluxcd.controlplane.io/namespace,cnpg.io/cluster,cnpg.io/instanceName,cnpg.io/instanceRole,cnpg.io/podRole,rook_cluster,rook-version,ceph_daemon_type,ceph-version,rook.io/operator-namespace,rook_file_system,rook_object_store,device-class,failure-domain,role,component,name,tier,svc,application,control-plane,version,io.cilium/app,tailscale.com/managed,tailscale.com/parent-resource,tailscale.com/parent-resource-ns,tailscale.com/parent-resource-type,functionName,functionNamespace,executorType,environmentName,environmentNamespace,fission.io/served,application.giantswarm.io/team,openebs.io/component-name,kubernetes.io/name,kubernetes.io/cluster-service]
+        - deployments=[app.kubernetes.io/name,app.kubernetes.io/instance,app.kubernetes.io/component,app.kubernetes.io/part-of,app.kubernetes.io/managed-by,app.kubernetes.io/version,app.kubernetes.io/created-by,app.kubernetes.io/controller,app,k8s-app,helm.sh/chart,chart,release,helm.toolkit.fluxcd.io/name,helm.toolkit.fluxcd.io/namespace,kustomize.toolkit.fluxcd.io/name,kustomize.toolkit.fluxcd.io/namespace,fluxcd.controlplane.io/name,fluxcd.controlplane.io/namespace,rook_cluster,rook-version,ceph_daemon_type,ceph-version,rook.io/operator-namespace,rook_file_system,rook_object_store,device-class,failure-domain,role,component,name,tier,svc,application,control-plane,version,io.cilium/app,application.giantswarm.io/team,openebs.io/component-name,kubernetes.io/name,kubernetes.io/cluster-service]
+        - persistentvolumeclaims=[app.kubernetes.io/name,app.kubernetes.io/instance,app.kubernetes.io/component,app.kubernetes.io/part-of,app.kubernetes.io/managed-by,app.kubernetes.io/version,app.kubernetes.io/created-by,app,helm.sh/chart,chart,release,managed-by,helm.toolkit.fluxcd.io/name,helm.toolkit.fluxcd.io/namespace,kustomize.toolkit.fluxcd.io/name,kustomize.toolkit.fluxcd.io/namespace,cnpg.io/cluster,cnpg.io/instanceName,cnpg.io/instanceRole,cnpg.io/pvcRole,volsync.backube/cleanup,role,alertmanager,prometheus,operator.prometheus.io/name,operator.prometheus.io/shard]
       # Gateway API State Metrics (Kuadrant CRS) — feeds Grafana dashboards 19432–19573
       # https://github.com/Kuadrant/gateway-api-state-metrics
       customResourceState:

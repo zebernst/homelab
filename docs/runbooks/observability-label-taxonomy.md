@@ -80,6 +80,39 @@ restores `exported_<label>` → `<label>` for the taxonomy identity set before
 remote write, so stored metrics keep sample identity. Do not rely on
 `exported_namespace` / `exported_pod` / etc. in alerts or dashboards.
 
+## kube-state-metrics label allowlist
+
+`kube_pod_labels` / `kube_deployment_labels` / `kube_persistentvolumeclaim_labels`
+only export an allowlisted set of Kubernetes labels (not `[*]`).
+
+**Keep**
+
+- Taxonomy: `app.kubernetes.io/{name,instance,component,part-of}`, `app`, `k8s-app`
+- Chart/pkg: `app.kubernetes.io/{managed-by,version,created-by,controller}`,
+  `helm.sh/chart`, `chart`, `release`
+- Flux: `helm.toolkit.fluxcd.io/{name,namespace}`,
+  `kustomize.toolkit.fluxcd.io/{name,namespace}`,
+  `fluxcd.controlplane.io/{name,namespace}`
+- CNPG: `cnpg.io/cluster`, `instanceName`, `instanceRole`, `podRole` / `pvcRole`
+- Rook/Ceph: `rook_cluster`, `rook-version`, `ceph_daemon_type`, `ceph-version`,
+  `rook.io/operator-namespace`, `rook_file_system`, `rook_object_store`,
+  `device-class`, `failure-domain`
+- Other useful one-offs: `role`, `component`, `tier`, `svc`, Tailscale parent
+  labels, Fission `functionName` / `functionNamespace` / env name+ns,
+  `io.cilium/app`, OpenEBS component, a few control-plane helpers
+- PVCs also: `volsync.backube/cleanup`, Prometheus Operator PVC labels
+
+**Drop (still)**
+
+High-cardinality controller noise and IDs: `pod-template-hash`,
+`controller-revision-hash`, `controller-uid`, batch/job UIDs,
+`apps.kubernetes.io/pod-index`, `statefulset.kubernetes.io/pod-name`,
+`functionUid`, `environmentUid`, `ceph_daemon_id` / `ceph-osd-id`,
+`topology-location-*`, Helm `heritage`, and other one-off churn keys.
+
+Kubelet scrapes separately drop `uid` / container `id` labels — leave those
+drops in place when editing VictoriaMetrics values.
+
 ## Incident queries
 
 In Grafana Explore, select the VictoriaLogs datasource and use LogsQL stream
