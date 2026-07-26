@@ -80,6 +80,27 @@ restores `exported_<label>` → `<label>` for the taxonomy identity set before
 remote write, so stored metrics keep sample identity. Do not rely on
 `exported_namespace` / `exported_pod` / etc. in alerts or dashboards.
 
+## kube-state-metrics label allowlist
+
+`kube_pod_labels` / `kube_deployment_labels` / `kube_persistentvolumeclaim_labels`
+only export an allowlisted set of Kubernetes labels (not `[*]`). The allowlist
+matches the taxonomy plus Flux ownership and CNPG PVC cluster identity:
+
+- `app.kubernetes.io/name`, `app.kubernetes.io/instance`,
+  `app.kubernetes.io/component`, `app.kubernetes.io/part-of`
+- `app`, `k8s-app` (pods/deployments)
+- `helm.toolkit.fluxcd.io/name`, `kustomize.toolkit.fluxcd.io/name`
+- `cnpg.io/cluster` (PVCs)
+
+High-cardinality controller hashes and UIDs (`pod-template-hash`,
+`controller-uid`, job UIDs, per-pod StatefulSet names, …) are intentionally
+omitted. Join workload ownership through these allowlisted `label_*` fields (or
+use the experimental Service metrics gate / log taxonomy) rather than expecting
+every Kubernetes label on the series.
+
+Kubelet scrapes separately drop `uid` / container `id` labels — leave those
+drops in place when editing VictoriaMetrics values.
+
 ## Incident queries
 
 In Grafana Explore, select the VictoriaLogs datasource and use LogsQL stream

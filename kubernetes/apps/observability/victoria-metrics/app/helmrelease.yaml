@@ -376,10 +376,12 @@ spec:
 
     kube-state-metrics:
       fullnameOverride: kube-state-metrics
+      # Taxonomy + Flux ownership only. Avoid pods=[*]/deployments=[*]/PVC wildcards —
+      # those export high-cardinality hashes/UIDs (pod-template-hash, controller-uid, …).
       metricLabelsAllowlist:
-        - pods=[*]
-        - deployments=[*]
-        - persistentvolumeclaims=[*]
+        - pods=[app.kubernetes.io/name,app.kubernetes.io/instance,app.kubernetes.io/component,app.kubernetes.io/part-of,app,k8s-app,helm.toolkit.fluxcd.io/name,kustomize.toolkit.fluxcd.io/name]
+        - deployments=[app.kubernetes.io/name,app.kubernetes.io/instance,app.kubernetes.io/component,app.kubernetes.io/part-of,app,k8s-app,helm.toolkit.fluxcd.io/name,kustomize.toolkit.fluxcd.io/name]
+        - persistentvolumeclaims=[app.kubernetes.io/name,app.kubernetes.io/instance,app.kubernetes.io/component,app.kubernetes.io/part-of,app,helm.toolkit.fluxcd.io/name,kustomize.toolkit.fluxcd.io/name,cnpg.io/cluster]
       # Gateway API State Metrics (Kuadrant CRS) — feeds Grafana dashboards 19432–19573
       # https://github.com/Kuadrant/gateway-api-state-metrics
       customResourceState:
