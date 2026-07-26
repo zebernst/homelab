@@ -127,9 +127,9 @@ native labels, as in the container CPU query above.
 
 Grafana [Correlations](https://grafana.com/docs/grafana/latest/administration/correlations/)
 turn a field on one Explore result into a query (or URL) on another datasource.
-Use them to jump between VictoriaLogs and Prometheus using the taxonomy labels
-above — not to invent Flux ownership when `helmrelease` /
-`flux_kustomization` are absent.
+Use them to jump between VictoriaLogs and Prometheus on the taxonomy labels
+that are routinely present after the Fluent Bit rename: `app`, `namespace`,
+`pod`, and `container`.
 
 Provisioned datasource UIDs in this cluster:
 
@@ -140,18 +140,10 @@ Provisioned datasource UIDs in this cluster:
 
 ### Preferred links
 
-Build correlations on labels that are usually present after the Fluent Bit
-rename:
-
 | Direction | Source field(s) | Target idea |
 |-----------|-----------------|-------------|
-| Logs → metrics | `app`, optionally `namespace` / `pod` / `container` | PromQL on cAdvisor or a flagged app series filtered by those labels |
-| Metrics → logs | `namespace`, `pod`, and/or `app` | LogsQL stream filter `{namespace="…",app="…"}` (add `pod` when present) |
-
-Avoid anchoring Correlations on `helmrelease` or `flux_kustomization` for
-**log** rows. Those fields are commonly missing on Pod logs, so the link will
-not appear. On **flagged metrics** targets they may be present and can be used
-as an optional secondary link later.
+| Logs → metrics | `app`, with `namespace` / `pod` / `container` when present | PromQL on cAdvisor or a flagged app series filtered by those labels |
+| Metrics → logs | `namespace`, `pod`, and/or `app` | LogsQL stream filter such as `{namespace="…", app="…"}` or `{namespace="…", pod="…"}` |
 
 ### Create in the UI
 
@@ -163,10 +155,10 @@ as an optional secondary link later.
 5. **Target**: the other datasource UID from the table above.
 6. **Target query**: substitute the clicked field with `${app}` / `${namespace}`
    / `${pod}` (Grafana exposes source fields as variables). Keep the Explore
-   time range; do not hard-code absolute times.
+   time range.
 
-Example **logs → metrics** target (cAdvisor CPU for the clicked app’s
-namespace — adjust filters to what the log row actually has):
+Example **logs → metrics** target (cAdvisor CPU for the clicked row — match
+filters to fields present on that row):
 
 ```promql
 sum by (pod, container) (
@@ -186,7 +178,7 @@ Example **metrics → logs** target:
 {namespace="${namespace}", pod="${pod}"}
 ```
 
-When the metric series has `app` (pilot / flagged Services), prefer:
+When the metric series has `app` (pilot / flagged Services):
 
 ```text
 {namespace="${namespace}", app="${app}"}
