@@ -3,14 +3,14 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: DatabaseRole
 metadata:
-  name: ${DB_NAME}
+  name: ${APP}
 spec:
-  name: ${DB_NAME}
+  name: ${APP}
   cluster:
     name: ${CNPG_CLUSTER:=redspot}
-  comment: ${DB_NAME} application role
+  comment: ${APP} application role
   login: true
   # DatabaseRole has no `ensure`; removal is governed by the reclaim policy
   databaseRoleReclaimPolicy: ${CNPG_RECLAIM:=retain}
   passwordSecret:
-    name: ${DB_NAME}-db-role
+    name: ${APP}-db-role

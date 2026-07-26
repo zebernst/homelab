@@ -10,8 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *db
-  components:
-    - ../../../../components/cnpg-database
   dependsOn:
     - name: cloudnative-pg-cluster
       namespace: database
@@ -29,7 +27,7 @@ spec:
   timeout: 5m
   postBuild:
     substitute:
-      DB_NAME: grafana
+      APP: grafana
       OP_USER: POSTGRES_USER
       OP_PASS: POSTGRES_PASS
   healthCheckExprs:
