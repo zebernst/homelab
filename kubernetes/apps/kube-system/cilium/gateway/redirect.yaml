@@ -13,9 +13,6 @@ spec:
     - name: lan
       namespace: kube-system
       sectionName: http
-    - name: lan
-      namespace: kube-system
-      sectionName: http-internal
   rules:
     - filters:
         - requestRedirect:
