@@ -17,10 +17,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
           glance/id: radarr-uhd
-          glance/name: Radarr UHD
-          glance/icon: si:radarr
-          glance/category: downloads
-          glance/url: https://radarr-uhd.kite-harmonic.ts.net
         initContainers:
           init-db:
             image:
@@ -121,6 +117,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Radarr UHD
+          glance/icon: si:radarr
+          glance/category: downloads
+          glance/url: https://radarr-uhd.kite-harmonic.ts.net
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

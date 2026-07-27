@@ -1,5 +1,11 @@
 # Canonical glance-k8s annotation registry for homelab workloads.
 # Categories align with Glance Homelab page widgets (namespace-oriented UX).
+#
+# Annotation placement:
+# - Workload (controllers.*.annotations): glance/id, glance/parent, glance/hide
+# - Primary HTTPRoute (route.*.annotations): glance/name, glance/icon, glance/category, glance/url
+# - workload_only: no app-template route; keep display annotations on the workload
+# - upstream_values: third-party charts without HTTPRoute (podAnnotations / podMetadata)
 
 categories:
   - media
@@ -16,6 +22,7 @@ multi_route:
   - downloads/qui
   - media/tautulli
   - media/plex
+  - games/minecraft/router
   - observability/victoria-metrics
 
 app_template:
@@ -27,10 +34,12 @@ app_template:
     icon: si:openai
     url: https://paperless-ai.internal
     category: ai
+    workload_only: true
 
   # AUTH
   - file: kubernetes/apps/auth/pocket-id/app/helmrelease.yaml
     controller: pocket-id
+    route: id
     id: pocket-id
     name: Pocket ID
     icon: si:keycloak
@@ -39,6 +48,7 @@ app_template:
 
   - file: kubernetes/apps/auth/tinyauth/app/helmrelease.yaml
     controller: tinyauth
+    route: external
     id: tinyauth
     name: Tinyauth
     icon: mdi:shield-account
@@ -48,6 +58,7 @@ app_template:
   # DOWNLOADS
   - file: kubernetes/apps/downloads/autobrr/app/helmrelease.yaml
     controller: autobrr
+    route: canonical
     id: autobrr
     name: Autobrr
     icon: mdi:robot
@@ -56,6 +67,7 @@ app_template:
 
   - file: kubernetes/apps/downloads/bazarr/hd/helmrelease.yaml
     controller: bazarr
+    route: canonical
     id: bazarr-hd
     name: Bazarr HD
     icon: si:bazarr
@@ -64,6 +76,7 @@ app_template:
 
   - file: kubernetes/apps/downloads/bazarr/uhd/helmrelease.yaml
     controller: bazarr-uhd
+    route: canonical
     id: bazarr-uhd
     name: Bazarr UHD
     icon: si:bazarr
@@ -72,6 +85,7 @@ app_template:
 
   - file: kubernetes/apps/downloads/lidarr/app/helmrelease.yaml
     controller: lidarr
+    route: canonical
     id: lidarr
     name: Lidarr
     icon: si:lidarr
@@ -80,6 +94,7 @@ app_template:
 
   - file: kubernetes/apps/downloads/openbooks/app/helmrelease.yaml
     controller: openbooks
+    route: canonical
     id: openbooks
     name: OpenBooks
     icon: mdi:book-search
@@ -88,6 +103,7 @@ app_template:
 
   - file: kubernetes/apps/downloads/prowlarr/app/helmrelease.yaml
     controller: prowlarr
+    route: canonical
     id: prowlarr
     name: Prowlarr
     icon: si:prowlarr
@@ -101,17 +117,21 @@ app_template:
     icon: si:qbittorrent
     url: https://qbittorrent.kite-harmonic.ts.net
     category: downloads
+    workload_only: true
 
   - file: kubernetes/apps/downloads/qui/app/helmrelease.yaml
     controller: qui
+    route: canonical
     id: qui
     name: Qui
     icon: si:qbittorrent
     url: https://qui.zebernst.dev
     category: downloads
+    force_url: true
 
   - file: kubernetes/apps/downloads/radarr/app/hd/helmrelease.yaml
     controller: radarr
+    route: canonical
     id: radarr-hd
     name: Radarr HD
     icon: si:radarr
@@ -120,6 +140,7 @@ app_template:
 
   - file: kubernetes/apps/downloads/radarr/app/uhd/helmrelease.yaml
     controller: radarr-uhd
+    route: canonical
     id: radarr-uhd
     name: Radarr UHD
     icon: si:radarr
@@ -128,6 +149,7 @@ app_template:
 
   - file: kubernetes/apps/downloads/sonarr/app/hd/helmrelease.yaml
     controller: sonarr
+    route: canonical
     id: sonarr-hd
     name: Sonarr HD
     icon: si:sonarr
@@ -136,6 +158,7 @@ app_template:
 
   - file: kubernetes/apps/downloads/sonarr/app/uhd/helmrelease.yaml
     controller: sonarr-uhd
+    route: canonical
     id: sonarr-uhd
     name: Sonarr UHD
     icon: si:sonarr
@@ -144,6 +167,7 @@ app_template:
 
   - file: kubernetes/apps/downloads/whisparr/app/helmrelease.yaml
     controller: whisparr
+    route: canonical
     id: whisparr
     name: Whisparr
     icon: si:sonarr
@@ -153,47 +177,34 @@ app_template:
   # GAMES
   - file: kubernetes/apps/games/minecraft/router/app/helmrelease.yaml
     controller: mc-router
+    route: api
     id: minecraft
     name: Minecraft
     icon: si:minecraft
     url: https://worldmap.zebernst.dev
     category: games
+    force_url: true
 
   - file: kubernetes/apps/games/minecraft/bluemap/app/helmrelease.yaml
     controller: bluemap
-    id: bluemap
-    name: BlueMap
-    icon: si:minecraft
     parent: minecraft
-    category: games
 
   - file: kubernetes/apps/games/minecraft/vanilla/app/helmrelease.yaml
     controller: vanilla
-    id: minecraft-vanilla
-    name: Minecraft Vanilla
-    icon: si:minecraft
     parent: minecraft
-    category: games
 
   - file: kubernetes/apps/games/minecraft/atm10/app/helmrelease.yaml
     controller: atm10
-    id: minecraft-atm10
-    name: Minecraft ATM10
-    icon: si:minecraft
     parent: minecraft
-    category: games
 
   - file: kubernetes/apps/games/minecraft/atmons/app/helmrelease.yaml
     controller: atmons
-    id: minecraft-atmons
-    name: Minecraft ATMons
-    icon: si:minecraft
     parent: minecraft
-    category: games
 
   # MEDIA
   - file: kubernetes/apps/media/agregarr/app/helmrelease.yaml
     controller: agregarr
+    route: canonical
     id: agregarr
     name: Agregarr
     icon: si:sonarr
@@ -202,6 +213,7 @@ app_template:
 
   - file: kubernetes/apps/media/booklore/app/helmrelease.yaml
     controller: booklore
+    route: app
     id: booklore
     name: Booklore
     icon: mdi:book-open-variant
@@ -210,6 +222,7 @@ app_template:
 
   - file: kubernetes/apps/media/capacitarr/app/helmrelease.yaml
     controller: capacitarr
+    route: canonical
     id: capacitarr
     name: Capacitarr
     icon: si:sonarr
@@ -218,6 +231,7 @@ app_template:
 
   - file: kubernetes/apps/media/maintainerr/app/helmrelease.yaml
     controller: maintainerr
+    route: canonical
     id: maintainerr
     name: Maintainerr
     icon: mdi:broom
@@ -226,14 +240,17 @@ app_template:
 
   - file: kubernetes/apps/media/plex/app/helmrelease.yaml
     controller: plex
+    route: plex
     id: plex
     name: Plex
     icon: si:plex
     url: https://plex.zebernst.dev
     category: media
+    force_url: true
 
   - file: kubernetes/apps/media/seerr/app/helmrelease.yaml
     controller: seerr
+    route: app
     id: seerr
     name: Seerr
     icon: mdi:movie-open
@@ -242,6 +259,7 @@ app_template:
 
   - file: kubernetes/apps/media/shelfmark/app/helmrelease.yaml
     controller: shelfmark
+    route: canonical
     id: shelfmark
     name: Shelfmark
     icon: mdi:bookmark
@@ -250,6 +268,7 @@ app_template:
 
   - file: kubernetes/apps/media/stash/app/helmrelease.yaml
     controller: stash
+    route: canonical
     id: stash
     name: Stash
     icon: mdi:filmstrip-box
@@ -258,6 +277,7 @@ app_template:
 
   - file: kubernetes/apps/media/steam/app/helmrelease.yaml
     controller: steam
+    route: canonical
     id: steam
     name: Steam Headless
     icon: si:steam
@@ -266,14 +286,17 @@ app_template:
 
   - file: kubernetes/apps/media/tautulli/app/helmrelease.yaml
     controller: tautulli
+    route: canonical
     id: tautulli
     name: Tautulli
     icon: si:plex
     url: https://tautulli.zebernst.dev
     category: media
+    force_url: true
 
   - file: kubernetes/apps/media/wizarr/app/helmrelease.yaml
     controller: wizarr
+    route: app
     id: wizarr
     name: Wizarr
     icon: mdi:account-plus
@@ -281,16 +304,19 @@ app_template:
     category: media
 
   # OBSERVABILITY
-  - file: kubernetes/apps/observability/gatus/app/helmrelease.yaml
+  - file: kubernetes/apps/observability/gatus/private/helmrelease.yaml
     controller: gatus
+    route: canonical
     id: gatus
     name: Gatus
     icon: mdi:heart-pulse
     url: https://status.zebernst.dev
     category: observability
+    force_url: true
 
   - file: kubernetes/apps/observability/karma/app/helmrelease.yaml
     controller: karma
+    route: canonical
     id: karma
     name: Karma
     icon: mdi:alert-circle
@@ -299,6 +325,7 @@ app_template:
 
   - file: kubernetes/apps/observability/kromgo/app/helmrelease.yaml
     controller: kromgo
+    route: app
     id: kromgo
     name: Kromgo
     icon: mdi:message-text
@@ -308,6 +335,7 @@ app_template:
   # SELF-HOSTED
   - file: kubernetes/apps/self-hosted/atuin/app/helmrelease.yaml
     controller: atuin
+    route: canonical
     id: atuin
     name: Atuin
     icon: mdi:history
@@ -316,22 +344,27 @@ app_template:
 
   - file: kubernetes/apps/self-hosted/dawarich/app/helmrelease.yaml
     controller: dawarich
+    route: canonical
     id: dawarich
     name: Dawarich
     icon: mdi:map-marker-path
     url: https://timeline.zebernst.dev
     category: self-hosted
+    force_url: true
 
   - file: kubernetes/apps/self-hosted/glance/app/helmrelease.yaml
     controller: glance
+    route: canonical
     id: glance
     name: Glance
     icon: di:glance
     url: https://glance.zebernst.dev
     category: self-hosted
+    force_url: true
 
   - file: kubernetes/apps/self-hosted/it-tools/app/helmrelease.yaml
     controller: it-tools
+    route: canonical
     id: it-tools
     name: IT-Tools
     icon: mdi:tools
@@ -340,6 +373,7 @@ app_template:
 
   - file: kubernetes/apps/self-hosted/nocodb/app/helmrelease.yaml
     controller: nocodb
+    route: canonical
     id: nocodb
     name: NocoDB
     icon: si:nocodb
@@ -353,9 +387,11 @@ app_template:
     icon: mdi:map-search
     url: https://nominatim.zebernst.dev
     category: self-hosted
+    workload_only: true
 
   - file: kubernetes/apps/self-hosted/paperless/app/helmrelease.yaml
     controller: paperless
+    route: canonical
     id: paperless
     name: Paperless-ngx
     icon: si:readthedocs
@@ -364,6 +400,7 @@ app_template:
 
   - file: kubernetes/apps/self-hosted/rxresume/app/helmrelease.yaml
     controller: rxresume
+    route: app
     id: rxresume
     name: RxResume
     icon: mdi:file-document
@@ -372,11 +409,13 @@ app_template:
 
   - file: kubernetes/apps/self-hosted/unwrapped/app/helmrelease.yaml
     controller: unwrapped
+    route: canonical
     id: unwrapped
     name: Unwrapped
     icon: mdi:gift
     url: https://unwrapped.zebernst.dev
     category: self-hosted
+    force_url: true
 
 hide:
   - file: kubernetes/apps/network/echo-server/app/helmrelease.yaml

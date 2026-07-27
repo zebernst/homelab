@@ -11,32 +11,60 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "docs/architecture/glance-annotations.yaml"
+ROUTE_PRIORITY = ("app", "id", "plex", "external", "api", "cv")
 
 
-def glance_lines(entry: dict, *, hide: bool = False) -> list[str]:
+def route_keys(text: str) -> list[str]:
+    if "    route:" not in text:
+        return []
+    block = text.split("    route:", 1)[1]
+    m = re.match(r"(.*?)(?=^    \w|\Z)", block, re.MULTILINE | re.DOTALL)
+    if not m:
+        return []
+    return re.findall(r"^      (\S+):", m.group(1), re.MULTILINE)
+
+
+def pick_route(text: str, entry: dict) -> str | None:
+    if entry.get("route"):
+        return entry["route"]
+    keys = route_keys(text)
+    if not keys:
+        return None
+    for key in ROUTE_PRIORITY:
+        if key in keys:
+            return key
+    non_canonical = [k for k in keys if k != "canonical"]
+    return non_canonical[0] if non_canonical else keys[0]
+
+
+def display_lines(entry: dict, *, include_url: bool) -> list[str]:
     indent = "          "
-    if hide:
-        return [f'{indent}glance/hide: "true"']
-
     lines = [
-        f"{indent}glance/id: {entry['id']}",
         f"{indent}glance/name: {entry['name']}",
         f"{indent}glance/icon: {entry['icon']}",
         f"{indent}glance/category: {entry['category']}",
     ]
-    if entry.get("url"):
-        lines.append(f'{indent}glance/url: {entry["url"]}')
-    if entry.get("parent"):
-        lines.append(f"{indent}glance/parent: {entry['parent']}")
+    if include_url and entry.get("url"):
+        lines.append(f"{indent}glance/url: {entry['url']}")
     return lines
 
 
+def workload_lines(entry: dict, *, hide: bool = False) -> list[str]:
+    indent = "          "
+    if hide:
+        return [f'{indent}glance/hide: "true"']
+    if entry.get("parent"):
+        return [f"{indent}glance/parent: {entry['parent']}"]
+    if entry.get("id"):
+        return [f"{indent}glance/id: {entry['id']}"]
+    return []
+
+
 def already_has_glance(text: str) -> bool:
-    return "glance/id:" in text or 'glance/hide: "true"' in text
+    return "glance/id:" in text or 'glance/hide: "true"' in text or "glance/parent:" in text
 
 
 def controller_block_end(text: str, start: int) -> int:
-    """Return index after the controller block starting at `start`."""
     lines = text[start:].splitlines(keepends=True)
     consumed = 0
     for line in lines[1:]:
@@ -48,39 +76,90 @@ def controller_block_end(text: str, start: int) -> int:
     return start + consumed
 
 
-def apply_app_template(path: Path, controller: str, lines: list[str]) -> bool:
+def merge_annotations(text: str, anchor_re: re.Pattern[str], lines: list[str]) -> str:
+    match = anchor_re.search(text)
+    if not match:
+        return text
+    block_end = controller_block_end(text, match.start()) if "      " in anchor_re.pattern else len(text)
+    block = text[match.start() : block_end]
+    ann_match = re.search(r"^        annotations:\n((?:          .+\n)*)", block, re.MULTILINE)
+    if ann_match:
+        insert_at = match.start() + ann_match.end(1)
+        payload = "".join(line + "\n" for line in lines)
+        return text[:insert_at] + payload + text[insert_at:]
+    insert_at = match.end()
+    payload = "        annotations:\n" + "".join(line + "\n" for line in lines)
+    return text[:insert_at] + payload + text[insert_at:]
+
+
+def should_include_url(entry: dict, text: str, route: str | None) -> bool:
+    if not entry.get("url"):
+        return False
+    if entry.get("force_url"):
+        return True
+    if not route:
+        return True
+    host = entry["url"].split("://", 1)[-1].split("/", 1)[0]
+    route_start = text.find("    route:")
+    if route_start == -1:
+        return True
+    route_block = text[route_start:]
+    route_section = re.search(
+        rf"      {re.escape(route)}:(.*?)(?=^      \S|\Z)",
+        route_block,
+        re.DOTALL | re.MULTILINE,
+    )
+    if route_section and host in route_section.group(1):
+        return False
+    return True
+
+
+def apply_app_template(path: Path, entry: dict, *, hide: bool = False) -> bool:
     text = path.read_text()
     if already_has_glance(text):
         return False
 
+    controller = entry["controller"]
     controller_re = re.compile(rf"^      {re.escape(controller)}:\n", re.MULTILINE)
-    match = controller_re.search(text)
-    if not match:
+    if not controller_re.search(text):
         print(f"WARN: controller {controller} not found in {path}", file=sys.stderr)
         return False
 
-    block_end = controller_block_end(text, match.start())
-    block = text[match.start() : block_end]
-    ann_matches = list(re.finditer(r"^        annotations:\n((?:          .+\n)*)", block, re.MULTILINE))
-    if ann_matches:
-        ann_match = ann_matches[0]
-        insert_at = match.start() + ann_match.end(1)
-        text = text[:insert_at] + "".join(line + "\n" for line in lines) + text[insert_at:]
+    text = merge_annotations(text, controller_re, workload_lines(entry, hide=hide))
+
+    if hide or entry.get("parent"):
         path.write_text(text)
         return True
 
-    child_match = re.search(
-        r"^        (?:(?:replicas|strategy|initContainers|containers|type):)",
-        block,
-        re.MULTILINE,
-    )
-    if not child_match:
-        print(f"WARN: no insertion point for {controller} in {path}", file=sys.stderr)
-        return False
+    if entry.get("workload_only"):
+        text = merge_annotations(
+            text,
+            controller_re,
+            display_lines(entry, include_url=should_include_url(entry, text, None)),
+        )
+        path.write_text(text)
+        return True
 
-    insert_at = match.start() + child_match.start()
-    ann_block = "        annotations:\n" + "".join(line + "\n" for line in lines)
-    text = text[:insert_at] + ann_block + text[insert_at:]
+    route = pick_route(text, entry)
+    if route:
+        route_re = re.compile(rf"^      {re.escape(route)}:\n", re.MULTILINE)
+        route_start = text.find("    route:")
+        route_block = text[route_start:]
+        if route_re.search(route_block):
+            abs_route_re = re.compile(rf"(?m)^      {re.escape(route)}:\n")
+            text = merge_annotations(
+                text,
+                abs_route_re,
+                display_lines(entry, include_url=should_include_url(entry, text, route)),
+            )
+            path.write_text(text)
+            return True
+
+    text = merge_annotations(
+        text,
+        controller_re,
+        display_lines(entry, include_url=should_include_url(entry, text, None)),
+    )
     path.write_text(text)
     return True
 
@@ -137,13 +216,13 @@ def main() -> int:
 
     for entry in catalog.get("app_template", []):
         path = ROOT / entry["file"]
-        if apply_app_template(path, entry["controller"], glance_lines(entry)):
+        if apply_app_template(path, entry):
             updated += 1
             print(f"updated {path}")
 
     for entry in catalog.get("hide", []):
         path = ROOT / entry["file"]
-        if apply_app_template(path, entry["controller"], glance_lines(entry, hide=True)):
+        if apply_app_template(path, entry, hide=True):
             updated += 1
             print(f"hidden {path}")
 

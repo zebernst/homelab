@@ -17,10 +17,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
           glance/id: qui
-          glance/name: Qui
-          glance/icon: si:qbittorrent
-          glance/category: downloads
-          glance/url: https://qui.zebernst.dev
         containers:
           qui:
             image:
@@ -103,6 +99,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Qui
+          glance/icon: si:qbittorrent
+          glance/category: downloads
+          glance/url: https://qui.zebernst.dev
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

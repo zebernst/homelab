@@ -17,10 +17,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
           glance/id: rxresume
-          glance/name: RxResume
-          glance/icon: mdi:file-document
-          glance/category: self-hosted
-          glance/url: https://rxresume.zebernst.dev
         initContainers:
           init-db:
             image:
@@ -103,6 +99,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: RxResume
+          glance/icon: mdi:file-document
+          glance/category: self-hosted
+          glance/url: https://rxresume.zebernst.dev
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"
         parentRefs:

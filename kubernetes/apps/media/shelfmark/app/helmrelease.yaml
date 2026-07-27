@@ -14,12 +14,6 @@ spec:
   values:
     controllers:
       shelfmark:
-        annotations:
-          glance/id: shelfmark
-          glance/name: Shelfmark
-          glance/icon: mdi:bookmark
-          glance/category: media
-          glance/url: https://shelfmark.zebernst.dev
         containers:
           shelfmark:
             image:
@@ -65,6 +59,11 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/id: shelfmark
+          glance/name: Shelfmark
+          glance/icon: mdi:bookmark
+          glance/category: media
+          glance/url: https://shelfmark.zebernst.dev
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

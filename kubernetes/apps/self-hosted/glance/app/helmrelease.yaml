@@ -17,10 +17,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
           glance/id: glance
-          glance/name: Glance
-          glance/icon: di:glance
-          glance/category: self-hosted
-          glance/url: https://glance.zebernst.dev
         containers:
           glance:
             image:
@@ -101,6 +97,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Glance
+          glance/icon: di:glance
+          glance/category: self-hosted
+          glance/url: https://glance.zebernst.dev
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

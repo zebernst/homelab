@@ -17,10 +17,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
           glance/id: unwrapped
-          glance/name: Unwrapped
-          glance/icon: mdi:gift
-          glance/category: self-hosted
-          glance/url: https://unwrapped.zebernst.dev
         containers:
           unwrapped:
             image:
@@ -76,6 +72,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Unwrapped
+          glance/icon: mdi:gift
+          glance/category: self-hosted
+          glance/url: https://unwrapped.zebernst.dev
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

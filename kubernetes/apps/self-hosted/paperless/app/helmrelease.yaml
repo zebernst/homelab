@@ -14,14 +14,9 @@ spec:
   values:
     controllers:
       paperless:
-
         annotations:
           reloader.stakater.com/auto: "true"
           glance/id: paperless
-          glance/name: Paperless-ngx
-          glance/icon: si:readthedocs
-          glance/category: self-hosted
-          glance/url: https://paperless.kite-harmonic.ts.net
 
         initContainers:
           init-db:
@@ -139,6 +134,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Paperless-ngx
+          glance/icon: si:readthedocs
+          glance/category: self-hosted
+          glance/url: https://paperless.kite-harmonic.ts.net
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

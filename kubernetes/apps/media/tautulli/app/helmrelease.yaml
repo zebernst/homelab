@@ -17,10 +17,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
           glance/id: tautulli
-          glance/name: Tautulli
-          glance/icon: si:plex
-          glance/category: media
-          glance/url: https://tautulli.zebernst.dev
         containers:
           tautulli:
             image:
@@ -76,6 +72,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Tautulli
+          glance/icon: si:plex
+          glance/category: media
+          glance/url: https://tautulli.zebernst.dev
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

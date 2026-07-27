@@ -14,12 +14,6 @@ spec:
   values:
     controllers:
       booklore:
-        annotations:
-          glance/id: booklore
-          glance/name: Booklore
-          glance/icon: mdi:book-open-variant
-          glance/category: media
-          glance/url: https://booklore.zebernst.dev
         containers:
           booklore:
             image:
@@ -74,6 +68,11 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/id: booklore
+          glance/name: Booklore
+          glance/icon: mdi:book-open-variant
+          glance/category: media
+          glance/url: https://booklore.zebernst.dev
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"
         parentRefs:

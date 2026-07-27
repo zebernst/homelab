@@ -17,10 +17,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
           glance/id: seerr
-          glance/name: Seerr
-          glance/icon: mdi:movie-open
-          glance/category: media
-          glance/url: https://requests.zebernst.dev
         containers:
           seerr:
             image:
@@ -75,6 +71,9 @@ spec:
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
             path: /api/v1/status
+          glance/name: Seerr
+          glance/icon: mdi:movie-open
+          glance/category: media
         hostnames:
           - "requests.zebernst.dev"
         parentRefs:

@@ -17,10 +17,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
           glance/id: steam
-          glance/name: Steam Headless
-          glance/icon: si:steam
-          glance/category: media
-          glance/url: https://steam.kite-harmonic.ts.net
         containers:
           steam:
             image:
@@ -103,6 +99,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Steam Headless
+          glance/icon: si:steam
+          glance/category: media
+          glance/url: https://steam.kite-harmonic.ts.net
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

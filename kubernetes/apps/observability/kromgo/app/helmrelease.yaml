@@ -17,10 +17,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
           glance/id: kromgo
-          glance/name: Kromgo
-          glance/icon: mdi:message-text
-          glance/category: observability
-          glance/url: https://kromgo.zebernst.dev
         replicas: 2
         strategy: RollingUpdate
         containers:
@@ -76,6 +72,10 @@ spec:
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
             path: /talos_version
+          glance/name: Kromgo
+          glance/icon: mdi:message-text
+          glance/category: observability
+          glance/url: https://kromgo.zebernst.dev
         hostnames:
           - "{{ .Release.Name }}.zebernst.dev"
         parentRefs:
