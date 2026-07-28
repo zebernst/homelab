@@ -51,7 +51,7 @@ spec:
           mc-router:
             image:
               repository: ghcr.io/itzg/mc-router
-              tag: 1.42.1@sha256:bab38fed93b8b54bb36fcded3310e83d92fb65b4df89989f5bcdb4b559e286a3
+              tag: 1.45.1@sha256:c0ba7037de0d2d91e093da1cbe528bb1ec0806abd4de8442d44092f4f39fe94e
             env:
               TZ: America/Chicago
               IN_KUBE_CLUSTER: "true"
