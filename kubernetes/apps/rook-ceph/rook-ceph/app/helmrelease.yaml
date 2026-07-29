@@ -9,18 +9,15 @@ spec:
   chart:
     spec:
       chart: rook-ceph
-      version: v1.19.7
+      version: v1.20.2
       sourceRef:
         kind: HelmRepository
         name: rook-ceph
         namespace: flux-system
 
   values:
-    csi:
-      cephFSKernelMountOptions: ms_mode=prefer-crc
-      enableLiveness: true
-      serviceMonitor:
-        enabled: false
+    # CSI driver settings moved to the ceph-csi-drivers chart in Rook 1.20.
+    # See kubernetes/apps/rook-ceph/ceph-csi-drivers/
     enableDiscoveryDaemon: true
     monitoring:
       enabled: true

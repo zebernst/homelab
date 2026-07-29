@@ -34,6 +34,8 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
+    - name: ceph-csi-drivers
+      namespace: *ns
     - name: rook-ceph
       namespace: *ns
   healthCheckExprs:

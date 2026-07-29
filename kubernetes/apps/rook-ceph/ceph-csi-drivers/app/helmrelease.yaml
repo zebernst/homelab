@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ceph-csi-drivers
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: ceph-csi-drivers
+      version: 1.0.4
+      sourceRef:
+        kind: HelmRepository
+        name: ceph-csi-operator
+        namespace: flux-system
+
+  values:
+    # Rook-compatible defaults — driver names must match existing StorageClasses.
+    # See https://rook.io/docs/rook/v1.20/Helm-Charts/csi-drivers-chart/
+    operatorConfig:
+      namespace: rook-ceph
+      driverSpecDefaults:
+        imageSet:
+          name: rook-csi-operator-image-set-configmap
+        nodePlugin:
+          priorityClassName: system-node-critical
+        controllerPlugin:
+          priorityClassName: system-cluster-critical
+        # Migrated from rook-ceph chart: csi.cephFSKernelMountOptions
+        kernelMountOptions:
+          ms_mode: prefer-crc
+    drivers:
+      rbd:
+        enabled: true
+        name: rook-ceph.rbd.csi.ceph.com
+        snapshotPolicy: volumeSnapshot
+      cephfs:
+        enabled: true
+        name: rook-ceph.cephfs.csi.ceph.com
+        snapshotPolicy: volumeSnapshot
+        kernelMountOptions:
+          ms_mode: prefer-crc
+      nfs:
+        enabled: false
+        name: rook-ceph.nfs.csi.ceph.com
+      nvmeof:
+        enabled: false
+        name: rook-ceph.nvmeof.csi.ceph.com
