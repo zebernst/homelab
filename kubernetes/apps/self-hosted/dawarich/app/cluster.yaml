@@ -24,5 +24,11 @@ spec:
       memory: 256Mi
     limits:
       memory: 1Gi
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: dawarich-db-backup
+        serverName: dawarich-db-v1
   monitoring:
     enablePodMonitor: true
