@@ -5,8 +5,10 @@ kind: Kustomization
 components:
   - ../../../../components/vmrule
 resources:
-  - cluster.yaml
   - externalsecret.yaml
+  - objectstore.yaml
+  - cluster.yaml
+  - scheduledbackup.yaml
   - helmrelease.yaml
   - vmservicescrape.yaml
   - vmrule.yaml
