@@ -17,7 +17,7 @@ machine:
     kubernetesTalosAPIAccess:
       enabled: true
       allowedRoles: ["os:admin", "os:etcd:backup"]
-      allowedKubernetesNamespaces: ["actions-runner-system", "system-upgrade", "talos-backup"]
+      allowedKubernetesNamespaces: ["actions-runner-system", "system-upgrade", "kube-system"]
     {% endif %}
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
