@@ -76,7 +76,7 @@ spec:
   postBuild:
     substitute:
       # renovate: datasource=docker depName=ghcr.io/cloudnative-pg/postgresql
-      POSTGRESQL_VERSION: 17.10-standard-trixie
+      POSTGRESQL_VERSION: 18.4-standard-trixie
   prune: true
   retryInterval: 1m
   sourceRef:
