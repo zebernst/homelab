@@ -64,14 +64,8 @@ machine:
     extraConfig:
       featureGates:
         UserNamespacesSupport: true
-        UserNamespacesPodSecurityStandards: true
       maxPods: 150
       serializeImagePulls: false
-    extraMounts:
-      - destination: /var/mnt/extra
-        type: bind
-        source: /var/mnt/extra
-        options: ["bind", "rshared", "rw"]
     defaultRuntimeSeccompProfileEnabled: true
     nodeIP:
       validSubnets: ["192.168.10.0/24"]
@@ -145,7 +139,7 @@ cluster:
     image: registry.k8s.io/kube-apiserver:v1.35.2
     extraArgs:
       enable-aggregator-routing: true
-      feature-gates: UserNamespacesSupport=true,UserNamespacesPodSecurityStandards=true
+      feature-gates: UserNamespacesSupport=true
     certSANs: ["k8s.internal"]
     disablePodSecurityPolicy: true
   controllerManager:
