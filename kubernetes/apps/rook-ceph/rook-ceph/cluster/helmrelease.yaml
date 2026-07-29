@@ -221,3 +221,28 @@ spec:
               - op: replace
                 path: /spec/groups/1/rules/4/for
                 value: 5m
+
+              # Collapse mgr pod label before joining on (cluster,pool_id,instance).
+              # After mgr restarts, predict_linear/lookbacks retain series from prior
+              # pods and the stock join fails with "duplicate time series".
+              # CephPoolGrowthWarning
+              - op: replace
+                path: /spec/groups/7/rules/0/expr
+                value: >-
+                  (max without (pod) (predict_linear(ceph_pool_percent_used[2d], 3600 * 24 * 5))
+                  * on(cluster,pool_id, instance) group_right()
+                  max without (pod) (ceph_pool_metadata)) >= 95
+              # CephPGsInactive (same join; harden for dual-mgr scrape windows)
+              - op: replace
+                path: /spec/groups/5/rules/0/expr
+                value: >-
+                  max without (pod) (ceph_pool_metadata)
+                  * on(cluster,pool_id,instance) group_left()
+                  max without (pod) (ceph_pg_total - ceph_pg_active) > 0
+              # CephPGsUnclean
+              - op: replace
+                path: /spec/groups/5/rules/1/expr
+                value: >-
+                  max without (pod) (ceph_pool_metadata)
+                  * on(cluster,pool_id,instance) group_left()
+                  max without (pod) (ceph_pg_total - ceph_pg_clean) > 0
