@@ -66,8 +66,6 @@ machine:
         UserNamespacesSupport: true
       maxPods: 150
       serializeImagePulls: false
-    # No kubelet.extraMounts for /var/mnt/* — Talos exposes user volumes to kubelet;
-    # rshared bind mounts leak CSI mounts across kubelet restarts (siderolabs/talos#13053).
     defaultRuntimeSeccompProfileEnabled: true
     nodeIP:
       validSubnets: ["192.168.10.0/24"]
