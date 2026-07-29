@@ -62,6 +62,8 @@ spec:
   dependsOn:
     - name: cloudnative-pg
       namespace: *ns
+    - name: cloudnative-pg-barman-plugin
+      namespace: *ns
     - name: openebs
       namespace: openebs-system
   healthCheckExprs:
