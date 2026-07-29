@@ -16,8 +16,8 @@ machine:
     {% if ENV.MACHINE_TYPE == 'controlplane' %}
     kubernetesTalosAPIAccess:
       enabled: true
-      allowedRoles: ["os:admin"]
-      allowedKubernetesNamespaces: ["actions-runner-system", "system-upgrade"]
+      allowedRoles: ["os:admin", "os:etcd:backup"]
+      allowedKubernetesNamespaces: ["actions-runner-system", "system-upgrade", "talos-backup"]
     {% endif %}
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true

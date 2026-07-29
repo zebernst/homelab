@@ -1,0 +1,82 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: talos-backup
+spec:
+  schedule: "15 3 * * *" # daily 03:15 UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: talos-backup
+              # renovate: datasource=docker depName=ghcr.io/siderolabs/talos-backup
+              image: ghcr.io/siderolabs/talos-backup:v0.1.0-beta.2
+              imagePullPolicy: IfNotPresent
+              workingDir: /tmp
+              command: ["/talos-backup"]
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: talos-backup-s3
+                      key: AWS_ACCESS_KEY_ID
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: talos-backup-s3
+                      key: AWS_SECRET_ACCESS_KEY
+                - name: AWS_REGION
+                  value: us-west-001
+                - name: CUSTOM_S3_ENDPOINT
+                  value: https://s3.us-west-001.backblazeb2.com
+                - name: USE_PATH_STYLE
+                  value: "true"
+                - name: BUCKET
+                  value: cluster-db-backup
+                - name: CLUSTER_NAME
+                  value: jupiter
+                - name: S3_PREFIX
+                  value: etcd/jupiter
+                # age public recipient; private identity stored out-of-band in 1Password (talos-backup)
+                - name: AGE_RECIPIENT_PUBLIC_KEY
+                  value: age1fjyq00tut3835ud23820twfnhxyq3ll6h4uzee5rumlexsy6kddq7j00np
+                - name: ENABLE_COMPRESSION
+                  value: "true"
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+                - name: talos
+                  mountPath: /.talos
+                - name: talos-secrets
+                  mountPath: /var/run/secrets/talos.dev
+          volumes:
+            - name: tmp
+              emptyDir: {}
+            - name: talos
+              emptyDir: {}
+            - name: talos-secrets
+              secret:
+                secretName: talos-backup-secrets
