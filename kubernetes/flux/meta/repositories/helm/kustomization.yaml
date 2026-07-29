@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - backube.yaml
   - bjw-s.yaml
+  - ceph-csi-operator.yaml
   - cilium.yaml
   - cloudnative-pg.yaml
   - controlplaneio.yaml
