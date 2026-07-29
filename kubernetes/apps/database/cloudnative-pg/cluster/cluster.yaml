@@ -41,4 +41,4 @@ spec:
       isWALArchiver: true
       parameters:
         barmanObjectName: redspot-backup
-        serverName: redspot-v17
+        serverName: redspot-v18
