@@ -6,7 +6,7 @@ metadata:
   name: redspot
 spec:
   schedule: "@daily"
-  immediate: true
+  immediate: false
   backupOwnerReference: self
   method: plugin
   pluginConfiguration:
