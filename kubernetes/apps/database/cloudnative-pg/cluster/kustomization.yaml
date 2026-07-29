@@ -5,6 +5,7 @@ kind: Kustomization
 components:
   - ../../../../components/vmrule
 resources:
+  - objectstore.yaml
   - cluster.yaml
   - scheduledbackup.yaml
   - vmrule.yaml
