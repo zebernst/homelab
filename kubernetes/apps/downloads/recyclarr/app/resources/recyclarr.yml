@@ -55,9 +55,9 @@ sonarr:
     custom_formats:
       # HDR — prefer HDR10+; keep DV (WEBDL) for compatibility
       - trash_ids:
-          - 9b27ab6498ec0f31a3353992e19434ca # DV (WEBDL)
-          - 0dad0a507451acddd754fe6dc3a7f5e7 # HDR10+ Boost
-          - 385e9e8581d33133c3961bdcdeffb7b4 # DV HDR10+ Boost
+          - 9b27ab6498ec0f31a3353992e19434ca # DV (w/o HDR fallback)
+          - 0c4b99df9206d2cfac3c05ab897dd62a # HDR10+ Boost
+          - 7c3a61a9c6cb04f52f1544be6d44a026 # DV Boost
         assign_scores_to:
           - name: Any
           - name: Best
@@ -139,10 +139,10 @@ radarr:
         assign_scores_to:
           - name: Best
 
-      # HDR — prefer HDR10+ on Best
+      # HDR — prefer HDR10+ / DV Boost on Best
       - trash_ids:
-          - b17886cb4158d9fea189859409975758 # HDR10+ Boost
-          - 55a5b50cb416dea5a50c4955896217ab # DV HDR10+ Boost
+          - caa37d0df9c348912df1fb1d88f9273a # HDR10+ Boost
+          - b337d6812e06c200ec9a2d3cfa9d20a7 # DV Boost
         assign_scores_to:
           - name: Best
 
