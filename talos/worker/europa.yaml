@@ -1,5 +1,7 @@
 ---
 machine:
+  disks:
+    $patch: delete
   files:
     - path: /etc/cri/conf.d/20-customization.part
       $patch: delete
