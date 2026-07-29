@@ -61,7 +61,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${prometheus}"
+        "uid": "$${prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -126,7 +126,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -143,7 +143,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${prometheus}"
+        "uid": "$${prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -192,7 +192,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(autobrr_release_total)",
@@ -209,7 +209,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${prometheus}"
+        "uid": "$${prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -262,7 +262,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -279,7 +279,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${prometheus}"
+        "uid": "$${prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -332,7 +332,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -349,7 +349,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${prometheus}"
+        "uid": "$${prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -402,7 +402,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -419,7 +419,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${prometheus}"
+        "uid": "$${prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -472,7 +472,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -485,7 +485,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${prometheus}"
+            "uid": "$${prometheus}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -499,7 +499,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -517,7 +517,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${prometheus}"
+        "uid": "$${prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -598,7 +598,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(autobrr_release_filter_rejected_total)",
@@ -609,7 +609,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${prometheus}"
+            "uid": "$${prometheus}"
           },
           "editorMode": "code",
           "expr": "max(autobrr_release_total)",
@@ -622,7 +622,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(autobrr_release_filtered_total)",
@@ -635,7 +635,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${prometheus}"
+            "uid": "$${prometheus}"
           },
           "editorMode": "code",
           "expr": "max(autobrr_release_push_rejected_total)",
@@ -648,7 +648,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(autobrr_release_push_approved_total)",
@@ -661,7 +661,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${prometheus}"
+            "uid": "$${prometheus}"
           },
           "editorMode": "code",
           "expr": "max(autobrr_release_push_error_total)",
@@ -678,7 +678,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "$${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -760,7 +760,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${prometheus}"
+            "uid": "$${prometheus}"
           },
           "editorMode": "code",
           "expr": "max(time() - autobrr_feed_last_run_timestamp_seconds) by (feed)",
@@ -771,7 +771,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(autobrr_feed_next_run_timestamp_seconds - time()) by (feed)",
@@ -788,7 +788,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${prometheus}"
+        "uid": "$${prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -870,7 +870,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(time() - autobrr_irc_channel_last_announced_timestamp_seconds) by (network, channel)",
@@ -885,7 +885,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${prometheus}"
+        "uid": "$${prometheus}"
       },
       "fieldConfig": {
         "defaults": {
@@ -967,7 +967,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "$${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(time() - autobrr_list_last_refresh_timestamp_seconds) by (list)",

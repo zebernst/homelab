@@ -110,7 +110,7 @@ spec:
             url: http://vmsingle-vmks.observability.svc.cluster.local:8428
             isDefault: true
             # Explore Correlations: metrics → logs on taxonomy labels.
-            # Links only render when every ${var} is present on the clicked row.
+            # Links only render when every $${var} is present on the clicked row.
             correlations:
               - targetUID: victorialogs
                 label: Logs for pod
@@ -122,7 +122,7 @@ spec:
                     refId: A
                     editorMode: code
                     queryType: instant
-                    expr: '{namespace="${namespace}", pod="${pod}"}'
+                    expr: '{namespace="$${namespace}", pod="$${pod}"}'
               - targetUID: victorialogs
                 label: Logs for app
                 description: Open VictoriaLogs filtered by namespace and app
@@ -133,7 +133,7 @@ spec:
                     refId: A
                     editorMode: code
                     queryType: instant
-                    expr: '{namespace="${namespace}", app="${app}"}'
+                    expr: '{namespace="$${namespace}", app="$${app}"}'
               - targetUID: victorialogs
                 label: Logs for namespace
                 description: Open VictoriaLogs filtered by namespace
@@ -144,7 +144,7 @@ spec:
                     refId: A
                     editorMode: code
                     queryType: instant
-                    expr: '{namespace="${namespace}"}'
+                    expr: '{namespace="$${namespace}"}'
           - name: VictoriaLogs
             type: victoriametrics-logs-datasource
             uid: victorialogs
@@ -166,8 +166,8 @@ spec:
                       sum by (pod, container) (
                         rate(container_cpu_usage_seconds_total{
                           cluster="jupiter",
-                          namespace="${namespace}",
-                          pod="${pod}",
+                          namespace="$${namespace}",
+                          pod="$${pod}",
                           container!="",
                           container!="POD"
                         }[5m])
@@ -180,7 +180,7 @@ spec:
                   field: app
                   target:
                     refId: A
-                    expr: 'up{cluster="jupiter", namespace="${namespace}", app="${app}"}'
+                    expr: 'up{cluster="jupiter", namespace="$${namespace}", app="$${app}"}'
               - targetUID: prometheus
                 label: Metrics for namespace
                 description: Application up{} series for the log row's namespace
@@ -189,7 +189,7 @@ spec:
                   field: namespace
                   target:
                     refId: A
-                    expr: 'up{cluster="jupiter", namespace="${namespace}", app!=""}'
+                    expr: 'up{cluster="jupiter", namespace="$${namespace}", app!=""}'
           - name: Alertmanager
             type: alertmanager
             uid: alertmanager
