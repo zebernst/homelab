@@ -14,18 +14,17 @@ sonarr:
       # Any — WEB-1080p (Alternative); 720p/HDTV/Bluray fallbacks for older shows
       - trash_id: 9d142234e45d6143785ac55f5a9e8dc9 # WEB-1080p (Alternative)
         name: Any
-        # Moderate upgrades: ignore tiny CF score bumps
-        min_upgrade_format_score: 1000
+        min_upgrade_format_score: 1000 # moderate upgrades
         reset_unmatched_scores:
           enabled: true
 
-      # Best — modern WEB-1080p only
+      # Best — WEB-1080p; modern WEB-only
       - trash_id: 72dae194fc92bf828f32cde7744e51a1 # WEB-1080p
         name: Best
         reset_unmatched_scores:
           enabled: true
 
-      # Anime — dedicated Seerr path (unchanged intent)
+      # Anime — [Anime] Remux-1080p; dedicated Seerr path
       - trash_id: 20e0fc959f1f1704bed501f23bdae76f # [Anime] Remux-1080p
         name: Anime
         reset_unmatched_scores:
@@ -40,19 +39,21 @@ sonarr:
       type: series
 
     quality_profiles:
+      # Any — WEB-2160p (Alternative); fallbacks for scarce 4K TV
       - trash_id: dfa5eaae7894077ad6449169b6eb03e0 # WEB-2160p (Alternative)
         name: Any
-        min_upgrade_format_score: 1000
+        min_upgrade_format_score: 1000 # moderate upgrades
         reset_unmatched_scores:
           enabled: true
 
+      # Best — WEB-2160p; modern WEB-only
       - trash_id: d1498e7d189fbe6c7110ceaabb7473e6 # WEB-2160p
         name: Best
         reset_unmatched_scores:
           enabled: true
 
     custom_formats:
-      # HDR — prefer HDR10+; keep DV (WEBDL) scored for compatibility gate
+      # HDR — prefer HDR10+; keep DV (WEBDL) for compatibility
       - trash_ids:
           - 9b27ab6498ec0f31a3353992e19434ca # DV (WEBDL)
           - 0dad0a507451acddd754fe6dc3a7f5e7 # HDR10+ Boost
@@ -61,7 +62,7 @@ sonarr:
           - name: Any
           - name: Best
 
-      # Block all SDR on UHD
+      # SDR — block all SDR on UHD
       - trash_ids:
           - 2016d1676f5ee13a5b7257ff86ac9a93 # SDR
           # - 83304f261cf516bb208c18c54c0adf97 # SDR (no WEBDL)
@@ -79,17 +80,17 @@ radarr:
       type: movie
 
     quality_profiles:
-      # Any — public HD Bluray + WEB, plus WEB/HDTV 720p for scarce titles
+      # Any — HD Bluray + WEB; plus WEB/HDTV 720p for scarce titles
       - trash_id: d1d67249d3890e49bc12e275d989a7e9 # HD Bluray + WEB
         name: Any
-        min_upgrade_format_score: 1000
+        min_upgrade_format_score: 1000 # moderate upgrades
         reset_unmatched_scores:
           enabled: true
         upgrade:
           allowed: true
           until_quality: Bluray-1080p
           until_score: 10000
-        # Full qualities list required when overriding; enable 720p WEB/HDTV below 1080p
+        # Override guide qualities to enable WEB/HDTV 720p below 1080p
         qualities:
           - name: Bluray-1080p
           - name: WEB 1080p
@@ -118,32 +119,34 @@ radarr:
       type: sqp-uhd
 
     quality_profiles:
-      # Any — public UHD Bluray + WEB (no SQP-1 on this instance)
+      # Any — UHD Bluray + WEB; public permissive default (no SQP-1 here)
       - trash_id: 64fb5f9858489bdac2af690e27c8f42f # UHD Bluray + WEB
         name: Any
-        min_upgrade_format_score: 1000
+        min_upgrade_format_score: 1000 # moderate upgrades
         reset_unmatched_scores:
           enabled: true
 
-      # Best — SQP-4 (WEB-DL / smaller 4K). Do not add SQP-1 here.
+      # Best — SQP-4; WEB-DL / smaller 4K (do not add SQP-1 here)
       - trash_id: 013f89e6da27519fe56cf482702a2db9 # [SQP] SQP-4
         name: Best
         reset_unmatched_scores:
           enabled: true
 
     custom_formats:
+      # IMAX — prefer IMAX Enhanced on Best
       - trash_ids:
           - 9f6cbff8cfe4ebbc1bde14c7b7bec0de # IMAX Enhanced
         assign_scores_to:
           - name: Best
 
+      # HDR — prefer HDR10+ on Best
       - trash_ids:
           - b17886cb4158d9fea189859409975758 # HDR10+ Boost
           - 55a5b50cb416dea5a50c4955896217ab # DV HDR10+ Boost
         assign_scores_to:
           - name: Best
 
-      # Block all SDR on Best
+      # SDR — block all SDR on Best
       - trash_ids:
           - 9c38ebb7384dada637be8899efa68e6f # SDR
           # - 25c12f78430a3a23413652cbd1d48d77 # SDR (no WEBDL)
