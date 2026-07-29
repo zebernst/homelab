@@ -1,8 +1,5 @@
 ---
 machine:
-  disks:
-    - device: /dev/disk/by-id/nvme-Samsung_SSD_990_PRO_4TB_S7KGNU0XC10841D
-      partitions: [{ mountpoint: /var/mnt/extra }]
   files:
     - path: /etc/cri/conf.d/20-customization.part
       $patch: delete
@@ -46,3 +43,10 @@ machine:
     topology.kubernetes.io/zone: w
   sysctls:
     net.core.bpf_jit_harden: 1    # required for NVIDIA kernel modules
+---
+apiVersion: v1alpha1
+kind: ExistingVolumeConfig
+name: extra
+discovery:
+  volumeSelector:
+    match: disk.serial == "S7KGNU0XC10841D" && volume.partition_index == 1u
