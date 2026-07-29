@@ -23,7 +23,7 @@ spec:
           containers:
             - name: talos-backup
               # renovate: datasource=docker depName=ghcr.io/siderolabs/talos-backup
-              image: ghcr.io/siderolabs/talos-backup:v0.1.0-beta.2
+              image: ghcr.io/siderolabs/talos-backup:v0.1.0-beta.3-10-gb9fd478
               imagePullPolicy: IfNotPresent
               workingDir: /tmp
               command: ["/talos-backup"]
