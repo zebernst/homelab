@@ -13,6 +13,8 @@ spec:
   dependsOn:
     - name: onepassword
       namespace: external-secrets
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
   path: kubernetes/apps/downloads/recyclarr/app
   prune: true
   sourceRef:
@@ -26,4 +28,3 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 1Gi
