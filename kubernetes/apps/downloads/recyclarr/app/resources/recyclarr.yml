@@ -1,26 +1,32 @@
+# yaml-language-server: $schema=https://schemas.recyclarr.dev/v8/config-schema.json
+# Seerr-facing profile names: Any (default), Best (dropdown), Anime (Sonarr HD).
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
 sonarr:
   sonarr-hd:
     base_url: http://sonarr.downloads.svc.cluster.local
     api_key: !env_var SONARR_API_KEY
     delete_old_custom_formats: true
-    replace_existing_custom_formats: true
-    include:
-      # WEB-1080p
-      - template: sonarr-quality-definition-series
-      - template: sonarr-v4-quality-profile-web-1080p
-      - template: sonarr-v4-custom-formats-web-1080p
-      # Remux-1080p - Anime
-      - template: sonarr-quality-definition-anime
-      - template: sonarr-v4-quality-profile-anime
-      - template: sonarr-v4-custom-formats-anime
+
+    quality_definition:
+      type: series
 
     quality_profiles:
-      - name: WEB-1080p
+      # Any — WEB-1080p (Alternative); 720p/HDTV/Bluray fallbacks for older shows
+      - trash_id: 9d142234e45d6143785ac55f5a9e8dc9 # WEB-1080p (Alternative)
+        name: Any
+        min_upgrade_format_score: 1000 # moderate upgrades
         reset_unmatched_scores:
           enabled: true
-      - name: Remux-1080p - Anime
+
+      # Best — WEB-1080p; modern WEB-only
+      - trash_id: 72dae194fc92bf828f32cde7744e51a1 # WEB-1080p
+        name: Best
+        reset_unmatched_scores:
+          enabled: true
+
+      # Anime — [Anime] Remux-1080p; dedicated Seerr path
+      - trash_id: 20e0fc959f1f1704bed501f23bdae76f # [Anime] Remux-1080p
+        name: Anime
         reset_unmatched_scores:
           enabled: true
 
@@ -28,131 +34,121 @@ sonarr:
     base_url: http://sonarr-uhd.downloads.svc.cluster.local
     api_key: !env_var SONARR_API_KEY
     delete_old_custom_formats: true
-    replace_existing_custom_formats: true
 
-    include:
-      - template: sonarr-quality-definition-series
-      - template: sonarr-v4-quality-profile-web-2160p
-      - template: sonarr-v4-custom-formats-web-2160p
+    quality_definition:
+      type: series
 
     quality_profiles:
-      - name: WEB-2160p
+      # Any — WEB-2160p (Alternative); fallbacks for scarce 4K TV
+      - trash_id: dfa5eaae7894077ad6449169b6eb03e0 # WEB-2160p (Alternative)
+        name: Any
+        min_upgrade_format_score: 1000 # moderate upgrades
+        reset_unmatched_scores:
+          enabled: true
+
+      # Best — WEB-2160p; modern WEB-only
+      - trash_id: d1498e7d189fbe6c7110ceaabb7473e6 # WEB-2160p
+        name: Best
         reset_unmatched_scores:
           enabled: true
 
     custom_formats:
-      # HDR Formats
+      # HDR — prefer HDR10+; keep DV (WEBDL) for compatibility
       - trash_ids:
-          # Comment out the next line if you and all of your users' setups are fully DV compatible
           - 9b27ab6498ec0f31a3353992e19434ca # DV (WEBDL)
-
-          # HDR10+ Boost - Uncomment the next two lines if any of your devices DO support HDR10+
           - 0dad0a507451acddd754fe6dc3a7f5e7 # HDR10+ Boost
           - 385e9e8581d33133c3961bdcdeffb7b4 # DV HDR10+ Boost
         assign_scores_to:
-          - name: WEB-2160p
+          - name: Any
+          - name: Best
 
-      # Optional SDR
-      # Only ever use ONE of the following custom formats:
-      # SDR - block ALL SDR releases
-      # SDR (no WEBDL) - block UHD/4k Remux and Bluray encode SDR releases, but allow SDR WEB
+      # SDR — block all SDR on UHD
       - trash_ids:
           - 2016d1676f5ee13a5b7257ff86ac9a93 # SDR
           # - 83304f261cf516bb208c18c54c0adf97 # SDR (no WEBDL)
         assign_scores_to:
-          - name: WEB-2160p
+          - name: Any
+          - name: Best
 
 radarr:
   radarr-hd:
     base_url: http://radarr.downloads.svc.cluster.local
     api_key: !env_var RADARR_API_KEY
     delete_old_custom_formats: true
-    replace_existing_custom_formats: true
+
+    quality_definition:
+      type: movie
 
     quality_profiles:
-      - name: SQP-1 WEB (1080p)
+      # Any — HD Bluray + WEB; plus WEB/HDTV 720p for scarce titles
+      - trash_id: d1d67249d3890e49bc12e275d989a7e9 # HD Bluray + WEB
+        name: Any
+        min_upgrade_format_score: 1000 # moderate upgrades
         reset_unmatched_scores:
           enabled: true
-      - name: HD Bluray + WEB
-        reset_unmatched_scores:
-          enabled: true
+        upgrade:
+          allowed: true
+          until_quality: Bluray-1080p
+          until_score: 10000
+        # Override guide qualities to enable WEB/HDTV 720p below 1080p
+        qualities:
+          - name: Bluray-1080p
+          - name: WEB 1080p
+            qualities:
+              - WEBRip-1080p
+              - WEBDL-1080p
+          - name: Bluray-720p
+          - name: WEB 720p
+            qualities:
+              - WEBRip-720p
+              - WEBDL-720p
+          - name: HDTV-720p
 
-    include:
-      # SQP-1 WEB (1080p)
-      - template: radarr-quality-definition-sqp-streaming
-      - template: radarr-quality-profile-sqp-1-web-1080p
-      - template: radarr-custom-formats-sqp-1-web-1080p
-      # HD BluRay + WEB
-      - template: radarr-quality-definition-movie
-      - template: radarr-quality-profile-hd-bluray-web
-      - template: radarr-custom-formats-hd-bluray-web
+      # Best — SQP-1 WEB (1080p); streaming-optimized WEB end-state
+      - trash_id: 90a3370d2d30cbaf08d9c23b856a12c8 # [SQP] SQP-1 WEB (1080p)
+        name: Best
+        reset_unmatched_scores:
+          enabled: true
 
   radarr-uhd:
     base_url: http://radarr-uhd.downloads.svc.cluster.local
     api_key: !env_var RADARR_API_KEY
     delete_old_custom_formats: true
-    replace_existing_custom_formats: true
+
+    quality_definition:
+      type: sqp-uhd
 
     quality_profiles:
-      - name: SQP-1 (2160p)
-        reset_unmatched_scores:
-          enabled: true
-      - name: SQP-4
+      # Any — UHD Bluray + WEB; public permissive default (no SQP-1 here)
+      - trash_id: 64fb5f9858489bdac2af690e27c8f42f # UHD Bluray + WEB
+        name: Any
+        min_upgrade_format_score: 1000 # moderate upgrades
         reset_unmatched_scores:
           enabled: true
 
-    include:
-      # SQP-1 (2160p)
-      - template: radarr-quality-definition-sqp-streaming
-      - template: radarr-quality-profile-sqp-1-2160p-4k-only-imax-e
-      - template: radarr-custom-formats-sqp-1-2160p
-      # SQP-4
-      - template: radarr-quality-definition-sqp-uhd
-      - template: radarr-quality-profile-sqp-4
-      - template: radarr-custom-formats-sqp-4
+      # Best — SQP-4; WEB-DL / smaller 4K (do not add SQP-1 here)
+      - trash_id: 013f89e6da27519fe56cf482702a2db9 # [SQP] SQP-4
+        name: Best
+        reset_unmatched_scores:
+          enabled: true
 
     custom_formats:
+      # IMAX — prefer IMAX Enhanced on Best
       - trash_ids:
-        - 9f6cbff8cfe4ebbc1bde14c7b7bec0de # IMAX Enhanced
+          - 9f6cbff8cfe4ebbc1bde14c7b7bec0de # IMAX Enhanced
         assign_scores_to:
-          - name: SQP-1 (2160p)
-          - name: SQP-4
+          - name: Best
 
+      # HDR — prefer HDR10+ on Best
       - trash_ids:
-         - b17886cb4158d9fea189859409975758 # HDR10+ Boost
-         - 55a5b50cb416dea5a50c4955896217ab # DV HDR10+ Boost
-
+          - b17886cb4158d9fea189859409975758 # HDR10+ Boost
+          - 55a5b50cb416dea5a50c4955896217ab # DV HDR10+ Boost
         assign_scores_to:
-          - name: SQP-1 (2160p)
-          - name: SQP-4
+          - name: Best
 
-      # Optional SDR
-      # Only ever use ONE of the following custom formats:
-      # SDR - block ALL SDR releases
-      # SDR (no WEBDL) - block UHD/4k Remux and Bluray encode SDR releases, but allow SDR WEB
+      # SDR — block all SDR on Best
       - trash_ids:
           - 9c38ebb7384dada637be8899efa68e6f # SDR
           # - 25c12f78430a3a23413652cbd1d48d77 # SDR (no WEBDL)
         assign_scores_to:
-          - name: SQP-1 (2160p)
-          - name: SQP-4
-
-      # Audio
-      - trash_ids:
-          - 496f355514737f7d83bf7aa4d24f8169 # TrueHD Atmos
-          - 2f22d89048b01681dde8afe203bf2e95 # DTS X
-          - 417804f7f2c4308c1f4c5d380d4c4475 # ATMOS (undefined)
-          - 1af239278386be2919e1bcee0bde047e # DD+ ATMOS
-          - 3cafb66171b47f226146a0770576870f # TrueHD
-          - dcf3ec6938fa32445f590a4da84256cd # DTS-HD MA
-          - a570d4a0e56a2874b64e5bfa55202a1b # FLAC
-          - e7c2fcae07cbada050a0af3357491d7b # PCM
-          - 8e109e50e0a0b83a5098b056e13bf6db # DTS-HD HRA
-          - 185f1dd7264c4562b9022d963ac37424 # DD+
-          - f9f847ac70a0af62ea4a08280b859636 # DTS-ES
-          - 1c1a4c5e823891c75bc50380a6866f73 # DTS
-          - 240770601cc226190c367ef59aba7463 # AAC
-          - c2998bd0d90ed5621d8df281e839436e # DD
-        assign_scores_to:
-          - name: SQP-1 (2160p)
-          - name: SQP-4
+          - name: Best
