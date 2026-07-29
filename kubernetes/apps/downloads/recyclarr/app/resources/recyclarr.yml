@@ -55,7 +55,7 @@ sonarr:
     custom_formats:
       # HDR — prefer HDR10+; keep DV (WEBDL) for compatibility
       - trash_ids:
-          - 9b27ab6498ec0f31a3353992e19434ca # DV (WEBDL)
+          - 9b27ab6498ec0f31a3353992e19434ca # DV (w/o HDR fallback)
           - 0c4b99df9206d2cfac3c05ab897dd62a # HDR10+ Boost
           - 7c3a61a9c6cb04f52f1544be6d44a026 # DV Boost
         assign_scores_to:
