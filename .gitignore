@@ -22,4 +22,14 @@ wiki
 .dolt/
 *.db
 
+# Beads local state / backups (not tracked in this repo)
+.beads/
+
+# Cursor local commands / project config
+.cursor/
+
+# Superpowers local working copies (specs/plans live under .beads/)
+docs/superpowers/
+.superpowers/
+
 .claude/
