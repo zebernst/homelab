@@ -40,8 +40,12 @@ tasks:
         sh: talosctl --nodes {{.NODE}} get machinetypes --output=jsonpath='{.spec}'
       TALOS_IMAGE:
         sh: |-
+          # Prefer UnattendedInstallConfig when present; fall back to legacy .machine.install.image
           talosctl --nodes {{.NODE}} get machineconfig --output=jsonpath='{.spec}' \
-            | yq '.machine.install.image'
+            | yq -r '
+                ([select(.kind == "UnattendedInstallConfig") | .installer.image] | first)
+                // .machine.install.image
+              '
     requires:
       vars: [NODE]
     preconditions:

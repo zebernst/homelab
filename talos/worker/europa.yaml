@@ -1,37 +1,13 @@
 ---
 machine:
-  files:
-    - path: /etc/cri/conf.d/20-customization.part
-      $patch: delete
-    - op: create
-      path: /etc/cri/conf.d/20-customization.part
-      content: |
-        [plugins."io.containerd.cri.v1.images"]
-          discard_unpacked_layers = false
-        [plugins."io.containerd.cri.v1.runtime"]
-          [plugins."io.containerd.cri.v1.runtime".containerd]
-            default_runtime_name = "nvidia"
   install:
     diskSelector:
       serial: S5H9NS0N517111K
     extraKernelArgs:
       - amd_iommu=on            # PCI Passthrough
-    image: factory.talos.dev/installer/0b97c67c1c2feb9a5ae7c196445e624332c6e381c45ef4c84f9c48debd4fa70c:v1.13.7
-  kernel:
-    modules:
-      - name: nvidia
-      - name: nvidia_uvm
-      - name: nvidia_drm
-      - name: nvidia_modeset
-      - name: uinput
-  kubelet:
-    extraConfig:
-      registerWithTaints:
-        - key: "nvidia.com/gpu"
-          value: "true"
-          effect: PreferNoSchedule
+    # renovate: datasource=custom.talos-factory depName=siderolabs/talos
+    image: factory.talos.dev/installer/0b97c67c1c2feb9a5ae7c196445e624332c6e381c45ef4c84f9c48debd4fa70c:v1.14.0
   network:
-    hostname: europa.k8s.internal
     interfaces:
       - interface: enp12s0
         dhcp: true
@@ -39,10 +15,51 @@ machine:
         vlans:
           - { vlanId: 20, dhcp: false, mtu: 1500 }
           - { vlanId: 30, dhcp: false, mtu: 1500 }
-  nodeLabels:
-    topology.kubernetes.io/zone: w
-  sysctls:
-    net.core.bpf_jit_harden: 1    # required for NVIDIA kernel modules
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+hostname: europa.k8s.internal
+---
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+labels:
+  topology.kubernetes.io/region: jupiter
+  topology.kubernetes.io/zone: w
+taints:
+  nvidia.com/gpu: "true:PreferNoSchedule"
+---
+apiVersion: v1alpha1
+kind: SysctlConfig
+params:
+  net.core.bpf_jit_harden: "1"    # required for NVIDIA kernel modules
+---
+apiVersion: v1alpha1
+kind: KernelModuleConfig
+name: nvidia
+---
+apiVersion: v1alpha1
+kind: KernelModuleConfig
+name: nvidia_uvm
+---
+apiVersion: v1alpha1
+kind: KernelModuleConfig
+name: nvidia_drm
+---
+apiVersion: v1alpha1
+kind: KernelModuleConfig
+name: nvidia_modeset
+---
+apiVersion: v1alpha1
+kind: KernelModuleConfig
+name: uinput
+---
+apiVersion: v1alpha1
+kind: CRICustomizationConfig
+name: 10-nvidia-runtime
+content: |
+  [plugins."io.containerd.cri.v1.runtime"]
+    [plugins."io.containerd.cri.v1.runtime".containerd]
+      default_runtime_name = "nvidia"
 ---
 apiVersion: v1alpha1
 kind: ExistingVolumeConfig

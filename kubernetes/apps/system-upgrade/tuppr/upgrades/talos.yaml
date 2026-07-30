@@ -6,7 +6,8 @@ metadata:
 spec:
   talos:
     # renovate: datasource=custom.talos-factory depName=siderolabs/talos
-    version: v1.13.7
+    # Hold merge until Talos 1.14.0 GA — multi-doc machineconfig requires >= 1.14
+    version: v1.14.0
   policy:
     rebootMode: powercycle
   healthChecks:

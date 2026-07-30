@@ -6,7 +6,6 @@ machine:
     extraKernelArgs:
       - intel_iommu=on          # PCI Passthrough
   network:
-    hostname: ganymede.k8s.internal
     interfaces:
       - interface: bond0
         bond:
@@ -32,7 +31,18 @@ machine:
         mtu: 65520
         addresses: [169.254.255.11/32]
         routes: [{ network: 169.254.255.12/32, metric: 2048 }]
-  nodeLabels:
-    topology.kubernetes.io/zone: m
-  sysfs:
-    devices.system.cpu.intel_pstate.hwp_dynamic_boost: 1
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+hostname: ganymede.k8s.internal
+---
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+labels:
+  topology.kubernetes.io/region: jupiter
+  topology.kubernetes.io/zone: m
+---
+apiVersion: v1alpha1
+kind: SysfsConfig
+params:
+  devices.system.cpu.intel_pstate.hwp_dynamic_boost: "1"
