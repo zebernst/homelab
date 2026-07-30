@@ -1,4 +1,7 @@
 ---
+# Legacy v1alpha1 shell — secrets, install (extraKernelArgs), etcd, and leftover
+# machine/network bits that are not yet multi-doc (interfaces stay here).
+# DO NOT MERGE / APPLY until cluster is on Talos >= 1.14.0.
 version: v1alpha1
 debug: false
 persist: true
@@ -12,7 +15,6 @@ machine:
     {% endif %}
   features:
     rbac: true
-    stableHostname: true
     {% if ENV.MACHINE_TYPE == 'controlplane' %}
     kubernetesTalosAPIAccess:
       enabled: true
@@ -21,28 +23,8 @@ machine:
     {% endif %}
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
-    kubePrism:
-      enabled: true
-      port: 7445
-    hostDNS:
-      enabled: true
-      forwardKubeDNSToHost: false
-      resolveMemberNames: true
-  files:
-    - op: overwrite
-      path: /etc/nfsmount.conf
-      permissions: 0o644
-      content: |
-        [ NFSMount_Global_Options ]
-        nfsvers=4.1
-        hard=True
-        nconnect=16
-        noatime=True
-    - op: create
-      path: /etc/cri/conf.d/20-customization.part
-      content: |
-        [plugins."io.containerd.cri.v1.images"]
-          discard_unpacked_layers = false
+  # install retained (mutually exclusive with UnattendedInstallConfig).
+  # extraKernelArgs still live here; Image Factory schematics also carry shared args.
   install:
     extraKernelArgs:
       - apparmor=0              # Less security, faster puter
@@ -52,102 +34,24 @@ machine:
       - mitigations=off         # Less security, faster puter
       - security=none           # Less security, faster puter
       - talos.auditd.disabled=1 # Less security, faster puter
-    image: factory.talos.dev/installer/5c030c38dbb790ca3298ec86a336ea4e6d287256dd5c5bbc7c56c347b0df5f3f:v1.13.7
+    # renovate: datasource=custom.talos-factory depName=siderolabs/talos
+    image: factory.talos.dev/installer/5c030c38dbb790ca3298ec86a336ea4e6d287256dd5c5bbc7c56c347b0df5f3f:v1.14.0
     wipe: false
-  kernel:
-    modules:
-      - name: nbd
-      - name: thunderbolt
-      - name: thunderbolt_net
-  kubelet:
-    image: ghcr.io/siderolabs/kubelet:v1.35.2
-    extraConfig:
-      featureGates:
-        UserNamespacesSupport: true
-      maxPods: 150
-      serializeImagePulls: false
-    defaultRuntimeSeccompProfileEnabled: true
-    nodeIP:
-      validSubnets: ["192.168.10.0/24"]
-    disableManifestsDirectory: true
-  network:
-    nameservers: ["192.168.10.1"]
-    disableSearchDomain: true
-  nodeLabels:
-    topology.kubernetes.io/region: jupiter
-  sysctls:
-    fs.inotify.max_user_watches: 1048576   # Watchdog
-    fs.inotify.max_user_instances: 8192    # Watchdog
-    net.core.default_qdisc: fq             # 10Gb/s
-    net.core.rmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
-    net.core.wmem_max: 67108864            # 10Gb/s | Cloudflared / QUIC
-    net.ipv4.tcp_congestion_control: bbr   # 10Gb/s
-    net.ipv4.tcp_fastopen: 3               # Send and accept data in the opening SYN packet
-    net.ipv4.tcp_mtu_probing: 1            # 10Gb/s | Jumbo frames
-    net.ipv4.tcp_rmem: 4096 87380 33554432 # 10Gb/s
-    net.ipv4.tcp_wmem: 4096 65536 33554432 # 10Gb/s
-    net.ipv4.tcp_window_scaling: 1         # 10Gb/s
-    vm.nr_hugepages: 1024                  # PostgreSQL
-    user.max_user_namespaces: "11255"      # Steam/Flatpak support
-  time:
-    servers:
-      - nas.internal
-      - time.cloudflare.com
-      - time.nist.gov
-  udev:
-    rules:
-      - # Thunderbolt
-        ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
-      - # Intel GPU
-        SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
+  # Host networking (bonds/VLANs/links) — migrate to BondConfig/VLANConfig/LinkConfig later.
+  network: {}
 cluster:
+  # Cluster PKI / join material — PEM multi-doc CA migration is a follow-up
+  # (KubeAPIServerCAConfig wants PEM; our 1Password refs are classic base64).
   ca:
     crt: op://Secrets/talos/CLUSTER_CA_CRT
     {% if ENV.MACHINE_TYPE == 'controlplane' %}
     key: op://Secrets/talos/CLUSTER_CA_KEY
     {% endif %}
-  clusterName: jupiter
-  controlPlane:
-    endpoint: https://k8s.internal:6443
-  discovery:
-    enabled: true
-    registries:
-      kubernetes:
-        disabled: true
-      service:
-        disabled: false
-  extraManifests:
-    - # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
-      https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.1/experimental-install.yaml
-    - # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
-      https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.92.1/stripped-down-crds.yaml
-  id: op://Secrets/talos/CLUSTER_ID
-  network:
-    cni:
-      name: none
-    dnsDomain: cluster.local
-    podSubnets: ["10.244.0.0/16"]
-    serviceSubnets: ["10.245.0.0/16"]
-  secret: op://Secrets/talos/CLUSTER_SECRET
   token: op://Secrets/talos/CLUSTER_TOKEN
   {% if ENV.MACHINE_TYPE == 'controlplane' %}
   aggregatorCA:
     crt: op://Secrets/talos/CLUSTER_AGGREGATOR_CA_CRT
     key: op://Secrets/talos/CLUSTER_AGGREGATOR_CA_KEY
-  allowSchedulingOnControlPlanes: true
-  apiServer:
-    image: registry.k8s.io/kube-apiserver:v1.35.2
-    extraArgs:
-      enable-aggregator-routing: true
-      feature-gates: UserNamespacesSupport=true
-    certSANs: ["k8s.internal"]
-    disablePodSecurityPolicy: true
-  controllerManager:
-    image: registry.k8s.io/kube-controller-manager:v1.35.2
-    extraArgs:
-      bind-address: 0.0.0.0
-  coreDNS:
-    disabled: true
   etcd:
     advertisedSubnets: ["192.168.10.0/24"]
     ca:
@@ -155,31 +59,225 @@ cluster:
       key: op://Secrets/talos/CLUSTER_ETCD_CA_KEY
     extraArgs:
       listen-metrics-urls: http://0.0.0.0:2381
-  proxy:
-    disabled: true
-    image: registry.k8s.io/kube-proxy:v1.35.2
-  secretboxEncryptionSecret: op://Secrets/talos/CLUSTER_SECRETBOX_ENCRYPTION_SECRET
-  scheduler:
-    image: registry.k8s.io/kube-scheduler:v1.35.2
-    extraArgs:
-      bind-address: 0.0.0.0
-    config:
-      apiVersion: kubescheduler.config.k8s.io/v1
-      kind: KubeSchedulerConfiguration
-      profiles:
-        - schedulerName: default-scheduler
-          plugins:
-            score:
-              disabled:
-                - name: ImageLocality
-          pluginConfig:
-            - name: PodTopologySpread
-              args:
-                defaultingType: List
-                defaultConstraints:
-                  - maxSkew: 1
-                    topologyKey: kubernetes.io/hostname
-                    whenUnsatisfiable: ScheduleAnyway
   serviceAccount:
     key: op://Secrets/talos/CLUSTER_SERVICE_ACCOUNT_KEY
   {% endif %}
+
+---
+apiVersion: v1alpha1
+kind: DiscoveryServiceConfig
+name: default
+endpoint: https://discovery.talos.dev/
+
+---
+apiVersion: v1alpha1
+kind: DiscoveryIdentityConfig
+clusterID: op://Secrets/talos/CLUSTER_ID
+clusterSecret: op://Secrets/talos/CLUSTER_SECRET
+
+---
+apiVersion: v1alpha1
+kind: ResolverConfig
+nameservers:
+  - address: 192.168.10.1
+searchDomains:
+  disableDefault: true
+hostDNS:
+  enabled: true
+  forwardKubeDNSToHost: false
+  resolveMemberNames: true
+
+---
+apiVersion: v1alpha1
+kind: TimeSyncConfig
+ntp:
+  servers:
+    - nas.internal
+    - time.cloudflare.com
+    - time.nist.gov
+  # Mixed local + public NTP; NTS not available on nas.internal.
+  useNTS: false
+
+---
+apiVersion: v1alpha1
+kind: SysctlConfig
+params:
+  fs.inotify.max_user_watches: "1048576"   # Watchdog
+  fs.inotify.max_user_instances: "8192"    # Watchdog
+  net.core.default_qdisc: fq             # 10Gb/s
+  net.core.rmem_max: "67108864"            # 10Gb/s | Cloudflared / QUIC
+  net.core.wmem_max: "67108864"            # 10Gb/s | Cloudflared / QUIC
+  net.ipv4.tcp_congestion_control: bbr   # 10Gb/s
+  net.ipv4.tcp_fastopen: "3"               # Send and accept data in the opening SYN packet
+  net.ipv4.tcp_mtu_probing: "1"            # 10Gb/s | Jumbo frames
+  net.ipv4.tcp_rmem: 4096 87380 33554432 # 10Gb/s
+  net.ipv4.tcp_wmem: 4096 65536 33554432 # 10Gb/s
+  net.ipv4.tcp_window_scaling: "1"         # 10Gb/s
+  vm.nr_hugepages: "1024"                  # PostgreSQL
+  user.max_user_namespaces: "11255"      # Steam/Flatpak support
+
+---
+apiVersion: v1alpha1
+kind: KernelModuleConfig
+name: nbd
+
+---
+apiVersion: v1alpha1
+kind: KernelModuleConfig
+name: thunderbolt
+
+---
+apiVersion: v1alpha1
+kind: KernelModuleConfig
+name: thunderbolt_net
+
+---
+apiVersion: v1alpha1
+kind: UdevRulesConfig
+rules:
+  - ACTION=="add", SUBSYSTEM=="thunderbolt", ATTR{authorized}=="0", ATTR{authorized}="1"
+  - SUBSYSTEM=="drm", KERNEL=="renderD*", GROUP="44", MODE="0660"
+
+---
+apiVersion: v1alpha1
+kind: EtcFileConfig
+name: nfsmount.conf
+mode: 0o644
+contents: |
+  [ NFSMount_Global_Options ]
+  nfsvers=4.1
+  hard=True
+  nconnect=16
+  noatime=True
+
+---
+apiVersion: v1alpha1
+kind: CRICustomizationConfig
+name: 00-images
+content: |
+  [plugins."io.containerd.cri.v1.images"]
+    discard_unpacked_layers = false
+
+---
+apiVersion: v1alpha1
+kind: KubePrismConfig
+port: 7445
+
+---
+apiVersion: v1alpha1
+kind: KubeClusterConfig
+clusterName: jupiter
+endpoint: https://k8s.internal:6443
+
+---
+apiVersion: v1alpha1
+kind: KubeNetworkConfig
+dnsDomain: cluster.local
+podSubnets:
+  - 10.244.0.0/16
+serviceSubnets:
+  - 10.245.0.0/16
+# No KubeFlannelCNIConfig — Cilium is the CNI (equivalent to former cni.name: none).
+
+---
+apiVersion: v1alpha1
+kind: KubeletConfig
+image: ghcr.io/siderolabs/kubelet:v1.35.2
+defaultRuntimeSeccompProfileEnabled: true
+config:
+  featureGates:
+    UserNamespacesSupport: true
+  maxPods: 150
+  serializeImagePulls: false
+
+---
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+nodeIP:
+  validSubnets:
+    - 192.168.10.0/24
+labels:
+  topology.kubernetes.io/region: jupiter
+# CP: omit control-plane NoSchedule taint (was allowSchedulingOnControlPlanes: true).
+# Worker zone / GPU taints come from node patches.
+
+{% if ENV.MACHINE_TYPE == 'controlplane' %}
+---
+apiVersion: v1alpha1
+kind: KubeCoreDNSConfig
+enabled: false
+
+---
+apiVersion: v1alpha1
+kind: KubeProxyConfig
+enabled: false
+image: registry.k8s.io/kube-proxy:v1.35.2
+
+---
+apiVersion: v1alpha1
+kind: KubeExternalManifestConfig
+name: gateway-api
+# renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
+url: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.1/experimental-install.yaml
+
+---
+apiVersion: v1alpha1
+kind: KubeExternalManifestConfig
+name: prometheus-operator-crds
+# renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
+url: https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.92.1/stripped-down-crds.yaml
+
+---
+apiVersion: v1alpha1
+kind: KubeAPIServerConfig
+image: registry.k8s.io/kube-apiserver:v1.35.2
+certExtraSANs:
+  - k8s.internal
+extraArgs:
+  enable-aggregator-routing: "true"
+  feature-gates: UserNamespacesSupport=true
+
+---
+apiVersion: v1alpha1
+kind: KubeControllerManagerConfig
+image: registry.k8s.io/kube-controller-manager:v1.35.2
+extraArgs:
+  bind-address: 0.0.0.0
+
+---
+apiVersion: v1alpha1
+kind: KubeSchedulerConfig
+image: registry.k8s.io/kube-scheduler:v1.35.2
+extraArgs:
+  bind-address: 0.0.0.0
+config:
+  apiVersion: kubescheduler.config.k8s.io/v1
+  kind: KubeSchedulerConfiguration
+  profiles:
+    - schedulerName: default-scheduler
+      plugins:
+        score:
+          disabled:
+            - name: ImageLocality
+      pluginConfig:
+        - name: PodTopologySpread
+          args:
+            defaultingType: List
+            defaultConstraints:
+              - maxSkew: 1
+                topologyKey: kubernetes.io/hostname
+                whenUnsatisfiable: ScheduleAnyway
+
+---
+apiVersion: v1alpha1
+kind: KubeEtcdEncryptionConfig
+config:
+  resources:
+    - providers:
+        - secretbox:
+            keys:
+              - name: key1
+                secret: op://Secrets/talos/CLUSTER_SECRETBOX_ENCRYPTION_SECRET
+      resources:
+        - secrets
+{% endif %}
