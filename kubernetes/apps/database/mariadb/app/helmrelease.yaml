@@ -17,6 +17,8 @@ spec:
       existingSecret: mariadb-secret
     metrics:
       enabled: true
+      auth:
+        existingSecret: mariadb-metrics
       resourcesPreset: small
       serviceMonitor:
         enabled: true
