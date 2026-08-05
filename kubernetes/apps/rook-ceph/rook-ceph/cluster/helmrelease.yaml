@@ -27,6 +27,9 @@ spec:
         mgr:
           mgr/dashboard/ALERTMANAGER_API_HOST: http://vmalertmanager-vmks.observability.svc.cluster.local:9093
           mgr/dashboard/GRAFANA_API_URL: http://grafana.observability.svc.cluster.local
+          # Bound the log ring buffer (daemon default 10000) as defense-in-depth
+          # against the mgr OOM leak: https://github.com/rook/rook/issues/17786
+          log_max_recent: "100"
       crashCollector:
         disable: false
       csi:
@@ -43,8 +46,9 @@ spec:
             enabled: true
           - name: pg_autoscaler
             enabled: true
+          # Disabled: leaks memory and OOMs mgr (rook/rook#17786)
           - name: rook
-            enabled: true
+            enabled: false
       resources:
         mgr:
           requests:
