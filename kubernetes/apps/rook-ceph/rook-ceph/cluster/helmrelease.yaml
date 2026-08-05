@@ -27,6 +27,13 @@ spec:
         mgr:
           mgr/dashboard/ALERTMANAGER_API_HOST: http://vmalertmanager-vmks.observability.svc.cluster.local:9093
           mgr/dashboard/GRAFANA_API_URL: http://grafana.observability.svc.cluster.local
+          # https://github.com/rook/rook/issues/17786: on ceph v20.2.2 the rook mgr
+          # module's orchestrator availability check logs full pod-list responses
+          # (multi-MB JSON) roughly every 15s, filling the log_max_recent ring buffer
+          # (daemon default 10000, not the documented client default of 500) and
+          # OOMing mgr within hours regardless of the memory limit. Bound the buffer
+          # as defense-in-depth on top of disabling the rook module below.
+          log_max_recent: "100"
       crashCollector:
         disable: false
       csi:
@@ -43,8 +50,9 @@ spec:
             enabled: true
           - name: pg_autoscaler
             enabled: true
+          # Disabled: leaks memory and OOMs mgr, see log_max_recent comment above.
           - name: rook
-            enabled: true
+            enabled: false
       resources:
         mgr:
           requests:
