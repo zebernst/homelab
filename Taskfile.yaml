@@ -18,6 +18,7 @@ env:
   TALOSCONFIG: '{{.TALOS_DIR}}/talosconfig'
 
 includes:
+  architecture: .taskfiles/architecture
   bootstrap: .taskfiles/bootstrap
   fission: .taskfiles/fission
   kubernetes: .taskfiles/kubernetes
