@@ -16,14 +16,6 @@ spec:
       lidarr:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/home-operations/postgres-init
-              tag: 17
-            envFrom: &envFrom
-              - secretRef:
-                  name: lidarr-secret
         containers:
           lidarr:
             image:
@@ -38,7 +30,9 @@ spec:
               LIDARR__LOG__LEVEL: info
               LIDARR__SERVER__PORT: &port 80
               TZ: America/Chicago
-            envFrom: *envFrom
+            envFrom:
+              - secretRef:
+                  name: lidarr-secret
             probes:
               liveness: &probe
                 enabled: true
