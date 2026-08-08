@@ -3,10 +3,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - gateway.yaml
   - externalsecret.yaml
   - helmrelease.yaml
   - vmprobe.yaml
   - pvc.yaml
+  - l4route.yaml
 configMapGenerator:
   - name: steam-init-scripts
     files:
