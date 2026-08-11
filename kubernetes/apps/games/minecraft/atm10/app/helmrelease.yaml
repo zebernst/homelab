@@ -43,7 +43,7 @@ spec:
           atm10:
             image:
               repository: ghcr.io/itzg/minecraft-server
-              tag: 2026.7.2-java21
+              tag: 2026.8.0-java21
             env:
               EULA: "true"
               TZ: America/Chicago
@@ -96,7 +96,7 @@ spec:
           mc-monitor:
             image:
               repository: itzg/mc-monitor
-              tag: 0.16.11@sha256:2ffab87864ad6c9838f7f4f70c17df71dcb7bb9782b0d31a2eaa0d712f44e8ce
+              tag: 0.17.0@sha256:0d6b89c29d93cfcfcfee7bfd8e3758ddf00e20eb157e3e9a6560a93fe7fe84d1
             args: ["export-for-prometheus"]
             env:
               EXPORT_SERVERS: atm10
@@ -114,7 +114,7 @@ spec:
           bluemap:
             image:
               repository: ghcr.io/bluemap-minecraft/bluemap
-              tag: v5.22
+              tag: v5.23
             args: ["-r", "-u", "-w", "-n", "/data/mods"]
             env:
               JAVA_TOOL_OPTIONS: "-Xmx3G"
