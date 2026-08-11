@@ -1,3 +1,5 @@
+
+
 <div align="center">
 
 <img src="https://github.com/user-attachments/assets/0248f379-cc4a-4a59-a400-014a750c61fa" align="center" width="144px" height="144px"/>
@@ -21,7 +23,7 @@ _... automated via [Flux](https://github.com/fluxcd/flux2), [Renovate](https://g
 <div align="center">
 
 [![Home-Internet](https://img.shields.io/uptimerobot/status/m798207245-e361357b4ae0adccce695dd9?style=for-the-badge&logo=ubiquiti&logoColor=white&logoSize=auto&label=Home%20Internet&color=brightgreen)](https://status.zebernst.dev)&nbsp;&nbsp;
-[![Status-Page](https://img.shields.io/uptimerobot/status/m798207270-986abc3b5ee42d8f51b9fc5c?color=brightgreeen&label=Status%20Page&style=for-the-badge&logo=statuspage&logoColor=white)](https://status.zebernst.dev)
+[![Status-Page](https://img.shields.io/uptimerobot/status/m798207270-986abc3b5ee42d8f51b9fc5c?color=brightgreen&label=Status%20Page&style=for-the-badge&logo=statuspage&logoColor=white)](https://status.zebernst.dev)
 </div>
 
 <div align="center">
