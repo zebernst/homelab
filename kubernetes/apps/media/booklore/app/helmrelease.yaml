@@ -18,7 +18,7 @@ spec:
           booklore:
             image:
               repository: grimmory/grimmory
-              tag: v3.2.4
+              tag: v3.3.1
 
             env:
               TZ: America/Chicago
