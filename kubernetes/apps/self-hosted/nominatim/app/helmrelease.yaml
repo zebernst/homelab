@@ -49,6 +49,11 @@ spec:
       nominatim:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: nominatim
+          glance/name: Nominatim
+          glance/icon: mdi:map-search
+          glance/category: self-hosted
+          glance/url: https://nominatim.zebernst.dev
         serviceAccount:
           identifier: app
         containers:

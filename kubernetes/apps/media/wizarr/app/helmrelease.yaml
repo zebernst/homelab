@@ -19,6 +19,7 @@ spec:
       wizarr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: wizarr
         containers:
           wizarr:
             image:
@@ -54,6 +55,9 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Wizarr
+          glance/icon: mdi:account-plus
+          glance/category: media
         hostnames:
           - "join.zebernst.dev"
         parentRefs:

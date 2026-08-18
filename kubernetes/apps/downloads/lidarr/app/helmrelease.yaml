@@ -16,6 +16,7 @@ spec:
       lidarr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: lidarr
         initContainers:
           init-db:
             image:
@@ -115,6 +116,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Lidarr
+          glance/icon: si:lidarr
+          glance/category: downloads
+          glance/url: https://lidarr.kite-harmonic.ts.net
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

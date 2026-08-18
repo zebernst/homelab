@@ -68,6 +68,11 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/id: agregarr
+          glance/name: Agregarr
+          glance/icon: si:sonarr
+          glance/category: media
+          glance/url: https://agregarr.zebernst.dev
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

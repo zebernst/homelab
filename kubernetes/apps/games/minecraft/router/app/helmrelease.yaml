@@ -47,6 +47,7 @@ spec:
       mc-router:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: minecraft
         containers:
           mc-router:
             image:
@@ -120,6 +121,10 @@ spec:
         annotations:
           # Health is on the Service above; don't also probe via the HTTPRoute
           gatus.home-operations.com/enabled: "false"
+          glance/name: Minecraft
+          glance/icon: si:minecraft
+          glance/category: games
+          glance/url: https://worldmap.zebernst.dev
         hostnames: ["mc-api.zebernst.dev"]
         parentRefs:
           - name: lan

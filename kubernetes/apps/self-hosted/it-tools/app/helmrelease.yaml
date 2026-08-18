@@ -16,6 +16,7 @@ spec:
       it-tools:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: it-tools
         containers:
           it-tools:
             image:
@@ -49,6 +50,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: IT-Tools
+          glance/icon: mdi:tools
+          glance/category: self-hosted
+          glance/url: https://it-tools.kite-harmonic.ts.net
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:
