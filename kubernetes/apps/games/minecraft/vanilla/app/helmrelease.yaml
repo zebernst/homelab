@@ -56,6 +56,7 @@ spec:
               PAUSE_WHEN_EMPTY_SECONDS: "60"
               INIT_MEMORY: 1G
               MAX_MEMORY: &max-memory 4G
+              RCON_PORT: "25578"
             envFrom:
               - secretRef:
                   name: vanilla-secret
@@ -118,6 +119,54 @@ spec:
               limits:
                 memory: 1536Mi
 
+      rcon-web:
+        type: deployment
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            fsGroupChangePolicy: OnRootMismatch
+        containers:
+          rcon-web:
+            image:
+              repository: docker.io/itzg/rcon
+              tag: latest@sha256:66cc978f196e2fb4c0afccc7bf7102773445cff85ea41eefe58dca19ea78413c
+            env:
+              RWA_USERNAME: admin
+              RWA_ADMIN: "TRUE"
+              RWA_GAME: minecraft
+              RWA_SERVER_NAME: *app
+              RWA_RCON_HOST: "{{ .Release.Name }}-rcon"
+              RWA_RCON_PORT: "25578"
+              RWA_WEBSOCKET_URL_SSL: "wss://{{ .Release.Name }}.jptr.zebernst.dev/ws"
+              RWA_WEBSOCKET_URL: "wss://{{ .Release.Name }}.jptr.zebernst.dev/ws"
+            envFrom:
+              - secretRef:
+                  name: vanilla-secret
+            probes:
+              liveness: &rconProbe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 4326
+              readiness: *rconProbe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+
     defaultPodOptions:
       priorityClassName: best-effort
       securityContext:
@@ -140,13 +189,16 @@ spec:
             port: 8080
       rcon:
         controller: *app
-        type: LoadBalancer
-        loadBalancerClass: tailscale
-        annotations:
-          tailscale.com/hostname: vanilla-rcon
         ports:
           rcon:
             port: 25578
+      rcon-web:
+        controller: rcon-web
+        ports:
+          http:
+            port: 4326
+          websocket:
+            port: 4327
 
     serviceMonitor:
       vanilla:
@@ -157,6 +209,51 @@ spec:
             path: /metrics
             interval: 1m
             scrapeTimeout: 30s
+    route:
+      rcon-web:
+        annotations:
+          gatus.home-operations.com/enabled: "false"
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /ws
+            filters: &rconAuth
+              - type: ExternalAuth
+                externalAuth:
+                  protocol: HTTP
+                  backendRef:
+                    name: tinyauth
+                    namespace: auth
+                    port: 3000
+                  http:
+                    path: "/api/auth/envoy?path="
+                    allowedHeaders:
+                      - cookie
+                      - accept
+                      - authorization
+                      - x-forwarded-proto
+                      - x-forwarded-host
+                    allowedResponseHeaders:
+                      - set-cookie
+                      - content-type
+            timeouts:
+              request: 0s
+            backendRefs:
+              - identifier: rcon-web
+                port: 4327
+          - filters: *rconAuth
+            timeouts:
+              request: 0s
+            backendRefs:
+              - identifier: rcon-web
+                port: 4326
     persistence:
       tmp:
         type: emptyDir
@@ -213,3 +310,9 @@ spec:
               - path: /app/config
             bluemap:
               - path: /app/config
+      rcon-web-db:
+        type: emptyDir
+        advancedMounts:
+          rcon-web:
+            rcon-web:
+              - path: /opt/rcon-web-admin/db
