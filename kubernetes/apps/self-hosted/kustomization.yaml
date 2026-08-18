@@ -8,6 +8,7 @@ components:
 resources:
   - atuin/ks.yaml
   - dawarich/ks.yaml
+  - esphome/ks.yaml
   - glance/ks.yaml
   - hajimari/ks.yaml
   - it-tools/ks.yaml
