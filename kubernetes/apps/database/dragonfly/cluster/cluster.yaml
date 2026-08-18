@@ -27,9 +27,7 @@ spec:
 #  snapshot:
 #    dir: s3://
   serviceSpec:
-    type: LoadBalancer
-    annotations:
-      external-dns.alpha.kubernetes.io/hostname: redis.internal
+    type: ClusterIP
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
