@@ -84,9 +84,7 @@ spec:
     service:
       mc-router:
         controller: *app
-        type: LoadBalancer
         annotations:
-          lbipam.cilium.io/ips: 192.168.20.65
           # Single Minecraft health signal — backends scale to zero and shouldn't be probed
           gatus.home-operations.com/enabled: "true"
           gatus.home-operations.com/endpoint: |
@@ -115,6 +113,16 @@ spec:
             interval: 1m
             scrapeTimeout: 30s
     route:
+      java:
+        kind: TCPRoute
+        parentRefs:
+          - name: minecraft
+            namespace: "{{ .Release.Namespace }}"
+            sectionName: java
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
       api:
         kind: HTTPRoute
         annotations:
