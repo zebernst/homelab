@@ -51,7 +51,8 @@ loadBalancer:
   mode: dsr
   l7:
     backend: envoy
-localRedirectPolicy: true
+localRedirectPolicies:
+  enabled: true
 operator:
   replicas: 2
   rollOutPods: true

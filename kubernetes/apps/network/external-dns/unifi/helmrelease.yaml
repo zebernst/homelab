@@ -63,7 +63,7 @@ spec:
       - --exclude-domains=jptr.zebernst.dev
     triggerLoopOnEvent: true
     policy: sync
-    sources: ["ingress", "service", "gateway-httproute", "gateway-tlsroute"]
+    sources: ["ingress", "service", "gateway-httproute", "gateway-tlsroute", "gateway-tcproute", "gateway-udproute"]
     domainFilters: ["zebernst.dev", "internal"]
     podAnnotations:
       secret.reloader.stakater.com/reload: *secret
