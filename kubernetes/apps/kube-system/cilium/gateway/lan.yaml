@@ -42,3 +42,11 @@ spec:
           - kind: Secret
             name: zebernst-dev-tls
             namespace: cert-manager
+    - name: esphome-peer
+      protocol: TCP
+      port: 6055
+      allowedRoutes:
+        namespaces:
+          from: All
+        kinds:
+          - kind: TCPRoute
