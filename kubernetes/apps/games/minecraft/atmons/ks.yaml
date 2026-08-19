@@ -13,6 +13,8 @@ spec:
   components:
     - ../../../../../components/volsync
   dependsOn:
+    - name: tinyauth
+      namespace: auth
     - name: bluemap
       namespace: games
     - name: onepassword
