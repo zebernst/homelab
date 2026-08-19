@@ -151,7 +151,7 @@ spec:
               RWA_ADMIN: "TRUE"
               RWA_GAME: minecraft
               RWA_SERVER_NAME: *app
-              RWA_RCON_HOST: "{{ .Release.Name }}-rcon"
+              RWA_RCON_HOST: "{{ .Release.Name }}"
               RWA_RCON_PORT: "25578"
               RWA_WEBSOCKET_URL_SSL: "wss://{{ .Release.Name }}.jptr.zebernst.dev/ws"
               RWA_WEBSOCKET_URL: "wss://{{ .Release.Name }}.jptr.zebernst.dev/ws"
@@ -201,9 +201,6 @@ spec:
             port: 25565
           metrics:
             port: 8080
-      rcon:
-        controller: *app
-        ports:
           rcon:
             port: 25578
       rcon-web:
