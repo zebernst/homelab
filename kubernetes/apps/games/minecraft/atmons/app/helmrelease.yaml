@@ -191,7 +191,7 @@ spec:
     service:
       atmons:
         annotations:
-          mc-router.itzg.me/externalServerName: "atmons.zebernst.dev"
+          mc-router.itzg.me/externalServerName: "atmons.zebernst.dev,atmons.jptr.zebernst.dev"
           mc-router.itzg.me/autoScaleUp: "true"
           mc-router.itzg.me/autoScaleDown: "true"
           mc-router.itzg.me/autoScaleAsleepMOTD: "§eAll the Mons is sleeping.§r Join once to wake it, then reconnect in a few minutes."

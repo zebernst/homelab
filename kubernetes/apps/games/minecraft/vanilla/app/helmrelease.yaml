@@ -179,7 +179,7 @@ spec:
     service:
       vanilla:
         annotations:
-          mc-router.itzg.me/externalServerName: "minecraft.zebernst.dev,vanilla.zebernst.dev"
+          mc-router.itzg.me/externalServerName: "minecraft.zebernst.dev,vanilla.zebernst.dev,vanilla.jptr.zebernst.dev"
           mc-router.itzg.me/autoScaleUp: "true"
           mc-router.itzg.me/autoScaleDown: "false"
         ports:

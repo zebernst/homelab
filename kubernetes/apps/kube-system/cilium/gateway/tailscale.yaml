@@ -57,3 +57,13 @@ spec:
           - kind: Secret
             name: jptr-zebernst-dev-tls
             namespace: cert-manager
+    # No hostname: Minecraft has no TLS SNI. All jptr names share this
+    # Tailscale IP; mc-router muxes on the handshake server address.
+    - name: java
+      protocol: TCP
+      port: 25565
+      allowedRoutes:
+        namespaces:
+          from: All
+        kinds:
+          - kind: TCPRoute
