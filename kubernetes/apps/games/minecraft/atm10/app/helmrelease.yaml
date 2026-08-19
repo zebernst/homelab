@@ -202,7 +202,9 @@ spec:
           metrics:
             port: 8080
           rcon:
+            name: rcon
             port: 25578
+            protocol: TCP
       rcon-web:
         controller: rcon-web
         ports:
