@@ -28,7 +28,7 @@ spec:
             dependsOn: init-db
             image:
               repository: ghcr.io/home-operations/gatus-sidecar
-              tag: 0.3.6@sha256:195e761e2fcf65bc959bea55f2ed15cdada44cc6653af6dc117b6241b010015b
+              tag: 0.5.1@sha256:221084ee862aecfa95b7797c66a4578e47a0bd08ea2c173fd6814a58e556b319
             args:
               - --auto-httproute
               - --enable-service
