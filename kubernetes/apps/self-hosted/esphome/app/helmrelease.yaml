@@ -105,11 +105,10 @@ spec:
         existingClaim: *app
         globalMounts:
           - path: /config
+      # Share the VolSync-managed claim (runtime already mounted both paths on it).
+      # A second Helm PVC named `esphome` fought Flux's VolSync PVC and broke reconcile.
       cache:
-        type: persistentVolumeClaim
-        size: 20Gi
-        accessMode: ReadWriteOnce
-        storageClass: ceph-block
+        existingClaim: *app
         globalMounts:
           - path: /cache
       tmp:

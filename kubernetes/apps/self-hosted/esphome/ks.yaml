@@ -30,4 +30,26 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 1Gi
+      # Must match the already-bound claim (Helm previously provisioned 20Gi);
+      # PVC size cannot shrink, and 1Gi was failing Flux dry-run.
+      VOLSYNC_CAPACITY: 20Gi
+  patches:
+    # Claim was created by Helm without dataSourceRef. Leaving dataSourceRef in
+    # the desired VolSync PVC makes every reconcile fail (immutable field).
+    - target:
+        kind: PersistentVolumeClaim
+        name: esphome
+      patch: |-
+        - op: remove
+          path: /spec/dataSourceRef
+    # Keep annotation so Helm can drop ownership when cache stops creating the PVC.
+    - target:
+        kind: PersistentVolumeClaim
+        name: esphome
+      patch: |-
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: esphome
+          annotations:
+            helm.sh/resource-policy: keep
