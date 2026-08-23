@@ -6,6 +6,7 @@ metadata:
   name: &app esphome
   namespace: &ns self-hosted
 spec:
+  suspend: false
   targetNamespace: *ns
   commonMetadata:
     labels:
@@ -31,3 +32,11 @@ spec:
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 10Gi
+  patches:
+    - target:
+        kind: ReplicationDestination
+        name: esphome
+      patch: |-
+        - op: replace
+          path: /spec/trigger/manual
+          value: restore-10gi
