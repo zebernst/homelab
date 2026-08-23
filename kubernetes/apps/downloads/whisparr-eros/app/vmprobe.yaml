@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmprobe_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMProbe
+metadata:
+  name: whisparr-eros
+spec:
+  interval: 1m
+  module: http_2xx
+  vmProberSpec:
+    url: blackbox-exporter.observability.svc.cluster.local:9115
+  targets:
+    static:
+      labels:
+        namespace: downloads
+        app: whisparr-eros
+      targets:
+        - http://whisparr-eros.downloads.svc.cluster.local/ping

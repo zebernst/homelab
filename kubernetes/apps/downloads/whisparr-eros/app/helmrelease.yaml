@@ -1,0 +1,101 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app whisparr-eros
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      whisparr-eros:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: 17
+            envFrom: &envFrom
+              - secretRef:
+                  name: whisparr-eros-secret
+        containers:
+          whisparr-eros:
+            image:
+              # Whisparr v3 (eros) — parallel to v2 whisparr until parity is verified
+              repository: ghcr.io/hotio/whisparr
+              tag: v3-3.3.8-release.1097@sha256:11fefc888d1483a7ce0e36e839d5e89fb78f28aeb784468131b4b3b4d509017a
+            env:
+              PUID: 568
+              PGID: 568
+              UMASK: "002"
+              # hotio defaults to 6969; keep cluster Service/probes on 80
+              WEBUI_PORTS: "80/tcp"
+              WHISPARR__APP__INSTANCENAME: Whisparr Eros
+              WHISPARR__APP__THEME: dark
+              WHISPARR__AUTH__METHOD: External
+              WHISPARR__AUTH__REQUIRED: DisabledForLocalAddresses
+              WHISPARR__LOG__DBENABLED: "False"
+              WHISPARR__LOG__LEVEL: info
+              WHISPARR__SERVER__PORT: &port 80
+              WHISPARR__UPDATE__BRANCH: eros
+              TZ: America/Chicago
+            envFrom: *envFrom
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /ping
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probe
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      # hotio s6 /init must start as root, then drops to PUID/PGID
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [65568]
+    service:
+      whisparr-eros:
+        controller: *app
+        ports:
+          http:
+            port: *port
+    route:
+      canonical:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
+    persistence:
+      config:
+        existingClaim: whisparr-eros
+      media:
+        type: nfs
+        server: nas.internal
+        path: /volume1/media
+        globalMounts:
+          - path: /media
+      tmp:
+        type: emptyDir
