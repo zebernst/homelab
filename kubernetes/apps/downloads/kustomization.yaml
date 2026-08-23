@@ -22,3 +22,4 @@ resources:
   - sonarr/ks.yaml
   - unpackerr/ks.yaml
   - whisparr/ks.yaml
+  - whisparr-eros/ks.yaml
