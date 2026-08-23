@@ -30,21 +30,4 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 20Gi
-  patches:
-    - target:
-        kind: PersistentVolumeClaim
-        name: esphome
-      patch: |-
-        - op: remove
-          path: /spec/dataSourceRef
-    - target:
-        kind: PersistentVolumeClaim
-        name: esphome
-      patch: |-
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: esphome
-          annotations:
-            helm.sh/resource-policy: keep
+      VOLSYNC_CAPACITY: 1Gi
