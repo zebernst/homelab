@@ -32,8 +32,6 @@ spec:
               tag: v3-3.3.8-release.1097@sha256:11fefc888d1483a7ce0e36e839d5e89fb78f28aeb784468131b4b3b4d509017a
             env:
               PUID: 568
-              # Synology NFS ACLs require group 65568; hotio's setuid drop
-              # does not keep pod supplementalGroups, so make it primary GID
               PGID: 65568
               UMASK: "002"
               # hotio defaults to 6969; keep cluster Service/probes on 80
