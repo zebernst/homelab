@@ -66,8 +66,6 @@ spec:
             # vmalert/VMRule webhook only allows $labels/$value/$expr — not Helm's `default`
             job: '{{ if $labels.namespace }}{{ $labels.namespace }}{{ else }}cluster{{ end }}'
       groups:
-        # count:up0 is empty whenever every target is up, which permanently trips
-        # RecordingRulesNoData. Nothing in-tree depends on count:up{0,1}.
         kube-prometheus-general.rules:
           enabled: false
 
@@ -363,8 +361,6 @@ spec:
           storageClassName: ceph-block
           resources:
             requests:
-              # Was 50Gi and 100% full (~52Gi data, 90d retention); expand so
-              # DiskRunsOutOfSpace / KubePersistentVolumeFillingUp clear.
               storage: 100Gi
       ingress:
         enabled: false
