@@ -107,6 +107,7 @@ spec:
           - path: /config
       cache:
         type: persistentVolumeClaim
+        forceRename: esphome-cache
         size: 20Gi
         accessMode: ReadWriteOnce
         storageClass: ceph-block

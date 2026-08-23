@@ -65,6 +65,9 @@ spec:
           labels:
             # vmalert/VMRule webhook only allows $labels/$value/$expr — not Helm's `default`
             job: '{{ if $labels.namespace }}{{ $labels.namespace }}{{ else }}cluster{{ end }}'
+      groups:
+        kube-prometheus-general.rules:
+          enabled: false
 
     extraRules:
       dockerhub-rules:
@@ -358,7 +361,7 @@ spec:
           storageClassName: ceph-block
           resources:
             requests:
-              storage: 50Gi
+              storage: 100Gi
       ingress:
         enabled: false
 
