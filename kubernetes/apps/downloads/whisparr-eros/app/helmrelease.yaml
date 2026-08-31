@@ -29,7 +29,7 @@ spec:
             image:
               # Whisparr v3 (eros) — parallel to v2 whisparr until parity is verified
               repository: ghcr.io/hotio/whisparr
-              tag: v3-3.3.8-release.1097@sha256:11fefc888d1483a7ce0e36e839d5e89fb78f28aeb784468131b4b3b4d509017a
+              tag: v3-3.3.8-release.1097@sha256:8cabb8b43191660f398cd76012bc77eadaf94db37e6434a94019205a361965d8
             env:
               PUID: 568
               PGID: 65568
