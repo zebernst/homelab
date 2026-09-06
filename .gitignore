@@ -25,6 +25,10 @@ wiki
 # Beads local state / backups (not tracked in this repo)
 .beads/
 
+# fnox local age-encrypted secret cache
+fnox.local.toml
+**/fnox.local.toml
+
 # Cursor local commands / project config
 .cursor/
 

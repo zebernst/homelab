@@ -1,0 +1,4 @@
+[env]
+_.fnox-env = { tools = true }
+
+OP_ACCOUNT = "my.1password.com"

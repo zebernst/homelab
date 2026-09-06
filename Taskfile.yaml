@@ -25,6 +25,7 @@ includes:
   nominatim-cnpg: .taskfiles/nominatim-cnpg
   synology: .taskfiles/synology
   talos: .taskfiles/talos
+  tofu: .taskfiles/tofu
   volsync: .taskfiles/volsync
 
 tasks:

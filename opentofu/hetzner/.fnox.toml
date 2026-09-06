@@ -1,0 +1,5 @@
+# Inherits [providers.op] from ../.fnox.toml when run from this directory.
+# https://fnox.jdx.dev/guide/hierarchical-config.html
+
+[secrets]
+HCLOUD_TOKEN = { provider = "op", value = "hcloud-token-opentofu/credential" }

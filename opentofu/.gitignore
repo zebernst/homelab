@@ -1,0 +1,16 @@
+**/.terraform/
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/terraform.tfstate.*
+**/*.tfvars
+**/*.tfvars.json
+!**/terraform.tfvars.example
+**/.terraform.tfstate.lock.info
+**/*_override.tf
+# Keep .terraform.lock.hcl tracked for reproducible provider versions.
+
+# fnox local age-encrypted cache (never commit)
+fnox.local.toml
+.fnox.local.toml
+**/fnox.local.toml
+**/.fnox.local.toml
