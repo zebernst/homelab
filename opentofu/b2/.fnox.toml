@@ -1,0 +1,3 @@
+[secrets]
+B2_APPLICATION_KEY_ID = { provider = "op", value = "b2-master-key/keyID" }
+B2_APPLICATION_KEY    = { provider = "op", value = "b2-master-key/applicationKey" }

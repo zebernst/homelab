@@ -8,6 +8,7 @@ shopt: [globstar]
 vars:
   KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
   TALOS_DIR: '{{.ROOT_DIR}}/talos'
+  OPENTOFU_DIR: '{{.ROOT_DIR}}/opentofu'
 
 dotenv:
   - '{{.KUBERNETES_DIR}}/apps/system-upgrade/versions.env'
@@ -25,7 +26,9 @@ includes:
   nominatim-cnpg: .taskfiles/nominatim-cnpg
   synology: .taskfiles/synology
   talos: .taskfiles/talos
-  tofu: .taskfiles/tofu
+  tofu:
+    taskfile: .taskfiles/tofu
+    dir: .
   volsync: .taskfiles/volsync
 
 tasks:

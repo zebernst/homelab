@@ -1,4 +1,4 @@
-# Shared providers + backend credentials (all stacks).
+# Shared providers + S3 backend credentials (all stacks).
 # Stack-specific secrets live in <stack>/.fnox.toml.
 # https://fnox.jdx.dev/guide/hierarchical-config.html
 
@@ -7,6 +7,6 @@ type = "1password"
 vault = "Secrets"
 
 [secrets]
-# OpenTofu S3 backend → Backblaze B2 (AWS_* env vars consumed by the s3 backend).
-AWS_ACCESS_KEY_ID     = { provider = "op", value = "b2-key-opentofu-local/keyID" }
-AWS_SECRET_ACCESS_KEY = { provider = "op", value = "b2-key-opentofu-local/applicationKey" }
+# OpenTofu S3 backend (AWS_* env vars).
+AWS_ACCESS_KEY_ID     = { provider = "op", value = "b2-key-opentofu-state/keyID" }
+AWS_SECRET_ACCESS_KEY = { provider = "op", value = "b2-key-opentofu-state/applicationKey" }

@@ -2,88 +2,68 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
-vars:
-  OPENTOFU_DIR: '{{.ROOT_DIR}}/opentofu'
-  STACK_DIR: '{{.OPENTOFU_DIR}}/{{.STACK}}'
-
 tasks:
 
   init:
     desc: tofu init for a stack [STACK=required]
-    dir: '{{.STACK_DIR}}'
+    dir: 'opentofu/{{.STACK}}'
     interactive: true
+    requires:
+      vars: [STACK]
+    preconditions:
+      - sh: 'test -d "{{.OPENTOFU_DIR}}/{{.STACK}}"'
+        msg: 'Stack directory not found: {{.OPENTOFU_DIR}}/{{.STACK}}'
     cmds:
       - mise exec -- fnox exec -- tofu init {{.CLI_ARGS}}
-    preconditions:
-      - sh: '[[ -n "{{.STACK}}" ]]'
-        msg: 'STACK is required (e.g. STACK=hetzner)'
-      - sh: '[[ -d "{{.STACK_DIR}}" ]]'
-        msg: 'Stack directory not found: {{.STACK_DIR}}'
 
   plan:
     desc: tofu plan for a stack [STACK=required]
-    dir: '{{.STACK_DIR}}'
+    dir: 'opentofu/{{.STACK}}'
+    requires:
+      vars: [STACK]
+    preconditions:
+      - sh: 'test -d "{{.OPENTOFU_DIR}}/{{.STACK}}"'
+        msg: 'Stack directory not found: {{.OPENTOFU_DIR}}/{{.STACK}}'
     cmds:
       - mise exec -- fnox exec -- tofu plan {{.CLI_ARGS}}
-    preconditions:
-      - sh: '[[ -n "{{.STACK}}" ]]'
-        msg: 'STACK is required (e.g. STACK=hetzner)'
-      - sh: '[[ -d "{{.STACK_DIR}}" ]]'
-        msg: 'Stack directory not found: {{.STACK_DIR}}'
 
   apply:
     desc: tofu apply for a stack [STACK=required]
-    dir: '{{.STACK_DIR}}'
+    dir: 'opentofu/{{.STACK}}'
     interactive: true
+    requires:
+      vars: [STACK]
+    preconditions:
+      - sh: 'test -d "{{.OPENTOFU_DIR}}/{{.STACK}}"'
+        msg: 'Stack directory not found: {{.OPENTOFU_DIR}}/{{.STACK}}'
     cmds:
       - mise exec -- fnox exec -- tofu apply {{.CLI_ARGS}}
-    preconditions:
-      - sh: '[[ -n "{{.STACK}}" ]]'
-        msg: 'STACK is required (e.g. STACK=hetzner)'
-      - sh: '[[ -d "{{.STACK_DIR}}" ]]'
-        msg: 'Stack directory not found: {{.STACK_DIR}}'
 
   validate:
     desc: tofu validate for a stack [STACK=required]
-    dir: '{{.STACK_DIR}}'
+    dir: 'opentofu/{{.STACK}}'
+    requires:
+      vars: [STACK]
+    preconditions:
+      - sh: 'test -d "{{.OPENTOFU_DIR}}/{{.STACK}}"'
+        msg: 'Stack directory not found: {{.OPENTOFU_DIR}}/{{.STACK}}'
     cmds:
       - mise exec -- fnox exec -- tofu init -backend=false
       - mise exec -- fnox exec -- tofu validate {{.CLI_ARGS}}
-    preconditions:
-      - sh: '[[ -n "{{.STACK}}" ]]'
-        msg: 'STACK is required (e.g. STACK=hetzner)'
-      - sh: '[[ -d "{{.STACK_DIR}}" ]]'
-        msg: 'Stack directory not found: {{.STACK_DIR}}'
 
   output:
     desc: tofu output for a stack [STACK=required]
-    dir: '{{.STACK_DIR}}'
+    dir: 'opentofu/{{.STACK}}'
+    requires:
+      vars: [STACK]
+    preconditions:
+      - sh: 'test -d "{{.OPENTOFU_DIR}}/{{.STACK}}"'
+        msg: 'Stack directory not found: {{.OPENTOFU_DIR}}/{{.STACK}}'
     cmds:
       - mise exec -- fnox exec -- tofu output {{.CLI_ARGS}}
-    preconditions:
-      - sh: '[[ -n "{{.STACK}}" ]]'
-        msg: 'STACK is required (e.g. STACK=hetzner)'
-      - sh: '[[ -d "{{.STACK_DIR}}" ]]'
-        msg: 'Stack directory not found: {{.STACK_DIR}}'
 
   fmt:
     desc: tofu fmt recursive under opentofu/
-    dir: '{{.OPENTOFU_DIR}}'
+    dir: opentofu
     cmds:
       - mise exec -- tofu fmt -recursive {{.CLI_ARGS}}
-
-  sync-secrets:
-    desc: fnox sync root + each stack that defines [secrets]
-    dir: '{{.OPENTOFU_DIR}}'
-    cmds:
-      - |
-        if [[ -f .fnox.toml ]] && grep -q '^\[secrets\]' .fnox.toml; then
-          echo "==> sync opentofu (root)"
-          mise exec -- fnox sync --provider sync-age --local-file {{.CLI_ARGS}}
-        fi
-        for stack in */; do
-          if [[ -f "${stack}.fnox.toml" ]] && grep -q '^\[secrets\]' "${stack}.fnox.toml"; then
-            echo "==> sync ${stack%/}"
-            (cd "${stack}" && mise exec -- fnox sync --provider sync-age --local-file {{.CLI_ARGS}})
-          fi
-        done
