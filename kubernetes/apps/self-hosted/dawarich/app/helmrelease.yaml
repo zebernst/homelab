@@ -16,6 +16,7 @@ spec:
       dawarich:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: dawarich
         containers:
           web:
             image:
@@ -148,6 +149,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Dawarich
+          glance/icon: mdi:map-marker-path
+          glance/category: self-hosted
+          glance/url: https://timeline.zebernst.dev
         hostnames:
           - timeline.jptr.zebernst.dev
         parentRefs:

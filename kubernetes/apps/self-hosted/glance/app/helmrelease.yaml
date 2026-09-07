@@ -16,6 +16,7 @@ spec:
       glance:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: glance
         containers:
           glance:
             image:
@@ -96,6 +97,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Glance
+          glance/icon: di:glance
+          glance/category: self-hosted
+          glance/url: https://glance.zebernst.dev
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:
@@ -133,8 +138,11 @@ spec:
             - apiGroups: [""]
               resources: ["services"]
               verbs: ["list"]
-            - apiGroups: ["networking.k8s.io"] # networking.k8s.io/v1
-              resources: ["ingresses", "ingressclasses"]
+            - apiGroups: ["networking.k8s.io"]
+              resources: ["ingresses"]
+              verbs: ["list"]
+            - apiGroups: ["gateway.networking.k8s.io"]
+              resources: ["httproutes"]
               verbs: ["list"]
             - apiGroups: ["apps"]
               resources: ["deployments", "statefulsets", "daemonsets"]

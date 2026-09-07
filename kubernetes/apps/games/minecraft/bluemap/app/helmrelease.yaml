@@ -16,6 +16,7 @@ spec:
       bluemap:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/parent: minecraft
         initContainers:
           init-config:
             image:
