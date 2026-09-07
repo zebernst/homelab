@@ -14,29 +14,24 @@ locals {
   mx = {
     apex_primary = {
       name     = local.domain
-      content  = "in1-smtp.messagingengine.com"
+      target   = "in1-smtp.messagingengine.com"
       priority = 10
     }
     apex_secondary = {
       name     = local.domain
-      content  = "in2-smtp.messagingengine.com"
+      target   = "in2-smtp.messagingengine.com"
       priority = 20
     }
     wildcard_primary = {
       name     = "*.${local.domain}"
-      content  = "in1-smtp.messagingengine.com"
+      target   = "in1-smtp.messagingengine.com"
       priority = 10
     }
     wildcard_secondary = {
       name     = "*.${local.domain}"
-      content  = "in2-smtp.messagingengine.com"
+      target   = "in2-smtp.messagingengine.com"
       priority = 20
     }
-  }
-
-  dmarc = {
-    fastmail = "\"v=DMARC1; p=quarantine; rua=mailto:admin@${local.domain}\""
-    cloudflare = "\"v=DMARC1; p=none; rua=mailto:8877933bd64d4f2c9bb00fff76d4aa45@dmarc-reports.cloudflare.net\""
   }
 }
 
@@ -72,13 +67,16 @@ resource "cloudflare_dns_record" "mx" {
   for_each = local.mx
 
   comment  = "Fastmail"
-  content  = each.value.content
   name     = each.value.name
   priority = each.value.priority
   proxied  = false
   ttl      = 1
   type     = "MX"
   zone_id  = local.zone
+  data = {
+    target   = each.value.target
+    priority = each.value.priority
+  }
 }
 
 resource "cloudflare_dns_record" "bsky_atproto" {
@@ -101,9 +99,7 @@ resource "cloudflare_dns_record" "dkim_cloudflare" {
 }
 
 resource "cloudflare_dns_record" "dmarc" {
-  for_each = local.dmarc
-
-  content = each.value
+  content = "\"v=DMARC1; p=quarantine; rua=mailto:admin@${local.domain},mailto:8877933bd64d4f2c9bb00fff76d4aa45@dmarc-reports.cloudflare.net\""
   name    = "_dmarc.${local.domain}"
   proxied = false
   ttl     = 1
