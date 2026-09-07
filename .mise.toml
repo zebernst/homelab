@@ -4,7 +4,7 @@ MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 TALOSCONFIG = "{{config_root}}/talos/talosconfig"
 
 [plugins]
-# Loads secrets from fnox.toml into the environment (used under opentofu/)
+# Loads secrets from fnox.toml into the environment (used under tofu/)
 "fnox-env" = "https://github.com/jdx/mise-env-fnox"
 
 [tools]

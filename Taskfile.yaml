@@ -8,7 +8,7 @@ shopt: [globstar]
 vars:
   KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
   TALOS_DIR: '{{.ROOT_DIR}}/talos'
-  OPENTOFU_DIR: '{{.ROOT_DIR}}/opentofu'
+  TOFU_DIR: '{{.ROOT_DIR}}/tofu'
 
 dotenv:
   - '{{.KUBERNETES_DIR}}/apps/system-upgrade/versions.env'
