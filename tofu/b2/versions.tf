@@ -8,8 +8,6 @@ terraform {
     }
   }
 
-  # State lives in the bucket this stack manages (bucket already exists).
-  # Credentials: AWS_* from tofu/.fnox.toml (b2-key-opentofu-state).
   backend "s3" {
     bucket = "jupiter-tofu-state"
     key    = "opentofu/b2.tfstate"
