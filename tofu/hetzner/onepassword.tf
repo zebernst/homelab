@@ -1,13 +1,6 @@
 data "onepassword_vault" "secrets" {
-  name = "Secrets" # must match ../fnox.toml providers.op.vault
+  name = "Secrets"
 }
-
-# Username/URL from Hetzner; passwords from var (primary) / random_password (synology).
-# No cycle: password sources do not depend on these items.
-# https://search.opentofu.org/provider/1password/onepassword/latest/docs/resources/item
-#
-# Do not set `category`: provider v3.3.1 resource schema omits api_credential
-# (data source / real items still use it). https://github.com/1Password/terraform-provider-onepassword/issues/391
 
 resource "onepassword_item" "storage_box" {
   vault = data.onepassword_vault.secrets.uuid
