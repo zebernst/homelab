@@ -34,10 +34,6 @@ locals {
     }
   }
 
-  dmarc = {
-    fastmail = "\"v=DMARC1; p=quarantine; rua=mailto:admin@${local.domain}\""
-    cloudflare = "\"v=DMARC1; p=none; rua=mailto:8877933bd64d4f2c9bb00fff76d4aa45@dmarc-reports.cloudflare.net\""
-  }
 }
 
 resource "cloudflare_dns_record" "google_domainconnect" {
@@ -101,9 +97,7 @@ resource "cloudflare_dns_record" "dkim_cloudflare" {
 }
 
 resource "cloudflare_dns_record" "dmarc" {
-  for_each = local.dmarc
-
-  content = each.value
+  content = "\"v=DMARC1; p=quarantine; rua=mailto:admin@${local.domain},mailto:8877933bd64d4f2c9bb00fff76d4aa45@dmarc-reports.cloudflare.net\""
   name    = "_dmarc.${local.domain}"
   proxied = false
   ttl     = 1
