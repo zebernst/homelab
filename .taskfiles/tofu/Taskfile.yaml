@@ -1,0 +1,71 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+# TOFU_DIR is defined on the root Taskfile.
+
+tasks:
+
+  init:
+    desc: tofu init for a stack [STACK=required]
+    dir: '{{.TOFU_DIR}}/{{.STACK}}'
+    interactive: true
+    requires:
+      vars: [STACK]
+    preconditions:
+      - sh: 'test -d "{{.TOFU_DIR}}/{{.STACK}}"'
+        msg: 'Stack directory not found: {{.TOFU_DIR}}/{{.STACK}}'
+    cmds:
+      - mise exec -- fnox exec -- tofu init {{.CLI_ARGS}}
+
+  plan:
+    desc: tofu plan for a stack [STACK=required]
+    dir: '{{.TOFU_DIR}}/{{.STACK}}'
+    requires:
+      vars: [STACK]
+    preconditions:
+      - sh: 'test -d "{{.TOFU_DIR}}/{{.STACK}}"'
+        msg: 'Stack directory not found: {{.TOFU_DIR}}/{{.STACK}}'
+    cmds:
+      - mise exec -- fnox exec -- tofu plan {{.CLI_ARGS}}
+
+  apply:
+    desc: tofu apply for a stack [STACK=required]
+    dir: '{{.TOFU_DIR}}/{{.STACK}}'
+    interactive: true
+    requires:
+      vars: [STACK]
+    preconditions:
+      - sh: 'test -d "{{.TOFU_DIR}}/{{.STACK}}"'
+        msg: 'Stack directory not found: {{.TOFU_DIR}}/{{.STACK}}'
+    cmds:
+      - mise exec -- fnox exec -- tofu apply {{.CLI_ARGS}}
+
+  validate:
+    desc: tofu validate for a stack [STACK=required]
+    dir: '{{.TOFU_DIR}}/{{.STACK}}'
+    requires:
+      vars: [STACK]
+    preconditions:
+      - sh: 'test -d "{{.TOFU_DIR}}/{{.STACK}}"'
+        msg: 'Stack directory not found: {{.TOFU_DIR}}/{{.STACK}}'
+    cmds:
+      - mise exec -- fnox exec -- tofu init -backend=false
+      - mise exec -- fnox exec -- tofu validate {{.CLI_ARGS}}
+
+  output:
+    desc: tofu output for a stack [STACK=required]
+    dir: '{{.TOFU_DIR}}/{{.STACK}}'
+    requires:
+      vars: [STACK]
+    preconditions:
+      - sh: 'test -d "{{.TOFU_DIR}}/{{.STACK}}"'
+        msg: 'Stack directory not found: {{.TOFU_DIR}}/{{.STACK}}'
+    cmds:
+      - mise exec -- fnox exec -- tofu output {{.CLI_ARGS}}
+
+  fmt:
+    desc: tofu fmt recursive under tofu/
+    dir: '{{.TOFU_DIR}}'
+    cmds:
+      - mise exec -- tofu fmt -recursive {{.CLI_ARGS}}

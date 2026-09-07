@@ -1,0 +1,3 @@
+[secrets]
+HCLOUD_TOKEN = { provider = "op", value = "hcloud-token-opentofu/credential" }
+TF_VAR_storage_box_password = { provider = "op", value = "hcloud-storagebox/password" }

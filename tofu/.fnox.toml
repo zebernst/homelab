@@ -1,0 +1,8 @@
+[providers.op]
+type = "1password"
+vault = "Secrets"
+
+[secrets]
+# OpenTofu S3 backend (AWS_* env vars).
+AWS_ACCESS_KEY_ID     = { provider = "op", value = "b2-key-opentofu-state/keyID" }
+AWS_SECRET_ACCESS_KEY = { provider = "op", value = "b2-key-opentofu-state/applicationKey" }
