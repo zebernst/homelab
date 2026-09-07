@@ -53,7 +53,7 @@ resource "cloudflare_dns_record" "google_domainconnect" {
   }
 }
 
-resource "cloudflare_dns_record" "dkim_fastmail" {
+resource "cloudflare_dns_record" "fastmail_dkim" {
   for_each = local.fastmail_dkim
 
   comment = "Fastmail"
