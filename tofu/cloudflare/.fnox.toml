@@ -1,0 +1,3 @@
+[secrets]
+CLOUDFLARE_API_TOKEN = { provider = "op", value = "cloudflare-token-opentofu/token" }
+TF_VAR_account_id    = { provider = "op", value = "cloudflare-token-opentofu/account-id" }
