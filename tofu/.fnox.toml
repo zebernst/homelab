@@ -1,7 +1,3 @@
-# Shared providers + S3 backend credentials (all stacks).
-# Stack-specific secrets live in <stack>/.fnox.toml.
-# https://fnox.jdx.dev/guide/hierarchical-config.html
-
 [providers.op]
 type = "1password"
 vault = "Secrets"

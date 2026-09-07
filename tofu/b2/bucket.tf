@@ -1,4 +1,3 @@
-# https://registry.terraform.io/providers/Backblaze/b2/latest/docs/resources/bucket
 resource "b2_bucket" "tofu_state" {
   bucket_name = "jupiter-tofu-state"
   bucket_type = "allPrivate"

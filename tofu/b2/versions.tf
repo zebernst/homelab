@@ -26,5 +26,4 @@ terraform {
   }
 }
 
-# B2_APPLICATION_KEY_ID / B2_APPLICATION_KEY from fnox.
 provider "b2" {}

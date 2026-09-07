@@ -1,4 +1,3 @@
-# Import ID is the B2 bucket_id (not the name). See var.tofu_state_bucket_id.
 import {
   to = b2_bucket.tofu_state
   id = "7fd2f810dd767980a00f0410"
