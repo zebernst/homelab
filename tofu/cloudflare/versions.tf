@@ -26,5 +26,4 @@ terraform {
   }
 }
 
-# Authenticated via CLOUDFLARE_API_TOKEN (fnox → 1Password).
 provider "cloudflare" {}
