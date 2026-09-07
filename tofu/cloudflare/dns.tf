@@ -14,26 +14,25 @@ locals {
   mx = {
     apex_primary = {
       name     = local.domain
-      content  = "in1-smtp.messagingengine.com"
+      target   = "in1-smtp.messagingengine.com"
       priority = 10
     }
     apex_secondary = {
       name     = local.domain
-      content  = "in2-smtp.messagingengine.com"
+      target   = "in2-smtp.messagingengine.com"
       priority = 20
     }
     wildcard_primary = {
       name     = "*.${local.domain}"
-      content  = "in1-smtp.messagingengine.com"
+      target   = "in1-smtp.messagingengine.com"
       priority = 10
     }
     wildcard_secondary = {
       name     = "*.${local.domain}"
-      content  = "in2-smtp.messagingengine.com"
+      target   = "in2-smtp.messagingengine.com"
       priority = 20
     }
   }
-
 }
 
 resource "cloudflare_dns_record" "google_domainconnect" {
@@ -68,13 +67,16 @@ resource "cloudflare_dns_record" "mx" {
   for_each = local.mx
 
   comment  = "Fastmail"
-  content  = each.value.content
   name     = each.value.name
   priority = each.value.priority
   proxied  = false
   ttl      = 1
   type     = "MX"
   zone_id  = local.zone
+  data = {
+    target   = each.value.target
+    priority = each.value.priority
+  }
 }
 
 resource "cloudflare_dns_record" "bsky_atproto" {
