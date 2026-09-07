@@ -2,11 +2,13 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
+# OPENTOFU_DIR is defined on the root Taskfile.
+
 tasks:
 
   init:
     desc: tofu init for a stack [STACK=required]
-    dir: 'opentofu/{{.STACK}}'
+    dir: '{{.OPENTOFU_DIR}}/{{.STACK}}'
     interactive: true
     requires:
       vars: [STACK]
@@ -18,7 +20,7 @@ tasks:
 
   plan:
     desc: tofu plan for a stack [STACK=required]
-    dir: 'opentofu/{{.STACK}}'
+    dir: '{{.OPENTOFU_DIR}}/{{.STACK}}'
     requires:
       vars: [STACK]
     preconditions:
@@ -29,7 +31,7 @@ tasks:
 
   apply:
     desc: tofu apply for a stack [STACK=required]
-    dir: 'opentofu/{{.STACK}}'
+    dir: '{{.OPENTOFU_DIR}}/{{.STACK}}'
     interactive: true
     requires:
       vars: [STACK]
@@ -41,7 +43,7 @@ tasks:
 
   validate:
     desc: tofu validate for a stack [STACK=required]
-    dir: 'opentofu/{{.STACK}}'
+    dir: '{{.OPENTOFU_DIR}}/{{.STACK}}'
     requires:
       vars: [STACK]
     preconditions:
@@ -53,7 +55,7 @@ tasks:
 
   output:
     desc: tofu output for a stack [STACK=required]
-    dir: 'opentofu/{{.STACK}}'
+    dir: '{{.OPENTOFU_DIR}}/{{.STACK}}'
     requires:
       vars: [STACK]
     preconditions:
@@ -64,6 +66,6 @@ tasks:
 
   fmt:
     desc: tofu fmt recursive under opentofu/
-    dir: opentofu
+    dir: '{{.OPENTOFU_DIR}}'
     cmds:
       - mise exec -- tofu fmt -recursive {{.CLI_ARGS}}
