@@ -4,7 +4,7 @@ kind: Dragonfly
 metadata:
   name: &cluster hindwing
 spec:
-  image: ghcr.io/dragonflydb/dragonfly:v1.39.0
+  image: ghcr.io/dragonflydb/dragonfly:v1.40.2
   replicas: 3
   networkPolicyEnabled: true
   args:
