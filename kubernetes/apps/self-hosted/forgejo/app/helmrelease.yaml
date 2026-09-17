@@ -130,6 +130,7 @@ spec:
           SSH_PORT: 22
           START_SSH_SERVER: "true"
           DISABLE_SSH: "false"
+          LFS_START_SERVER: "true"
           OFFLINE_MODE: "false"
 
         service:
@@ -140,6 +141,7 @@ spec:
           REQUIRE_SIGNIN_VIEW: "false"
           DEFAULT_KEEP_EMAIL_PRIVATE: "true"
           DEFAULT_ALLOW_CREATE_ORGANIZATION: "false"
+          ENABLE_NOTIFY_MAIL: "true"
 
         admin:
           DISABLE_REGULAR_ORG_CREATION: "true"
@@ -167,6 +169,8 @@ spec:
           DISABLE_HTTP_GIT: "false"
           MAX_CREATION_LIMIT: 0
           ALLOW_FORK_WITHOUT_MAXIMUM_LIMIT: "false"
+          signing:
+            DEFAULT_TRUST_MODEL: committer
 
         mailer:
           ENABLED: "true"
@@ -179,6 +183,7 @@ spec:
           INSTALL_LOCK: "true"
           PASSWORD_COMPLEXITY: "off"
           MIN_PASSWORD_LENGTH: 12
+          LOGIN_REMEMBER_DAYS: 365
 
         # Personal forge: in-process cache + memory sessions + LevelDB queues (PVC).
         # Redis/Dragonfly only recommended for high-activity instances.
