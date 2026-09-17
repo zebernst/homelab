@@ -80,7 +80,9 @@ spec:
           wishlist:
             wishlist:
               - path: /usr/src/app/data
+                subPath: data
               - path: /usr/src/app/uploads
+                subPath: uploads
       tmp:
         type: emptyDir
         globalMounts:
