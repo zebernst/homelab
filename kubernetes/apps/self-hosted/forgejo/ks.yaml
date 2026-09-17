@@ -54,8 +54,6 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: forgejo-db
-    - name: dragonfly-cluster
-      namespace: database
     - name: onepassword
       namespace: external-secrets
     - name: rook-ceph-cluster

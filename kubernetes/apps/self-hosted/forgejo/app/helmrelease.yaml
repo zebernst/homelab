@@ -180,6 +180,17 @@ spec:
           PASSWORD_COMPLEXITY: "off"
           MIN_PASSWORD_LENGTH: 12
 
+        # Personal forge: in-process cache + memory sessions + LevelDB queues (PVC).
+        # Redis/Dragonfly only recommended for high-activity instances.
+        # https://forgejo.org/docs/latest/admin/setup/recommendations/
+        cache:
+          ADAPTER: twoqueue
+          HOST: '{"size":100, "recent_ratio":0.25, "ghost_ratio":0.5}'
+        session:
+          PROVIDER: memory
+        queue:
+          TYPE: level
+
     resources:
       requests:
         cpu: 50m
