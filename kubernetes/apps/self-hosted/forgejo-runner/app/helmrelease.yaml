@@ -1,0 +1,134 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app forgejo-runner
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      forgejo-runner:
+        type: deployment
+        replicas: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          dind:
+            image:
+              repository: docker.io/library/docker
+              tag: 27.5.1-dind
+            env:
+              DOCKER_TLS_CERTDIR: ""
+            args:
+              - --host=tcp://127.0.0.1:2375
+              - --tls=false
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 4Gi
+            # Required for dockerd; job containers remain unprivileged via runner config.
+            securityContext:
+              privileged: true
+              allowPrivilegeEscalation: true
+
+          runner:
+            image:
+              repository: code.forgejo.org/forgejo/runner
+              tag: 11.3.1
+            dependsOn:
+              - dind
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -eu
+                export DOCKER_HOST="tcp://127.0.0.1:2375"
+                echo "waiting for dockerd..."
+                until wget -q -O - http://127.0.0.1:2375/_ping 2>/dev/null | grep -q OK; do sleep 1; done
+                INSTANCE="http://forgejo-http.self-hosted.svc.cluster.local:3000"
+                LABELS="ubuntu-latest:docker://code.forgejo.org/oci/node:20-bookworm,docker:docker://code.forgejo.org/oci/node:20-bookworm"
+                cd /data
+                while true; do
+                  rm -f .runner
+                  forgejo-runner register --no-interactive --ephemeral \
+                    --instance "${INSTANCE}" \
+                    --token "${RUNNER_REGISTRATION_TOKEN}" \
+                    --name "ephemeral-$(hostname)-$(date +%s)" \
+                    --labels "${LABELS}"
+                  forgejo-runner one-job --config /config/config.yaml || true
+                  sleep 2
+                done
+            env:
+              DOCKER_HOST: tcp://127.0.0.1:2375
+              RUNNER_REGISTRATION_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: forgejo-runner-secret
+                    key: token
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+            resources:
+              requests:
+                cpu: 50m
+                memory: 128Mi
+              limits:
+                memory: 1Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+
+    defaultPodOptions:
+      priorityClassName: internal-only
+      # Pod-level non-root would block privileged DinD; harden per-container instead.
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+
+    persistence:
+      data:
+        type: emptyDir
+        advancedMounts:
+          forgejo-runner:
+            runner:
+              - path: /data
+      config:
+        type: configMap
+        name: forgejo-runner-config
+        defaultMode: 0644
+        advancedMounts:
+          forgejo-runner:
+            runner:
+              - path: /config
+                readOnly: true
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          forgejo-runner:
+            runner:
+              - path: /tmp
+            dind:
+              - path: /tmp
+      dind-lib:
+        type: emptyDir
+        advancedMounts:
+          forgejo-runner:
+            dind:
+              - path: /var/lib/docker
