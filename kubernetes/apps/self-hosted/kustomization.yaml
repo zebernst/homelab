@@ -18,3 +18,4 @@ resources:
   - paperless/ks.yaml
   - rxresume/ks.yaml
   - unwrapped/ks.yaml
+  - wishlist/ks.yaml
