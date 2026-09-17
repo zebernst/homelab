@@ -1,0 +1,86 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app wishlist
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      wishlist:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          wishlist:
+            image:
+              repository: ghcr.io/cmintey/wishlist
+              tag: v0.66.0@sha256:073ab4de0f27a93a79410172bedfa3947bed4718f050396547516def790f1f49
+            env:
+              ORIGIN: https://wishlist.zebernst.dev
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 3280
+              readiness: *probe
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+    defaultPodOptions:
+      priorityClassName: external-facing
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      wishlist:
+        controller: *app
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
+        hostnames:
+          - "{{ .Release.Name }}.zebernst.dev"
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        size: 10Gi
+        accessMode: ReadWriteOnce
+        storageClass: ceph-block
+        advancedMounts:
+          wishlist:
+            wishlist:
+              - path: /usr/src/app/data
+              - path: /usr/src/app/uploads
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
