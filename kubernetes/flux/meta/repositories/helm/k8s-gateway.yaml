@@ -7,5 +7,4 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1h
-  type: oci
-  url: oci://ghcr.io/k8s-gateway/charts
+  url: https://k8s-gateway.kryptonian.kapsi.fi
