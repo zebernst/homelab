@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/helmrepository_v1.json
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
@@ -6,4 +7,4 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1h
-  url: https://k8s-gateway.github.io/k8s_gateway
+  url: https://k8s-gateway.kryptonian.kapsi.fi
