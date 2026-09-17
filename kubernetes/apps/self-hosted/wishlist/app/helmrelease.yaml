@@ -23,6 +23,7 @@ spec:
               tag: v0.66.0@sha256:073ab4de0f27a93a79410172bedfa3947bed4718f050396547516def790f1f49
             env:
               ORIGIN: https://wishlist.zebernst.dev
+              XDG_CONFIG_HOME: /tmp
             probes:
               liveness: &probe
                 enabled: true
