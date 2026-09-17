@@ -35,5 +35,6 @@ fnox.local.toml
 # Superpowers local working copies (specs/plans live under .beads/)
 docs/superpowers/
 .superpowers/
+.worktrees/
 
 .claude/
