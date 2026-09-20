@@ -16,4 +16,5 @@ resources:
   - stash/ks.yaml
   - steam/ks.yaml
   - tautulli/ks.yaml
+  - tracearr/ks.yaml
   - wizarr/ks.yaml

@@ -100,13 +100,20 @@ Wire into `kubernetes/apps/media/kustomization.yaml` as `tracearr/ks.yaml`. Do n
 
 ### Secrets (1Password item `tracearr`)
 
-ExternalSecrets produce at least:
+Create a 1Password item named `tracearr` with at least:
+
+| Field | Purpose |
+| --- | --- |
+| `POSTGRES_SUPER_USER` | CNPG superuser username (e.g. `postgres`) |
+| `POSTGRES_SUPER_PASS` | CNPG superuser password (URL-safe preferred — used in `DATABASE_URL`) |
+| `JWT_SECRET` | `openssl rand -hex 32` |
+| `COOKIE_SECRET` | `openssl rand -hex 32` |
+
+ExternalSecrets produce:
 
 - `tracearr-db-secret` — CNPG superuser (`username` / `password`) with `cnpg.io/reload: "true"`
 - `tracearr-db-backup-secret` — B2 keys from `barman-b2-credentials` (same pattern as dawarich)
-- `tracearr-secret` — app env:
-  - `DATABASE_URL=postgres://…@tracearr-db-rw.media.svc.cluster.local:5432/tracearr`
-  - `JWT_SECRET`, `COOKIE_SECRET` (hex secrets, 32+ bytes)
+- `tracearr-secret` — app env (`DATABASE_URL`, `JWT_SECRET`, `COOKIE_SECRET`)
 
 Operator must create/populate the 1Password item before Flux can reconcile healthy.
 
