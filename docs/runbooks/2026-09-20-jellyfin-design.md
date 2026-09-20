@@ -30,12 +30,13 @@ Pocket ID (id.zebernst.dev)
         │
    Jellyfin pod (media ns)
         ├── /config          Volsync PVC (ceph-block)
-        ├── /cache           emptyDir or small PVC
-        ├── /transcode       emptyDir
+        ├── /cache,/tmp,/transcode  emptyDir
         └── /media/{tv,tv-uhd,movies,movies-uhd}  NFS RO ← nas.internal:/volume1/media
         │
         ├── HTTPRoute lan        → jellyfin.zebernst.dev
         └── HTTPRoute tailscale  → jellyfin.jptr.zebernst.dev
+        │
+        GPU: device plugin i915 (DRA deferred)
 ```
 
 Flux applies `kubernetes/apps/media/jellyfin/` like other media apps. OIDC client credentials live in 1Password and sync via ExternalSecret; the SSO plugin itself is configured once in the Jellyfin UI after first boot.
@@ -58,29 +59,37 @@ jellyfin/
 ├── ks.yaml
 └── app/
     ├── kustomization.yaml
+    ├── ocirepository.yaml   # local Flux source named jellyfin → app-template
     ├── helmrelease.yaml
     └── externalsecret.yaml
 ```
 
 ## Runtime
 
-- **Chart:** cluster `app-template` OCIRepository (same as Plex/Stash)
-- **Image:** official `jellyfin/jellyfin` (digest-pinned; Renovate can track). Prefer the upstream image unless a `home-operations/jellyfin` image is already in use elsewhere in this repo (it is not today).
+- **Chart:** local `OCIRepository` `jellyfin` in the app dir (bjw-style), pointing at `oci://ghcr.io/bjw-s-labs/helm/app-template` with a pinned tag (e.g. `5.2.1`). HelmRelease `chartRef` references that local source — not the shared cluster `app-template` OCIRepository. There is no dedicated bjw-s jellyfin chart; this only isolates chart versioning per app.
+- **Image:** `ghcr.io/jellyfin/jellyfin` (digest-pinned; Renovate can track)
 - **Port:** `8096`
+- **Env:**
+  - `TZ: America/Chicago`
+  - `DOTNET_SYSTEM_IO_DISABLEFILELOCKING: "true"`
+  - `JELLYFIN_PublishedServerUrl: https://jellyfin.jptr.zebernst.dev` (canonical Tailscale URL; LAN hostname remains a first-class route)
 - **Identity:** UID/GID `568`, `fsGroup: 568`, `supplementalGroups: [65568]` (render/GPU group, matching Plex/Stash)
-- **GPU:** `gpu.intel.com/i915: 1`, `nodeSelector: intel.feature.node.kubernetes.io/gpu: "true"`
+- **GPU (v1):** classic device plugin — `gpu.intel.com/i915: 1`, `nodeSelector: intel.feature.node.kubernetes.io/gpu: "true"`, HelmRelease `dependsOn: intel-device-plugin-gpu`. DRA / `ResourceClaimTemplate` is deferred (requires `intel-gpu-resource-driver` and a Plex/Stash migration plan).
 - **Priority:** `media-core` (internal media; not `external-facing`)
-- **TZ:** `America/Chicago`
-- **Probes:** HTTP GET `/health` on port 8096 (liveness + readiness; startup probe with higher failure threshold like Plex)
-- **Security:** non-root, drop ALL caps, no privilege escalation, `readOnlyRootFilesystem: true` with writable mounts only for `/config`, `/cache`, `/transcode`, and any other paths the official image requires via `emptyDir` (e.g. `/tmp`)
+- **Probes:** HTTP GET `/health` on 8096 — gentler timings than Plex (e.g. period 30s, timeout 10s, failureThreshold 5 for liveness/readiness; startup period 10s, failureThreshold 30)
+- **terminationGracePeriodSeconds:** `120` (avoid SIGKILL during Jellyfin 12 shutdown VACUUM; jellyfin#17831)
+- **Resources:** requests `cpu: 100m`; limits `memory: 6Gi` (+ GPU limit as above)
+- **Security:** non-root, drop ALL caps, no privilege escalation, `readOnlyRootFilesystem: true`
+- **emptyDir tmpfs mounts:** `/cache`, `/tmp`, `/transcode` (required with RO rootfs)
 
 ## Storage
 
 | Mount | Source | Mode | Purpose |
 |-------|--------|------|---------|
 | `/config` | Volsync PVC `jellyfin` | RW | App config, metadata DB, plugins |
-| `/cache` | `emptyDir` | RW | Transcode/cache scratch (or dedicated PVC later if needed) |
-| `/transcode` | `emptyDir` | RW | Active transcodes |
+| `/cache` | `emptyDir` (tmpfs) | RW | Cache scratch |
+| `/tmp` | `emptyDir` (tmpfs) | RW | Temp (RO rootfs) |
+| `/transcode` | `emptyDir` (tmpfs) | RW | Active transcodes |
 | `/media/tv` | NFS `nas.internal:/volume1/media` subPath `tv` | RO | Same as Plex |
 | `/media/tv-uhd` | subPath `tv-uhd` | RO | Same as Plex |
 | `/media/movies` | subPath `movies` | RO | Same as Plex |
