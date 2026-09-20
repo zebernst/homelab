@@ -18,12 +18,12 @@
 
 ### Task 1: Scaffold Flux app
 
-- [ ] Create `kubernetes/apps/media/jellyfin/ks.yaml` (volsync, nfs-scaler, dependsOn, VOLSYNC_CAPACITY 30Gi)
-- [ ] Create `app/kustomization.yaml`, `ocirepository.yaml`, `helmrelease.yaml`, `externalsecret.yaml`
-- [ ] Register `jellyfin/ks.yaml` in `media/kustomization.yaml`
-- [ ] Commit
+- [x] Create `kubernetes/apps/media/jellyfin/ks.yaml` (volsync, nfs-scaler, dependsOn, VOLSYNC_CAPACITY 30Gi)
+- [x] Create `app/kustomization.yaml`, `ocirepository.yaml`, `helmrelease.yaml`, `externalsecret.yaml`
+- [x] Register `jellyfin/ks.yaml` in `media/kustomization.yaml`
+- [x] Commit
 
 ### Task 2: Verify manifests
 
-- [ ] YAML/schema sanity (anchors, paths, chartRef → local jellyfin OCIRepo)
-- [ ] Commit any fixes; update PR with post-deploy OIDC runbook notes
+- [x] YAML/schema sanity (anchors, paths, chartRef → local jellyfin OCIRepo)
+- [x] Commit any fixes; update PR with post-deploy OIDC runbook notes
