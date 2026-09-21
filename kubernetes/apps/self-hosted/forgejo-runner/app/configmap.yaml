@@ -1,0 +1,24 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forgejo-runner-config
+data:
+  config.yaml: |
+    log:
+      level: info
+    runner:
+      file: /data/.runner
+      capacity: 1
+      timeout: 3h
+      insecure: false
+    # Docker job containers (not host). DinD sidecar provides the daemon;
+    # job/service/step containers stay unprivileged.
+    container:
+      privileged: false
+      network: ""
+      docker_host: ""
+      options: --memory=2g --cpus=2
+      valid_volumes: []
+    cache:
+      enabled: false

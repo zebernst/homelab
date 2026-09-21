@@ -9,6 +9,8 @@ resources:
   - atuin/ks.yaml
   - dawarich/ks.yaml
   - esphome/ks.yaml
+  - forgejo/ks.yaml
+  - forgejo-runner/ks.yaml
   - glance/ks.yaml
   - hajimari/ks.yaml
   - it-tools/ks.yaml
