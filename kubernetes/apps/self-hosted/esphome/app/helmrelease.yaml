@@ -93,9 +93,10 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/hostname: esphome.internal
         parentRefs:
-          - name: lan
-            namespace: kube-system
-            sectionName: esphome-peer
+          - name: esphome
+            namespace: "{{ .Release.Namespace }}"
+            kind: ListenerSet
+            sectionName: peer
         rules:
           - backendRefs:
               - name: *app
