@@ -16,14 +16,6 @@ spec:
       prowlarr:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-db:
-            image:
-              repository: ghcr.io/home-operations/postgres-init
-              tag: 17
-            envFrom: &envFrom
-              - secretRef:
-                  name: prowlarr-secret
         containers:
           prowlarr:
             image:
@@ -39,7 +31,9 @@ spec:
               PROWLARR__SERVER__PORT: &port 80
               PROWLARR__UPDATE__BRANCH: develop
               TZ: America/Chicago
-            envFrom: *envFrom
+            envFrom:
+              - secretRef:
+                  name: prowlarr-secret
             probes:
               liveness: &probe
                 enabled: true
