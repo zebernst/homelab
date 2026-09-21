@@ -84,9 +84,8 @@ spec:
     service:
       mc-router:
         controller: *app
-        type: LoadBalancer
+        # L4 front door: lan-l4-minecraft (TCPRoute on :25565)
         annotations:
-          lbipam.cilium.io/ips: 192.168.20.65
           # Single Minecraft health signal — backends scale to zero and shouldn't be probed
           gatus.home-operations.com/enabled: "true"
           gatus.home-operations.com/endpoint: |

@@ -1,0 +1,59 @@
+---
+# Sunshine / Steam Headless streaming ports. VIP preserved from the former
+# steam LoadBalancer. One listener per port — L4 does not hostname-multiplex.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: lan-l4-steam
+  labels:
+    external-dns.alpha.kubernetes.io/registry: unifi
+spec:
+  gatewayClassName: cilium
+  addresses:
+    - type: IPAddress
+      value: 192.168.20.16
+    - type: IPAddress
+      value: ::ffff:192.168.20.16
+  listeners:
+    - name: https
+      protocol: TCP
+      port: 47984
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: http
+      protocol: TCP
+      port: 47989
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: web-ui
+      protocol: TCP
+      port: 47990
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: rtsp
+      protocol: TCP
+      port: 48010
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: video
+      protocol: UDP
+      port: 47998
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: control
+      protocol: UDP
+      port: 47999
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: audio
+      protocol: UDP
+      port: 48000
+      allowedRoutes:
+        namespaces:
+          from: Same

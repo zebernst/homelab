@@ -1,0 +1,93 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/tcproute_v1alpha2.json
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: steam-https
+spec:
+  parentRefs:
+    - name: lan-l4-steam
+      sectionName: https
+  rules:
+    - backendRefs:
+        - name: steam
+          port: 47984
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: steam-http
+spec:
+  parentRefs:
+    - name: lan-l4-steam
+      sectionName: http
+  rules:
+    - backendRefs:
+        - name: steam
+          port: 47989
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: steam-web-ui
+spec:
+  parentRefs:
+    - name: lan-l4-steam
+      sectionName: web-ui
+  rules:
+    - backendRefs:
+        - name: steam
+          port: 47990
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: TCPRoute
+metadata:
+  name: steam-rtsp
+spec:
+  parentRefs:
+    - name: lan-l4-steam
+      sectionName: rtsp
+  rules:
+    - backendRefs:
+        - name: steam
+          port: 48010
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/udproute_v1alpha2.json
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: UDPRoute
+metadata:
+  name: steam-video
+spec:
+  parentRefs:
+    - name: lan-l4-steam
+      sectionName: video
+  rules:
+    - backendRefs:
+        - name: steam
+          port: 47998
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: UDPRoute
+metadata:
+  name: steam-control
+spec:
+  parentRefs:
+    - name: lan-l4-steam
+      sectionName: control
+  rules:
+    - backendRefs:
+        - name: steam
+          port: 47999
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: UDPRoute
+metadata:
+  name: steam-audio
+spec:
+  parentRefs:
+    - name: lan-l4-steam
+      sectionName: audio
+  rules:
+    - backendRefs:
+        - name: steam
+          port: 48000
