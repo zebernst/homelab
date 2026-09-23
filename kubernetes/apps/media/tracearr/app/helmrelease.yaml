@@ -1,0 +1,134 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app tracearr
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+
+  values:
+    controllers:
+      tracearr:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: Recreate
+        containers:
+          tracearr:
+            image:
+              repository: ghcr.io/connorgallopo/tracearr
+              tag: 2.4.1@sha256:689af46c10c34ccd0487be71a713323574a8cfd60214d89fee6ddb5f60555eae
+            env:
+              NODE_ENV: production
+              HOST: "0.0.0.0"
+              PORT: "3000"
+              TZ: America/Chicago
+              LOG_LEVEL: info
+              CORS_ORIGIN: "https://tracearr.jptr.zebernst.dev"
+              REDIS_URL: redis://localhost:6379
+            envFrom:
+              - secretRef:
+                  name: tracearr-secret
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: 3000
+                  initialDelaySeconds: 0
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: 3000
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: 3000
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+                  failureThreshold: 30
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+          redis:
+            image:
+              repository: docker.io/redis
+              tag: 8.8-alpine@sha256:e2c307e77bcaf306fa9e468bda845165a46c4c015ffd238fb3c92ae5d71d486f
+            command: ["redis-server", "--save", "", "--loglevel", "warning"]
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+
+    defaultPodOptions:
+      priorityClassName: media-core
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+
+    service:
+      tracearr:
+        controller: *app
+        ports:
+          http:
+            port: 3000
+
+    route:
+      canonical:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
+        rules:
+          - backendRefs:
+              - name: *app
+                port: 3000
+
+    persistence:
+      data:
+        existingClaim: *app
+        globalMounts:
+          - path: /data/backup
+            subPath: backup
+          - path: /app/data/image-cache
+            subPath: image-cache
