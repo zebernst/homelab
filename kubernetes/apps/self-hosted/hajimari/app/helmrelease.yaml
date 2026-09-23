@@ -36,6 +36,11 @@ spec:
         any: true
     podAnnotations:
       configmap.reloader.stakater.com/reload: hajimari-settings
+      glance/id: hajimari
+      glance/name: Hajimari
+      glance/icon: mdi:view-dashboard
+      glance/url: https://hajimari.kite-harmonic.ts.net
+      glance/category: self-hosted
     persistence:
       data:
         type: emptyDir
