@@ -19,7 +19,7 @@ spec:
           scanopy-daemon:
             image:
               repository: ghcr.io/scanopy/scanopy/daemon
-              tag: v0.17.4@sha256:5c026743866dd91f815a9549045ef175c2cedb2694c81e3966990260acedbdd1
+              tag: v0.17.17@sha256:c3b2d96ac59efb6e742f804d47b90d071f490174ae5b68e0de7838e45e65cf12
             env:
               TZ: America/Chicago
               SCANOPY_LOG_LEVEL: info
