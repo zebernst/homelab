@@ -6,3 +6,9 @@ resources:
   - helmrelease.yaml
   - vmprobe.yaml
   - pvc.yaml
+configMapGenerator:
+  - name: stash-python-requirements
+    files:
+      - requirements.txt=resources/requirements.txt
+generatorOptions:
+  disableNameSuffixHash: true

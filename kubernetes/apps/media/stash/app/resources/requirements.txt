@@ -1,0 +1,17 @@
+# stash-s6 defaults
+algoliasearch
+bs4
+cloudscraper
+lxml
+mechanicalsoup
+pystashlib
+requests
+requests-toolbelt
+stashapp-tools
+
+# FanScrape / SHALookup / FansDB scrapers
+emojis
+markdown
+pyyaml
+watchdog
+schedule
