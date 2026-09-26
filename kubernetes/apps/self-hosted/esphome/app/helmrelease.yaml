@@ -20,7 +20,7 @@ spec:
           esphome:
             image:
               repository: ghcr.io/home-operations/esphome
-              tag: 2026.7.4@sha256:9d786e254aeb71b38a8448ad2c8605d5163a20089efcb7e80d3df6770ddcb2d1
+              tag: 2026.9.0@sha256:a467b53ce970d96d54045f417c3ee57928e904f44b400ec908ae31a94bbb519c
             env:
               TZ: America/Chicago
               ESPHOME_TRUSTED_DOMAINS: esphome.jptr.zebernst.dev
