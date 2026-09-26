@@ -113,6 +113,13 @@ spec:
           - path: /config/requirements.txt
             subPath: requirements.txt
             readOnly: true
+      shalookup-config:
+        type: secret
+        name: stash-secret
+        globalMounts:
+          - path: /config/scrapers/SHALookup/config.py
+            subPath: config.py
+            readOnly: true
       cache:
         existingClaim: stash-cache
         globalMounts:
