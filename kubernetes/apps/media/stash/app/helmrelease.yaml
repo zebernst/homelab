@@ -20,7 +20,7 @@ spec:
           stash:
             image:
               repository: ghcr.io/feederbox826/stash-s6
-              tag: hwaccel-alpine-2026-05-18@sha256:a8db0883a443772e1f19bf2c0c4bf42dd7ff9618e42a591158b91ebed67af3da
+              tag: hwaccel@sha256:7df6c8f657239ae36d2d0ef627428e7e1e3d9ea33244d8aa8bb2cd365f9f5375
               pullPolicy: IfNotPresent
             env:
               TZ: America/Chicago
