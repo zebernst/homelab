@@ -9,7 +9,7 @@ requests
 requests-toolbelt
 stashapp-tools
 
-# FanScrape / SHALookup / FansDB scrapers
+# scrapers
 emojis
 markdown
 pyyaml
