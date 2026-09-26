@@ -25,6 +25,8 @@ spec:
             env:
               TZ: America/Chicago
               PUID: 568
+              # stash-s6 installs /config/requirements.txt into /pip-install on every start.
+              # Do not set INSTALL_PY_DEPS — that only apk/apts build toolchains and needs root.
               STASH_CONFIG_FILE: /config/config.yml
               STASH_STASH: /media/xxx/
               STASH_GENERATED: /generated/
@@ -104,6 +106,13 @@ spec:
             subPath: config
           - path: /blobs
             subPath: blobs
+      python-requirements:
+        type: configMap
+        name: stash-python-requirements
+        globalMounts:
+          - path: /config/requirements.txt
+            subPath: requirements.txt
+            readOnly: true
       cache:
         existingClaim: stash-cache
         globalMounts:
