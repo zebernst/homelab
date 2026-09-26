@@ -8,6 +8,15 @@
       matchPackageNames: ["/plex/"],
     },
     {
+      // Dated tags like hwaccel-alpine-2025-08-08 are not docker-semver.
+      // Default docker versioning only digest-bumps the pinned tag, so
+      // jumps to hwaccel-alpine-2026-05-18 never get PRs (see #706).
+      description: ["CalVer for feederbox826/stash-s6 dated tags"],
+      matchDatasources: ["docker"],
+      matchPackageNames: ["ghcr.io/feederbox826/stash-s6"],
+      versioning: "regex:^(?<compatibility>hwaccel-alpine)-(?<major>\\d{4})-(?<minor>\\d{2})-(?<patch>\\d{2})$",
+    },
+    {
       description: ["Custom schedule for frequently updated container digests"],
       matchDatasources: ["docker"],
       matchPackageNames: ["/postgresql/", "/postgis/"],
