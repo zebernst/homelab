@@ -73,6 +73,10 @@ spec:
 
     defaultPodOptions:
       priorityClassName: background
+      hostAliases:
+        - ip: 190.115.31.237
+          hostnames:
+            - coomer.st
       securityContext:
         runAsNonRoot: true
         runAsUser: 568
