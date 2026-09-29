@@ -39,7 +39,7 @@ spec:
           vmalert:
             image:
               repository: quay.io/victoriametrics/vmalert
-              tag: v1.148.0@sha256:268ab5df69360a236e1382db0dbde44d5c32362b85501f761d61fc25c76f05ce
+              tag: v1.153.0@sha256:0c1c7718b54b03e8559d0f257f31f1bd79ef7fa32ac6e9ed90d7b92a74a4fe76
             args:
               - --rule=/rules/*.yaml
               - --rule.defaultRuleType=vlogs
