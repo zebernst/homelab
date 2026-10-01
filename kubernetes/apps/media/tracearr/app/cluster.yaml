@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/cluster_v1.json
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: tracearr-db
+spec:
+  instances: 1
+  # renovate: datasource=docker depName=ghcr.io/sedaprotocol/cnpg-timescaledb
+  imageName: ghcr.io/sedaprotocol/cnpg-timescaledb:18-ts2.26.4-20260915-00583e2@sha256:b8ab2540cc9aa2b9b12cb5833444049bb468bc10036c44e2adda2d73c0fd9f55
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 50Gi
+    storageClass: ceph-block
+  superuserSecret:
+    name: tracearr-db-secret
+  enableSuperuserAccess: true
+  bootstrap:
+    initdb:
+      database: tracearr
+      postInitApplicationSQL:
+        - CREATE EXTENSION IF NOT EXISTS timescaledb;
+        - CREATE EXTENSION IF NOT EXISTS pg_trgm;
+  postgresql:
+    shared_preload_libraries:
+      - timescaledb
+    parameters:
+      timescaledb.license: timescale
+      timescaledb.telemetry_level: "off"
+      max_locks_per_transaction: "4096"
+      max_connections: "150"
+      shared_buffers: 512MB
+      effective_cache_size: 2GB
+      work_mem: 16MB
+      maintenance_work_mem: 256MB
+  ephemeralVolumesSizeLimit:
+    shm: 512Mi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      memory: 4Gi
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: tracearr-db-backup
+        serverName: tracearr-db-v1
+  monitoring:
+    enablePodMonitor: true
