@@ -21,7 +21,7 @@ spec:
           unpoller:
             image:
               repository: ghcr.io/unpoller/unpoller
-              tag: v3.3.1@sha256:9dcccdc931a6830735f6978caf8cd67699b0dc33e37cf9ef4638611791c4df62
+              tag: v5.5.0@sha256:0f45de09caec353b68f67524f864a6c68fc551600261c2002312750b52fe38a8
             env:
               TZ: America/Chicago
               UP_UNIFI_DEFAULT_URL: https://unifi
