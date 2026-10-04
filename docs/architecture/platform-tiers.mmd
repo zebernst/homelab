@@ -1,0 +1,157 @@
+flowchart BT
+
+  %% Cross-tier dependsOn summary (higher tier -.-> lower tier it depends on)
+
+  subgraph vt0["Substrate — Cluster-critical — pods cannot run without this (CNI, DNS, PVC/CSI, snapshots)"]
+    subgraph g_substrate["Substrate — Network, PKI, storage, hardware, cluster meta — pods cannot run without this"]
+      subgraph p_substrate_substrate_gitops["gitops"]
+        cluster_meta["cluster-meta"]
+        class cluster_meta substrate
+      end
+      subgraph p_substrate_substrate_network["network"]
+        cilium["cilium"]
+        class cilium substrate
+        coredns["coredns"]
+        class coredns substrate
+      end
+      subgraph p_substrate_substrate_pki["pki"]
+        kubelet_csr_approver["kubelet-csr-approver"]
+        class kubelet_csr_approver substrate
+      end
+      subgraph p_substrate_substrate_storage["storage"]
+        nfs_subdir_external_provisioner["nfs-subdir-external-provisioner"]
+        class nfs_subdir_external_provisioner substrate
+        rook_ceph["rook-ceph"]
+        class rook_ceph substrate
+        rook_ceph_cluster["rook-ceph-cluster<br/>(42 deps)"]
+        class rook_ceph_cluster substrate
+        snapshot_controller["snapshot-controller"]
+        class snapshot_controller substrate
+        synology_csi_driver["synology-csi-driver"]
+        class synology_csi_driver substrate
+        volsync["volsync<br/>(30 deps)"]
+        class volsync substrate
+      end
+      subgraph p_substrate_substrate_hardware["hardware"]
+        node_feature_discovery["node-feature-discovery"]
+        class node_feature_discovery substrate
+      end
+      subgraph p_substrate_substrate_meta["meta"]
+        priority_class["priority-class"]
+        class priority_class substrate
+        spegel["spegel"]
+        class spegel substrate
+      end
+    end
+    hub_vt0(( ))
+    class hub_vt0 hub
+  end
+
+  subgraph vt1["Infrastructure — Platform providers and observability at the same tier, distinct groups"]
+    subgraph g_platform["Platform — Secrets, networking, auth, security, gitops"]
+      subgraph p_platform_platform_auth["auth"]
+        pocket_id["pocket-id"]
+        class pocket_id platform
+      end
+      subgraph p_platform_platform_data_operators["data operators"]
+        cloudnative_pg["cloudnative-pg"]
+        class cloudnative_pg platform
+      end
+      subgraph p_platform_platform_gitops["gitops"]
+        cluster_apps["cluster-apps"]
+        class cluster_apps platform
+        flux_operator["flux-operator"]
+        class flux_operator platform
+      end
+      subgraph p_platform_platform_networking["networking"]
+        ingress_nginx_external["ingress-nginx-external"]
+        class ingress_nginx_external platform
+        ingress_nginx_internal["ingress-nginx-internal"]
+        class ingress_nginx_internal platform
+      end
+      subgraph p_platform_platform_secrets["secrets"]
+        cluster_secrets["cluster-secrets"]
+        class cluster_secrets platform
+        external_secrets["external-secrets"]
+        class external_secrets platform
+        onepassword["onepassword<br/>(53 deps)"]
+        class onepassword platform
+      end
+      subgraph p_platform_platform_security["security"]
+        cert_manager["cert-manager"]
+        class cert_manager platform
+        cert_manager_issuers["cert-manager-issuers"]
+        class cert_manager_issuers platform
+      end
+    end
+    subgraph g_observability["Observability — Metrics, logs, alerting, synthetic checks — not an infra provider"]
+      subgraph p_observability_observability_metrics["metrics"]
+        victoria_metrics["victoria-metrics"]
+        class victoria_metrics observability
+        victoria_metrics_operator["victoria-metrics-operator<br/>(5 deps)"]
+        class victoria_metrics_operator observability
+      end
+    end
+    hub_vt1(( ))
+    class hub_vt1 hub
+  end
+
+  subgraph vt2["Shared services — Data and AI at the same tier, distinct groups"]
+    subgraph g_data["Data — Shared databases and cache clusters"]
+      subgraph p_data_data_cache["cache"]
+        dragonfly_cluster["dragonfly-cluster"]
+        class dragonfly_cluster data
+      end
+      subgraph p_data_data_postgres["postgres"]
+        cloudnative_pg_cluster["cloudnative-pg-cluster<br/>(20 deps)"]
+        class cloudnative_pg_cluster data
+      end
+    end
+    subgraph g_ai["AI — Shared inference infrastructure"]
+      subgraph p_ai_ai_inference["inference"]
+        ollama["ollama"]
+        class ollama ai
+      end
+    end
+    hub_vt2(( ))
+    class hub_vt2 hub
+  end
+
+  subgraph vt3["Workloads — User-facing applications"]
+    subgraph g_workloads["Workloads"]
+      wl_ai["AI<br/>(4 ks)"]
+      class wl_ai workloads
+      wl_downloads["Downloads<br/>(20 ks)"]
+      class wl_downloads workloads
+      wl_fission["Fission<br/>(3 ks)"]
+      class wl_fission workloads
+      wl_games["Games<br/>(5 ks)"]
+      class wl_games workloads
+      wl_kube_system["Kube System<br/>(8 ks)"]
+      class wl_kube_system workloads
+      wl_media["Media<br/>(11 ks)"]
+      class wl_media workloads
+      wl_self_hosted["Self-Hosted<br/>(13 ks)"]
+      class wl_self_hosted workloads
+      wl_system_upgrade["System Upgrade<br/>(2 ks)"]
+      class wl_system_upgrade workloads
+    end
+    hub_vt3(( ))
+    class hub_vt3 hub
+  end
+
+  hub_vt1 -.-> hub_vt0
+  hub_vt2 -.-> hub_vt0
+  hub_vt2 -.-> hub_vt1
+  hub_vt3 -.-> hub_vt0
+  hub_vt3 -.-> hub_vt1
+  hub_vt3 -.-> hub_vt2
+
+  %% styling
+  classDef hub fill:none,stroke:none,color:transparent
+  classDef substrate fill:#1f2937,stroke:#9ca3af,color:#f9fafb
+  classDef platform fill:#1e3a5f,stroke:#60a5fa,color:#eff6ff
+  classDef observability fill:#312e81,stroke:#a78bfa,color:#f5f3ff
+  classDef data fill:#14532d,stroke:#4ade80,color:#f0fdf4
+  classDef ai fill:#581c87,stroke:#d8b4fe,color:#faf5ff
+  classDef workloads fill:#422006,stroke:#fbbf24,color:#fffbeb

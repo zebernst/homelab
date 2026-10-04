@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+---
+version: '3'
+
+vars:
+  ARCHITECTURE_DIR: '{{.ROOT_DIR}}/docs/architecture'
+
+tasks:
+
+  graph:
+    desc: Generate Mermaid architecture diagram and README from Flux ks.yaml
+    cmds:
+      - python3 {{.ROOT_DIR}}/scripts/flux-architecture-graph.py --out-dir {{.ARCHITECTURE_DIR}}
+    preconditions:
+      - sh: test -x "$(command -v python3)"
+        msg: python3 is required
+      - sh: python3 -c "import yaml"
+        msg: PyYAML is required (python3-yaml)
