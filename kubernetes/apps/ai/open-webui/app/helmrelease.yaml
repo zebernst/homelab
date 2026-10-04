@@ -32,3 +32,9 @@ spec:
     persistence:
       enabled: true
       existingClaim: open-webui
+    podAnnotations:
+      glance/id: open-webui
+      glance/name: Open WebUI
+      glance/icon: si:openai
+      glance/url: https://open-webui.internal
+      glance/category: ai

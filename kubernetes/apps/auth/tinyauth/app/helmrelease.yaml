@@ -16,6 +16,7 @@ spec:
       tinyauth:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: tinyauth
 
         containers:
           tinyauth:
@@ -67,6 +68,9 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Tinyauth
+          glance/icon: mdi:shield-account
+          glance/category: auth
         hostnames:
           - auth.zebernst.dev
         parentRefs:

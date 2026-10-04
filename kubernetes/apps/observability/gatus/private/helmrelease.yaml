@@ -16,6 +16,7 @@ spec:
       gatus:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: gatus
         initContainers:
           init-db:
             image:
@@ -88,6 +89,10 @@ spec:
       canonical:
         annotations:
           gatus.home-operations.com/enabled: "false"
+          glance/name: Gatus
+          glance/icon: mdi:heart-pulse
+          glance/category: observability
+          glance/url: https://status.zebernst.dev
         hostnames:
           - gatus.jptr.zebernst.dev
         parentRefs:

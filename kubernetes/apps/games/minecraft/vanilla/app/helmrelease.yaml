@@ -17,6 +17,7 @@ spec:
         type: statefulset
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/parent: minecraft
         initContainers:
           init-bluemap-config:
             image:
