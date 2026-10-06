@@ -35,6 +35,10 @@ gatewayAPI:
   enabled: true
   enableAlpn: true
   xffNumTrustedHops: 1
+  # Required for TCPRoute/UDPRoute (Cilium 1.20+). Host-network mode forces
+  # Gateway Services to NodePort and breaks L4 listener ports.
+  hostNetwork:
+    enabled: false
 hubble:
   enabled: false
 ipam:

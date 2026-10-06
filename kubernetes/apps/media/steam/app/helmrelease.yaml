@@ -66,9 +66,7 @@ spec:
     service:
       steam:
         controller: *app
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 192.168.20.16, ::ffff:c0a8:1410
+        # L4 front door: lan-l4-steam (TCPRoute/UDPRoute for Sunshine ports)
         ports:
           http:
             port: *port

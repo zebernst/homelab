@@ -138,15 +138,6 @@ spec:
             port: 25565
           metrics:
             port: 8080
-      rcon:
-        controller: *app
-        type: LoadBalancer
-        loadBalancerClass: tailscale
-        annotations:
-          tailscale.com/hostname: vanilla-rcon
-        ports:
-          rcon:
-            port: 25578
 
     serviceMonitor:
       vanilla:
