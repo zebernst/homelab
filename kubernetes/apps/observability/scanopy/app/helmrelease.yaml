@@ -28,7 +28,7 @@ spec:
           scanopy:
             image:
               repository: ghcr.io/scanopy/scanopy/server
-              tag: v0.17.4@sha256:7a44d26134e7698c25d53bda3eb17622d02a87f9296a4dab7584fe522eee3bc5
+              tag: v0.17.22@sha256:7b7d1590913c5bbe45555657653705da962efcd0c8bedf227d9f21152fb28435
             env:
               TZ: America/Chicago
               SCANOPY_LOG_LEVEL: info
