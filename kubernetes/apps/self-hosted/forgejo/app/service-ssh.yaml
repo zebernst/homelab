@@ -1,0 +1,43 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: forgejo-ssh-lan
+  labels:
+    app.kubernetes.io/name: forgejo
+    app.kubernetes.io/instance: forgejo
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: git.internal
+    lbipam.cilium.io/ips: 192.168.20.17, ::ffff:c0a8:1411
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+    - name: ssh
+      port: 22
+      targetPort: ssh
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: forgejo
+    app.kubernetes.io/instance: forgejo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: forgejo-ssh-tailscale
+  labels:
+    app.kubernetes.io/name: forgejo
+    app.kubernetes.io/instance: forgejo
+  annotations:
+    tailscale.com/hostname: git
+spec:
+  type: LoadBalancer
+  loadBalancerClass: tailscale
+  ports:
+    - name: ssh
+      port: 22
+      targetPort: ssh
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: forgejo
+    app.kubernetes.io/instance: forgejo

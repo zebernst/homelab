@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/networking.k8s.io/networkpolicy_v1.json
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: forgejo-runner
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: forgejo-runner
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: forgejo
+              app.kubernetes.io/instance: forgejo
+      ports:
+        - protocol: TCP
+          port: 3000
+    - ports:
+        - protocol: TCP
+          port: 443
