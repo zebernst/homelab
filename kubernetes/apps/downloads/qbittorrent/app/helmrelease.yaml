@@ -71,15 +71,21 @@ spec:
         ports:
           http:
             port: *port
-      bittorrent:
-        controller: *app
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 192.168.20.14, ::ffff:c0a8:140e
-        ports:
           bittorrent-tcp:
             port: *bittorrentPort
             protocol: TCP
+    route:
+      bittorrent:
+        kind: TCPRoute
+        parentRefs:
+          - name: qbittorrent
+            namespace: "{{ .Release.Namespace }}"
+            kind: ListenerSet
+            sectionName: bittorrent
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *bittorrentPort
     persistence:
       config:
         existingClaim: *app

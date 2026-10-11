@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/listenerset_v1.json
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: qbittorrent
+spec:
+  parentRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: lan
+    namespace: kube-system
+  listeners:
+    - name: bittorrent
+      protocol: TCP
+      port: 61267
+      allowedRoutes:
+        kinds:
+          - kind: TCPRoute

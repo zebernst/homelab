@@ -41,6 +41,7 @@ spec:
       - --exclude-domains=jptr.zebernst.dev
     triggerLoopOnEvent: true
     policy: sync
+    enableGatewayListenerSets: true
     sources: ["crd", "ingress", "gateway-httproute", "gateway-tlsroute", "gateway-tcproute", "gateway-udproute"]
     domainFilters: ["zebernst.dev"]
     podAnnotations:
