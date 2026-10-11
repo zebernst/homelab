@@ -20,7 +20,7 @@ spec:
           tautulli:
             image:
               repository: ghcr.io/tautulli/tautulli
-              tag: v2.17.2@sha256:864245fb24830ef6516b5f383bf4d8ba37939ae2f0574dc0217ca02fba4301ff
+              tag: v2.18.2@sha256:1b5875fe3193d450a62e7b438eb6701195c841f14f3dcb962e545eda42d3696f
             env:
               TZ: America/Chicago
             command: ["/usr/local/bin/python", "Tautulli.py"]
