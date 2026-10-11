@@ -159,7 +159,7 @@ spec:
             image:
               repository: docker.io/library/alpine
               # renovate: datasource=docker depName=library/alpine
-              tag: 3.24.1
+              tag: 3.24.2
             command: ["/bin/sh", "/scripts/init-ui.sh"]
             env:
               # renovate: datasource=github-releases depName=osm-search/nominatim-ui
