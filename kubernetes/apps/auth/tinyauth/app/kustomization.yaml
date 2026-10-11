@@ -6,4 +6,5 @@ resources:
   - ciliumenvoyconfig.yaml
   - externalsecret.yaml
   - helmrelease.yaml
+  - referencegrant.yaml
   - vmprobe.yaml
