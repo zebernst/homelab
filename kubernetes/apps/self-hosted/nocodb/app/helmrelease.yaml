@@ -16,6 +16,7 @@ spec:
       nocodb:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: nocodb
         initContainers:
           init-db:
             image:
@@ -61,6 +62,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: NocoDB
+          glance/icon: si:nocodb
+          glance/category: self-hosted
+          glance/url: https://nocodb.kite-harmonic.ts.net
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:
