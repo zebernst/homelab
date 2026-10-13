@@ -23,7 +23,7 @@ spec:
           wizarr:
             image:
               repository:  ghcr.io/wizarrrr/wizarr
-              tag: v2026.7.1@sha256:606f9b88b0303daae11f595e424756b588d9365021c53dcb4d1369f2efc0543c
+              tag: v2026.10.1@sha256:08f2c6de534ec7d36d39a4f55b7c5c379021ca881dc519c702aad0ddafbdc67a
             env:
               TZ: America/Chicago
               PUID: 568
