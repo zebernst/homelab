@@ -96,7 +96,7 @@ spec:
           mc-monitor:
             image:
               repository: itzg/mc-monitor
-              tag: 0.17.0@sha256:0d6b89c29d93cfcfcfee7bfd8e3758ddf00e20eb157e3e9a6560a93fe7fe84d1
+              tag: 1.18.3@sha256:f30307791501a6eec4190f4b2c32296d5f17c6673aceb18943c5ed0f56f4edfe
             args: ["export-for-prometheus"]
             env:
               EXPORT_SERVERS: atm10
