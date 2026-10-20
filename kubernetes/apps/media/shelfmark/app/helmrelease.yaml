@@ -65,6 +65,17 @@ spec:
           - name: tailscale
             namespace: kube-system
             sectionName: https-canon
+      public:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
+        hostnames:
+          - "{{ .Release.Name }}.zebernst.dev"
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
 
     persistence:
       config:
