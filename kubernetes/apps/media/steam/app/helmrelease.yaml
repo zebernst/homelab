@@ -20,7 +20,7 @@ spec:
           steam:
             image:
               repository: josh5/steam-headless
-              tag: latest@sha256:ee516532fcead95a29aa581f75143837f5611f81a54d59a43014d64f76162e34
+              tag: latest@sha256:c60f4d7243a4d94515f722441fff90b752413bf6a45bb221c9a4ed55bc4d9108
               pullPolicy: IfNotPresent
             envFrom:
               - secretRef:
