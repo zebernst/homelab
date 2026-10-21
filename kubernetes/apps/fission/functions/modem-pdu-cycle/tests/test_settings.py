@@ -47,7 +47,7 @@ def test_missing_required_secret_raises(tmp_path: Path):
             "unifi.username": "admin",
             # password missing
             "pdu.mac": "aa:bb:cc:dd:ee:ff",
-            "pdu.outlet_index": "1",
+            "pdu.modem_outlet_index": "1",
         },
     )
 
