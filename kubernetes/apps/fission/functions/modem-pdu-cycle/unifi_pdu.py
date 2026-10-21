@@ -8,6 +8,8 @@ from typing import Any
 
 import httpx
 
+from settings import UnifiSettings
+
 logger = logging.getLogger("modem-pdu-cycle")
 
 
@@ -36,18 +38,15 @@ def merge_outlet_overrides(
 class UniFiPDUClient:
     def __init__(
         self,
+        unifi: UnifiSettings,
         *,
-        base_url: str,
-        username: str,
-        password: str,
-        site: str = "default",
         verify: bool = False,
         timeout: float = 30.0,
     ) -> None:
-        self.base_url = base_url.rstrip("/")
-        self.username = username
-        self.password = password
-        self.site = site
+        self.base_url = unifi.url.rstrip("/")
+        self.username = unifi.username
+        self.password = unifi.password.get_secret_value()
+        self.site = unifi.site
         self.client = httpx.Client(
             base_url=self.base_url,
             verify=verify,

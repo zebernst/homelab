@@ -49,13 +49,7 @@ async def main(request: Request) -> Response:
     await _require_bearer(request, cfg.webhook.token.get_secret_value())
 
     try:
-        with UniFiPDUClient(
-            base_url=cfg.unifi.url,
-            username=cfg.unifi.username,
-            password=cfg.unifi.password.get_secret_value(),
-            site=cfg.unifi.site,
-            verify=False,
-        ) as client:
+        with UniFiPDUClient(cfg.unifi) as client:
             client.power_cycle_outlet(
                 cfg.pdu.mac,
                 cfg.pdu.outlet_index,
