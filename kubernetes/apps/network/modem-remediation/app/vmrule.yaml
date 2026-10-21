@@ -12,11 +12,7 @@ spec:
         # unpoller ≥5.7.0: unpoller_device_wan_status is 1=online, 0=other (status label).
         - alert: WanModemRemediate
           expr: |
-            (
-              max(unpoller_device_wan_status) by () == 0
-              or
-              absent(unpoller_device_wan_status)
-            )
+            max(unpoller_device_wan_status) by () == 0
             and
             min(probe_success{probe="wan-external"}) by () == 0
           for: 5m
@@ -35,11 +31,7 @@ spec:
           expr: |
             increase(alertmanager_notifications_total{receiver="modem-pdu-cycle"}[45m]) >= 3
             and
-            (
-              max(unpoller_device_wan_status) by () == 0
-              or
-              absent(unpoller_device_wan_status)
-            )
+            max(unpoller_device_wan_status) by () == 0
             and
             min(probe_success{probe="wan-external"}) by () == 0
           annotations:

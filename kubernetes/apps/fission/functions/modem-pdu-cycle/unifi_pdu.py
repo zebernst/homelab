@@ -118,8 +118,10 @@ class UniFiPDUClient:
         device = self.get_device_by_mac(mac)
         logger.info("power-cycle start mac=%s outlet=%s", mac, outlet_index)
         self.set_outlet_relay(device, outlet_index, False)
-        time.sleep(off_seconds)
-        # Re-fetch in case controller rewrote overrides while off
-        device = self.get_device_by_mac(mac)
-        self.set_outlet_relay(device, outlet_index, True)
+        try:
+            time.sleep(off_seconds)
+        finally:
+            # Best-effort restore on even if sleep/re-fetch fails mid-cycle
+            device = self.get_device_by_mac(mac)
+            self.set_outlet_relay(device, outlet_index, True)
         logger.info("power-cycle complete mac=%s outlet=%s", mac, outlet_index)
