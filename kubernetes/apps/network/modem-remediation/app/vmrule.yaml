@@ -1,0 +1,53 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmrule_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: modem-remediation
+spec:
+  groups:
+    - name: modem-remediation.rules
+      rules:
+        # Dual-signal: UniFi WAN not online AND at least one external ICMP probe failing.
+        # unpoller ≥5.7.0: unpoller_device_wan_status is 1=online, 0=other (status label).
+        - alert: WanModemRemediate
+          expr: |
+            (
+              max(unpoller_device_wan_status) by () == 0
+              or
+              absent(unpoller_device_wan_status)
+            )
+            and
+            min(probe_success{probe="wan-external"}) by () == 0
+          for: 5m
+          annotations:
+            summary: >-
+              WAN sustained-down — modem PDU remediation eligible
+            description: >-
+              UniFi WAN status is not online and at least one external ICMP probe
+              (1.1.1.1 / 8.8.8.8) is failing for 5m. Alertmanager will invoke the
+              modem PDU cycle webhook (10m gap; inhibited after 3 attempts).
+          labels:
+            severity: critical
+
+        # Circuit breaker: ≥3 remediation webhook notifies in 45m while still dual-signal down.
+        - alert: ModemRemediationBudgetExhausted
+          expr: |
+            increase(alertmanager_notifications_total{receiver="modem-pdu-cycle"}[45m]) >= 3
+            and
+            (
+              max(unpoller_device_wan_status) by () == 0
+              or
+              absent(unpoller_device_wan_status)
+            )
+            and
+            min(probe_success{probe="wan-external"}) by () == 0
+          annotations:
+            summary: >-
+              Modem PDU remediation budget exhausted
+            description: >-
+              Alertmanager has delivered at least three modem-pdu-cycle webhook
+              notifications in the last 45m while WAN is still dual-signal down.
+              Further remediation webhooks are inhibited until WAN recovers.
+          labels:
+            severity: critical

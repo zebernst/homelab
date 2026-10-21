@@ -1,0 +1,14 @@
+---
+apiVersion: fission.io/v1
+kind: HTTPTrigger
+metadata:
+  name: modem-pdu-cycle
+  namespace: fission
+spec:
+  # Cluster-only: Alertmanager posts to http://router.fission.svc.cluster.local/modem-pdu-cycle
+  # (no Gateway routeConfig — not exposed publicly).
+  relativeurl: /modem-pdu-cycle
+  method: POST
+  functionref:
+    type: name
+    name: modem-pdu-cycle
