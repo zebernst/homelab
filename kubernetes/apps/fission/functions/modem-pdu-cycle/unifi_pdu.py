@@ -8,7 +8,7 @@ from typing import Any
 
 import httpx
 
-from settings import UnifiSettings
+from settings import PduSettings, UnifiSettings
 
 logger = logging.getLogger("modem-pdu-cycle")
 
@@ -106,21 +106,15 @@ class UniFiPDUClient:
         # Keep local copy in sync for a subsequent call in the same cycle
         device["outlet_overrides"] = overrides
 
-    def power_cycle_outlet(
-        self,
-        mac: str,
-        outlet_index: int,
-        *,
-        off_seconds: float = 5.0,
-    ) -> None:
+    def power_cycle_outlet(self, pdu: PduSettings) -> None:
         self.login()
-        device = self.get_device_by_mac(mac)
-        logger.info("power-cycle start mac=%s outlet=%s", mac, outlet_index)
-        self.set_outlet_relay(device, outlet_index, False)
+        device = self.get_device_by_mac(pdu.mac)
+        logger.info("power-cycle start mac=%s outlet=%s", pdu.mac, pdu.outlet_index)
+        self.set_outlet_relay(device, pdu.outlet_index, False)
         try:
-            time.sleep(off_seconds)
+            time.sleep(pdu.off_seconds)
         finally:
             # Best-effort restore on even if sleep/re-fetch fails mid-cycle
-            device = self.get_device_by_mac(mac)
-            self.set_outlet_relay(device, outlet_index, True)
-        logger.info("power-cycle complete mac=%s outlet=%s", mac, outlet_index)
+            device = self.get_device_by_mac(pdu.mac)
+            self.set_outlet_relay(device, pdu.outlet_index, True)
+        logger.info("power-cycle complete mac=%s outlet=%s", pdu.mac, pdu.outlet_index)
