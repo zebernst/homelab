@@ -135,7 +135,7 @@ UniFi’s outlet power-cycle thresholds treat brief WAN saturation as outages an
 ### Key Technical Decisions
 
 - KTD1. **Bump unpoller to ≥ v5.7.0** so UniFi WAN down uses `unpoller_device_wan_status` / availability metrics, not site `www` health. `(session-settled: user-directed — chosen over www-subsystem-only on v3.3.1: richer WAN status)` — Governs R2.
-- KTD2. **Budget-exhausted from Alertmanager notification counts** — `increase(alertmanager_notifications_total{receiver="<remediation-receiver>"}[45m]) >= 3` while the dual-signal WAN condition still holds; function emits no cycle counter. `(session-settled: user-directed — chosen over function-emitted cycle metrics: keep function execution-only)` — Governs R5, R7, R9.
+- KTD2. **Budget-exhausted from Alertmanager notification counts** — trip when `increase(alertmanager_notifications_total{receiver="<remediation-receiver>"}[45m]) >= 3` while dual-signal still holds; **latch open** with `ALERTS{alertname="ModemRemediationBudgetExhausted",alertstate="firing"}` so the breaker does not auto-close when the sliding window ages out; clear only when dual-signal recovers. Function emits no cycle counter. `(session-settled: user-directed — chosen over function-emitted cycle metrics: keep function execution-only; latch added so 45m is trip window only, not auto-reset)` — Governs R5, R7, R9.
 - KTD3. **External confirmation = ICMP to 1.1.1.1 and 8.8.8.8** via new blackbox `VMProbe`s; composite requires at least one `probe_success == 0`. — Governs R2, R3.
 - KTD4. **Cluster-only Fission HTTPTrigger** — AM posts to `http://router.fission.svc.cluster.local/<path>` (or the chart’s router Service DNS); no Gateway / public route. — Governs R6.
 - KTD5. **PDU cycle via classic UniFi Network API** `outlet_overrides` (off → wait → on) against the USP PDU Pro; credentials + MAC + outlet index from ExternalSecret / 1Password. — Governs R1, R7, R8.
@@ -159,8 +159,8 @@ sequenceDiagram
   AM->>FX: webhook POST (bearer)
   FX->>Uni: outlet off / on
   Note over VM,AM: after 3 notifies in ~45m while still down
-  VM->>AM: ModemRemediationBudgetExhausted
-  AM->>AM: inhibit remediation receiver
+  VM->>AM: ModemRemediationBudgetExhausted (latched)
+  AM->>AM: inhibit remediation receiver until WAN recovers
 ```
 
 ```mermaid
@@ -169,6 +169,7 @@ stateDiagram-v2
   Closed --> Cycling: WanModemRemediate fires
   Cycling --> Closed: cycle done, attempts less than 3
   Cycling --> Open: 3rd remediation notify
+  Open --> Open: still down (latch; 45m window aging does not close)
   Open --> Closed: WAN dual-signal clears
   Closed --> Closed: within repeat_interval: no webhook
 ```
@@ -177,7 +178,7 @@ stateDiagram-v2
 
 - v5.7.0+ `unpoller_device_wan_status` (1=online, 0=other) is the UniFi half of R2; refine labels after first scrape if multiple WANs exist.
 - `alertmanager_notifications_total` is scraped for the in-cluster Alertmanager; receiver name in PromQL matches the new remediation receiver.
-- A second outage within ~45m of a tripped breaker may still see `increase(...) >= 3` briefly—acceptable for home use; budget alert also requires the dual-signal still true so it clears when WAN recovers.
+- Budget trip uses a 45m notify lookback, but the open state is latched via `ALERTS` until dual-signal clears — aging of the lookback alone must not re-enable remediation mid-outage.
 - UniFi built-in outlet internet-down automation for this outlet is disabled (or never enabled) so it does not race this remediator.
 
 ### System-Wide Impact
@@ -267,7 +268,7 @@ stateDiagram-v2
 
 **Approach:**
 1. Alert `WanModemRemediate` (severity critical): UniFi WAN down **and** `min(probe_success{…wan-external…}) == 0`, `for: 5m`. Use `unpoller_device_wan_status == 0` (or `max by (…) == 0` for primary WAN) once labels are confirmed from U1.
-2. Alert `ModemRemediationBudgetExhausted`: `increase(alertmanager_notifications_total{receiver="modem-pdu-cycle"}[45m]) >= 3` **and** the same dual-signal condition (without requiring another 5m `for`, or short `for`), so it clears when WAN recovers. Per KTD2.
+2. Alert `ModemRemediationBudgetExhausted`: `(increase(...[45m]) >= 3 or ALERTS{alertname=ModemRemediationBudgetExhausted,alertstate=firing})` **and** the same dual-signal condition (no extra `for`), so it trips on the third notify, stays open while still down (latch), and clears only when WAN recovers. Per KTD2.
 3. Annotations suitable for Pushover (summary/description).
 
 **Patterns to follow:** `kubernetes/apps/observability/blackbox-exporter/app/vmrule.yaml`; `kubernetes/components/vmrule/` job labeling.
