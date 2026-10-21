@@ -38,7 +38,8 @@ async def _require_bearer(request: Request, expected: str) -> None:
     credentials = await _bearer(request)
     if credentials.credentials != expected:
         logger.warning("unauthorized webhook")
-        raise HTTPException(status_code=403, detail="Unauthorized")
+        # Match HTTPBearer(auto_error=True) on FastAPI 0.114 (env pin): 403.
+        raise HTTPException(status_code=403, detail="Not authenticated")
 
 
 async def main(request: Request) -> Response:
