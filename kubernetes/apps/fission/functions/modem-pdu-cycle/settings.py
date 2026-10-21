@@ -32,7 +32,7 @@ class UnifiSettings(BaseModel):
 
 class PduSettings(BaseModel):
     mac: str
-    outlet_index: int
+    modem_outlet_index: int
     off_seconds: float = 5.0
 
 

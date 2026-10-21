@@ -21,7 +21,7 @@ def test_from_fission_secrets_loads_dotted_keys(tmp_path: Path):
             "unifi.username": "admin",
             "unifi.password": "s3cret",
             "pdu.mac": "aa:bb:cc:dd:ee:ff",
-            "pdu.outlet_index": "7",
+            "pdu.modem_outlet_index": "7",
         },
     )
 
@@ -33,7 +33,7 @@ def test_from_fission_secrets_loads_dotted_keys(tmp_path: Path):
     assert cfg.unifi.password.get_secret_value() == "s3cret"
     assert cfg.unifi.site == "default"
     assert cfg.pdu.mac == "aa:bb:cc:dd:ee:ff"
-    assert cfg.pdu.outlet_index == 7
+    assert cfg.pdu.modem_outlet_index == 7
     assert cfg.pdu.off_seconds == 5.0
 
 

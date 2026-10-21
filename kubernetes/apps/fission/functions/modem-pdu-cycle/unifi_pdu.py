@@ -106,15 +106,23 @@ class UniFiPDUClient:
         # Keep local copy in sync for a subsequent call in the same cycle
         device["outlet_overrides"] = overrides
 
-    def power_cycle_outlet(self, pdu: PduSettings) -> None:
+    def power_cycle_outlet(self, pdu: PduSettings, modem_outlet_index: int) -> None:
         self.login()
         device = self.get_device_by_mac(pdu.mac)
-        logger.info("power-cycle start mac=%s outlet=%s", pdu.mac, pdu.outlet_index)
-        self.set_outlet_relay(device, pdu.outlet_index, False)
+        logger.info(
+            "power-cycle start mac=%s outlet=%s",
+            pdu.mac,
+            modem_outlet_index,
+        )
+        self.set_outlet_relay(device, modem_outlet_index, False)
         try:
             time.sleep(pdu.off_seconds)
         finally:
             # Best-effort restore on even if sleep/re-fetch fails mid-cycle
             device = self.get_device_by_mac(pdu.mac)
-            self.set_outlet_relay(device, pdu.outlet_index, True)
-        logger.info("power-cycle complete mac=%s outlet=%s", pdu.mac, pdu.outlet_index)
+            self.set_outlet_relay(device, modem_outlet_index, True)
+        logger.info(
+            "power-cycle complete mac=%s outlet=%s",
+            pdu.mac,
+            modem_outlet_index,
+        )

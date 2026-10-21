@@ -36,7 +36,7 @@ def _settings(tmp_path: Path) -> Settings:
     (mount / "unifi.username").write_text("admin")
     (mount / "unifi.password").write_text("pw")
     (mount / "pdu.mac").write_text("aa:bb:cc:dd:ee:ff")
-    (mount / "pdu.outlet_index").write_text("1")
+    (mount / "pdu.modem_outlet_index").write_text("1")
     return Settings(_secrets_dir=mount)
 
 

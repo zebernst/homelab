@@ -50,7 +50,7 @@ async def main(request: Request) -> Response:
 
     try:
         with UniFiPDUClient(cfg.unifi) as client:
-            client.power_cycle_outlet(cfg.pdu)
+            client.power_cycle_outlet(cfg.pdu, cfg.pdu.modem_outlet_index)
     except UniFiPDUError as exc:
         logger.exception("unifi pdu cycle failed: %s", exc)
         raise HTTPException(status_code=502, detail=str(exc)) from exc

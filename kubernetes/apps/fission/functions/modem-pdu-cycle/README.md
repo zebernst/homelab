@@ -30,7 +30,7 @@ Create a 1Password item named **`modem-pdu-cycle`** with:
 | `UNIFI_PASSWORD` | Password |
 | `UNIFI_SITE` | Site name (usually `default`) |
 | `PDU_MAC` | USP PDU Pro MAC (`AA:BB:CC:DD:EE:FF`) |
-| `PDU_OUTLET_INDEX` | 1-based outlet index for the modem/ONT |
+| `PDU_MODEM_OUTLET_INDEX` | 1-based PDU outlet index for the modem/ONT |
 | `PDU_OFF_SECONDS` | Seconds off before power-on (e.g. `5`) |
 
 Also ensure the Alertmanager 1Password extract can read `MODEM_PDU_CYCLE_WEBHOOK_TOKEN` from this item (wired in `victoria-metrics` ExternalSecret `dataFrom`).
