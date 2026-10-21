@@ -28,7 +28,7 @@ spec:
           sonarr-uhd:
             image:
               repository: ghcr.io/home-operations/sonarr
-              tag: 4.0.18.2978@sha256:2cd77fb3d81909a734d61bb8f71462044cb9d2f187e626a28a05a5c4e4be8fd2
+              tag: 5.0.0.2742@sha256:491f13c731083c1e3a5eb707750ad61f0052a5a6c12b37f6f524eaa35664915d
             env:
               SONARR__APP__INSTANCENAME: Sonarr (UHD)
               SONARR__APP__THEME: dark
