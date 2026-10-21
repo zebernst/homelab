@@ -2,14 +2,19 @@
 
 Policy (dual-signal, gap, circuit breaker) lives in Alertmanager / VMRules.
 This function only authenticates and executes the outlet cycle.
+
+Note: Fission's python-fastapi runtime invokes ``main(request)`` directly, so
+FastAPI ``Depends`` / ``Security`` on this signature are not applied. We still
+use FastAPI's ``HTTPBearer`` + ``HTTPException`` for auth parsing and errors.
 """
 
 from __future__ import annotations
 
 import logging
 
-from fastapi import Request
+from fastapi import HTTPException, Request
 from fastapi.responses import Response
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import ValidationError
 from pydantic_settings import SettingsError
 
@@ -18,27 +23,35 @@ from unifi_pdu import UniFiPDUClient, UniFiPDUError
 
 logger = logging.getLogger("modem-pdu-cycle")
 
+# auto_error=False: we raise 401 ourselves (HTTPBearer defaults to 403).
+_bearer = HTTPBearer(auto_error=False)
 
-def _authorized(request: Request, expected: str) -> bool:
-    auth = request.headers.get("authorization") or ""
-    if auth.lower().startswith("bearer "):
-        return auth[7:].strip() == expected
-    return False
+
+def _load_settings() -> Settings:
+    try:
+        return Settings.from_fission_secrets()
+    except (FileNotFoundError, ValidationError, SettingsError, OSError) as exc:
+        logger.error("secret load failed: %s", exc)
+        raise HTTPException(status_code=500, detail="misconfigured") from exc
+
+
+async def _require_bearer(request: Request, expected: str) -> None:
+    credentials: HTTPAuthorizationCredentials | None = await _bearer(request)
+    if credentials is None or credentials.credentials != expected:
+        logger.warning("unauthorized webhook")
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 async def main(request: Request) -> Response:
     if request.method != "POST":
-        return Response(content="Method Not Allowed", status_code=405)
+        raise HTTPException(status_code=405, detail="Method Not Allowed")
 
-    try:
-        cfg = Settings.from_fission_secrets()
-    except (FileNotFoundError, ValidationError, SettingsError, OSError) as exc:
-        logger.error("secret load failed: %s", exc)
-        return Response(content="misconfigured", status_code=500)
-
-    if not _authorized(request, cfg.webhook.token.get_secret_value()):
-        logger.warning("unauthorized webhook")
-        return Response(content="Unauthorized", status_code=401)
+    cfg = _load_settings()
+    await _require_bearer(request, cfg.webhook.token.get_secret_value())
 
     try:
         with UniFiPDUClient(
@@ -55,6 +68,6 @@ async def main(request: Request) -> Response:
             )
     except UniFiPDUError as exc:
         logger.exception("unifi pdu cycle failed: %s", exc)
-        return Response(content=str(exc), status_code=502)
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     return Response(content="ok", status_code=200)

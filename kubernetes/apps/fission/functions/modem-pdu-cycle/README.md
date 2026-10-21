@@ -6,6 +6,8 @@ Fission function invoked by Alertmanager when `WanModemRemediate` fires. Power-c
 
 Config is loaded via [pydantic-settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) from Fission secret **file mounts** (ExternalSecret keys → `/secrets/fission/<mount>/<key>`), not env vars or a single config file.
 
+Webhook auth uses FastAPI’s `HTTPBearer` + `HTTPException`. Fission calls `main(request)` directly (no `Depends`/`Security` injection), so the scheme is invoked explicitly.
+
 ## Endpoint
 
 | | |
