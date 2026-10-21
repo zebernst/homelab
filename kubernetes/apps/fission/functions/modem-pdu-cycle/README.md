@@ -4,6 +4,8 @@ Fission function invoked by Alertmanager when `WanModemRemediate` fires. Power-c
 
 **Policy stays in the alert stack** (dual-signal, 10m gap, 3-strike inhibit). This function only authenticates and cycles the outlet.
 
+Config is loaded via [pydantic-settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) from Fission secret **file mounts** (ExternalSecret keys → `/secrets/fission/<mount>/<key>`), not env vars or a single config file.
+
 ## Endpoint
 
 | | |
