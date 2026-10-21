@@ -52,7 +52,7 @@ async def test_require_bearer_accepts_matching_token():
 async def test_require_bearer_rejects_missing():
     with pytest.raises(HTTPException) as exc:
         await modem_main._require_bearer(_request(), "secret")
-    assert exc.value.status_code == 401
+    assert exc.value.status_code == 403
 
 
 @pytest.mark.asyncio
@@ -62,7 +62,7 @@ async def test_require_bearer_rejects_wrong_token():
             _request(authorization="Bearer nope"),
             "secret",
         )
-    assert exc.value.status_code == 401
+    assert exc.value.status_code == 403
 
 
 @pytest.mark.asyncio
@@ -78,4 +78,4 @@ async def test_main_unauthorized(tmp_path: Path):
     with patch.object(modem_main, "_load_settings", return_value=cfg):
         with pytest.raises(HTTPException) as exc:
             await modem_main.main(_request(authorization="Bearer wrong"))
-        assert exc.value.status_code == 401
+        assert exc.value.status_code == 403

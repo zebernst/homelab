@@ -14,7 +14,7 @@ import logging
 
 from fastapi import HTTPException, Request
 from fastapi.responses import Response
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPBearer
 from pydantic import ValidationError
 from pydantic_settings import SettingsError
 
@@ -23,8 +23,7 @@ from unifi_pdu import UniFiPDUClient, UniFiPDUError
 
 logger = logging.getLogger("modem-pdu-cycle")
 
-# auto_error=False: we raise 401 ourselves (HTTPBearer defaults to 403).
-_bearer = HTTPBearer(auto_error=False)
+_bearer = HTTPBearer()
 
 
 def _load_settings() -> Settings:
@@ -36,14 +35,10 @@ def _load_settings() -> Settings:
 
 
 async def _require_bearer(request: Request, expected: str) -> None:
-    credentials: HTTPAuthorizationCredentials | None = await _bearer(request)
-    if credentials is None or credentials.credentials != expected:
+    credentials = await _bearer(request)
+    if credentials.credentials != expected:
         logger.warning("unauthorized webhook")
-        raise HTTPException(
-            status_code=401,
-            detail="Unauthorized",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise HTTPException(status_code=403, detail="Unauthorized")
 
 
 async def main(request: Request) -> Response:
