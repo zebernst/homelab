@@ -1,0 +1,105 @@
+# One-shot VolSync rsyncTLS copy of nominatim-flatnode (Ceph) → hostpath on europa.
+# Not wired into Flux — apply manually during cutover.
+#
+# Why VolSync (not a Job):
+#   - Source uses copyMethod: Snapshot → Ceph VolumeSnapshot + restore PVC (frozen PiT)
+#   - Destination is openebs-hostpath (no snapshots) via destinationPVC + Direct
+#   - Same-namespace ClusterIP; rsyncTLS preferred over deprecated SSH rsync
+#
+# Prerequisites / cutover:
+#   1. Scale nominatim Deployment to 0 (and finish/cancel any import Job using flatnode)
+#   2. Create PSK once (stunnel format identity:hex — key must be named psk.txt):
+#        KEY="1:$(openssl rand -hex 32)"
+#        kubectl -n self-hosted create secret generic nominatim-flatnode-mig-psk \
+#          --from-literal=psk.txt="$KEY"
+#   3. Apply this file (PVC + ReplicationDestination + ReplicationSource)
+#   4. Wait for destination endpoint, then wire source address from status:
+#        ADDR=$(kubectl -n self-hosted get replicationdestination nominatim-flatnode-hostpath \
+#          -o jsonpath='{.status.rsyncTLS.address}')
+#        kubectl -n self-hosted patch replicationsource nominatim-flatnode-ceph --type merge \
+#          -p "{\"spec\":{\"rsyncTLS\":{\"address\":\"${ADDR}\"}}}"
+#   5. Trigger sync:
+#        kubectl -n self-hosted annotate replicationsource nominatim-flatnode-ceph \
+#          volsync.backube/manual="$(date +%s)" --overwrite
+#   6. Wait for LatestMoverStatus Successful / lastSyncTime on the ReplicationSource
+#   7. Rebind so the app claim name stays nominatim-flatnode:
+#        - Delete ReplicationSource + ReplicationDestination (stop movers)
+#        - Patch both PVs reclaimPolicy=Retain; delete claim nominatim-flatnode
+#          and nominatim-flatnode-hostpath; recreate nominatim-flatnode bound to
+#          the hostpath PV (volumeName); delete/release old Ceph PV when done
+#   8. Scale nominatim back up (API already nodeSelector europa + flatnode SC hostpath)
+#
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationdestination_v1alpha1.json
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nominatim-flatnode-hostpath
+  namespace: self-hosted
+  labels:
+    app.kubernetes.io/name: nominatim
+    app.kubernetes.io/component: flatnode-migrate
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: openebs-hostpath
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata:
+  name: nominatim-flatnode-hostpath
+  namespace: self-hosted
+  labels:
+    app.kubernetes.io/name: nominatim
+    app.kubernetes.io/component: flatnode-migrate
+spec:
+  rsyncTLS:
+    # Pre-created hostpath PVC (WaitForFirstConsumer → binds when mover lands on europa)
+    destinationPVC: nominatim-flatnode-hostpath
+    copyMethod: Direct
+    keySecret: nominatim-flatnode-mig-psk
+    serviceType: ClusterIP
+    moverAffinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values: ["europa"]
+    # Match project VolSync movers; chown flatnode after cutover if nominatim UID differs
+    moverSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/replicationsource_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: nominatim-flatnode-ceph
+  namespace: self-hosted
+  labels:
+    app.kubernetes.io/name: nominatim
+    app.kubernetes.io/component: flatnode-migrate
+spec:
+  sourcePVC: nominatim-flatnode
+  # Manual only — annotate to fire (see header). Patch .spec.rsyncTLS.address first.
+  trigger:
+    manual: "0"
+  rsyncTLS:
+    # Frozen source: Ceph CSI snapshot → temp restore PVC → rsync
+    copyMethod: Snapshot
+    volumeSnapshotClassName: csi-ceph-block
+    storageClassName: ceph-block
+    accessModes: ["ReadWriteOnce"]
+    capacity: 50Gi
+    keySecret: nominatim-flatnode-mig-psk
+    # address: set from ReplicationDestination.status.rsyncTLS.address (step 4)
+    # Source snapshot PVC is Ceph (any node). Leave mover unpinned.
+    moverSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
