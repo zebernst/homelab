@@ -27,8 +27,7 @@ spec:
     replicaCount: 2
     priorityClassName: network-critical
     service:
-      type: LoadBalancer
-      loadBalancerClass: tailscale
+      # L4 front door: # jupiter-dns Gateway (TCPRoute/UDPRoute on :53). MagicDNS
+      # hostname jupiter-dns lives on the Gateway so split DNS is unchanged.
+      type: ClusterIP
       useTcp: true
-      annotations:
-        tailscale.com/hostname: jupiter-dns

@@ -1,0 +1,42 @@
+---
+# Dedicated L4 Gateway — Cilium cannot mix TCP/UDP with HTTP/HTTPS on the
+# same Gateway. VIP preserved from the former plex LoadBalancer.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: lan-l4-plex
+  labels:
+    external-dns.alpha.kubernetes.io/registry: unifi
+spec:
+  gatewayClassName: cilium
+  addresses:
+    - type: IPAddress
+      value: 192.168.20.5
+    - type: IPAddress
+      value: ::ffff:192.168.20.5
+  listeners:
+    - name: plex
+      protocol: TCP
+      port: 32400
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+# Tailscale native Plex port. Own MagicDNS hostname (plex) — not shared with
+# jupiter-dns; L4 infra DNS lives with k8s-gateway.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: plex-tailscale
+spec:
+  gatewayClassName: cilium-ts
+  infrastructure:
+    annotations:
+      tailscale.com/hostname: plex
+  listeners:
+    - name: plex
+      protocol: TCP
+      port: 32400
+      allowedRoutes:
+        namespaces:
+          from: Same

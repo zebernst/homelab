@@ -73,9 +73,7 @@ spec:
             port: *port
       bittorrent:
         controller: *app
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 192.168.20.14, ::ffff:c0a8:140e
+        # L4 front door: lan-l4-qbittorrent (TCPRoute)
         ports:
           bittorrent-tcp:
             port: *bittorrentPort

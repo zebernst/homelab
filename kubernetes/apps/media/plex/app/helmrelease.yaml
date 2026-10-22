@@ -70,21 +70,10 @@ spec:
         intel.feature.node.kubernetes.io/gpu: "true"
     service:
       plex:
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 192.168.20.5, ::ffff:c0a8:1405
+        # L4 front doors: lan-l4-plex + plex-tailscale (TCPRoute)
         ports:
           http:
             port: &port 32400
-      ts:
-        controller: *app
-        type: LoadBalancer
-        loadBalancerClass: tailscale
-        annotations:
-          tailscale.com/hostname: plex
-        ports:
-          http:
-            port: *port
     route:
       plex:
         annotations:
