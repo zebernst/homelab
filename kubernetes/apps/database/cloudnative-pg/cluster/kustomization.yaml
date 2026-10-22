@@ -9,4 +9,3 @@ resources:
   - cluster.yaml
   - scheduledbackup.yaml
   - vmrule.yaml
-  - service.yaml
