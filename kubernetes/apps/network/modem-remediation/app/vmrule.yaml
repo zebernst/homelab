@@ -1,0 +1,52 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmrule_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: modem-remediation
+spec:
+  groups:
+    - name: modem-remediation.rules
+      rules:
+        # Dual-signal: UniFi WAN not online AND at least one external ICMP probe failing.
+        # unpoller ≥5.7.0: unpoller_device_wan_status is 1=online, 0=other (status label).
+        - alert: WanModemRemediate
+          expr: |
+            max(unpoller_device_wan_status) by () == 0
+            and
+            min(probe_success{probe="wan-external"}) by () == 0
+          for: 5m
+          annotations:
+            summary: >-
+              WAN sustained-down — modem PDU remediation eligible
+            description: >-
+              UniFi WAN status is not online and at least one external ICMP probe
+              (1.1.1.1 / 8.8.8.8) is failing for 5m. Alertmanager will invoke the
+              modem PDU cycle webhook (10m gap; inhibited after 3 attempts).
+          labels:
+            severity: critical
+
+        # Circuit breaker: trip on ≥3 remediation notifies in 45m, then latch open
+        # (via ALERTS self-ref) until dual-signal clears — do not auto-close when
+        # the sliding window alone ages out while WAN is still down.
+        - alert: ModemRemediationBudgetExhausted
+          expr: |
+            (
+              max(increase(alertmanager_notifications_total{receiver="modem-pdu-cycle"}[45m])) by () >= 3
+              or
+              max(ALERTS{alertname="ModemRemediationBudgetExhausted",alertstate="firing"}) by ()
+            )
+            and
+            max(unpoller_device_wan_status) by () == 0
+            and
+            min(probe_success{probe="wan-external"}) by () == 0
+          annotations:
+            summary: >-
+              Modem PDU remediation budget exhausted
+            description: >-
+              Alertmanager delivered at least three modem-pdu-cycle webhook
+              notifications in a 45m window while WAN stayed dual-signal down.
+              The breaker stays open (inhibiting further remediation) until WAN
+              recovers — it does not reset when the notify window ages out.
+          labels:
+            severity: critical

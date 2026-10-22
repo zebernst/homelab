@@ -24,12 +24,27 @@ spec:
         repeat_interval: 1m
         matchers:
           - alertname="Watchdog"
+      # Modem PDU remediation: webhook + continue so default Pushover still pages.
+      - receiver: modem-pdu-cycle
+        continue: true
+        group_by: ["alertname"]
+        group_wait: 0s
+        group_interval: 10m
+        repeat_interval: 10m
+        matchers:
+          - alertname="WanModemRemediate"
   inhibit_rules:
     - equal: ["alertname", "namespace"]
       source_matchers:
         - severity="critical"
       target_matchers:
         - severity="warning"
+    # Circuit breaker: stop remediation webhooks after budget-exhausted (Pushover
+    # still receives ModemRemediationBudgetExhausted via the default route).
+    - source_matchers:
+        - alertname="ModemRemediationBudgetExhausted"
+      target_matchers:
+        - alertname="WanModemRemediate"
   receivers:
     - name: blackhole
     - name: heartbeat
@@ -41,6 +56,16 @@ spec:
             bearer_token_secret:
               name: alertmanager-secret
               key: BUDDY_HEARTBEAT_TOKEN
+    - name: modem-pdu-cycle
+      webhook_configs:
+        - url_secret:
+            name: alertmanager-secret
+            key: MODEM_PDU_CYCLE_WEBHOOK_URL
+          http_config:
+            bearer_token_secret:
+              name: alertmanager-secret
+              key: MODEM_PDU_CYCLE_WEBHOOK_TOKEN
+          send_resolved: false
     - name: pushover
       pushover_configs:
         - html: true

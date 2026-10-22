@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/operator.victoriametrics.com/vmprobe_v1beta1.json
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMProbe
+metadata:
+  name: wan-external
+spec:
+  interval: 1m
+  module: icmp
+  vmProberSpec:
+    url: blackbox-exporter.observability.svc.cluster.local:9115
+  targets:
+    static:
+      labels:
+        namespace: observability
+        probe: wan-external
+      targets:
+        - 1.1.1.1
+        - 8.8.8.8
