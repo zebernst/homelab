@@ -16,6 +16,7 @@ spec:
       capacitarr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: capacitarr
         containers:
           capacitarr:
             image:
@@ -69,6 +70,10 @@ spec:
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
             path: /api/v1/health
+          glance/name: Capacitarr
+          glance/icon: si:sonarr
+          glance/category: media
+          glance/url: https://capacitarr.zebernst.dev
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:
