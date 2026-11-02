@@ -20,7 +20,7 @@ spec:
           qui:
             image:
               repository: ghcr.io/autobrr/qui
-              tag: v1.23.0@sha256:b1abd18f1d544cd5c63a3b8d9c8a91d097143e04df416567a8cb52040f380ca8
+              tag: v1.35.0@sha256:a5b2f5faf6388cce257137c88e4b189458fd799cf9119ed476c980e5a69341b2
             env:
               TZ: America/Chicago
               QUI__HOST: 0.0.0.0
