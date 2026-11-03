@@ -1,6 +1,8 @@
 # Trash
 .DS_Store
 Thumbs.db
+__pycache__/
+*.py[cod]
 # k8s
 kubeconfig
 talosconfig

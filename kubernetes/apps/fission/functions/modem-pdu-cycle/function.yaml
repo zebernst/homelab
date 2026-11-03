@@ -1,0 +1,25 @@
+---
+apiVersion: fission.io/v1
+kind: Function
+metadata:
+  name: modem-pdu-cycle
+  namespace: fission
+spec:
+  environment:
+    name: python-fastapi
+    namespace: fission
+  package:
+    packageref:
+      name: modem-pdu-cycle
+      namespace: fission
+    functionName: main.main
+  secrets:
+    - name: modem-pdu-cycle-secret
+      namespace: fission
+  InvokeStrategy:
+    StrategyType: execution
+    ExecutionStrategy:
+      ExecutorType: poolmgr
+  # Allow off-delay + UniFi API round-trips
+  functionTimeout: 60
+  idletimeout: 120
