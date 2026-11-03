@@ -25,11 +25,50 @@ spec:
         matchers:
           - alertname="Watchdog"
   inhibit_rules:
+    # Same alert: critical suppresses warning
     - equal: ["alertname", "namespace"]
       source_matchers:
         - severity="critical"
       target_matchers:
         - severity="warning"
+
+    # Scrape latch: TargetDown is the actionable signal; vmagent meta is noise
+    - equal: ["namespace"]
+      source_matchers:
+        - alertname="TargetDown"
+      target_matchers:
+        - alertname="TooManyScrapeErrors"
+    - equal: ["namespace"]
+      source_matchers:
+        - alertname="TargetDown"
+      target_matchers:
+        - alertname="TooManyLogs"
+    # Scrape latch without TargetDown (e.g. <10% of a job's targets failing)
+    - equal: ["namespace", "instance"]
+      source_matchers:
+        - alertname="TooManyScrapeErrors"
+      target_matchers:
+        - alertname="TooManyLogs"
+
+    # Kube: crash loop is the cause; NotReady is the symptom on the same pod
+    - equal: ["namespace", "pod"]
+      source_matchers:
+        - alertname="KubePodCrashLooping"
+      target_matchers:
+        - alertname="KubePodNotReady"
+
+    # Flux: instance-level failure subsumes per-object reconcile noise
+    - equal: ["namespace"]
+      source_matchers:
+        - alertname="FluxInstanceNotReady"
+      target_matchers:
+        - alertname=~"HelmReleaseReconciliationFailure|KustomizationReconciliationFailure"
+
+    # Ceph: hard health error subsumes soft health warning
+    - source_matchers:
+        - alertname="CephHealthError"
+      target_matchers:
+        - alertname="CephHealthWarning"
   receivers:
     - name: blackhole
     - name: heartbeat

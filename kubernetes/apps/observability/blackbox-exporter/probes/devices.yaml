@@ -13,8 +13,9 @@ spec:
     static:
       labels:
         namespace: observability
+      # ups.internal is covered by snmp-exporter (TargetDown / UPSOnBattery);
+      # ICMP here duplicated host-down paging whenever the UPS was unreachable.
       targets:
         - unifi
         - nas.internal
-        - ups.internal
         - homeassistant.internal
