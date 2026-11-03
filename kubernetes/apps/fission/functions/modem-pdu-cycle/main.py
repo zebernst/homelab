@@ -49,8 +49,8 @@ async def main(request: Request) -> Response:
     await _require_bearer(request, cfg.webhook.token.get_secret_value())
 
     try:
-        with UniFiPDUClient(cfg.unifi) as client:
-            client.power_cycle_outlet(cfg.pdu, cfg.pdu.modem_outlet_index)
+        with UniFiPDU(cfg.unifi, cfg.pdu) as pdu:
+            pdu.power_cycle_outlet(cfg.pdu.modem_outlet_index)
     except UniFiPDUError as exc:
         logger.exception("unifi pdu cycle failed: %s", exc)
         raise HTTPException(status_code=502, detail=str(exc)) from exc
