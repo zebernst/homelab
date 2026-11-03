@@ -10,8 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../components/volsync
   dependsOn:
     - name: cloudnative-pg
       namespace: database
@@ -21,8 +19,6 @@ spec:
       namespace: external-secrets
     - name: rook-ceph-cluster
       namespace: rook-ceph
-    - name: volsync
-      namespace: volsync-system
   path: kubernetes/apps/media/tracearr/app
   prune: true
   sourceRef:
@@ -33,9 +29,3 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
-  postBuild:
-    substitute:
-      APP: *app
-      VOLSYNC_CAPACITY: 15Gi
-      VOLSYNC_PUID: "1001"
-      VOLSYNC_PGID: "1001"
