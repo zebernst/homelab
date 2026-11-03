@@ -19,7 +19,7 @@ from pydantic import ValidationError
 from pydantic_settings import SettingsError
 
 from settings import Settings
-from unifi_pdu import UniFiPDUClient, UniFiPDUError
+from unifi_pdu import UniFiPDU, UniFiPDUError
 
 logger = logging.getLogger("modem-pdu-cycle")
 

@@ -35,14 +35,19 @@ def merge_outlet_overrides(
     return overrides
 
 
-class UniFiPDUClient:
+class UniFiPDU:
+    """A single USP PDU addressed via the UniFi Network API."""
+
     def __init__(
         self,
         unifi: UnifiSettings,
+        pdu: PduSettings,
         *,
         verify: bool = False,
         timeout: float = 30.0,
     ) -> None:
+        self.mac = pdu.mac
+        self.off_seconds = pdu.off_seconds
         self.base_url = unifi.url.rstrip("/")
         self.username = unifi.username
         self.password = unifi.password.get_secret_value()
@@ -57,7 +62,7 @@ class UniFiPDUClient:
     def close(self) -> None:
         self.client.close()
 
-    def __enter__(self) -> UniFiPDUClient:
+    def __enter__(self) -> UniFiPDU:
         return self
 
     def __exit__(self, *args: object) -> None:
@@ -83,21 +88,21 @@ class UniFiPDUClient:
             raise UniFiPDUError(f"{method} {path} failed: HTTP {resp.status_code}: {resp.text[:200]}")
         return resp
 
-    def get_device_by_mac(self, mac: str) -> dict[str, Any]:
-        mac_norm = mac.lower()
+    def _get_device(self) -> dict[str, Any]:
+        mac_norm = self.mac.lower()
         resp = self._api("GET", "/stat/device")
         data = resp.json().get("data") or []
         for device in data:
             if str(device.get("mac", "")).lower() == mac_norm:
                 return device
-        raise UniFiPDUError(f"device not found for mac={mac}")
+        raise UniFiPDUError(f"device not found for mac={self.mac}")
 
-    def set_outlet_relay(self, device: dict[str, Any], outlet_index: int, relay_state: bool) -> None:
+    def _set_outlet_relay(self, device: dict[str, Any], outlet: int, relay_state: bool) -> None:
         device_id = device.get("_id")
         if not device_id:
             raise UniFiPDUError("device missing _id")
         existing = list(device.get("outlet_overrides") or [])
-        overrides = merge_outlet_overrides(existing, outlet_index, relay_state)
+        overrides = merge_outlet_overrides(existing, outlet, relay_state)
         self._api(
             "PUT",
             f"/rest/device/{device_id}",
@@ -106,23 +111,15 @@ class UniFiPDUClient:
         # Keep local copy in sync for a subsequent call in the same cycle
         device["outlet_overrides"] = overrides
 
-    def power_cycle_outlet(self, pdu: PduSettings, modem_outlet_index: int) -> None:
+    def power_cycle_outlet(self, outlet: int) -> None:
         self.login()
-        device = self.get_device_by_mac(pdu.mac)
-        logger.info(
-            "power-cycle start mac=%s outlet=%s",
-            pdu.mac,
-            modem_outlet_index,
-        )
-        self.set_outlet_relay(device, modem_outlet_index, False)
+        device = self._get_device()
+        logger.info("power-cycle start mac=%s outlet=%s", self.mac, outlet)
+        self._set_outlet_relay(device, outlet, False)
         try:
-            time.sleep(pdu.off_seconds)
+            time.sleep(self.off_seconds)
         finally:
             # Best-effort restore on even if sleep/re-fetch fails mid-cycle
-            device = self.get_device_by_mac(pdu.mac)
-            self.set_outlet_relay(device, modem_outlet_index, True)
-        logger.info(
-            "power-cycle complete mac=%s outlet=%s",
-            pdu.mac,
-            modem_outlet_index,
-        )
+            device = self._get_device()
+            self._set_outlet_relay(device, outlet, True)
+        logger.info("power-cycle complete mac=%s outlet=%s", self.mac, outlet)
