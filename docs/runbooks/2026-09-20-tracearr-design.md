@@ -98,24 +98,29 @@ Wire into `kubernetes/apps/media/kustomization.yaml` as `tracearr/ks.yaml`. Do n
 
 **Toolkit note:** Tracearr’s external-DB docs also mention `timescaledb_toolkit`. The sedaprotocol image ships TimescaleDB but not necessarily toolkit. Implementation must verify Tracearr migrations succeed; if toolkit is required, switch to a toolkit-capable CNPG image or add a follow-up image decision — do not silently ignore migration failures.
 
-### Secrets (1Password item `tracearr`)
+### Secrets
 
-Create a 1Password item named `tracearr` with at least:
+**1Password item `cloudnative-pg`** (existing) supplies CNPG superuser credentials:
 
 | Field | Purpose |
 | --- | --- |
-| `POSTGRES_SUPER_USER` | CNPG superuser username (e.g. `postgres`) |
+| `POSTGRES_SUPER_USER` | CNPG superuser username |
 | `POSTGRES_SUPER_PASS` | CNPG superuser password (URL-safe preferred — used in `DATABASE_URL`) |
+
+**1Password item `tracearr`** (new) supplies app-only secrets:
+
+| Field | Purpose |
+| --- | --- |
 | `JWT_SECRET` | `openssl rand -hex 32` |
 | `COOKIE_SECRET` | `openssl rand -hex 32` |
 
 ExternalSecrets produce:
 
-- `tracearr-db-secret` — CNPG superuser (`username` / `password`) with `cnpg.io/reload: "true"`
+- `tracearr-db-secret` — CNPG superuser from `cloudnative-pg` (`username` / `password`) with `cnpg.io/reload: "true"`
 - `tracearr-db-backup-secret` — B2 keys from `barman-b2-credentials` (same pattern as dawarich)
-- `tracearr-secret` — app env (`DATABASE_URL`, `JWT_SECRET`, `COOKIE_SECRET`)
+- `tracearr-secret` — app env (`DATABASE_URL` built from `cloudnative-pg` + `JWT_SECRET` / `COOKIE_SECRET` from `tracearr`)
 
-Operator must create/populate the 1Password item before Flux can reconcile healthy.
+Operator must create/populate the `tracearr` 1Password item before Flux can reconcile healthy.
 
 ### Observability
 
