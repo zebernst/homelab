@@ -13,7 +13,9 @@ spec:
     name: nominatim-db-secret
   storage:
     size: 400Gi
-    storageClass: ceph-block
+    # Local NVMe via OpenEBS. Existing ceph-block PVC is NOT rewritten by this
+    # change — cut over with Barman recovery onto a new Cluster (see PR).
+    storageClass: openebs-hostpath
   resources:
     requests:
       cpu: "2"
@@ -21,16 +23,9 @@ spec:
     limits:
       memory: 28Gi
   affinity:
-    # Prefer same node as Nominatim API/flatnode (not UI / import Jobs).
-    additionalPodAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/name: nominatim
-                app.kubernetes.io/controller: nominatim
-            topologyKey: kubernetes.io/hostname
+    # Pin with Nominatim API + flatnode (hostpath is node-local).
+    nodeSelector:
+      kubernetes.io/hostname: europa
   postgresql:
     # Nominatim tuning: https://nominatim.org/release-docs/latest/admin/Installation/#tuning-the-postgresql-database
     # Deliberately omitted: wal_level=minimal / max_wal_senders=0 (incompatible with CNPG WAL archiving + Barman).
