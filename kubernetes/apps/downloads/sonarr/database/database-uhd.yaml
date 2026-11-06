@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/database_v1.json
+---
+# Second database owned by the ${APP} role created by the cnpg-database
+# component. The component cannot express one role owning two databases, so
+# the extra database is declared here and both sonarr KSs depend on sonarr-db.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: sonarr-uhd
+spec:
+  name: sonarr-uhd
+  owner: ${APP}
+  cluster:
+    name: ${CNPG_CLUSTER:=redspot}
+  ensure: present
+  databaseReclaimPolicy: ${CNPG_RECLAIM:=retain}

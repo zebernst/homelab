@@ -3,6 +3,51 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: &db whisparr-db
+  namespace: &ns downloads
+spec:
+  targetNamespace: database
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *db
+  dependsOn:
+    - name: cloudnative-pg-cluster
+      namespace: database
+    - name: onepassword
+      namespace: external-secrets
+  path: kubernetes/apps/downloads/whisparr/database
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  postBuild:
+    substitute:
+      APP: whisparr
+      OP_USER: WHISPARR_POSTGRES_USER
+      OP_PASS: WHISPARR_POSTGRES_PASSWORD
+  healthCheckExprs:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: DatabaseRole
+      failed: has(status.applied) && !status.applied
+      current: has(status.applied) && status.applied && status.observedGeneration == metadata.generation
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Database
+      failed: has(status.applied) && !status.applied
+      current: has(status.applied) && status.applied && status.observedGeneration == metadata.generation
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: &app whisparr
   namespace: &ns downloads
 spec:
@@ -15,8 +60,7 @@ spec:
     - ../../../../components/volsync
     - ../../../../components/vmalert-rules
   dependsOn:
-    - name: cloudnative-pg-cluster
-      namespace: database
+    - name: whisparr-db
     - name: onepassword
       namespace: external-secrets
     - name: rook-ceph-cluster
