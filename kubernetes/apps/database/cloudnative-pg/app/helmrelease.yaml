@@ -14,7 +14,10 @@ spec:
         kind: HelmRepository
         name: cloudnative-pg
         namespace: flux-system
-
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
   values:
     priorityClassName: database-critical
     crds:
