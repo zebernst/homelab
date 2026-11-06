@@ -5,6 +5,7 @@ metadata:
   name: redspot-lb
   annotations:
     external-dns.alpha.kubernetes.io/hostname: redspot.internal
+    lbipam.cilium.io/ips: 192.168.20.3, ::ffff:c0a8:1403
 spec:
   type: LoadBalancer
   ports:
