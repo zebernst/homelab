@@ -1,0 +1,81 @@
+# Temporary Cluster bootstrap used ONLY during cutover — NOT wired into Flux.
+# After recovery succeeds and the live Cluster matches GitOps again, delete this file's
+# applied object (Flux owns kubernetes/apps/self-hosted/nominatim-db/app/cluster.yaml).
+#
+# Usage outline (see PR):
+#   1. Stop region-import Job + scale Nominatim API to 0
+#   2. Take a fresh CNPG Backup; wait until completed
+#   3. Delete the live Cluster (PVCs go with it unless retention is configured)
+#   4. kubectl apply -f this file  (same name/secrets → app DSN unchanged)
+#   5. Wait for Cluster Ready + WAL replay
+#   6. Let Flux reconcile the GitOps Cluster (initdb bootstrap + hostpath + europa)
+#      — bootstrap is creation-only; Flux will not re-init an existing healthy Cluster
+#
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/cluster_v1.json
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: nominatim-db
+  namespace: self-hosted
+  labels:
+    app.kubernetes.io/name: nominatim-db
+    app.kubernetes.io/component: database-migration
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgis:16-3.4
+  primaryUpdateStrategy: unsupervised
+  enableSuperuserAccess: true
+  superuserSecret:
+    name: nominatim-db-secret
+  storage:
+    size: 400Gi
+    storageClass: openebs-hostpath
+  resources:
+    requests:
+      cpu: "2"
+      memory: 24Gi
+    limits:
+      memory: 28Gi
+  affinity:
+    nodeSelector:
+      kubernetes.io/hostname: europa
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: 2GB
+      maintenance_work_mem: 4GB
+      autovacuum_work_mem: 1GB
+      effective_cache_size: 12GB
+      work_mem: 50MB
+      synchronous_commit: "off"
+      checkpoint_timeout: 10min
+      checkpoint_completion_target: "0.9"
+      max_wal_size: 1GB
+      random_page_cost: "1.0"
+  bootstrap:
+    recovery:
+      source: nominatim-db-backup
+  externalClusters:
+    - name: nominatim-db-backup
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: nominatim-db-backup
+          serverName: nominatim-db-v1
+  managed:
+    roles:
+      - name: nominatim
+        ensure: present
+        login: true
+        comment: Nominatim application role
+        passwordSecret:
+          name: nominatim-db-app-user
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: nominatim-db-backup
+        serverName: nominatim-db-v1
+  monitoring:
+    enablePodMonitor: true
