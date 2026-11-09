@@ -31,6 +31,7 @@ spec:
               tag: 2.4.1@sha256:2229bc0ad9c8e1c3c44cef3324ff0501639d44a7b6f64026ebaa44f61cfb038e
             env:
               BASEROW_PUBLIC_URL: "https://{{ .Release.Name }}.jptr.zebernst.dev"
+              BASEROW_EXTRA_PUBLIC_URLS: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc"
               BASEROW_CADDY_ADDRESSES: ":80"
               BASEROW_RUN_MINIMAL: "yes"
               BASEROW_AMOUNT_OF_WORKERS: "1"
@@ -44,6 +45,9 @@ spec:
                   httpGet:
                     path: /api/_health/
                     port: &port 80
+                    httpHeaders:
+                      - name: Host
+                        value: "{{ .Release.Name }}.{{ .Release.Namespace }}.svc"
               readiness: *probe
               startup:
                 enabled: true
@@ -52,6 +56,9 @@ spec:
                   httpGet:
                     path: /api/_health/
                     port: *port
+                    httpHeaders:
+                      - name: Host
+                        value: "{{ .Release.Name }}.{{ .Release.Namespace }}.svc"
                   failureThreshold: 60
                   periodSeconds: 5
             resources:
