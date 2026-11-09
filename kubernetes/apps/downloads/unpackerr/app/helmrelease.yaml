@@ -20,7 +20,7 @@ spec:
           unpackerr:
             image:
               repository: ghcr.io/unpackerr/unpackerr
-              tag: 0.15.2@sha256:89e13608521ece21dd300c39229fd595a55fbf4b8152771af5670a7455b5c747
+              tag: v1.0.1@sha256:22b4693fbeaae4bd927905d63b59b8f67b4a1446682d965ac876c61a48976658
             env:
               TZ: America/Chicago
               UN_WEBSERVER_METRICS: true
