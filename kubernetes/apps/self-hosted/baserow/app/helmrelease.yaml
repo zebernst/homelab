@@ -36,6 +36,10 @@ spec:
               BASEROW_RUN_MINIMAL: "yes"
               BASEROW_AMOUNT_OF_WORKERS: "1"
               REDIS_URL: redis://localhost:6379
+              EMAIL_SMTP: "true"
+              EMAIL_SMTP_HOST: smtp-relay.network.svc.cluster.local
+              EMAIL_SMTP_PORT: "25"
+              FROM_EMAIL: noreply@zebernst.dev
             envFrom: *envFrom
             probes:
               liveness: &probe
