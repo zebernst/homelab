@@ -28,7 +28,7 @@ spec:
           baserow:
             image:
               repository: docker.io/baserow/baserow
-              tag: 2.4.1@sha256:2229bc0ad9c8e1c3c44cef3324ff0501639d44a7b6f64026ebaa44f61cfb038e
+              tag: 2.4.3@sha256:304bebe22bf4c66d96d11bb746727492fa91637bd6deb807b2ef464f071c215c
             env:
               BASEROW_PUBLIC_URL: "https://{{ .Release.Name }}.jptr.zebernst.dev"
               BASEROW_EXTRA_PUBLIC_URLS: "http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc"
