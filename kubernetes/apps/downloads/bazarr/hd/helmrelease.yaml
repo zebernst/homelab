@@ -20,7 +20,7 @@ spec:
           bazarr:
             image:
               repository: ghcr.io/home-operations/bazarr
-              tag: 1.6.0@sha256:cd63bbd0986c93e238eb8b9442604d249f0d4080099b389f822abe2062044417
+              tag: 1.6.2@sha256:6c40dfa683f767d28d1dc502837ed0a5a57682a84231f03e704e2b3f61b25a46
             env:
               TZ: America/Chicago
             envFrom:
