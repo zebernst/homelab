@@ -79,7 +79,7 @@ spec:
           redis:
             image:
               repository: docker.io/redis
-              tag: 8.8-alpine@sha256:e2c307e77bcaf306fa9e468bda845165a46c4c015ffd238fb3c92ae5d71d486f
+              tag: 8.10-alpine@sha256:7958cfbb9d152f87dadfbc89f1b0b15938f0b81ff8982feb327476f4911935c3
             command: ["redis-server", "--save", "", "--loglevel", "warning"]
             securityContext:
               allowPrivilegeEscalation: false
