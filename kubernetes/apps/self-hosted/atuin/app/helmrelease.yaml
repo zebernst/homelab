@@ -14,9 +14,10 @@ spec:
   values:
     controllers:
       atuin:
-        strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: atuin
+        strategy: RollingUpdate
         initContainers:
           init-db:
             image:
@@ -83,6 +84,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Atuin
+          glance/icon: mdi:history
+          glance/category: self-hosted
+          glance/url: https://atuin.kite-harmonic.ts.net
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

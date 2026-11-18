@@ -16,6 +16,11 @@ spec:
       qbittorrent:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: qbittorrent
+          glance/name: qBittorrent
+          glance/icon: si:qbittorrent
+          glance/category: downloads
+          glance/url: https://qbittorrent.kite-harmonic.ts.net
         containers:
           qbittorrent:
             image:
