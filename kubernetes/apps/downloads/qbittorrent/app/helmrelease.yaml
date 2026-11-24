@@ -20,7 +20,7 @@ spec:
           qbittorrent:
             image:
               repository: ghcr.io/home-operations/qbittorrent
-              tag: 5.2.3@sha256:4fcf15b7f265c2c8d7bc2a7e13240a07e0593c326f3cf3b5b9bb69eec5b79299
+              tag: 5.3.1@sha256:fcdbc4ac4a66d8c205ac67e4fe1b578158aaee0a50369c3d04918977f4f359c4
             env:
               TZ: America/Chicago
               QBT_WEBUI_PORT: &port 80
