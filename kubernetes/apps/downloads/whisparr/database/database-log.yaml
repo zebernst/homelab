@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/postgresql.cnpg.io/database_v1.json
+---
+# Servarr keeps UI logs in a separate PostgresLogDb (defaults to
+# <PostgresMainDb>-log). Without it, whisparr nightly writes into the main
+# database and fails with: relation "Logs" does not exist.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: whisparr-log
+spec:
+  name: whisparr-log
+  owner: ${APP}
+  cluster:
+    name: ${CNPG_CLUSTER:=redspot}
+  ensure: present
+  databaseReclaimPolicy: ${CNPG_RECLAIM:=retain}
