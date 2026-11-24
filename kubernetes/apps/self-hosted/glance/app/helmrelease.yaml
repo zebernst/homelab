@@ -20,7 +20,7 @@ spec:
           glance:
             image:
               repository: glanceapp/glance
-              tag: v0.8.5@sha256:32ab73d80f2b8b5fb0735b0431deb36b93fbb6b2fb43592449b0178c8b83e350
+              tag: v0.8.8@sha256:4d7445bc7971836858ffddee5d7501f1efbabb6e694a45b1dde1a789bb1943bb
             env:
               TZ: America/Chicago
             resources:
