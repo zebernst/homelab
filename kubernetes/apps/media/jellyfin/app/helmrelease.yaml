@@ -1,0 +1,147 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app jellyfin
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: jellyfin
+  dependsOn:
+    - name: intel-device-plugin-gpu
+      namespace: kube-system
+
+  values:
+    controllers:
+      jellyfin:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          # jellyfin/jellyfin#17831: default 30s can SIGKILL shutdown VACUUM on v12
+          terminationGracePeriodSeconds: 120
+        containers:
+          jellyfin:
+            image:
+              repository: ghcr.io/jellyfin/jellyfin
+              tag: 12.1@sha256:008ec8024bdaaa6f0a3f0de468e185633eeba9d67c56936e8dbf5ef6b8d6200f
+            env:
+              TZ: America/Chicago
+              DOTNET_SYSTEM_IO_DISABLEFILELOCKING: "true"
+              JELLYFIN_PublishedServerUrl: https://jellyfin.jptr.zebernst.dev
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: &port 8096
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 5
+              readiness: *probe
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *port
+                  periodSeconds: 10
+                  failureThreshold: 30
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+              limits:
+                gpu.intel.com/i915: 1
+                memory: 6Gi
+
+    defaultPodOptions:
+      priorityClassName: media-core
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 568
+        runAsGroup: 568
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [65568]
+      nodeSelector:
+        intel.feature.node.kubernetes.io/gpu: "true"
+
+    service:
+      jellyfin:
+        controller: *app
+        ports:
+          http:
+            port: *port
+
+    route:
+      lan:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}"
+            group: "{{ .Release.Namespace }}"
+        hostnames:
+          - jellyfin.zebernst.dev
+        parentRefs:
+          - name: lan
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
+      canonical:
+        annotations:
+          gatus.home-operations.com/endpoint: |
+            name: "{{ .Release.Name }}-jptr"
+            group: "{{ .Release.Namespace }}"
+        hostnames:
+          - "{{ .Release.Name }}.jptr.zebernst.dev"
+        parentRefs:
+          - name: tailscale
+            namespace: kube-system
+            sectionName: https-canon
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
+
+    persistence:
+      config:
+        existingClaim: *app
+        globalMounts:
+          - path: /config
+      media:
+        type: nfs
+        server: nas.internal
+        path: /volume1/media
+        globalMounts:
+          - path: /media/tv
+            subPath: tv
+            readOnly: true
+          - path: /media/tv-uhd
+            subPath: tv-uhd
+            readOnly: true
+          - path: /media/movies
+            subPath: movies
+            readOnly: true
+          - path: /media/movies-uhd
+            subPath: movies-uhd
+            readOnly: true
+      tmpfs:
+        type: emptyDir
+        medium: Memory
+        globalMounts:
+          - path: /cache
+            subPath: cache
+          - path: /tmp
+            subPath: tmp
+          - path: /transcode
+            subPath: transcode
