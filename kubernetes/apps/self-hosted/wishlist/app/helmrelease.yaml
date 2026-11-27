@@ -20,7 +20,7 @@ spec:
           wishlist:
             image:
               repository: ghcr.io/cmintey/wishlist
-              tag: v0.66.0@sha256:073ab4de0f27a93a79410172bedfa3947bed4718f050396547516def790f1f49
+              tag: v0.69.0@sha256:a3c0482c5d55155a3aa96c4cbb63d2aa379f02ae3bbeb76909ffed2b15980f36
             env:
               ORIGIN: https://wishlist.zebernst.dev
               XDG_CONFIG_HOME: /tmp
