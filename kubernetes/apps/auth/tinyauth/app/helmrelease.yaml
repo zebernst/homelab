@@ -25,6 +25,7 @@ spec:
             env:
               TINYAUTH_APPS_ID_IP_BYPASS: "0.0.0.0/0"
               TINYAUTH_APPS_AUTH_PATH_ALLOW: "^/api/auth"
+              TINYAUTH_AUTH_TRUSTEDPROXIES: "10.244.0.0/16"
             envFrom:
               - secretRef:
                   name: tinyauth-secret
