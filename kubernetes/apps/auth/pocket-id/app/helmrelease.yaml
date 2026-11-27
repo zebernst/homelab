@@ -16,6 +16,7 @@ spec:
       pocket-id:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: pocket-id
 
         initContainers:
           init-db:
@@ -113,6 +114,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Pocket ID
+          glance/icon: si:keycloak
+          glance/category: auth
+          glance/url: https://id.zebernst.dev
         hostnames:
           - id.zebernst.dev
         parentRefs:

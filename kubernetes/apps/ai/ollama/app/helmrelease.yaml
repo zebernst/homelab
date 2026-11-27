@@ -42,3 +42,9 @@ spec:
       - key: nvidia.com/gpu
         operator: Exists
         effect: NoSchedule
+    podAnnotations:
+      glance/id: ollama
+      glance/name: Ollama
+      glance/icon: si:ollama
+      glance/url: https://ollama.internal
+      glance/category: ai

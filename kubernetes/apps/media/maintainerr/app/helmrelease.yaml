@@ -16,6 +16,7 @@ spec:
       maintainerr:
         annotations:
           reloader.stakater.com/auto: "true"
+          glance/id: maintainerr
         containers:
           maintainerr:
             image:
@@ -59,6 +60,10 @@ spec:
           gatus.home-operations.com/endpoint: |
             name: "{{ .Release.Name }}"
             group: "{{ .Release.Namespace }}"
+          glance/name: Maintainerr
+          glance/icon: mdi:broom
+          glance/category: media
+          glance/url: https://maintainerr.kite-harmonic.ts.net
         hostnames:
           - "{{ .Release.Name }}.jptr.zebernst.dev"
         parentRefs:

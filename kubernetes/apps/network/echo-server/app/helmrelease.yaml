@@ -14,6 +14,8 @@ spec:
   values:
     controllers:
       echo-server:
+        annotations:
+          glance/hide: "true"
         strategy: RollingUpdate
         containers:
           echo-server:
