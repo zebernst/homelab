@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -7,17 +8,33 @@ metadata:
     gatus.home-operations.com/enabled: "false"
 spec:
   hostnames:
+    - hooks.zebernst.dev
+    # Retire once GitHub is delivering to hooks.zebernst.dev/flux/.
     - flux-webhook.zebernst.dev
   parentRefs:
     - name: external
       namespace: kube-system
       sectionName: https
   rules:
-    - backendRefs:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /flux/
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /hook/
+      backendRefs:
         - name: webhook-receiver
           namespace: flux-system
           port: 80
-      matches:
+    - matches:
         - path:
             type: PathPrefix
             value: /hook/
+      backendRefs:
+        - name: webhook-receiver
+          namespace: flux-system
+          port: 80

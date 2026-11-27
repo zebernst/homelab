@@ -9,7 +9,7 @@ endpoints:
   # FLUX_WEBHOOK_PATH is derived in gatus-external-secret from the flux webhook token (Receiver formula).
   - name: flux-webhook
     group: flux-system
-    url: https://flux-webhook.zebernst.dev${FLUX_WEBHOOK_PATH}
+    url: https://hooks.zebernst.dev${FLUX_WEBHOOK_PATH}
     interval: 1m
     client:
       dns-resolver: tcp://1.1.1.1:53
