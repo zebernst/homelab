@@ -7,7 +7,9 @@ mechanicalsoup
 pystashlib
 requests
 requests-toolbelt
-stashapp-tools
+# stashapi replaces stashapp-tools for Stash >=0.28 GraphQL fragments
+# (fingerprint type, Folder/BasicFile). See stashapp/CommunityScripts#599
+stashapi>=0.1.5
 
 # scrapers
 emojis
