@@ -139,16 +139,9 @@ spec:
               limits:
                 memory: 24Gi
         pod:
-          # Prefer same node as nominatim-db (CNPG has the reverse preference).
-          affinity:
-            podAffinity:
-              preferredDuringSchedulingIgnoredDuringExecution:
-                - weight: 100
-                  podAffinityTerm:
-                    labelSelector:
-                      matchLabels:
-                        cnpg.io/cluster: nominatim-db
-                    topologyKey: kubernetes.io/hostname
+          # Pin with nominatim-db + flatnode (openebs-hostpath is node-local).
+          nodeSelector:
+            kubernetes.io/hostname: europa
       ui:
         annotations:
           reloader.stakater.com/auto: "true"
@@ -267,7 +260,9 @@ spec:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         size: 250Gi
-        storageClass: ceph-block
+        # Local NVMe via OpenEBS. Existing ceph-block PVC is NOT rewritten by this
+        # change — cut over with an offline rsync Job onto a new claim (see PR).
+        storageClass: openebs-hostpath
         advancedMounts:
           nominatim:
             nominatim:
