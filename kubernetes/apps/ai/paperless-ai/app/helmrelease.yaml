@@ -20,7 +20,7 @@ spec:
           app:
             image:
               repository: docker.io/clusterzx/paperless-ai
-              tag: 3.0.9
+              tag: 4.8.0
             env:
               AI_PROVIDER: ollama
               OLLAMA_API_URL: http://ollama.ai.svc.cluster.local:11434
