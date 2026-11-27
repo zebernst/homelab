@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &db forgejo-db
+  namespace: &ns self-hosted
+spec:
+  targetNamespace: database
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *db
+  dependsOn:
+    - name: cloudnative-pg-cluster
+      namespace: database
+    - name: onepassword
+      namespace: external-secrets
+  path: kubernetes/apps/self-hosted/forgejo/database
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  postBuild:
+    substitute:
+      APP: forgejo
+  healthCheckExprs:
+    - apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: DatabaseRole
+      failed: has(status.applied) && !status.applied
+      current: has(status.applied) && status.applied && status.observedGeneration == metadata.generation
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Database
+      failed: has(status.applied) && !status.applied
+      current: has(status.applied) && status.applied && status.observedGeneration == metadata.generation
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app forgejo
+  namespace: &ns self-hosted
+spec:
+  targetNamespace: *ns
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: forgejo-db
+    - name: onepassword
+      namespace: external-secrets
+    - name: rook-ceph-cluster
+      namespace: rook-ceph
+    - name: volsync
+      namespace: volsync-system
+  path: kubernetes/apps/self-hosted/forgejo/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: false
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  components:
+    - ../../../../components/volsync
+  postBuild:
+    substitute:
+      APP: *app
+      VOLSYNC_CAPACITY: 50Gi
+      VOLSYNC_PUID: "1000"
+      VOLSYNC_PGID: "1000"

@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app forgejo-runner
+  namespace: &ns self-hosted
+spec:
+  targetNamespace: *ns
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: forgejo
+      namespace: self-hosted
+    - name: onepassword
+      namespace: external-secrets
+  path: kubernetes/apps/self-hosted/forgejo-runner/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: false
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
